@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SongSpot עברי</title>
+  <title>SongSpot IL - זהה את השיר</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -28,28 +28,59 @@
     }
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       background: var(--card);
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       text-align: center;
+      position: relative;
     }
     h1 {
-      margin: 0 0 8px;
-      font-size: 26px;
+      margin: 0 0 6px;
+      font-size: 28px;
       color: var(--accent);
     }
     .subtitle {
       color: var(--text-muted);
       font-size: 14px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
+
+    /* בורר רמות קושי */
+    .difficulty-bar {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .diff-btn {
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .diff-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .diff-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
     .attempts-track {
       display: flex;
       gap: 6px;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .attempt-box {
       flex: 1;
@@ -71,6 +102,7 @@
     .attempt-box.correct {
       background: var(--success);
     }
+
     .player-controls {
       margin: 20px 0;
     }
@@ -92,13 +124,22 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    /* אזור חיפוש והשלמה אוטומטית */
     .input-section {
       display: flex;
       flex-direction: column;
       gap: 10px;
       margin-top: 15px;
+      position: relative;
+    }
+    .search-wrapper {
+      position: relative;
+      width: 100%;
     }
     input {
+      width: 100%;
+      box-sizing: border-box;
       padding: 12px 16px;
       border-radius: 8px;
       border: 1px solid #475569;
@@ -111,15 +152,69 @@
       outline: none;
       border-color: var(--accent);
     }
+    .suggestions-list {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+    }
+    .suggestion-item {
+      padding: 10px 14px;
+      text-align: right;
+      cursor: pointer;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .suggestion-item:hover {
+      background: #1e293b;
+      color: var(--accent);
+    }
+    .suggestion-artist {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+    }
     .btn-submit {
+      flex: 2;
       padding: 12px;
       border-radius: 8px;
       border: none;
-      background: #475569;
-      color: #fff;
+      background: #38bdf8;
+      color: #000;
       font-weight: bold;
       cursor: pointer;
     }
+    .btn-skip {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid #475569;
+      color: var(--text);
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-submit:disabled, .btn-skip:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     .result-card {
       margin-top: 20px;
       padding: 16px;
@@ -128,8 +223,8 @@
       display: none;
     }
     .result-card img {
-      width: 100px;
-      height: 100px;
+      width: 110px;
+      height: 110px;
       border-radius: 8px;
       margin-top: 10px;
     }
@@ -137,13 +232,23 @@
       background: var(--success);
       color: #fff;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 20px;
       border-radius: 8px;
       font-weight: bold;
       margin-top: 15px;
       cursor: pointer;
       display: none;
       width: 100%;
+      font-size: 16px;
+    }
+    .streams-badge {
+      display: inline-block;
+      background: #334155;
+      color: #cbd5e1;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      margin-bottom: 12px;
     }
   </style>
 </head>
@@ -151,7 +256,18 @@
 
   <div class="container">
     <h1>SongSpot IL 🎵</h1>
-    <div class="subtitle" id="status-label">טוען שיר...</div>
+    <div class="subtitle" id="status-label">בחר רמת קושי והתחל לשחק</div>
+
+    <!-- בחירת רמת קושי -->
+    <div class="difficulty-bar" id="difficulty-bar">
+      <button class="diff-btn active" data-level="easy">קל (להיטי ענק)</button>
+      <button class="diff-btn" data-level="medium">בינוני</button>
+      <button class="diff-btn" data-level="hard">קשה</button>
+      <button class="diff-btn" data-level="very_hard">קשה מאוד</button>
+      <button class="diff-btn" data-level="impossible">בלתי אפשרי</button>
+    </div>
+
+    <div class="streams-badge" id="streams-badge">כמות השמעות משוערת: 20M+</div>
 
     <div class="attempts-track" id="attempts-track">
       <div class="attempt-box active">0.2ש'</div>
@@ -168,15 +284,20 @@
       </button>
     </div>
 
-    <div class="input-section" id="input-section">
-      <input type="text" id="guess-input" placeholder="שם השיר או האמן..." disabled autocomplete="off" />
-      <button class="btn-submit" id="submit-btn" disabled>נחש</button>
-      <button class="btn-submit" id="skip-btn" style="background: transparent; border: 1px solid #475569;" disabled>דלג</button>
+    <div class="input-section">
+      <div class="search-wrapper">
+        <input type="text" id="guess-input" placeholder="הקלד שם שיר או אמן..." disabled autocomplete="off" />
+        <div class="suggestions-list" id="suggestions-list"></div>
+      </div>
+      <div class="actions-row">
+        <button class="btn-submit" id="submit-btn" disabled>נחש</button>
+        <button class="btn-skip" id="skip-btn" disabled>דלג (+זמן)</button>
+      </div>
     </div>
 
     <div class="result-card" id="result-card">
-      <div id="result-text" style="font-weight: bold; margin-bottom: 8px;"></div>
-      <div id="song-details" style="color: var(--text-muted); font-size: 14px;"></div>
+      <div id="result-text" style="font-weight: bold; margin-bottom: 6px; font-size: 18px;"></div>
+      <div id="song-details" style="color: var(--text-muted); font-size: 15px;"></div>
       <img id="song-cover" src="" alt="Album Cover" />
     </div>
 
@@ -184,44 +305,132 @@
   </div>
 
   <script>
-    // מאגר שירים ראשוני לחיפוש בחנות הישראלית
-    const PLAYLIST = [
-      { artist: "חנן בן ארי", title: "אלוף העולם" },
-      { artist: "אושר כהן", title: "אהבה" },
-      { artist: "פאר טסי", title: "אהבה חולה" },
-      { artist: "נועה קירל", title: "יוניקורן" },
-      { artist: "עדן חסון", title: "אין יותר מועדונים" },
-      { artist: "אייל גולן", title: "צליל מיתר" },
-      { artist: "טונה", title: "סהרה" },
-      { artist: "יסמין מועלם", title: "מסיבה" }
-    ];
+    // מאגר שירים מחולק ל-5 רמות קושי לפי פופולריות ומספר השמעות
+    const SONG_DB = {
+      easy: {
+        streamsText: "כמות השמעות משוערת: 15M - 50M+ (להיטי מדינה)",
+        songs: [
+          { artist: "חנן בן ארי", title: "אלוף העולם" },
+          { artist: "אושר כהן", title: "אהבה" },
+          { artist: "פאר טסי", title: "אהבה חולה" },
+          { artist: "נועה קירל", title: "יוניקורן" },
+          { artist: "עדן חסון", title: "שקיעות אדומות" },
+          { artist: "עומר אדם", title: "שני משוגעים" },
+          { artist: "אייל גולן", title: "צליל מיתר" },
+          { artist: "טונה", title: "סהרה" },
+          { artist: "יסמין מועלם", title: "מסיבה" },
+          { artist: "סטטיק ובן אל", title: "סלסולים" },
+          { artist: "עידן רייכל", title: "שבט אחים ואחיות" },
+          { artist: "ישי ריבו", title: "הלב שלי" }
+        ]
+      },
+      medium: {
+        streamsText: "כמות השמעות משוערת: 5M - 15M (מוכרים מאוד)",
+        songs: [
+          { artist: "רביד פלוטניק", title: "כל הזמן הזה" },
+          { artist: "נתן גושן", title: "באתי לחלום" },
+          { artist: "אמיר דדון", title: "אור גדול" },
+          { artist: "משינה", title: "רכבת לילה" },
+          { artist: "שלמה ארצי", title: "תתארו לכם" },
+          { artist: "אודיה", title: "אינטלקטוערסית" },
+          { artist: "בניה ברבי", title: "קרן שמש" },
+          { artist: "מרגי", title: "סגול בהיר" },
+          { artist: "איתי לוי", title: "קירות" },
+          { artist: "מוניקה סקס", title: "מכה אפורה" },
+          { artist: "אביב גפן", title: "אור הירח" }
+        ]
+      },
+      hard: {
+        streamsText: "כמות השמעות משוערת: 1M - 5M (לחובבי מוזיקה)",
+        songs: [
+          { artist: "פול טראנק", title: "סתלבט בקיבוץ" },
+          { artist: "התקווה 6", title: "הכי ישראלי" },
+          { artist: "אביתר בנאי", title: "עד מחר" },
+          { artist: "ברי סחרוף", title: "ניצוצות" },
+          { artist: "הדג נחש", title: "שירת הסטיקר" },
+          { artist: "סינרגיה", title: "תראי זה אני" },
+          { artist: "בית הבובות", title: "סיגפו" },
+          { artist: "גיא ויהל", title: "רצים באוויר" },
+          { artist: "אליעד", title: "מסע" },
+          { artist: "שחר טבוך", title: "מישבאלי" }
+        ]
+      },
+      very_hard: {
+        streamsText: "כמות השמעות משוערת: 300K - 1M (קלאסיקות ושירי אלבום)",
+        songs: [
+          { artist: "מרסדס בנד", title: "תגידי לי את" },
+          { artist: "איפה הילד", title: "מה שעובר עלי" },
+          { artist: "ג'ירפות", title: "גג" },
+          { artist: "אלג'יר", title: "קיטש" },
+          { artist: "היהודים", title: "קח אותי" },
+          { artist: "כוורת", title: "המגפיים של ברוך" },
+          { artist: "תיסלם", title: "רדיו חזק" },
+          { artist: "כנסיית השכל", title: "למיה יש אקדח" },
+          { artist: "אסף אמדורסקי", title: "יקירתי" }
+        ]
+      },
+      impossible: {
+        streamsText: "כמות השמעות משוערת: מתחת ל-300K (אינדי ובי-סיידס)",
+        songs: [
+          { artist: "הילה רוח", title: "דובה גריזלית" },
+          { artist: "גון בן ארי", title: "אבק" },
+          { artist: "טדי נגוסה", title: "זה בדם שלי" },
+          { artist: "שלומי שבן", title: "אריק" },
+          { artist: "קרולינה", title: "אף אחד לא בא לי" },
+          { artist: "הבילויים", title: "אוטו זבל" },
+          { artist: "נושאי המגבעת", title: "הבא בתור הוא סוס" },
+          { artist: "רם אוריון", title: "קר" },
+          { artist: "תמוז", title: "סוף עונת התפוזים" }
+        ]
+      }
+    };
+
+    // איחוד כל השירים למאגר חיפוש מקומי מהיר
+    const ALL_LOCAL_SONGS = Object.values(SONG_DB).flatMap(level => level.songs);
 
     const DURATIONS = [0.2, 0.5, 1.0, 2.0, 3.5, 5.0];
+    let currentDifficulty = "easy";
     let currentAttempt = 0;
     let currentSong = null;
     let audio = new Audio();
     let stopTimeout = null;
+    let searchDebounce = null;
 
     // רכיבי DOM
     const playBtn = document.getElementById("play-btn");
     const playTimeLabel = document.getElementById("play-time-label");
     const guessInput = document.getElementById("guess-input");
+    const suggestionsList = document.getElementById("suggestions-list");
     const submitBtn = document.getElementById("submit-btn");
     const skipBtn = document.getElementById("skip-btn");
     const statusLabel = document.getElementById("status-label");
+    const streamsBadge = document.getElementById("streams-badge");
     const resultCard = document.getElementById("result-card");
     const resultText = document.getElementById("result-text");
     const songDetails = document.getElementById("song-details");
     const songCover = document.getElementById("song-cover");
     const nextBtn = document.getElementById("next-btn");
     const boxes = document.querySelectorAll(".attempt-box");
+    const diffButtons = document.querySelectorAll(".diff-btn");
 
-    // שליפת שיר מחנות אפל בישראל (ללא API Key)
+    // מעבר בין רמות קושי
+    diffButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        diffButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentDifficulty = btn.dataset.level;
+        streamsBadge.textContent = SONG_DB[currentDifficulty].streamsText;
+        fetchRandomSong();
+      });
+    });
+
+    // שליפת שיר מרמת הקושי הנבחרת
     async function fetchRandomSong() {
       resetUI();
-      statusLabel.textContent = "טוען שיר ישראלי...";
-      
-      const item = PLAYLIST[Math.floor(Math.random() * PLAYLIST.length)];
+      statusLabel.textContent = "טוען שיר מרמת הקושי שנבחרה...";
+
+      const pool = SONG_DB[currentDifficulty].songs;
+      const item = pool[Math.floor(Math.random() * pool.length)];
       const query = encodeURIComponent(`${item.artist} ${item.title}`);
       const itunesUrl = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=1&term=${query}`;
 
@@ -232,8 +441,9 @@
         if (data.results && data.results.length > 0) {
           const track = data.results[0];
           currentSong = {
-            title: track.trackName,
-            artist: track.artistName,
+            title: item.title, // שומרים על השם העברי הנקי שהגדרנו
+            itunesTitle: track.trackName,
+            artist: item.artist,
             previewUrl: track.previewUrl,
             artwork: track.artworkUrl100.replace("100x100bb", "300x300bb")
           };
@@ -241,20 +451,98 @@
           audio.src = currentSong.previewUrl;
           audio.preload = "auto";
 
-          statusLabel.textContent = "נחש את השיר לפי הצליל!";
+          statusLabel.textContent = "האזן לקטע ונחש את השיר!";
           playBtn.disabled = false;
           guessInput.disabled = false;
           submitBtn.disabled = false;
           skipBtn.disabled = false;
         } else {
-          fetchRandomSong(); // נסה שיר אחר במקרה שאין תוצאה
+          fetchRandomSong();
         }
       } catch (err) {
-        statusLabel.textContent = "שגיאה בחיבור לשירות המוזיקה. נסה לרענן.";
+        statusLabel.textContent = "שגיאה בטעינת השיר. בדוק חיבור אינטרנט.";
       }
     }
 
-    // השמעת קטע מדויק
+    // השלמה אוטומטית (Autocomplete) בזמן הקלדה
+    guessInput.addEventListener("input", () => {
+      const val = guessInput.value.trim();
+      clearTimeout(searchDebounce);
+
+      if (val.length < 1) {
+        suggestionsList.style.display = "none";
+        return;
+      }
+
+      // 1. סינון מיידי מהמאגר המקומי לפי האותיות שהוקלדו
+      const normalizedVal = normalizeHebrew(val);
+      const localMatches = ALL_LOCAL_SONGS.filter(s =>
+        normalizeHebrew(s.title).includes(normalizedVal) ||
+        normalizeHebrew(s.artist).includes(normalizedVal)
+      );
+
+      renderSuggestions(localMatches);
+
+      // 2. שליפת השלמות נוספות מ-iTunes API עבור חיפושים חופשיים
+      if (val.length >= 2) {
+        searchDebounce = setTimeout(async () => {
+          try {
+            const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=6&term=${encodeURIComponent(val)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.results) {
+              const apiSongs = data.results.map(r => ({
+                artist: r.artistName,
+                title: r.trackName
+              }));
+              // מיזוג ללא כפילויות
+              const combined = [...localMatches];
+              apiSongs.forEach(apiSong => {
+                const exists = combined.some(c =>
+                  normalizeHebrew(c.title) === normalizeHebrew(apiSong.title)
+                );
+                if (!exists) combined.push(apiSong);
+              });
+              renderSuggestions(combined.slice(0, 8));
+            }
+          } catch (e) {}
+        }, 250);
+      }
+    });
+
+    function renderSuggestions(items) {
+      suggestionsList.innerHTML = "";
+      if (items.length === 0) {
+        suggestionsList.style.display = "none";
+        return;
+      }
+
+      items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.innerHTML = `
+          <span><strong>${item.title}</strong></span>
+          <span class="suggestion-artist">${item.artist}</span>
+        `;
+        div.addEventListener("click", () => {
+          guessInput.value = `${item.title} - ${item.artist}`;
+          guessInput.dataset.selectedTitle = item.title;
+          suggestionsList.style.display = "none";
+        });
+        suggestionsList.appendChild(div);
+      });
+
+      suggestionsList.style.display = "block";
+    }
+
+    // סגירת הרשימה בלחיצה מחוץ לתיבה
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".search-wrapper")) {
+        suggestionsList.style.display = "none";
+      }
+    });
+
+    // השמעת קטע
     function playSnippet() {
       clearTimeout(stopTimeout);
       audio.pause();
@@ -276,22 +564,28 @@
       });
     }
 
-    // ניקוי ונרמול מחרוזות בעברית להשוואה
     function normalizeHebrew(text) {
       return text
-        .replace(/[\u0591-\u05C7]/g, "") // הסרת ניקוד
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "") // הסרת פיסוק
+        .replace(/[\u0591-\u05C7]/g, "")
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
     }
 
     function handleGuess() {
-      const userGuess = normalizeHebrew(guessInput.value);
+      const rawValue = guessInput.dataset.selectedTitle || guessInput.value.split("-")[0];
+      const userGuess = normalizeHebrew(rawValue);
       if (!userGuess) return;
 
-      const normalizedTitle = normalizeHebrew(currentSong.title);
-      const isCorrect = normalizedTitle.includes(userGuess) || userGuess.includes(normalizedTitle);
+      suggestionsList.style.display = "none";
+      const targetTitle = normalizeHebrew(currentSong.title);
+      const itunesTitle = normalizeHebrew(currentSong.itunesTitle || "");
+
+      const isCorrect =
+        targetTitle.includes(userGuess) ||
+        userGuess.includes(targetTitle) ||
+        (itunesTitle && itunesTitle.includes(userGuess));
 
       if (isCorrect) {
         endRound(true);
@@ -301,10 +595,12 @@
     }
 
     function advanceAttempt() {
+      suggestionsList.style.display = "none";
       boxes[currentAttempt].classList.remove("active");
       boxes[currentAttempt].classList.add("wrong");
       currentAttempt++;
       guessInput.value = "";
+      delete guessInput.dataset.selectedTitle;
 
       if (currentAttempt < DURATIONS.length) {
         boxes[currentAttempt].classList.add("active");
@@ -315,13 +611,13 @@
     }
 
     function updatePlayButtonText() {
-      playTimeLabel.textContent = DURATIONS[currentAttempt];
       playBtn.innerHTML = `▶ השמע קטע (<span id="play-time-label">${DURATIONS[currentAttempt]}</span> שניות)`;
     }
 
     function endRound(won) {
       audio.pause();
       clearTimeout(stopTimeout);
+      suggestionsList.style.display = "none";
 
       if (won) {
         boxes[currentAttempt].classList.remove("active");
@@ -338,7 +634,6 @@
       resultCard.style.display = "block";
       nextBtn.style.display = "block";
 
-      // ניטרול כפתורי קלט
       guessInput.disabled = true;
       submitBtn.disabled = true;
       skipBtn.disabled = true;
@@ -350,6 +645,8 @@
       audio.pause();
       clearTimeout(stopTimeout);
       guessInput.value = "";
+      delete guessInput.dataset.selectedTitle;
+      suggestionsList.style.display = "none";
       guessInput.disabled = true;
       submitBtn.disabled = true;
       skipBtn.disabled = true;
@@ -364,7 +661,6 @@
       updatePlayButtonText();
     }
 
-    // אירועים
     playBtn.addEventListener("click", playSnippet);
     submitBtn.addEventListener("click", handleGuess);
     skipBtn.addEventListener("click", advanceAttempt);
@@ -373,7 +669,7 @@
     });
     nextBtn.addEventListener("click", fetchRandomSong);
 
-    // התחלת המשחק עם טעינת הדף
+    // הפעלה ראשונית
     fetchRandomSong();
   </script>
 </body>
