@@ -1,1 +1,1006 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SongSpot IL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-pure: #000000;
+      --surface: #121212;
+      --surface-elevated: #181818;
+      --surface-hover: #282828;
+      --border: #2a2a2a;
+      --spotify-green: #1DB954;
+      --spotify-green-hover: #1ed760;
+      --text-main: #FFFFFF;
+      --text-sub: #B3B3B3;
+      --text-muted: #727272;
+      --danger: #E91429;
+    }
 
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-pure);
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 460px;
+      min-height: 100dvh;
+      padding: 20px 18px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    /* Header */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      fill: var(--spotify-green);
+      filter: drop-shadow(0 0 10px rgba(29, 185, 84, 0.35));
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .streams-pill {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-sub);
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+
+    /* Difficulty Chips - Spotify Filter Style */
+    .chips-wrapper {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .chips-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      background: var(--surface-elevated);
+      color: var(--text-main);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .chip:hover {
+      background: var(--surface-hover);
+    }
+
+    .chip:active {
+      transform: scale(0.95);
+    }
+
+    .chip.active {
+      background: var(--spotify-green);
+      color: #000000;
+      font-weight: 700;
+    }
+
+    /* Center Player Card */
+    .player-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 28px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      border: 1px solid #1f1f1f;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      transition: transform 0.3s ease;
+    }
+
+    /* Vinyl / Cover Art Container */
+    .disc-wrapper {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #282828 0%, #111 60%, #050505 100%);
+      border: 4px solid #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 22px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .disc-wrapper.revealed {
+      border-radius: 12px;
+      border-color: transparent;
+      transform: scale(1.04);
+    }
+
+    .disc-wrapper.spinning {
+      animation: spin 6s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .disc-center-hole {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-pure);
+      border: 3px solid #333;
+      z-index: 2;
+      transition: opacity 0.3s;
+    }
+
+    .disc-wrapper.revealed .disc-center-hole {
+      opacity: 0;
+    }
+
+    .cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .disc-wrapper.revealed .cover-img {
+      opacity: 1;
+    }
+
+    /* Equalizer Wave Animation */
+    .equalizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 20px;
+      margin-bottom: 14px;
+      opacity: 0.25;
+      transition: opacity 0.2s;
+    }
+
+    .equalizer.playing {
+      opacity: 1;
+    }
+
+    .bar {
+      width: 4px;
+      background: var(--spotify-green);
+      border-radius: 2px;
+      height: 4px;
+      transition: height 0.2s;
+    }
+
+    .equalizer.playing .bar:nth-child(1) { animation: eq 0.6s ease-in-out infinite alternate; }
+    .equalizer.playing .bar:nth-child(2) { animation: eq 0.45s ease-in-out infinite alternate 0.1s; }
+    .equalizer.playing .bar:nth-child(3) { animation: eq 0.7s ease-in-out infinite alternate 0.2s; }
+    .equalizer.playing .bar:nth-child(4) { animation: eq 0.5s ease-in-out infinite alternate 0.15s; }
+    .equalizer.playing .bar:nth-child(5) { animation: eq 0.65s ease-in-out infinite alternate 0.05s; }
+
+    @keyframes eq {
+      0% { height: 4px; }
+      100% { height: 20px; }
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin-bottom: 18px;
+      min-height: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* Segmented Progress Timeline */
+    .segments-bar {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .segment {
+      flex: 1;
+      height: 6px;
+      background: #2a2a2a;
+      border-radius: 999px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .segment.active {
+      background: #404040;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+    }
+
+    .segment.wrong {
+      background: var(--danger);
+    }
+
+    .segment.correct {
+      background: var(--spotify-green);
+    }
+
+    /* Spotify Green Play Button */
+    .play-control-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .play-fab {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--spotify-green);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(29, 185, 84, 0.35);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
+    }
+
+    .play-fab:hover:not(:disabled) {
+      background: var(--spotify-green-hover);
+      transform: scale(1.07);
+    }
+
+    .play-fab:active:not(:disabled) {
+      transform: scale(0.94);
+    }
+
+    .play-fab:disabled {
+      background: #282828;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .play-fab svg {
+      width: 26px;
+      height: 26px;
+      fill: #000000;
+      margin-right: -2px; /* optical alignment for RTL play triangle */
+    }
+
+    .duration-badge {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    .duration-badge span {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* Search & Controls Area */
+    .interaction-area {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .search-box {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      fill: var(--text-sub);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface-elevated);
+      border: 1.5px solid transparent;
+      border-radius: 999px;
+      padding: 14px 44px 14px 18px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 16px; /* 16px prevents iOS Safari auto-zoom */
+      transition: all 0.2s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: #242424;
+      border-color: var(--text-main);
+    }
+
+    .search-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Floating Autocomplete Menu */
+    .suggestions-dropdown {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      left: 0;
+      background: #242424;
+      border: 1px solid #333;
+      border-radius: 12px;
+      max-height: 210px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.85);
+      animation: fadeUp 0.18s ease-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .suggestion-row {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border-bottom: 1px solid #2e2e2e;
+      transition: background 0.15s;
+    }
+
+    .suggestion-row:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-row:hover {
+      background: #333333;
+    }
+
+    .suggestion-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .suggestion-artist {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    /* Buttons Row */
+    .buttons-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+      border: none;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      flex: 2;
+      background: var(--spotify-green);
+      color: #000000;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--spotify-green-hover);
+      transform: scale(1.02);
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid #535353;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Result Reveal Banner */
+    .result-banner {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      animation: fadeUp 0.3s ease-out;
+    }
+
+    .song-reveal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .song-reveal-artist {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin: 0 0 6px;
+    }
+
+    .btn-next {
+      width: 100%;
+      background: var(--text-main);
+      color: #000000;
+    }
+
+    .btn-next:hover {
+      background: #e6e6e6;
+      transform: scale(1.02);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .shake {
+      animation: shake 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+    <!-- Top Header -->
+    <div>
+      <header class="top-bar">
+        <div class="brand">
+          <svg class="brand-icon" viewBox="0 0 24 24">
+            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.469-.077-.335.132-.67.469-.746 3.809-.87 7.076-.496 9.713 1.115.293.18.386.563.207.856zm1.224-2.723c-.226.367-.706.482-1.072.257-2.687-1.652-6.785-2.131-9.965-1.166-.413.125-.848-.106-.973-.517-.125-.413.108-.848.52-.973 3.632-1.102 8.147-.568 11.234 1.328.366.226.48.707.256 1.071zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.493.15-1.016-.128-1.166-.62-.149-.493.129-1.016.621-1.166 3.532-1.073 9.404-.865 13.115 1.338.445.264.59.838.327 1.282-.264.444-.838.59-1.28.322z"/>
+          </svg>
+          <h1 class="brand-title">SongSpot</h1>
+        </div>
+        <div class="streams-pill" id="streams-badge">15M - 50M+ השמעות</div>
+      </header>
+
+      <!-- Difficulty Pills -->
+      <div class="chips-wrapper" id="difficulty-bar">
+        <button class="chip active" data-level="easy">קל</button>
+        <button class="chip" data-level="medium">בינוני</button>
+        <button class="chip" data-level="hard">קשה</button>
+        <button class="chip" data-level="very_hard">קשה מאוד</button>
+        <button class="chip" data-level="impossible">בלתי אפשרי</button>
+      </div>
+    </div>
+
+    <!-- Center Player Card -->
+    <main class="player-card" id="player-card">
+      <div class="disc-wrapper" id="disc-wrapper">
+        <div class="disc-center-hole"></div>
+        <img class="cover-img" id="song-cover" src="" alt="Cover" />
+      </div>
+
+      <div class="equalizer" id="equalizer">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+
+      <div class="status-text" id="status-label">טוען שיר...</div>
+
+      <!-- 6 Attempts Timeline -->
+      <div class="segments-bar" id="segments-bar">
+        <div class="segment active"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+      </div>
+
+      <div class="play-control-row">
+        <button class="play-fab" id="play-btn" disabled aria-label="השמע">
+          <svg viewBox="0 0 24 24" id="play-icon">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="duration-badge" id="duration-badge">
+        אורך קטע נוכחי: <span id="play-time-label">0.2</span> שניות
+      </div>
+
+      <!-- Revealed Song Details on Win/Loss -->
+      <div class="result-banner" id="result-banner">
+        <p class="song-reveal-title" id="song-title-reveal"></p>
+        <p class="song-reveal-artist" id="song-artist-reveal"></p>
+        <button class="btn btn-next" id="next-btn">לשיר הבא</button>
+      </div>
+    </main>
+
+    <!-- Bottom Search & Actions -->
+    <footer class="interaction-area" id="interaction-area">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24">
+          <path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z"/>
+        </svg>
+        <input type="text" class="search-input" id="guess-input" placeholder="חפש שיר או אמן..." disabled autocomplete="off" />
+        <div class="suggestions-dropdown" id="suggestions-list"></div>
+      </div>
+
+      <div class="buttons-row">
+        <button class="btn btn-primary" id="submit-btn" disabled>נחש</button>
+        <button class="btn btn-secondary" id="skip-btn" disabled>דלג (+זמן)</button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const SONG_DB = {
+      easy: {
+        streamsText: "15M - 50M+ השמעות",
+        songs: [
+          { artist: "חנן בן ארי", title: "אלוף העולם" },
+          { artist: "אושר כהן", title: "אהבה" },
+          { artist: "פאר טסי", title: "אהבה חולה" },
+          { artist: "נועה קירל", title: "יוניקורן" },
+          { artist: "עדן חסון", title: "שקיעות אדומות" },
+          { artist: "עומר אדם", title: "שני משוגעים" },
+          { artist: "אייל גולן", title: "צליל מיתר" },
+          { artist: "טונה", title: "סהרה" },
+          { artist: "יסמין מועלם", title: "מסיבה" },
+          { artist: "סטטיק ובן אל", title: "סלסולים" },
+          { artist: "עידן רייכל", title: "שבט אחים ואחיות" },
+          { artist: "ישי ריבו", title: "הלב שלי" }
+        ]
+      },
+      medium: {
+        streamsText: "5M - 15M השמעות",
+        songs: [
+          { artist: "רביד פלוטניק", title: "כל הזמן הזה" },
+          { artist: "נתן גושן", title: "באתי לחלום" },
+          { artist: "אמיר דדון", title: "אור גדול" },
+          { artist: "משינה", title: "רכבת לילה" },
+          { artist: "שלמה ארצי", title: "תתארו לכם" },
+          { artist: "אודיה", title: "אינטלקטוערסית" },
+          { artist: "בניה ברבי", title: "קרן שמש" },
+          { artist: "מרגי", title: "סגול בהיר" },
+          { artist: "איתי לוי", title: "קירות" },
+          { artist: "מוניקה סקס", title: "מכה אפורה" },
+          { artist: "אביב גפן", title: "אור הירח" }
+        ]
+      },
+      hard: {
+        streamsText: "1M - 5M השמעות",
+        songs: [
+          { artist: "פול טראנק", title: "סתלבט בקיבוץ" },
+          { artist: "התקווה 6", title: "הכי ישראלי" },
+          { artist: "אביתר בנאי", title: "עד מחר" },
+          { artist: "ברי סחרוף", title: "ניצוצות" },
+          { artist: "הדג נחש", title: "שירת הסטיקר" },
+          { artist: "סינרגיה", title: "תראי זה אני" },
+          { artist: "בית הבובות", title: "סיגפו" },
+          { artist: "גיא ויהל", title: "רצים באוויר" },
+          { artist: "אליעד", title: "מסע" },
+          { artist: "שחר טבוך", title: "מישבאלי" }
+        ]
+      },
+      very_hard: {
+        streamsText: "300K - 1M השמעות",
+        songs: [
+          { artist: "מרסדס בנד", title: "תגידי לי את" },
+          { artist: "איפה הילד", title: "מה שעובר עלי" },
+          { artist: "ג'ירפות", title: "גג" },
+          { artist: "אלג'יר", title: "קיטש" },
+          { artist: "היהודים", title: "קח אותי" },
+          { artist: "כוורת", title: "המגפיים של ברוך" },
+          { artist: "תיסלם", title: "רדיו חזק" },
+          { artist: "כנסיית השכל", title: "למיה יש אקדח" },
+          { artist: "אסף אמדורסקי", title: "יקירתי" }
+        ]
+      },
+      impossible: {
+        streamsText: "פחות מ-300K השמעות",
+        songs: [
+          { artist: "הילה רוח", title: "דובה גריזלית" },
+          { artist: "גון בן ארי", title: "אבק" },
+          { artist: "טדי נגוסה", title: "זה בדם שלי" },
+          { artist: "שלומי שבן", title: "אריק" },
+          { artist: "קרולינה", title: "אף אחד לא בא לי" },
+          { artist: "הבילויים", title: "אוטו זבל" },
+          { artist: "נושאי המגבעת", title: "הבא בתור הוא סוס" },
+          { artist: "רם אוריון", title: "קר" },
+          { artist: "תמוז", title: "סוף עונת התפוזים" }
+        ]
+      }
+    };
+
+    const ALL_LOCAL_SONGS = Object.values(SONG_DB).flatMap(level => level.songs);
+    const DURATIONS = [0.2, 0.5, 1.0, 2.0, 3.5, 5.0];
+
+    let currentDifficulty = "easy";
+    let currentAttempt = 0;
+    let currentSong = null;
+    let audio = new Audio();
+    let stopTimeout = null;
+    let searchDebounce = null;
+
+    // Elements
+    const playBtn = document.getElementById("play-btn");
+    const playIcon = document.getElementById("play-icon");
+    const playTimeLabel = document.getElementById("play-time-label");
+    const durationBadge = document.getElementById("duration-badge");
+    const guessInput = document.getElementById("guess-input");
+    const suggestionsList = document.getElementById("suggestions-list");
+    const submitBtn = document.getElementById("submit-btn");
+    const skipBtn = document.getElementById("skip-btn");
+    const statusLabel = document.getElementById("status-label");
+    const streamsBadge = document.getElementById("streams-badge");
+    const discWrapper = document.getElementById("disc-wrapper");
+    const equalizer = document.getElementById("equalizer");
+    const songCover = document.getElementById("song-cover");
+    const resultBanner = document.getElementById("result-banner");
+    const songTitleReveal = document.getElementById("song-title-reveal");
+    const songArtistReveal = document.getElementById("song-artist-reveal");
+    const nextBtn = document.getElementById("next-btn");
+    const segments = document.querySelectorAll(".segment");
+    const diffButtons = document.querySelectorAll(".chip");
+    const playerCard = document.getElementById("player-card");
+
+    const PLAY_SVG = '<path d="M8 5v14l11-7z"/>';
+    const PAUSE_SVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+    diffButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        diffButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentDifficulty = btn.dataset.level;
+        streamsBadge.textContent = SONG_DB[currentDifficulty].streamsText;
+        fetchRandomSong();
+      });
+    });
+
+    async function fetchRandomSong() {
+      resetUI();
+      statusLabel.textContent = "מחפש שיר בקטלוג...";
+
+      const pool = SONG_DB[currentDifficulty].songs;
+      const item = pool[Math.floor(Math.random() * pool.length)];
+      const query = encodeURIComponent(`${item.artist} ${item.title}`);
+      const itunesUrl = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=1&term=${query}`;
+
+      try {
+        const response = await fetch(itunesUrl);
+        const data = await response.json();
+
+        if (data.results && data.results.length > 0) {
+          const track = data.results[0];
+          currentSong = {
+            title: item.title,
+            itunesTitle: track.trackName,
+            artist: item.artist,
+            previewUrl: track.previewUrl,
+            artwork: track.artworkUrl100.replace("100x100bb", "400x400bb")
+          };
+
+          audio.src = currentSong.previewUrl;
+          audio.preload = "auto";
+          songCover.src = currentSong.artwork;
+
+          statusLabel.textContent = "לחץ על ניגון כדי לשמוע שבריר שנייה";
+          playBtn.disabled = false;
+          guessInput.disabled = false;
+          submitBtn.disabled = false;
+          skipBtn.disabled = false;
+        } else {
+          fetchRandomSong();
+        }
+      } catch (err) {
+        statusLabel.textContent = "שגיאת רשת. בדוק חיבור ונסה שוב.";
+      }
+    }
+
+    guessInput.addEventListener("input", () => {
+      const val = guessInput.value.trim();
+      clearTimeout(searchDebounce);
+
+      if (val.length < 1) {
+        suggestionsList.style.display = "none";
+        return;
+      }
+
+      const normalizedVal = normalizeHebrew(val);
+      const localMatches = ALL_LOCAL_SONGS.filter(s =>
+        normalizeHebrew(s.title).includes(normalizedVal) ||
+        normalizeHebrew(s.artist).includes(normalizedVal)
+      );
+
+      renderSuggestions(localMatches);
+
+      if (val.length >= 2) {
+        searchDebounce = setTimeout(async () => {
+          try {
+            const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=6&term=${encodeURIComponent(val)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.results) {
+              const apiSongs = data.results.map(r => ({
+                artist: r.artistName,
+                title: r.trackName
+              }));
+              const combined = [...localMatches];
+              apiSongs.forEach(apiSong => {
+                const exists = combined.some(c =>
+                  normalizeHebrew(c.title) === normalizeHebrew(apiSong.title)
+                );
+                if (!exists) combined.push(apiSong);
+              });
+              renderSuggestions(combined.slice(0, 7));
+            }
+          } catch (e) {}
+        }, 220);
+      }
+    });
+
+    function renderSuggestions(items) {
+      suggestionsList.innerHTML = "";
+      if (items.length === 0) {
+        suggestionsList.style.display = "none";
+        return;
+      }
+
+      items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "suggestion-row";
+        div.innerHTML = `
+          <span class="suggestion-title">${item.title}</span>
+          <span class="suggestion-artist">${item.artist}</span>
+        `;
+        div.addEventListener("click", () => {
+          guessInput.value = `${item.title} - ${item.artist}`;
+          guessInput.dataset.selectedTitle = item.title;
+          suggestionsList.style.display = "none";
+        });
+        suggestionsList.appendChild(div);
+      });
+
+      suggestionsList.style.display = "block";
+    }
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".search-box")) {
+        suggestionsList.style.display = "none";
+      }
+    });
+
+    function playSnippet() {
+      clearTimeout(stopTimeout);
+      audio.pause();
+      audio.currentTime = 0;
+
+      const duration = DURATIONS[currentAttempt];
+      audio.play().then(() => {
+        playIcon.innerHTML = PAUSE_SVG;
+        equalizer.classList.add("playing");
+        discWrapper.classList.add("spinning");
+        playBtn.disabled = true;
+
+        stopTimeout = setTimeout(() => {
+          stopAudioVisuals();
+          playBtn.disabled = false;
+        }, duration * 1000);
+      }).catch(() => {
+        stopAudioVisuals();
+        playBtn.disabled = false;
+      });
+    }
+
+    function stopAudioVisuals() {
+      audio.pause();
+      audio.currentTime = 0;
+      playIcon.innerHTML = PLAY_SVG;
+      equalizer.classList.remove("playing");
+      discWrapper.classList.remove("spinning");
+    }
+
+    function normalizeHebrew(text) {
+      return text
+        .replace(/[\u0591-\u05C7]/g, "")
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function handleGuess() {
+      const rawValue = guessInput.dataset.selectedTitle || guessInput.value.split("-")[0];
+      const userGuess = normalizeHebrew(rawValue);
+      if (!userGuess) return;
+
+      suggestionsList.style.display = "none";
+      const targetTitle = normalizeHebrew(currentSong.title);
+      const itunesTitle = normalizeHebrew(currentSong.itunesTitle || "");
+
+      const isCorrect =
+        targetTitle.includes(userGuess) ||
+        userGuess.includes(targetTitle) ||
+        (itunesTitle && itunesTitle.includes(userGuess));
+
+      if (isCorrect) {
+        endRound(true);
+      } else {
+        playerCard.classList.remove("shake");
+        void playerCard.offsetWidth;
+        playerCard.classList.add("shake");
+        advanceAttempt();
+      }
+    }
+
+    function advanceAttempt() {
+      suggestionsList.style.display = "none";
+      segments[currentAttempt].classList.remove("active");
+      segments[currentAttempt].classList.add("wrong");
+      currentAttempt++;
+      guessInput.value = "";
+      delete guessInput.dataset.selectedTitle;
+
+      if (currentAttempt < DURATIONS.length) {
+        segments[currentAttempt].classList.add("active");
+        playTimeLabel.textContent = DURATIONS[currentAttempt];
+        skipBtn.textContent = `דלג (+${DURATIONS[currentAttempt]}ש')`;
+      } else {
+        endRound(false);
+      }
+    }
+
+    function endRound(won) {
+      clearTimeout(stopTimeout);
+      stopAudioVisuals();
+      suggestionsList.style.display = "none";
+      discWrapper.classList.add("revealed");
+      durationBadge.style.display = "none";
+
+      if (won) {
+        segments[currentAttempt].classList.remove("active");
+        segments[currentAttempt].classList.add("correct");
+        statusLabel.textContent = "זיהית נכון!";
+        statusLabel.style.color = "var(--spotify-green)";
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+        equalizer.classList.add("playing");
+      } else {
+        statusLabel.textContent = "נגמרו הניסיונות";
+        statusLabel.style.color = "var(--danger)";
+      }
+
+      songTitleReveal.textContent = currentSong.title;
+      songArtistReveal.textContent = currentSong.artist;
+      resultBanner.style.display = "flex";
+
+      guessInput.disabled = true;
+      submitBtn.disabled = true;
+      skipBtn.disabled = true;
+      playBtn.disabled = true;
+    }
+
+    function resetUI() {
+      currentAttempt = 0;
+      clearTimeout(stopTimeout);
+      stopAudioVisuals();
+
+      discWrapper.classList.remove("revealed");
+      statusLabel.style.color = "var(--text-sub)";
+      durationBadge.style.display = "block";
+      playTimeLabel.textContent = DURATIONS[0];
+      skipBtn.textContent = "דלג (+זמן)";
+
+      guessInput.value = "";
+      delete guessInput.dataset.selectedTitle;
+      suggestionsList.style.display = "none";
+      guessInput.disabled = true;
+      submitBtn.disabled = true;
+      skipBtn.disabled = true;
+      playBtn.disabled = true;
+      resultBanner.style.display = "none";
+
+      segments.forEach((seg, i) => {
+        seg.className = "segment";
+        if (i === 0) seg.classList.add("active");
+      });
+    }
+
+    playBtn.addEventListener("click", playSnippet);
+    submitBtn.addEventListener("click", handleGuess);
+    skipBtn.addEventListener("click", advanceAttempt);
+    guessInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleGuess();
+    });
+    nextBtn.addEventListener("click", fetchRandomSong);
+
+    fetchRandomSong();
+  </script>
+</body>
+</html>
