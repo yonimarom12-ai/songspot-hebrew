@@ -1,9 +1,16 @@
 // Centralized mutable runtime state & caches
-const fallbackAudio = new Audio();
-fallbackAudio.crossOrigin = "anonymous";
+function createMobileAudio() {
+  const audio = new Audio();
+  // ללא crossOrigin="anonymous" — iTunes CDN לא תמיד שולח כותרות CORS ולכן crossOrigin חוסם ניגון ב-iOS Safari ובמובייל
+  audio.preload = "auto";
+  audio.playsInline = true;
+  audio.setAttribute("playsinline", "");
+  audio.setAttribute("webkit-playsinline", "");
+  return audio;
+}
 
-const galleryAudio = new Audio();
-galleryAudio.crossOrigin = "anonymous";
+const fallbackAudio = createMobileAudio();
+const galleryAudio = createMobileAudio();
 
 export const state = {
   currentDifficulty: "easy",
@@ -41,6 +48,8 @@ export const state = {
   activeSource: null,
   fallbackAudio,
   activeOnPlayingHandler: null,
+  activeOnErrorHandler: null,
+  playStartGuardTimer: null,
   uiTimer: null,
   rafProgressId: null,
 

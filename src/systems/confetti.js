@@ -1,11 +1,12 @@
 import { dom } from "../dom.js";
 
 // אפקט קונפטי בניצחון
-const confettiCtx = dom.confettiCanvas.getContext("2d");
+const confettiCtx = dom.confettiCanvas ? dom.confettiCanvas.getContext("2d") : null;
 let confettiParticles = [];
 let confettiAnimId = null;
 
 export function launchWinConfetti() {
+  if (!confettiCtx || !dom.confettiCanvas) return;
   cancelAnimationFrame(confettiAnimId);
   dom.confettiCanvas.width = window.innerWidth;
   dom.confettiCanvas.height = window.innerHeight;

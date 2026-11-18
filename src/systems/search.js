@@ -103,6 +103,10 @@ export function renderSuggestions(items) {
       rows.forEach((r, i) => r.classList.toggle("highlighted", i === idx));
     });
 
+    div.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+    });
+
     div.addEventListener("click", () => {
       selectSuggestionItem(item);
     });

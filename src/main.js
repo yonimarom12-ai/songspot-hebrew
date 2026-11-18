@@ -1,6 +1,6 @@
 import { dom } from "./dom.js";
 import { initStorageState } from "./services/storage.js";
-import { playSnippet, setBeforePlaySnippetHook } from "./systems/audio.js";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture } from "./systems/audio.js";
 import { initHintListeners } from "./systems/feedback.js";
 import { initSearchListeners } from "./systems/search.js";
 import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js";
@@ -15,29 +15,40 @@ import {
   initDifficultyListeners
 } from "./systems/game.js";
 
-// Hydrate persisted user, stats, and played track IDs
-initStorageState();
+function bootApp() {
+  // Hydrate persisted user, stats, and played track IDs safely
+  initStorageState();
 
-// Prevent main snippet audio and gallery preview audio from overlapping
-setBeforePlaySnippetHook(stopGalleryPreview);
+  // Unlock mobile Web Audio on first touch/tap
+  unlockAudioOnFirstGesture();
 
-// Initialize all modular game systems
-initDifficultyListeners();
-initHintListeners();
-initSearchListeners({ onSubmitGuess: handleGuess });
-initDrawerListeners();
-initAuthListeners();
-initGalleryAudioListeners();
-initProfileListeners();
+  // Prevent main snippet audio and gallery preview audio from overlapping
+  setBeforePlaySnippetHook(stopGalleryPreview);
 
-// Core game control bindings
-dom.playBtn.addEventListener("click", playSnippet);
-dom.submitBtn.addEventListener("click", handleGuess);
-dom.skipBtn.addEventListener("click", advanceAttempt);
-dom.retryBtn.addEventListener("click", fetchRandomSong);
-dom.nextBtn.addEventListener("click", fetchRandomSong);
+  // Initialize all modular game systems
+  initDifficultyListeners();
+  initHintListeners();
+  initSearchListeners({ onSubmitGuess: handleGuess });
+  initDrawerListeners();
+  initAuthListeners();
+  initGalleryAudioListeners();
+  initProfileListeners();
 
-// Boot application
-updateStreakDisplay();
-updatePointsDisplay();
-fetchRandomSong();
+  // Core game control bindings
+  dom.playBtn.addEventListener("click", playSnippet);
+  dom.submitBtn.addEventListener("click", handleGuess);
+  dom.skipBtn.addEventListener("click", advanceAttempt);
+  dom.retryBtn.addEventListener("click", fetchRandomSong);
+  dom.nextBtn.addEventListener("click", fetchRandomSong);
+
+  // Boot application
+  updateStreakDisplay();
+  updatePointsDisplay();
+  fetchRandomSong();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootApp, { once: true });
+} else {
+  bootApp();
+}

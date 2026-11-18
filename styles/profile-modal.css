@@ -23,6 +23,7 @@
 .profile-modal {
   width: 100%;
   max-width: 440px;
+  max-height: 88vh;
   max-height: 88dvh;
   background: #141414;
   border: 1px solid var(--border);
@@ -430,7 +431,7 @@
   padding: 10px 12px;
   color: var(--text-main);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .auth-input:focus {

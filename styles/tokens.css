@@ -24,12 +24,17 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+button {
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-pure);
   color: var(--text-main);
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   justify-content: center;
@@ -40,6 +45,7 @@ body {
 .app-shell {
   width: 100%;
   max-width: 470px;
+  min-height: 100vh;
   min-height: 100dvh;
   padding: 18px 16px 32px;
   display: flex;

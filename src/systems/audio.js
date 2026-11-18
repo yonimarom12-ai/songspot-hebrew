@@ -15,24 +15,42 @@ export function initAudioContext() {
       if (AudioContextClass) state.audioCtx = new AudioContextClass();
     }
     if (state.audioCtx && state.audioCtx.state === "suspended") {
-      state.audioCtx.resume().catch(() => {});
+      state.audioCtx.resume().catch(() => { });
     }
   } catch (e) { }
 }
 
+// משחרר את נעילת האודיו במובייל (iOS Safari / Chrome) במגע הראשון של המשתמש
+export function unlockAudioOnFirstGesture() {
+  const unlock = () => {
+    initAudioContext();
+    document.removeEventListener("touchstart", unlock, true);
+    document.removeEventListener("pointerdown", unlock, true);
+  };
+  document.addEventListener("touchstart", unlock, { capture: true, passive: true });
+  document.addEventListener("pointerdown", unlock, { capture: true, passive: true });
+}
+
 export async function preloadAudioBufferInBackground(previewUrl, roundId) {
+  let timer = null;
   try {
     if (!state.audioCtx || state.audioCtx.state !== "running") return;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 4500);
-    const audioRes = await fetch(previewUrl, { signal: controller.signal });
-    clearTimeout(timer);
+    const hasAbort = typeof AbortController !== "undefined";
+    const controller = hasAbort ? new AbortController() : null;
+    if (controller) {
+      timer = setTimeout(() => controller.abort(), 5000);
+    }
+    const audioRes = await fetch(previewUrl, controller ? { signal: controller.signal } : undefined);
+    if (!audioRes.ok) return;
     const arrayBuffer = await audioRes.arrayBuffer();
     const decoded = await state.audioCtx.decodeAudioData(arrayBuffer);
     if (roundId === state.activeFetchRoundId) {
       state.audioBuffer = decoded;
     }
-  } catch (e) { }
+  } catch (e) {
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 export function elapsedSecondsToBarPercent(sec) {
@@ -82,12 +100,19 @@ export function startProgressLoop(durationSec) {
 export function stopAudioVisuals(finalPct = null) {
   state.isPlayingSnippet = false;
   clearTimeout(state.uiTimer);
+  clearTimeout(state.playStartGuardTimer);
+  state.playStartGuardTimer = null;
   cancelAnimationFrame(state.uiTimer);
   cancelAnimationFrame(state.rafProgressId);
 
   if (state.activeOnPlayingHandler) {
     state.fallbackAudio.removeEventListener("playing", state.activeOnPlayingHandler);
     state.activeOnPlayingHandler = null;
+  }
+
+  if (state.activeOnErrorHandler) {
+    state.fallbackAudio.removeEventListener("error", state.activeOnErrorHandler);
+    state.activeOnErrorHandler = null;
   }
 
   if (state.activeSource) {
@@ -142,13 +167,23 @@ export function playSnippet() {
       preloadAudioBufferInBackground(state.currentSong.previewUrl, state.activeFetchRoundId);
     }
 
-    try {
-      state.fallbackAudio.currentTime = START_OFFSET;
-    } catch (e) { }
+    // במובייל (במיוחד iOS Safari) מותר להזיז currentTime רק אם המטא-דאטה כבר נטענה
+    if (state.fallbackAudio.readyState >= 1) {
+      try {
+        state.fallbackAudio.currentTime = START_OFFSET;
+      } catch (e) { }
+    }
 
-    state.activeOnPlayingHandler = () => {
-      state.fallbackAudio.removeEventListener("playing", state.activeOnPlayingHandler);
-      state.activeOnPlayingHandler = null;
+    const startSnippetCountdown = () => {
+      clearTimeout(state.playStartGuardTimer);
+      state.playStartGuardTimer = null;
+
+      if (state.fallbackAudio.currentTime < START_OFFSET - 0.05) {
+        try {
+          state.fallbackAudio.currentTime = START_OFFSET;
+        } catch (e) { }
+      }
+
       const startStamp = performance.now();
       startProgressLoop(duration);
 
@@ -163,9 +198,31 @@ export function playSnippet() {
       state.uiTimer = requestAnimationFrame(checkFrame);
     };
 
-    state.fallbackAudio.addEventListener("playing", state.activeOnPlayingHandler);
-    state.fallbackAudio.play().catch(() => {
+    state.activeOnPlayingHandler = () => {
+      state.fallbackAudio.removeEventListener("playing", state.activeOnPlayingHandler);
+      state.activeOnPlayingHandler = null;
+      startSnippetCountdown();
+    };
+
+    state.activeOnErrorHandler = () => {
       stopAudioVisuals();
-    });
+    };
+
+    state.fallbackAudio.addEventListener("playing", state.activeOnPlayingHandler);
+    state.fallbackAudio.addEventListener("error", state.activeOnErrorHandler);
+
+    // מגן מפני תקיעה אם הדפדפן במובייל חסם או נתקע בטעינת האודיו
+    state.playStartGuardTimer = setTimeout(() => {
+      if (state.isPlayingSnippet && state.activeOnPlayingHandler) {
+        stopAudioVisuals();
+      }
+    }, 8000);
+
+    const playPromise = state.fallbackAudio.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        stopAudioVisuals();
+      });
+    }
   }
 }

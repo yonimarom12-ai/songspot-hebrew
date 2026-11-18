@@ -32,8 +32,24 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
   justify-content: flex-end;
+}
+
+@media (max-width: 390px) {
+  .brand-title {
+    font-size: 16px;
+  }
+
+  .profile-btn {
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .meta-badges {
+    gap: 4px;
+  }
 }
 
 /* Animated Fire Streak Badge */

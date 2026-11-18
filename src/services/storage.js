@@ -1,5 +1,26 @@
 import { state } from "../state.js";
 
+// גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
+export function safeStorageGet(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (e) {
+    return null;
+  }
+}
+
+export function safeStorageSet(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (e) { }
+}
+
+export function safeStorageRemove(key) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch (e) { }
+}
+
 // ניהול חשבונות משתמשים, אורח וסטטיסטיקות ב-localStorage
 export function getDefaultStats() {
   return {
@@ -35,16 +56,14 @@ export function normalizeStatsObj(parsed) {
 
 export function loadAccountsMap() {
   try {
-    return JSON.parse(localStorage.getItem("songspot_accounts_v1") || "{}");
+    return JSON.parse(safeStorageGet("songspot_accounts_v1") || "{}");
   } catch (e) {
     return {};
   }
 }
 
 export function saveAccountsMap(accounts) {
-  try {
-    localStorage.setItem("songspot_accounts_v1", JSON.stringify(accounts));
-  } catch (e) { }
+  safeStorageSet("songspot_accounts_v1", JSON.stringify(accounts));
 }
 
 export function loadUserStats() {
@@ -55,7 +74,7 @@ export function loadUserStats() {
         return normalizeStatsObj(accounts[state.currentUser].stats);
       }
     }
-    const raw = localStorage.getItem("songspot_guest_stats_v2");
+    const raw = safeStorageGet("songspot_guest_stats_v2");
     return normalizeStatsObj(raw ? JSON.parse(raw) : null);
   } catch (e) {
     return getDefaultStats();
@@ -72,13 +91,13 @@ export function saveUserStats() {
         return;
       }
     }
-    localStorage.setItem("songspot_guest_stats_v2", JSON.stringify(state.userStats));
+    safeStorageSet("songspot_guest_stats_v2", JSON.stringify(state.userStats));
   } catch (e) { }
 }
 
 export function loadPlayedIds() {
   try {
-    return new Set(JSON.parse(localStorage.getItem("songspot_played_ids") || "[]"));
+    return new Set(JSON.parse(safeStorageGet("songspot_played_ids") || "[]"));
   } catch (e) {
     return new Set();
   }
@@ -89,13 +108,11 @@ export function markSongAsPlayed(trackId) {
   if (state.playedTrackIds.size > 1500) {
     state.playedTrackIds = new Set(Array.from(state.playedTrackIds).slice(-800));
   }
-  try {
-    localStorage.setItem("songspot_played_ids", JSON.stringify(Array.from(state.playedTrackIds)));
-  } catch (e) { }
+  safeStorageSet("songspot_played_ids", JSON.stringify(Array.from(state.playedTrackIds)));
 }
 
 export function initStorageState() {
-  state.currentUser = localStorage.getItem("songspot_current_user_v1") || null;
+  state.currentUser = safeStorageGet("songspot_current_user_v1") || null;
   state.userStats = loadUserStats();
   state.playedTrackIds = loadPlayedIds();
 }

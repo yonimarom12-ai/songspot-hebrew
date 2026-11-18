@@ -1,6 +1,6 @@
 import { dom } from "../dom.js";
 import { state } from "../state.js";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj } from "../services/storage.js";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js";
 import { stopGalleryPreview } from "./gallery.js";
 import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js";
 import { updatePointsDisplay } from "./economy.js";
@@ -131,7 +131,7 @@ export function initAuthListeners() {
     };
     saveAccountsMap(accounts);
     state.currentUser = username;
-    localStorage.setItem("songspot_current_user_v1", username);
+    safeStorageSet("songspot_current_user_v1", username);
 
     dom.registerForm.reset();
     updateLiveUsernameFeedback();
@@ -155,7 +155,7 @@ export function initAuthListeners() {
     }
 
     state.currentUser = acc.username;
-    localStorage.setItem("songspot_current_user_v1", state.currentUser);
+    safeStorageSet("songspot_current_user_v1", state.currentUser);
     state.userStats = normalizeStatsObj(acc.stats);
     dom.loginForm.reset();
     setAuthMessage("");
@@ -217,7 +217,7 @@ export function initAuthListeners() {
       accounts[state.pendingResetAccountKey].password = newPass;
       saveAccountsMap(accounts);
       state.currentUser = state.pendingResetAccountKey;
-      localStorage.setItem("songspot_current_user_v1", state.currentUser);
+      safeStorageSet("songspot_current_user_v1", state.currentUser);
       state.userStats = normalizeStatsObj(accounts[state.currentUser].stats);
     }
 
@@ -235,7 +235,7 @@ export function initAuthListeners() {
   dom.logoutBtn.addEventListener("click", () => {
     stopGalleryPreview();
     state.currentUser = null;
-    localStorage.removeItem("songspot_current_user_v1");
+    safeStorageRemove("songspot_current_user_v1");
     state.userStats = loadUserStats();
     updateStreakDisplay();
     updatePointsDisplay();

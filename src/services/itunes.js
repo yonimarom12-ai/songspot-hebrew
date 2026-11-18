@@ -8,10 +8,11 @@ const BANNED_TRACK_WORDS = [
   "נעימה", "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"
 ];
 
-export function fetchItunesJsonp(url, timeoutMs = 7000) {
+export function fetchItunesJsonp(url, timeoutMs = 9000) {
   return new Promise((resolve, reject) => {
     const callbackName = "itunesCb_" + Math.random().toString(36).slice(2, 11);
     const script = document.createElement("script");
+    script.async = true;
     const timer = setTimeout(() => {
       cleanup();
       reject(new Error("JSONP timeout"));
@@ -19,7 +20,7 @@ export function fetchItunesJsonp(url, timeoutMs = 7000) {
 
     function cleanup() {
       clearTimeout(timer);
-      delete window[callbackName];
+      try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
       if (script.parentNode) script.parentNode.removeChild(script);
     }
 
@@ -38,16 +39,21 @@ export function fetchItunesJsonp(url, timeoutMs = 7000) {
   });
 }
 
-export async function fetchItunesData(url, timeoutMs = 6500) {
+export async function fetchItunesData(url, timeoutMs = 9000) {
+  let timer = null;
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
+    const hasAbort = typeof AbortController !== "undefined";
+    const controller = hasAbort ? new AbortController() : null;
+    if (controller) {
+      timer = setTimeout(() => controller.abort(), timeoutMs);
+    }
+    const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
     if (!res.ok) throw new Error("HTTP " + res.status);
     return await res.json();
   } catch (err) {
     return await fetchItunesJsonp(url, timeoutMs);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -164,7 +170,7 @@ export async function getArtistCatalog(artistName) {
     return state.artistCatalogCache[artistName];
   }
 
-  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=150&term=${encodeURIComponent(artistName)}`;
+  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=80&term=${encodeURIComponent(artistName)}`;
   const data = await fetchItunesData(url);
 
   let uniqueTracks = [];
