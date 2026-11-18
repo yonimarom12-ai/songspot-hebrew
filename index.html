@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -135,13 +136,25 @@
     }
 
     @keyframes flamePulse {
-      0% { transform: scale(0.96) rotate(-2deg); }
-      100% { transform: scale(1.07) rotate(2deg); }
+      0% {
+        transform: scale(0.96) rotate(-2deg);
+      }
+
+      100% {
+        transform: scale(1.07) rotate(2deg);
+      }
     }
 
     @keyframes flameFlicker {
-      0% { transform: scaleY(0.92) translateY(1px); opacity: 0.85; }
-      100% { transform: scaleY(1.08) translateY(-1px); opacity: 1; }
+      0% {
+        transform: scaleY(0.92) translateY(1px);
+        opacity: 0.85;
+      }
+
+      100% {
+        transform: scaleY(1.08) translateY(-1px);
+        opacity: 1;
+      }
     }
 
     .streak-count-text {
@@ -272,6 +285,7 @@
       padding: 4px 2px 6px;
       scrollbar-width: none;
     }
+
     .chips-wrapper::-webkit-scrollbar {
       display: none;
     }
@@ -292,17 +306,65 @@
       transform: scale(0.95);
     }
 
-    .chip[data-level="easy"] { background: rgba(30, 215, 96, 0.14); color: var(--easy-color); border-color: rgba(30, 215, 96, 0.26); }
-    .chip[data-level="medium"] { background: rgba(245, 197, 24, 0.14); color: var(--medium-color); border-color: rgba(245, 197, 24, 0.26); }
-    .chip[data-level="hard"] { background: rgba(255, 140, 26, 0.14); color: var(--hard-color); border-color: rgba(255, 140, 26, 0.26); }
-    .chip[data-level="very_hard"] { background: rgba(255, 77, 77, 0.14); color: var(--very-hard-color); border-color: rgba(255, 77, 77, 0.26); }
-    .chip[data-level="impossible"] { background: rgba(184, 110, 255, 0.14); color: var(--impossible-color); border-color: rgba(184, 110, 255, 0.26); }
+    .chip[data-level="easy"] {
+      background: rgba(30, 215, 96, 0.14);
+      color: var(--easy-color);
+      border-color: rgba(30, 215, 96, 0.26);
+    }
 
-    .chip[data-level="easy"].active { background: var(--easy-color); color: #000000; box-shadow: 0 0 18px rgba(30, 215, 96, 0.55); }
-    .chip[data-level="medium"].active { background: var(--medium-color); color: #000000; box-shadow: 0 0 18px rgba(245, 197, 24, 0.55); }
-    .chip[data-level="hard"].active { background: var(--hard-color); color: #000000; box-shadow: 0 0 18px rgba(255, 140, 26, 0.55); }
-    .chip[data-level="very_hard"].active { background: var(--very-hard-color); color: #000000; box-shadow: 0 0 18px rgba(255, 77, 77, 0.55); }
-    .chip[data-level="impossible"].active { background: var(--impossible-color); color: #000000; box-shadow: 0 0 18px rgba(184, 110, 255, 0.55); }
+    .chip[data-level="medium"] {
+      background: rgba(245, 197, 24, 0.14);
+      color: var(--medium-color);
+      border-color: rgba(245, 197, 24, 0.26);
+    }
+
+    .chip[data-level="hard"] {
+      background: rgba(255, 140, 26, 0.14);
+      color: var(--hard-color);
+      border-color: rgba(255, 140, 26, 0.26);
+    }
+
+    .chip[data-level="very_hard"] {
+      background: rgba(255, 77, 77, 0.14);
+      color: var(--very-hard-color);
+      border-color: rgba(255, 77, 77, 0.26);
+    }
+
+    .chip[data-level="impossible"] {
+      background: rgba(184, 110, 255, 0.14);
+      color: var(--impossible-color);
+      border-color: rgba(184, 110, 255, 0.26);
+    }
+
+    .chip[data-level="easy"].active {
+      background: var(--easy-color);
+      color: #000000;
+      box-shadow: 0 0 18px rgba(30, 215, 96, 0.55);
+    }
+
+    .chip[data-level="medium"].active {
+      background: var(--medium-color);
+      color: #000000;
+      box-shadow: 0 0 18px rgba(245, 197, 24, 0.55);
+    }
+
+    .chip[data-level="hard"].active {
+      background: var(--hard-color);
+      color: #000000;
+      box-shadow: 0 0 18px rgba(255, 140, 26, 0.55);
+    }
+
+    .chip[data-level="very_hard"].active {
+      background: var(--very-hard-color);
+      color: #000000;
+      box-shadow: 0 0 18px rgba(255, 77, 77, 0.55);
+    }
+
+    .chip[data-level="impossible"].active {
+      background: var(--impossible-color);
+      color: #000000;
+      box-shadow: 0 0 18px rgba(184, 110, 255, 0.55);
+    }
 
     /* Center Player Card */
     .player-card {
@@ -345,7 +407,9 @@
     }
 
     @keyframes spin {
-      100% { transform: rotate(360deg); }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .disc-center-hole {
@@ -399,15 +463,34 @@
       transition: height 0.2s, background-color 0.25s ease;
     }
 
-    .equalizer.playing .bar:nth-child(1) { animation: eq 0.6s ease-in-out infinite alternate; }
-    .equalizer.playing .bar:nth-child(2) { animation: eq 0.45s ease-in-out infinite alternate 0.1s; }
-    .equalizer.playing .bar:nth-child(3) { animation: eq 0.7s ease-in-out infinite alternate 0.2s; }
-    .equalizer.playing .bar:nth-child(4) { animation: eq 0.5s ease-in-out infinite alternate 0.15s; }
-    .equalizer.playing .bar:nth-child(5) { animation: eq 0.65s ease-in-out infinite alternate 0.05s; }
+    .equalizer.playing .bar:nth-child(1) {
+      animation: eq 0.6s ease-in-out infinite alternate;
+    }
+
+    .equalizer.playing .bar:nth-child(2) {
+      animation: eq 0.45s ease-in-out infinite alternate 0.1s;
+    }
+
+    .equalizer.playing .bar:nth-child(3) {
+      animation: eq 0.7s ease-in-out infinite alternate 0.2s;
+    }
+
+    .equalizer.playing .bar:nth-child(4) {
+      animation: eq 0.5s ease-in-out infinite alternate 0.15s;
+    }
+
+    .equalizer.playing .bar:nth-child(5) {
+      animation: eq 0.65s ease-in-out infinite alternate 0.05s;
+    }
 
     @keyframes eq {
-      0% { height: 4px; }
-      100% { height: 18px; }
+      0% {
+        height: 4px;
+      }
+
+      100% {
+        height: 18px;
+      }
     }
 
     .status-text {
@@ -479,16 +562,41 @@
       transition: background-color 0.25s ease;
     }
 
-    .segment:last-child { border-right: none; }
-    .segment:nth-child(2) { flex: 0 0 2.5%; }
-    .segment:nth-child(3) { flex: 0 0 5.5%; }
-    .segment:nth-child(4) { flex: 0 0 17%; }
-    .segment:nth-child(5) { flex: 0 0 25%; }
-    .segment:nth-child(6) { flex: 0 0 50%; }
+    .segment:last-child {
+      border-right: none;
+    }
 
-    .segment.active { background: rgba(255, 255, 255, 0.06); }
-    .segment.wrong { background: rgba(233, 20, 41, 0.24); }
-    .segment.correct { background: rgba(29, 185, 84, 0.32); }
+    .segment:nth-child(2) {
+      flex: 0 0 2.5%;
+    }
+
+    .segment:nth-child(3) {
+      flex: 0 0 5.5%;
+    }
+
+    .segment:nth-child(4) {
+      flex: 0 0 17%;
+    }
+
+    .segment:nth-child(5) {
+      flex: 0 0 25%;
+    }
+
+    .segment:nth-child(6) {
+      flex: 0 0 50%;
+    }
+
+    .segment.active {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .segment.wrong {
+      background: rgba(233, 20, 41, 0.24);
+    }
+
+    .segment.correct {
+      background: rgba(29, 185, 84, 0.32);
+    }
 
     .timeline-marker {
       position: absolute;
@@ -701,9 +809,20 @@
       transition: all 0.2s ease;
     }
 
-    .search-input::placeholder { color: var(--text-muted); }
-    .search-input:focus { outline: none; background: #242424; border-color: var(--text-main); }
-    .search-input:disabled { opacity: 0.4; cursor: not-allowed; }
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: #242424;
+      border-color: var(--text-main);
+    }
+
+    .search-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
     .suggestions-dropdown {
       position: absolute;
@@ -722,8 +841,15 @@
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .suggestion-row {
@@ -738,7 +864,10 @@
       transition: background 0.15s, border-color 0.15s;
     }
 
-    .suggestion-row:last-child { border-bottom: none; }
+    .suggestion-row:last-child {
+      border-bottom: none;
+    }
+
     .suggestion-row:hover,
     .suggestion-row.highlighted,
     .suggestion-row.kb-active {
@@ -774,8 +903,14 @@
       border: none;
     }
 
-    .btn:active:not(:disabled) { transform: scale(0.96); }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
 
     .btn-primary {
       flex: 2;
@@ -784,7 +919,10 @@
       display: none;
     }
 
-    .btn-primary.visible { display: block; }
+    .btn-primary.visible {
+      display: block;
+    }
+
     .btn-primary:hover:not(:disabled) {
       background: var(--spotify-green-hover);
       transform: scale(1.02);
@@ -885,7 +1023,9 @@
       box-shadow: -16px 0 40px rgba(0, 0, 0, 0.75);
     }
 
-    .side-drawer.open { transform: translateX(0); }
+    .side-drawer.open {
+      transform: translateX(0);
+    }
 
     .drawer-header {
       display: flex;
@@ -1006,8 +1146,13 @@
       transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .switch-toggle.on { background: var(--spotify-green); }
-    .switch-toggle.on::after { transform: translateX(20px); }
+    .switch-toggle.on {
+      background: var(--spotify-green);
+    }
+
+    .switch-toggle.on::after {
+      transform: translateX(20px);
+    }
 
     /* Decade Grid */
     .decade-grid {
@@ -1030,7 +1175,10 @@
       transition: all 0.18s ease;
     }
 
-    .decade-chip.full-span { grid-column: span 2; }
+    .decade-chip.full-span {
+      grid-column: span 2;
+    }
+
     .decade-chip.selected {
       background: rgba(29, 185, 84, 0.14);
       border-color: var(--spotify-green);
@@ -1407,7 +1555,7 @@
       width: 20px;
       height: 20px;
       fill: #ffffff;
-      filter: drop-shadow(0 1px 4px rgba(0,0,0,0.8));
+      filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8));
     }
 
     .gallery-item.playing .gallery-play-overlay svg {
@@ -1561,8 +1709,13 @@
       line-height: 1.35;
     }
 
-    .auth-msg.error { color: #ff5c6c; }
-    .auth-msg.success { color: var(--spotify-green); }
+    .auth-msg.error {
+      color: #ff5c6c;
+    }
+
+    .auth-msg.success {
+      color: var(--spotify-green);
+    }
 
     .username-live-hint {
       font-size: 11px;
@@ -1714,9 +1867,19 @@
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-6px);
+      }
+
+      75% {
+        transform: translateX(6px);
+      }
     }
 
     .shake {
@@ -1724,6 +1887,7 @@
     }
   </style>
 </head>
+
 <body>
   <canvas id="confetti-canvas"></canvas>
 
@@ -1737,7 +1901,8 @@
             <span class="menu-bar"></span>
           </button>
           <svg class="brand-icon" viewBox="0 0 24 24">
-            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.469-.077-.335.132-.67.469-.746 3.809-.87 7.076-.496 9.713 1.115.293.18.386.563.207.856zm1.224-2.723c-.226.367-.706.482-1.072.257-2.687-1.652-6.785-2.131-9.965-1.166-.413.125-.848-.106-.973-.517-.125-.413.108-.848.52-.973 3.632-1.102 8.147-.568 11.234 1.328.366.226.48.707.256 1.071zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.493.15-1.016-.128-1.166-.62-.149-.493.129-1.016.621-1.166 3.532-1.073 9.404-.865 13.115 1.338.445.264.59.838.327 1.282-.264.444-.838.59-1.28.322z"/>
+            <path
+              d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.469-.077-.335.132-.67.469-.746 3.809-.87 7.076-.496 9.713 1.115.293.18.386.563.207.856zm1.224-2.723c-.226.367-.706.482-1.072.257-2.687-1.652-6.785-2.131-9.965-1.166-.413.125-.848-.106-.973-.517-.125-.413.108-.848.52-.973 3.632-1.102 8.147-.568 11.234 1.328.366.226.48.707.256 1.071zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.493.15-1.016-.128-1.166-.62-.149-.493.129-1.016.621-1.166 3.532-1.073 9.404-.865 13.115 1.338.445.264.59.838.327 1.282-.264.444-.838.59-1.28.322z" />
           </svg>
           <h1 class="brand-title">SongSpot</h1>
         </div>
@@ -1757,15 +1922,18 @@
                   <stop offset="100%" stop-color="#fff3a1" />
                 </linearGradient>
               </defs>
-              <path class="flame-outer" fill="url(#fireGradOuter)" d="M18 2C18 2 29 11 29 22.5C29 30.5 24.2 37 18 37C11.8 37 7 30.5 7 22.5C7 17.2 9.8 12.2 12.5 9.2C12.2 12.2 13.8 14.5 15.2 15C13.8 10.2 15.5 5.2 18 2Z"/>
-              <path class="flame-inner" fill="url(#fireGradInner)" d="M18 13C18 13 24 18.5 24 25C24 30.2 21.3 34.5 18 34.5C14.7 34.5 12 30.2 12 25C12 21.2 14.8 17 18 13Z"/>
+              <path class="flame-outer" fill="url(#fireGradOuter)"
+                d="M18 2C18 2 29 11 29 22.5C29 30.5 24.2 37 18 37C11.8 37 7 30.5 7 22.5C7 17.2 9.8 12.2 12.5 9.2C12.2 12.2 13.8 14.5 15.2 15C13.8 10.2 15.5 5.2 18 2Z" />
+              <path class="flame-inner" fill="url(#fireGradInner)"
+                d="M18 13C18 13 24 18.5 24 25C24 30.2 21.3 34.5 18 34.5C14.7 34.5 12 30.2 12 25C12 21.2 14.8 17 18 13Z" />
             </svg>
             <span class="streak-count-text" id="streak-count">0</span>
           </div>
 
           <button class="profile-btn" id="profile-btn" type="button">
             <svg viewBox="0 0 24 24">
-              <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+              <path
+                d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
             </svg>
             <span id="profile-btn-label">אורח</span>
           </button>
@@ -1825,7 +1993,7 @@
         <div style="min-width: 52px;"></div>
         <button class="play-fab" id="play-btn" disabled aria-label="השמע">
           <svg viewBox="0 0 24 24" id="play-icon">
-            <path d="M8 5v14l11-7z"/>
+            <path d="M8 5v14l11-7z" />
           </svg>
         </button>
         <div class="side-duration-readout"><span id="play-time-label">0.1</span>s</div>
@@ -1850,15 +2018,19 @@
 
     <footer class="interaction-area" id="interaction-area">
       <div class="active-settings-pills">
-        <span class="setting-status-pill" id="easy-search-status-pill" title="לחץ לפתיחת הגדרות">🎯 חיפוש קל (50%) פעיל</span>
-        <span class="setting-status-pill" id="red-feedback-status-pill" title="לחץ לפתיחת הגדרות">🔴 חיווי אדום (8ש') פעיל</span>
+        <span class="setting-status-pill" id="easy-search-status-pill" title="לחץ לפתיחת הגדרות">🎯 חיפוש קל (50%)
+          פעיל</span>
+        <span class="setting-status-pill" id="red-feedback-status-pill" title="לחץ לפתיחת הגדרות">🔴 חיווי אדום (8ש')
+          פעיל</span>
       </div>
 
       <div class="search-box">
         <svg class="search-icon" viewBox="0 0 24 24">
-          <path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z"/>
+          <path
+            d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z" />
         </svg>
-        <input type="text" class="search-input" id="guess-input" placeholder="חפש שיר או זמר (ניתן לנווט עם החצים)..." disabled autocomplete="off" />
+        <input type="text" class="search-input" id="guess-input" placeholder="חפש שיר או זמר (ניתן לנווט עם החצים)..."
+          disabled autocomplete="off" />
         <div class="suggestions-dropdown" id="suggestions-list"></div>
       </div>
 
@@ -1889,7 +2061,8 @@
             <span class="setting-name">חיפוש קל (צמצום 50%)</span>
             <span class="setting-desc">מציג בחיפוש רק 50% מהשירים של כל אמן (כולל השיר הנכון כשמקלידים התאמה)</span>
           </div>
-          <button type="button" class="switch-toggle" id="easy-search-setting-toggle" aria-label="הפעל חיפוש קל"></button>
+          <button type="button" class="switch-toggle" id="easy-search-setting-toggle"
+            aria-label="הפעל חיפוש קל"></button>
         </div>
 
         <div class="setting-row">
@@ -1897,7 +2070,8 @@
             <span class="setting-name">חיווי אדום בהקלדה שגויה (מ-8ש')</span>
             <span class="setting-desc">צובע את שורת החיפוש באדום אם מקלידים אותיות שגויות משלב 8 שניות</span>
           </div>
-          <button type="button" class="switch-toggle" id="red-feedback-setting-toggle" aria-label="הפעל חיווי אדום ב-8 שניות"></button>
+          <button type="button" class="switch-toggle" id="red-feedback-setting-toggle"
+            aria-label="הפעל חיווי אדום ב-8 שניות"></button>
         </div>
 
         <div class="setting-row">
@@ -1905,7 +2079,8 @@
             <span class="setting-name">רמזים בשלב 15 שניות</span>
             <span class="setting-desc">הצג כפתורי רמז (זמר, שנה, אות ראשונה) כשמגיעים ל-15ש'</span>
           </div>
-          <button type="button" class="switch-toggle on" id="hints-setting-toggle" aria-label="הפעל רמזים ב-15 שניות"></button>
+          <button type="button" class="switch-toggle on" id="hints-setting-toggle"
+            aria-label="הפעל רמזים ב-15 שניות"></button>
         </div>
       </div>
 
@@ -1929,7 +2104,9 @@
               <span class="genre-option-name">כל הז'אנרים</span>
               <span class="genre-option-desc">כל השירים והאמנים בקטלוג הישראלי</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
 
           <button type="button" class="genre-option" data-genre="pop">
@@ -1937,7 +2114,9 @@
               <span class="genre-option-name">פופ ומיינסטרים</span>
               <span class="genre-option-desc">נועה קירל, עדן חסון, יסמין מועלם, סטטיק ובן אל...</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
 
           <button type="button" class="genre-option" data-genre="mizrahi">
@@ -1945,7 +2124,9 @@
               <span class="genre-option-name">מזרחית וים-תיכוני</span>
               <span class="genre-option-desc">עומר אדם, אייל גולן, אושר כהן, פאר טסי, שרית חדד...</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
 
           <button type="button" class="genre-option" data-genre="rock_classics">
@@ -1953,7 +2134,9 @@
               <span class="genre-option-name">רוק וקלאסיקות ישראליות</span>
               <span class="genre-option-desc">שלמה ארצי, אריק איינשטיין, משינה, כוורת, ברי סחרוף...</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
 
           <button type="button" class="genre-option" data-genre="hiphop">
@@ -1961,7 +2144,9 @@
               <span class="genre-option-name">היפ-הופ, ראפ וגרוב</span>
               <span class="genre-option-desc">טונה, רביד פלוטניק, הדג נחש, נס וסטילה, שב"ק ס...</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
 
           <button type="button" class="genre-option" data-genre="soul_faith">
@@ -1969,7 +2154,9 @@
               <span class="genre-option-name">נשמה, אמונה ויוצרים</span>
               <span class="genre-option-desc">חנן בן ארי, ישי ריבו, עידן רייכל, אביתר בנאי, עידן עמדי...</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
 
           <button type="button" class="genre-option" data-genre="indie">
@@ -1977,7 +2164,9 @@
               <span class="genre-option-name">אינדי ואלטרנטיב</span>
               <span class="genre-option-desc">ג'ירפות, אלג'יר, שלומי שבן, החברים של נטאשה, רוקפור...</span>
             </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+            <span class="genre-check"><svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg></span>
           </button>
         </div>
       </div>
@@ -1999,7 +2188,8 @@
         <!-- סרגל משתמש מחובר -->
         <div class="logged-user-bar" id="logged-user-bar">
           <div class="logged-user-info">
-            <span>👤 מחובר בתור: <strong id="logged-username-display" style="color: var(--spotify-green);"></strong></span>
+            <span>👤 מחובר בתור: <strong id="logged-username-display"
+                style="color: var(--spotify-green);"></strong></span>
           </div>
           <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
         </div>
@@ -2014,31 +2204,38 @@
 
           <!-- טופס התחברות -->
           <form class="auth-form active" id="login-form">
-            <input type="text" class="auth-input" id="login-username" placeholder="שם משתמש" required autocomplete="username" />
-            <input type="password" class="auth-input" id="login-password" placeholder="סיסמא" required autocomplete="current-password" />
+            <input type="text" class="auth-input" id="login-username" placeholder="שם משתמש" required
+              autocomplete="username" />
+            <input type="password" class="auth-input" id="login-password" placeholder="סיסמא" required
+              autocomplete="current-password" />
             <button type="submit" class="auth-submit-btn">התחבר לחשבון</button>
           </form>
 
           <!-- טופס הרשמה -->
           <form class="auth-form" id="register-form">
-            <input type="text" class="auth-input" id="reg-username" placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required autocomplete="username" />
+            <input type="text" class="auth-input" id="reg-username"
+              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required autocomplete="username" />
             <div class="username-live-hint" id="reg-username-hint"></div>
-            <input type="email" class="auth-input" id="reg-email" placeholder="כתובת אימייל (לשחזור סיסמא)" required autocomplete="email" />
-            <input type="password" class="auth-input" id="reg-password" placeholder="בחר סיסמא (לפחות 4 תווים)" required autocomplete="new-password" />
+            <input type="email" class="auth-input" id="reg-email" placeholder="כתובת אימייל (לשחזור סיסמא)" required
+              autocomplete="email" />
+            <input type="password" class="auth-input" id="reg-password" placeholder="בחר סיסמא (לפחות 4 תווים)" required
+              autocomplete="new-password" />
             <button type="submit" class="auth-submit-btn">צור חשבון ושמור נתונים</button>
           </form>
 
           <!-- טופס שכחתי סיסמא -->
           <form class="auth-form" id="forgot-form">
             <div id="forgot-step-1" style="display: flex; flex-direction: column; gap: 8px;">
-              <input type="text" class="auth-input" id="forgot-identifier" placeholder="הזן שם משתמש או אימייל שנרשמת איתו" />
+              <input type="text" class="auth-input" id="forgot-identifier"
+                placeholder="הזן שם משתמש או אימייל שנרשמת איתו" />
               <button type="button" class="auth-submit-btn" id="send-reset-code-btn">שלח קוד אימות למייל</button>
             </div>
 
             <div class="simulated-email-box" id="simulated-email-box"></div>
 
             <div id="forgot-step-2" style="display: none; flex-direction: column; gap: 8px;">
-              <input type="text" class="auth-input" id="reset-code-input" placeholder="הזן קוד בן 6 ספרות מהמייל" maxlength="6" />
+              <input type="text" class="auth-input" id="reset-code-input" placeholder="הזן קוד בן 6 ספרות מהמייל"
+                maxlength="6" />
               <input type="password" class="auth-input" id="reset-new-password" placeholder="בחר סיסמא חדשה" />
               <button type="submit" class="auth-submit-btn">אפס סיסמא והתחבר</button>
             </div>
@@ -2053,7 +2250,8 @@
             <div class="guest-lock-card">
               <span style="font-size: 24px;">🔒</span>
               <h4 class="guest-lock-title">פרופיל אורח</h4>
-              <p class="guest-lock-desc">הסטטיסטיקות וגלריית השירים חסומים למשתמשי אורח. הירשם או התחבר למעלה בחינם כדי לצפות ולשמור את הנתונים שלך!</p>
+              <p class="guest-lock-desc">הסטטיסטיקות וגלריית השירים חסומים למשתמשי אורח. הירשם או התחבר למעלה בחינם כדי
+                לצפות ולשמור את הנתונים שלך!</p>
             </div>
           </div>
 
@@ -2324,7 +2522,7 @@
     function saveAccountsMap(accounts) {
       try {
         localStorage.setItem("songspot_accounts_v1", JSON.stringify(accounts));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     let currentUser = localStorage.getItem("songspot_current_user_v1") || null;
@@ -2357,7 +2555,7 @@
           }
         }
         localStorage.setItem("songspot_guest_stats_v2", JSON.stringify(userStats));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function loadPlayedIds() {
@@ -2377,7 +2575,7 @@
       }
       try {
         localStorage.setItem("songspot_played_ids", JSON.stringify(Array.from(playedTrackIds)));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Web Audio API & Fallback Audio
@@ -2686,7 +2884,7 @@
         if (roundId === activeFetchRoundId) {
           audioBuffer = decoded;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function getCandidatePool() {
@@ -2727,7 +2925,7 @@
             selectedSong = pickSongFromCatalog(catalog, picked.tier, attempt >= 6);
             if (selectedSong) break;
           }
-        } catch (err) {}
+        } catch (err) { }
       }
 
       if (roundId !== activeFetchRoundId) return;
@@ -2866,7 +3064,7 @@
 
         try {
           fallbackAudio.currentTime = START_OFFSET;
-        } catch (e) {}
+        } catch (e) { }
 
         activeOnPlayingHandler = () => {
           fallbackAudio.removeEventListener("playing", activeOnPlayingHandler);
@@ -2904,14 +3102,14 @@
       }
 
       if (activeSource) {
-        try { activeSource.stop(); } catch (e) {}
-        try { activeSource.disconnect(); } catch (e) {}
+        try { activeSource.stop(); } catch (e) { }
+        try { activeSource.disconnect(); } catch (e) { }
         activeSource = null;
       }
 
       try {
         fallbackAudio.pause();
-      } catch (e) {}
+      } catch (e) { }
 
       if (playbackFill && finalPct !== null) {
         playbackFill.style.width = `${finalPct}%`;
@@ -3070,7 +3268,7 @@
 
               renderSuggestions(combined.slice(0, 8));
             }
-          } catch (e) {}
+          } catch (e) { }
         }, 250);
       }
     }
@@ -3354,9 +3552,9 @@
 
         try {
           fallbackAudio.currentTime = 0;
-          fallbackAudio.play().catch(() => {});
+          fallbackAudio.play().catch(() => { });
           equalizer.classList.add("playing");
-        } catch (e) {}
+        } catch (e) { }
       } else {
         statusLabel.textContent = "נגמרו הניסיונות";
         statusLabel.style.color = "var(--danger)";
@@ -3722,7 +3920,7 @@
     function stopGalleryPreview() {
       try {
         galleryAudio.pause();
-      } catch (e) {}
+      } catch (e) { }
       playingGalleryTrackId = null;
       updateGalleryCardsPlayState();
     }
@@ -3775,7 +3973,7 @@
               saveUserStats();
             }
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (!previewUrl) {
@@ -3949,4 +4147,5 @@
     fetchRandomSong();
   </script>
 </body>
+
 </html>
