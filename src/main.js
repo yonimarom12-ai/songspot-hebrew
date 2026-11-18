@@ -5,6 +5,7 @@ import { initHintListeners } from "./systems/feedback.js";
 import { initSearchListeners } from "./systems/search.js";
 import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js";
 import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js";
+import { updatePointsDisplay } from "./systems/economy.js";
 import { initAuthListeners } from "./systems/auth.js";
 import { initDrawerListeners } from "./systems/drawer.js";
 import {
@@ -38,4 +39,5 @@ dom.nextBtn.addEventListener("click", fetchRandomSong);
 
 // Boot application
 updateStreakDisplay();
+updatePointsDisplay();
 fetchRandomSong();

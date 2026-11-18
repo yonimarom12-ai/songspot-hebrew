@@ -3,6 +3,7 @@ import { state } from "../state.js";
 import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj } from "../services/storage.js";
 import { stopGalleryPreview } from "./gallery.js";
 import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js";
+import { updatePointsDisplay } from "./economy.js";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -131,6 +132,7 @@ export function initAuthListeners() {
     updateLiveUsernameFeedback();
     setAuthMessage("נרשמת והתחברת בהצלחה!", "success");
     updateStreakDisplay();
+    updatePointsDisplay();
     renderProfileStatsModal();
   });
 
@@ -153,6 +155,7 @@ export function initAuthListeners() {
     dom.loginForm.reset();
     setAuthMessage("");
     updateStreakDisplay();
+    updatePointsDisplay();
     renderProfileStatsModal();
   });
 
@@ -220,6 +223,7 @@ export function initAuthListeners() {
     dom.forgotForm.reset();
     setAuthMessage("הסיסמא אופסה והתחברת בהצלחה!", "success");
     updateStreakDisplay();
+    updatePointsDisplay();
     renderProfileStatsModal();
   });
 
@@ -229,6 +233,7 @@ export function initAuthListeners() {
     localStorage.removeItem("songspot_current_user_v1");
     state.userStats = loadUserStats();
     updateStreakDisplay();
+    updatePointsDisplay();
     renderProfileStatsModal();
   });
 }

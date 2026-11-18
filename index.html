@@ -37,6 +37,24 @@
         </div>
 
         <div class="meta-badges">
+          <!-- יתרת נקודות / מטבעות למשחק ולחנות העתידית -->
+          <button class="points-badge" id="points-badge" type="button" title="יתרת נקודות (ישמש לקנייה בחנות)">
+            <svg class="points-coin-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#fff099" />
+                  <stop offset="50%" stop-color="#f5c518" />
+                  <stop offset="100%" stop-color="#d49300" />
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="10" fill="url(#coinGrad)" />
+              <circle cx="12" cy="12" r="7.4" fill="none" stroke="#9e6b00" stroke-width="1.2" opacity="0.55" />
+              <path d="M12 7.2l1.45 2.94 3.25.47-2.35 2.29.55 3.23L12 14.6l-2.9 1.53.55-3.23-2.35-2.29 3.25-.47L12 7.2z"
+                fill="#7a4e00" />
+            </svg>
+            <span class="points-count-text" id="points-count">0</span>
+          </button>
+
           <!-- אנימציית אש עם מספר רצף הניצחונות בתוכו -->
           <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
             <svg class="streak-fire-svg" viewBox="0 0 36 40">
@@ -140,6 +158,7 @@
       <div class="result-banner" id="result-banner">
         <p class="song-reveal-title" id="song-title-reveal"></p>
         <p class="song-reveal-artist" id="song-artist-reveal"></p>
+        <div class="points-earned-notice" id="points-earned-notice"></div>
         <div class="level-up-notice" id="level-up-notice"></div>
         <button class="btn btn-next" id="next-btn">לשיר הבא</button>
       </div>
@@ -385,6 +404,17 @@
           </div>
 
           <div class="stats-lock-content">
+            <div class="wallet-summary-card">
+              <div class="wallet-summary-main">
+                <span class="wallet-summary-label">🪙 יתרת נקודות (לחנות העתידית)</span>
+                <span class="wallet-summary-val" id="stat-points">0</span>
+              </div>
+              <div class="wallet-summary-meta">
+                <span>סה"כ נצבר</span>
+                <strong id="stat-total-points">0</strong>
+              </div>
+            </div>
+
             <div class="kpi-grid">
               <div class="kpi-card">
                 <span class="kpi-val" id="stat-heard">0</span>

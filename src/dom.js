@@ -21,6 +21,7 @@ export const dom = {
   resultBanner: document.getElementById("result-banner"),
   songTitleReveal: document.getElementById("song-title-reveal"),
   songArtistReveal: document.getElementById("song-artist-reveal"),
+  pointsEarnedNotice: document.getElementById("points-earned-notice"),
   levelUpNotice: document.getElementById("level-up-notice"),
   nextBtn: document.getElementById("next-btn"),
   segments: document.querySelectorAll(".segment"),
@@ -49,6 +50,10 @@ export const dom = {
 
   streakBadge: document.getElementById("streak-badge"),
   streakCountEl: document.getElementById("streak-count"),
+  pointsBadge: document.getElementById("points-badge"),
+  pointsCountEl: document.getElementById("points-count"),
+  statPoints: document.getElementById("stat-points"),
+  statTotalPoints: document.getElementById("stat-total-points"),
   profileBtn: document.getElementById("profile-btn"),
   profileBtnLabel: document.getElementById("profile-btn-label"),
   profileModalBackdrop: document.getElementById("profile-modal-backdrop"),

@@ -7,6 +7,8 @@ export function getDefaultStats() {
     totalWon: 0,
     currentStreak: 0,
     bestStreak: 0,
+    points: 0,
+    totalPointsEarned: 0,
     byLevel: { easy: 0, medium: 0, hard: 0, very_hard: 0, impossible: 0 },
     bySpeed: { "0.1": 0, "0.5": 0, "2": 0, "8": 0, "15": 0 },
     wonSongs: []
@@ -16,9 +18,15 @@ export function getDefaultStats() {
 export function normalizeStatsObj(parsed) {
   const def = getDefaultStats();
   if (!parsed) return def;
+  const points = Number.isFinite(Number(parsed.points)) ? Math.max(0, Math.round(Number(parsed.points) * 100) / 100) : 0;
+  const totalPointsEarned = Number.isFinite(Number(parsed.totalPointsEarned))
+    ? Math.max(points, Math.round(Number(parsed.totalPointsEarned) * 100) / 100)
+    : points;
   return {
     ...def,
     ...parsed,
+    points,
+    totalPointsEarned,
     byLevel: { ...def.byLevel, ...(parsed.byLevel || {}) },
     bySpeed: { ...def.bySpeed, ...(parsed.bySpeed || {}) },
     wonSongs: Array.isArray(parsed.wonSongs) ? parsed.wonSongs : []

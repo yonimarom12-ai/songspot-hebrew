@@ -5,6 +5,7 @@ export const DIFFICULTIES = {
     color: "#1ed760",
     glow: "rgba(30, 215, 96, 0.55)",
     streamsText: "15M - 50M+ השמעות",
+    pointsMultiplier: 1,
     tiers: { superstars: [0, 4] }
   },
   medium: {
@@ -12,6 +13,7 @@ export const DIFFICULTIES = {
     color: "#f5c518",
     glow: "rgba(245, 197, 24, 0.55)",
     streamsText: "5M - 15M השמעות",
+    pointsMultiplier: 1.5,
     tiers: { superstars: [4, 12], established: [0, 5] }
   },
   hard: {
@@ -19,6 +21,7 @@ export const DIFFICULTIES = {
     color: "#ff8c1a",
     glow: "rgba(255, 140, 26, 0.55)",
     streamsText: "1M - 5M השמעות",
+    pointsMultiplier: 2,
     tiers: { superstars: [12, 24], established: [5, 15] }
   },
   very_hard: {
@@ -26,6 +29,7 @@ export const DIFFICULTIES = {
     color: "#ff4d4d",
     glow: "rgba(255, 77, 77, 0.55)",
     streamsText: "300K - 1M השמעות",
+    pointsMultiplier: 3,
     tiers: { established: [15, 32], indie_deep: [0, 8] }
   },
   impossible: {
@@ -33,11 +37,21 @@ export const DIFFICULTIES = {
     color: "#b86eff",
     glow: "rgba(184, 110, 255, 0.55)",
     streamsText: "פחות מ-300K השמעות",
+    pointsMultiplier: 4,
     tiers: { established: [32, 55], indie_deep: [8, 45] }
   }
 };
 
 export const DIFFICULTY_ORDER = Object.keys(DIFFICULTIES);
+
+// נקודות בסיס לרמה הקלה לפי זמן זיהוי (בשניות)
+export const BASE_POINTS_BY_DURATION = {
+  "0.1": 10,
+  "0.5": 5,
+  "2": 2,
+  "8": 1,
+  "15": 0.5
+};
 
 export const GENRE_LABELS = {
   all: "כל הז'אנרים",

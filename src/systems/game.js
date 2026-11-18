@@ -27,6 +27,12 @@ import {
   updateSubmitButtonVisibility
 } from "./search.js";
 import { updateStreakDisplay } from "./profile.js";
+import {
+  calculateRoundReward,
+  awardPoints,
+  formatPoints,
+  updatePointsDisplay
+} from "./economy.js";
 
 export function setActiveDifficultyUI(level) {
   state.currentDifficulty = level;
@@ -66,6 +72,7 @@ export function resetUI() {
   dom.skipBtn.disabled = true;
   dom.playBtn.disabled = true;
   dom.resultBanner.style.display = "none";
+  if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   dom.levelUpNotice.style.display = "none";
   dom.retryBtn.style.display = "none";
 
@@ -138,7 +145,7 @@ export async function fetchRandomSong() {
   preloadAudioBufferInBackground(state.currentSong.previewUrl, roundId);
 }
 
-export function recordRoundStats(won, solvedDuration, difficultyLevel) {
+export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0) {
   state.userStats.totalHeard = (state.userStats.totalHeard || 0) + 1;
   if (won) {
     state.userStats.totalWon = (state.userStats.totalWon || 0) + 1;
@@ -150,6 +157,10 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel) {
     const speedKey = String(solvedDuration);
     state.userStats.bySpeed[speedKey] = (state.userStats.bySpeed[speedKey] || 0) + 1;
 
+    if (earnedPoints > 0) {
+      awardPoints(earnedPoints, { persist: false });
+    }
+
     if (state.currentSong) {
       state.userStats.wonSongs = state.userStats.wonSongs.filter(s => s.trackId !== state.currentSong.trackId);
       state.userStats.wonSongs.unshift({
@@ -159,7 +170,8 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel) {
         artwork: state.currentSong.artwork,
         previewUrl: state.currentSong.previewUrl,
         timeSec: solvedDuration,
-        level: difficultyLevel
+        level: difficultyLevel,
+        pointsEarned: earnedPoints
       });
       if (state.userStats.wonSongs.length > 60) {
         state.userStats.wonSongs = state.userStats.wonSongs.slice(0, 60);
@@ -171,6 +183,7 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel) {
 
   saveUserStats();
   updateStreakDisplay();
+  updatePointsDisplay(won && earnedPoints > 0);
 }
 
 export function endRound(won) {
@@ -182,7 +195,9 @@ export function endRound(won) {
   if (dom.timelineMarker) dom.timelineMarker.style.display = "none";
 
   const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
-  recordRoundStats(won, solvedAtSec, state.currentDifficulty);
+  const playedDifficulty = state.currentDifficulty;
+  const earnedPoints = won ? calculateRoundReward(solvedAtSec, playedDifficulty) : 0;
+  recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints);
 
   if (won) {
     dom.segments[state.currentAttempt].classList.remove("active");
@@ -192,7 +207,14 @@ export function endRound(won) {
     dom.statusLabel.style.color = "var(--spotify-green)";
     launchWinConfetti();
 
-    const currDiffIdx = DIFFICULTY_ORDER.indexOf(state.currentDifficulty);
+    if (dom.pointsEarnedNotice) {
+      const mult = DIFFICULTIES[playedDifficulty]?.pointsMultiplier ?? 1;
+      const multSuffix = mult > 1 ? ` (×${mult})` : "";
+      dom.pointsEarnedNotice.textContent = `🪙 +${formatPoints(earnedPoints)} נקודות${multSuffix}`;
+      dom.pointsEarnedNotice.style.display = "inline-flex";
+    }
+
+    const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
     if (currDiffIdx >= 0 && currDiffIdx < DIFFICULTY_ORDER.length - 1) {
       const nextDiff = DIFFICULTY_ORDER[currDiffIdx + 1];
       setActiveDifficultyUI(nextDiff);
@@ -210,6 +232,7 @@ export function endRound(won) {
   } else {
     dom.statusLabel.textContent = "נגמרו הניסיונות";
     dom.statusLabel.style.color = "var(--danger)";
+    if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
     dom.levelUpNotice.style.display = "none";
   }
 

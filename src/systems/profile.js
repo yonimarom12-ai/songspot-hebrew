@@ -2,6 +2,7 @@ import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js";
 import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js";
 import { state } from "../state.js";
 import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js";
+import { formatPoints, getPointsBalance } from "./economy.js";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -49,6 +50,8 @@ export function renderProfileStatsModal() {
   document.getElementById("stat-won").textContent = won;
   document.getElementById("stat-rate").textContent = `${rate}%`;
   document.getElementById("stat-best-streak").textContent = `${state.userStats.bestStreak || 0}🔥`;
+  if (dom.statPoints) dom.statPoints.textContent = formatPoints(getPointsBalance());
+  if (dom.statTotalPoints) dom.statTotalPoints.textContent = formatPoints(state.userStats.totalPointsEarned || getPointsBalance());
 
   renderStatBars("stats-by-level", DIFFICULTY_ORDER.map(lvl => ({
     label: DIFFICULTIES[lvl].label,
@@ -152,6 +155,7 @@ export function toggleProfileModal(isOpen) {
 export function initProfileListeners() {
   dom.profileBtn.addEventListener("click", () => toggleProfileModal(true));
   dom.streakBadge.addEventListener("click", () => toggleProfileModal(true));
+  if (dom.pointsBadge) dom.pointsBadge.addEventListener("click", () => toggleProfileModal(true));
   dom.profileCloseBtn.addEventListener("click", () => toggleProfileModal(false));
   dom.profileModalBackdrop.addEventListener("click", (e) => {
     if (e.target === dom.profileModalBackdrop) toggleProfileModal(false);
