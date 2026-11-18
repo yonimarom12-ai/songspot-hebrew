@@ -91,20 +91,31 @@ export async function fetchRandomSong() {
 
   let selectedSong = null;
   const candidatePool = getCandidatePool();
+  const triedArtists = new Set();
+  let lastErrorMsg = "";
+  let emptyCatalogCount = 0;
 
-  for (let attempt = 0; attempt < 9; attempt++) {
+  for (let attempt = 0; attempt < 7; attempt++) {
     if (roundId !== state.activeFetchRoundId || candidatePool.length === 0) break;
 
-    const picked = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+    const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
+    const pickFrom = remaining.length > 0 ? remaining : candidatePool;
+    const picked = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+    triedArtists.add(picked.name);
+
     try {
       const catalog = await getArtistCatalog(picked.name);
       if (roundId !== state.activeFetchRoundId) return;
 
       if (catalog && catalog.length > 0) {
-        selectedSong = pickSongFromCatalog(catalog, picked.tier, attempt >= 6);
+        selectedSong = pickSongFromCatalog(catalog, picked.tier, attempt >= 4);
         if (selectedSong) break;
+      } else {
+        emptyCatalogCount++;
       }
-    } catch (err) { }
+    } catch (err) {
+      lastErrorMsg = err?.message || "network";
+    }
   }
 
   if (roundId !== state.activeFetchRoundId) return;
@@ -125,7 +136,8 @@ export async function fetchRandomSong() {
   }
 
   if (!selectedSong) {
-    dom.statusLabel.textContent = "לא נמצאו שירים בסינון זה או שיש שגיאת רשת. נסה שוב.";
+    const diag = lastErrorMsg ? ` (${lastErrorMsg})` : (emptyCatalogCount > 0 ? " (0 תוצאות תואמות)" : "");
+    dom.statusLabel.textContent = `לא נמצאו שירים בסינון זה או שיש שגיאת רשת${diag}. נסה שוב.`;
     dom.retryBtn.style.display = "inline-block";
     return;
   }

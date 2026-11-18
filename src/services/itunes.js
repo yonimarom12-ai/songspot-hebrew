@@ -8,7 +8,7 @@ const BANNED_TRACK_WORDS = [
   "נעימה", "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"
 ];
 
-export function fetchItunesJsonp(url, timeoutMs = 9000) {
+export function fetchItunesJsonp(url, timeoutMs = 6500) {
   return new Promise((resolve, reject) => {
     const callbackName = "itunesCb_" + Math.random().toString(36).slice(2, 11);
     const script = document.createElement("script");
@@ -39,31 +39,66 @@ export function fetchItunesJsonp(url, timeoutMs = 9000) {
   });
 }
 
-let preferJsonp = false;
-
-export async function fetchItunesData(url, timeoutMs = 8500) {
-  if (preferJsonp) {
-    return await fetchItunesJsonp(url, timeoutMs);
-  }
-
+async function fetchJsonWithTimeout(url, timeoutMs) {
   let timer = null;
   try {
     const hasAbort = typeof AbortController !== "undefined";
     const controller = hasAbort ? new AbortController() : null;
-    const fetchTimeout = Math.min(timeoutMs, 3500);
     if (controller) {
-      timer = setTimeout(() => controller.abort(), fetchTimeout);
+      timer = setTimeout(() => controller.abort(), timeoutMs);
     }
     const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
     if (!res.ok) throw new Error("HTTP " + res.status);
     return await res.json();
-  } catch (err) {
-    // אם fetch נחסם ב-CORS (נפוץ ב-iOS Safari), עוברים ישירות ל-JSONP בהמשך הסשן
-    preferJsonp = true;
-    return await fetchItunesJsonp(url, timeoutMs);
   } finally {
     if (timer) clearTimeout(timer);
   }
+}
+
+async function fetchViaCorsProxy(url, timeoutMs = 7500) {
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  return await fetchJsonWithTimeout(proxyUrl, timeoutMs);
+}
+
+// זוכר איזה ערוץ תקשורת עבד בסשן הנוכחי (fetch / jsonp / proxy) כדי למנוע עיכובים חוזרים ב-iOS Safari
+let preferredTransport = null;
+
+export async function fetchItunesData(url, timeoutMs = 7500) {
+  const attempts = [];
+  if (preferredTransport === "jsonp") {
+    attempts.push(
+      { name: "jsonp", fn: () => fetchItunesJsonp(url, timeoutMs) },
+      { name: "proxy", fn: () => fetchViaCorsProxy(url, timeoutMs) },
+      { name: "fetch", fn: () => fetchJsonWithTimeout(url, Math.min(timeoutMs, 3500)) }
+    );
+  } else if (preferredTransport === "proxy") {
+    attempts.push(
+      { name: "proxy", fn: () => fetchViaCorsProxy(url, timeoutMs) },
+      { name: "jsonp", fn: () => fetchItunesJsonp(url, timeoutMs) },
+      { name: "fetch", fn: () => fetchJsonWithTimeout(url, Math.min(timeoutMs, 3500)) }
+    );
+  } else {
+    attempts.push(
+      { name: "fetch", fn: () => fetchJsonWithTimeout(url, Math.min(timeoutMs, 3500)) },
+      { name: "jsonp", fn: () => fetchItunesJsonp(url, Math.min(timeoutMs, 6000)) },
+      { name: "proxy", fn: () => fetchViaCorsProxy(url, timeoutMs) }
+    );
+  }
+
+  let lastErr = null;
+  for (const step of attempts) {
+    try {
+      const data = await step.fn();
+      if (data && Array.isArray(data.results)) {
+        preferredTransport = step.name;
+        return data;
+      }
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+
+  throw lastErr || new Error("All iTunes transports failed");
 }
 
 // מוודא ששם השיר הוא אכן בעברית (מונע דליפה של שירים באנגלית או בשפות זרות אחרות)
@@ -86,51 +121,62 @@ export function isHebrewSongTitle(rawTitle) {
   return hebrewCount >= 2 || latinCount === 0;
 }
 
+function isArtistNameMatch(normTrackArtist, normExpected) {
+  if (!normTrackArtist || !normExpected) return false;
+  if (normTrackArtist === normExpected) return true;
+  if (normTrackArtist.includes(normExpected)) return true;
+  // מונע התאמה שגויה של שם קצר כמו "אדם" בתוך "עומר אדם"
+  return normTrackArtist.length >= 4 && normExpected.includes(normTrackArtist);
+}
+
 function findDominantArtistId(results, expectedArtist) {
   const normExpected = normalizeHebrew(expectedArtist);
-  const idCounts = new Map();
-  let matchedArtistId = null;
+  const idScores = new Map();
+  let exactArtistId = null;
 
-  for (let i = 0; i < Math.min(results.length, 25); i++) {
+  for (let i = 0; i < Math.min(results.length, 30); i++) {
     const t = results[i];
     if (!t || !t.artistId || !t.artistName) continue;
     const normTrackArtist = normalizeHebrew(t.artistName);
-    if (normTrackArtist && (normTrackArtist.includes(normExpected) || normExpected.includes(normTrackArtist))) {
-      matchedArtistId = t.artistId;
+    if (isArtistNameMatch(normTrackArtist, normExpected)) {
+      exactArtistId = t.artistId;
       break;
     }
-    if (isHebrewSongTitle(t.trackName)) {
-      idCounts.set(t.artistId, (idCounts.get(t.artistId) || 0) + 1);
-    }
+    const weight = isHebrewSongTitle(t.trackName) ? 3 : 1;
+    idScores.set(t.artistId, (idScores.get(t.artistId) || 0) + weight);
   }
 
-  if (matchedArtistId) return matchedArtistId;
+  if (exactArtistId) return exactArtistId;
 
   let bestId = null;
-  let bestCount = 0;
-  for (const [id, count] of idCounts.entries()) {
-    if (count > bestCount) {
-      bestCount = count;
+  let bestScore = 0;
+  for (const [id, score] of idScores.entries()) {
+    if (score > bestScore) {
+      bestScore = score;
       bestId = id;
     }
   }
-  return bestCount >= 2 ? bestId : null;
+  return bestScore >= 2 ? bestId : null;
 }
 
-export function isValidStudioTrack(track, expectedArtist, dominantArtistId = null) {
+export function isValidStudioTrack(track, expectedArtist, dominantArtistId = null, relaxedHebrew = false) {
   if (!track || !track.previewUrl || !track.trackName || !track.artistName) return false;
   const lowerTitle = track.trackName.toLowerCase();
   if (BANNED_TRACK_WORDS.some(w => lowerTitle.includes(w))) return false;
 
   // חובה: שם השיר חייב להיות בעברית
-  if (!isHebrewSongTitle(track.trackName)) return false;
+  if (relaxedHebrew) {
+    if (!/[\u0590-\u05FF]/.test(cleanTrackTitle(track.trackName))) return false;
+  } else {
+    if (!isHebrewSongTitle(track.trackName)) return false;
+  }
 
   const normArtist = normalizeHebrew(expectedArtist);
   const normTrackArtist = normalizeHebrew(track.artistName);
-  const isNameMatch = normTrackArtist.includes(normArtist) || normArtist.includes(normTrackArtist);
-  const isIdMatch = Boolean(dominantArtistId && track.artistId === dominantArtistId);
+  const nameMatched = isArtistNameMatch(normTrackArtist, normArtist);
+  const idMatched = Boolean(dominantArtistId && track.artistId === dominantArtistId);
 
-  return isNameMatch || isIdMatch;
+  return nameMatched || idMatched;
 }
 
 export function doesYearMatchSelectedDecades(releaseYear) {
@@ -145,12 +191,12 @@ export function doesYearMatchSelectedDecades(releaseYear) {
   return false;
 }
 
-function extractTracksFromResults(results, artistName, dominantArtistId) {
+function extractTracksFromResults(results, artistName, dominantArtistId, relaxedHebrew = false) {
   const uniqueTracks = [];
   const seenTitles = new Set();
 
   for (const t of results) {
-    if (!isValidStudioTrack(t, artistName, dominantArtistId)) continue;
+    if (!isValidStudioTrack(t, artistName, dominantArtistId, relaxedHebrew)) continue;
     const cleanTitle = cleanTrackTitle(t.trackName);
     const normTitle = normalizeHebrew(cleanTitle);
     if (!normTitle || seenTitles.has(normTitle)) continue;
@@ -179,13 +225,16 @@ export async function getArtistCatalog(artistName) {
     return state.artistCatalogCache[artistName];
   }
 
-  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=80&term=${encodeURIComponent(artistName)}`;
+  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=60&term=${encodeURIComponent(artistName)}`;
   const data = await fetchItunesData(url);
 
   let uniqueTracks = [];
   if (data && Array.isArray(data.results) && data.results.length > 0) {
     const dominantArtistId = findDominantArtistId(data.results, artistName);
-    uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId);
+    uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId, false);
+    if (uniqueTracks.length === 0) {
+      uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId, true);
+    }
   }
 
   if (uniqueTracks.length > 0) {
