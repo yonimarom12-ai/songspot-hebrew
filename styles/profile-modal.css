@@ -65,8 +65,8 @@
 }
 
 .wallet-summary-card {
-  background: linear-gradient(135deg, rgba(245, 197, 24, 0.14) 0%, rgba(245, 197, 24, 0.04) 100%);
-  border: 1px solid rgba(245, 197, 24, 0.35);
+  background: linear-gradient(135deg, rgba(56, 217, 255, 0.14) 0%, rgba(109, 40, 217, 0.1) 100%);
+  border: 1px solid rgba(56, 217, 255, 0.35);
   border-radius: 14px;
   padding: 12px 14px;
   display: flex;
@@ -90,7 +90,7 @@
 .wallet-summary-val {
   font-size: 20px;
   font-weight: 800;
-  color: #ffe270;
+  color: #8bf0ff;
   direction: ltr;
   text-align: right;
 }

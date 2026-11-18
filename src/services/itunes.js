@@ -4,8 +4,8 @@ import { state } from "../state.js";
 import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js";
 
 const BANNED_TRACK_WORDS = [
-  "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי",
-  "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"
+  "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
+  "נעימה", "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"
 ];
 
 export function fetchItunesJsonp(url, timeoutMs = 7000) {
@@ -51,6 +51,26 @@ export async function fetchItunesData(url, timeoutMs = 6500) {
   }
 }
 
+// מוודא ששם השיר הוא אכן בעברית (מונע דליפה של שירים באנגלית או בשפות זרות אחרות)
+export function isHebrewSongTitle(rawTitle) {
+  const cleaned = cleanTrackTitle(rawTitle || "");
+  if (!cleaned) return false;
+
+  // חוסם שירים הכוללים אותיות בשפות זרות (ערבית, קירילית, יוונית, מזרח-אסיה)
+  if (/[\u0600-\u06FF\u0400-\u04FF\u0370-\u03FF\u3040-\u30FF\u4E00-\u9FFF]/.test(cleaned)) {
+    return false;
+  }
+
+  const hebrewMatches = cleaned.match(/[\u0590-\u05FF]/g) || [];
+  const latinMatches = cleaned.match(/[a-zA-Z]/g) || [];
+  const hebrewCount = hebrewMatches.length;
+  const latinCount = latinMatches.length;
+
+  if (hebrewCount === 0) return false;
+  if (latinCount > 0 && hebrewCount <= latinCount) return false;
+  return hebrewCount >= 2 || latinCount === 0;
+}
+
 function findDominantArtistId(results, expectedArtist) {
   const normExpected = normalizeHebrew(expectedArtist);
   const idCounts = new Map();
@@ -64,7 +84,9 @@ function findDominantArtistId(results, expectedArtist) {
       matchedArtistId = t.artistId;
       break;
     }
-    idCounts.set(t.artistId, (idCounts.get(t.artistId) || 0) + 1);
+    if (isHebrewSongTitle(t.trackName)) {
+      idCounts.set(t.artistId, (idCounts.get(t.artistId) || 0) + 1);
+    }
   }
 
   if (matchedArtistId) return matchedArtistId;
@@ -80,21 +102,20 @@ function findDominantArtistId(results, expectedArtist) {
   return bestCount >= 2 ? bestId : null;
 }
 
-export function isValidStudioTrack(track, expectedArtist, dominantArtistId = null, allowHebrewTitleFallback = false) {
+export function isValidStudioTrack(track, expectedArtist, dominantArtistId = null) {
   if (!track || !track.previewUrl || !track.trackName || !track.artistName) return false;
   const lowerTitle = track.trackName.toLowerCase();
   if (BANNED_TRACK_WORDS.some(w => lowerTitle.includes(w))) return false;
+
+  // חובה: שם השיר חייב להיות בעברית
+  if (!isHebrewSongTitle(track.trackName)) return false;
 
   const normArtist = normalizeHebrew(expectedArtist);
   const normTrackArtist = normalizeHebrew(track.artistName);
   const isNameMatch = normTrackArtist.includes(normArtist) || normArtist.includes(normTrackArtist);
   const isIdMatch = Boolean(dominantArtistId && track.artistId === dominantArtistId);
 
-  if (isNameMatch || isIdMatch) return true;
-  if (allowHebrewTitleFallback) {
-    return /[\u0590-\u05FF]/.test(track.trackName);
-  }
-  return false;
+  return isNameMatch || isIdMatch;
 }
 
 export function doesYearMatchSelectedDecades(releaseYear) {
@@ -109,12 +130,12 @@ export function doesYearMatchSelectedDecades(releaseYear) {
   return false;
 }
 
-function extractTracksFromResults(results, artistName, dominantArtistId, allowHebrewTitleFallback) {
+function extractTracksFromResults(results, artistName, dominantArtistId) {
   const uniqueTracks = [];
   const seenTitles = new Set();
 
   for (const t of results) {
-    if (!isValidStudioTrack(t, artistName, dominantArtistId, allowHebrewTitleFallback)) continue;
+    if (!isValidStudioTrack(t, artistName, dominantArtistId)) continue;
     const cleanTitle = cleanTrackTitle(t.trackName);
     const normTitle = normalizeHebrew(cleanTitle);
     if (!normTitle || seenTitles.has(normTitle)) continue;
@@ -149,10 +170,7 @@ export async function getArtistCatalog(artistName) {
   let uniqueTracks = [];
   if (data && Array.isArray(data.results) && data.results.length > 0) {
     const dominantArtistId = findDominantArtistId(data.results, artistName);
-    uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId, false);
-    if (uniqueTracks.length === 0) {
-      uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId, true);
-    }
+    uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId);
   }
 
   if (uniqueTracks.length > 0) {

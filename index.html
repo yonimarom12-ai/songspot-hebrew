@@ -37,20 +37,37 @@
         </div>
 
         <div class="meta-badges">
-          <!-- יתרת נקודות / מטבעות למשחק ולחנות העתידית -->
-          <button class="points-badge" id="points-badge" type="button" title="יתרת נקודות (ישמש לקנייה בחנות)">
-            <svg class="points-coin-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <!-- יתרת קריסטלים למשחק ולחנות העתידית (למשתמשים רשומים) -->
+          <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים (ישמש לקנייה בחנות)">
+            <svg class="points-crystal-svg" viewBox="0 0 28 32" aria-hidden="true">
               <defs>
-                <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#fff099" />
-                  <stop offset="50%" stop-color="#f5c518" />
-                  <stop offset="100%" stop-color="#d49300" />
+                <linearGradient id="crystalTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#d6fbff" />
+                  <stop offset="55%" stop-color="#56e0ff" />
+                  <stop offset="100%" stop-color="#229bff" />
+                </linearGradient>
+                <linearGradient id="crystalLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#8bf0ff" />
+                  <stop offset="100%" stop-color="#3b82f6" />
+                </linearGradient>
+                <linearGradient id="crystalRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#6d28d9" />
+                </linearGradient>
+                <linearGradient id="crystalCore" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#e0faff" stop-opacity="0.95" />
+                  <stop offset="50%" stop-color="#38d9ff" stop-opacity="0.85" />
+                  <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.95" />
                 </linearGradient>
               </defs>
-              <circle cx="12" cy="12" r="10" fill="url(#coinGrad)" />
-              <circle cx="12" cy="12" r="7.4" fill="none" stroke="#9e6b00" stroke-width="1.2" opacity="0.55" />
-              <path d="M12 7.2l1.45 2.94 3.25.47-2.35 2.29.55 3.23L12 14.6l-2.9 1.53.55-3.23-2.35-2.29 3.25-.47L12 7.2z"
-                fill="#7a4e00" />
+              <!-- פאה מרכזית ומעטפת קריסטל רב-פאות -->
+              <polygon points="14,1 25,11 14,31 3,11" fill="url(#crystalRight)" />
+              <polygon points="14,1 3,11 14,14" fill="url(#crystalTop)" />
+              <polygon points="14,1 25,11 14,14" fill="url(#crystalLeft)" />
+              <polygon points="3,11 14,14 14,31" fill="url(#crystalLeft)" opacity="0.88" />
+              <polygon points="14,4 19.5,11.2 14,25.5 8.5,11.2" fill="url(#crystalCore)" />
+              <!-- הבזק אור עליון -->
+              <polygon points="14,1 18.5,9.5 14,11 9.5,9.5" fill="#ffffff" opacity="0.55" />
             </svg>
             <span class="points-count-text" id="points-count">0</span>
           </button>
@@ -147,7 +164,7 @@
       </div>
 
       <div class="hints-panel" id="hints-panel">
-        <div class="hints-header">💡 רמזים לשלב 15 שניות (לחץ לחשיפה):</div>
+        <div class="hints-header">💡 רמזים ל-15ש' (שימוש מבטל קריסטלים לשלב; בבלתי אפשרי חצי כמות):</div>
         <div class="hints-btns-row">
           <button type="button" class="hint-chip-btn" id="hint-artist-btn">🎤 חשוף זמר/ת</button>
           <button type="button" class="hint-chip-btn" id="hint-year-btn">📅 שנת יציאה</button>
@@ -207,7 +224,7 @@
         <div class="setting-row">
           <div class="setting-info">
             <span class="setting-name">חיפוש קל (צמצום 50%)</span>
-            <span class="setting-desc">מציג בחיפוש רק 50% מהשירים של כל אמן (כולל השיר הנכון כשמקלידים התאמה)</span>
+            <span class="setting-desc">מציג בחיפוש רק 50% מהשירים של כל אמן (מזכה ב-×0.5 קריסטלים)</span>
           </div>
           <button type="button" class="switch-toggle" id="easy-search-setting-toggle"
             aria-label="הפעל חיפוש קל"></button>
@@ -406,7 +423,7 @@
           <div class="stats-lock-content">
             <div class="wallet-summary-card">
               <div class="wallet-summary-main">
-                <span class="wallet-summary-label">🪙 יתרת נקודות (לחנות העתידית)</span>
+                <span class="wallet-summary-label">💎 יתרת קריסטלים (לחנות העתידית)</span>
                 <span class="wallet-summary-val" id="stat-points">0</span>
               </div>
               <div class="wallet-summary-meta">

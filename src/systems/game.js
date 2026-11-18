@@ -50,6 +50,8 @@ export function updateSkipButtonLabel() {
 
 export function resetUI() {
   state.currentAttempt = 0;
+  state.usedHintInRound = false;
+  state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.audioBuffer = null;
   stopAudioVisuals(0);
   resetHintButtons();
@@ -196,7 +198,11 @@ export function endRound(won) {
 
   const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
   const playedDifficulty = state.currentDifficulty;
-  const earnedPoints = won ? calculateRoundReward(solvedAtSec, playedDifficulty) : 0;
+  const usedHint = state.usedHintInRound;
+  const usedEasySearch = state.usedEasySearchInRound || state.easySearchFiftyActive;
+  const earnedPoints = won
+    ? calculateRoundReward(solvedAtSec, playedDifficulty, { usedHint, usedEasySearch })
+    : 0;
   recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints);
 
   if (won) {
@@ -208,20 +214,23 @@ export function endRound(won) {
     launchWinConfetti();
 
     if (dom.pointsEarnedNotice) {
-      const mult = DIFFICULTIES[playedDifficulty]?.pointsMultiplier ?? 1;
-      const multSuffix = mult > 1 ? ` (×${mult})` : "";
-      dom.pointsEarnedNotice.textContent = `🪙 +${formatPoints(earnedPoints)} נקודות${multSuffix}`;
+      dom.pointsEarnedNotice.classList.remove("is-muted");
+      if (!state.currentUser) {
+        dom.pointsEarnedNotice.textContent = "🔒 התחבר או הירשם כדי לצבור קריסטלים";
+        dom.pointsEarnedNotice.classList.add("is-muted");
+      } else if (usedHint && playedDifficulty !== "impossible") {
+        dom.pointsEarnedNotice.textContent = "💎 0 קריסטלים (הופעל רמז)";
+        dom.pointsEarnedNotice.classList.add("is-muted");
+      } else {
+        const notes = [];
+        const mult = DIFFICULTIES[playedDifficulty]?.pointsMultiplier ?? 1;
+        if (mult > 1) notes.push(`×${mult}`);
+        if (usedHint && playedDifficulty === "impossible") notes.push("רמז ×0.5");
+        if (usedEasySearch) notes.push("חיפוש קל ×0.5");
+        const suffix = notes.length > 0 ? ` (${notes.join(" · ")})` : "";
+        dom.pointsEarnedNotice.textContent = `💎 +${formatPoints(earnedPoints)} קריסטלים${suffix}`;
+      }
       dom.pointsEarnedNotice.style.display = "inline-flex";
-    }
-
-    const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
-    if (currDiffIdx >= 0 && currDiffIdx < DIFFICULTY_ORDER.length - 1) {
-      const nextDiff = DIFFICULTY_ORDER[currDiffIdx + 1];
-      setActiveDifficultyUI(nextDiff);
-      dom.levelUpNotice.textContent = `⬆️ עלית אוטומטית לרמת "${DIFFICULTIES[nextDiff].label}" (ניתן לשנות ידנית למעלה)`;
-      dom.levelUpNotice.style.display = "inline-block";
-    } else {
-      dom.levelUpNotice.style.display = "none";
     }
 
     try {
@@ -233,6 +242,18 @@ export function endRound(won) {
     dom.statusLabel.textContent = "נגמרו הניסיונות";
     dom.statusLabel.style.color = "var(--danger)";
     if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
+  }
+
+  // מעבר אוטומטי לשלב הבא גם בניצחון וגם אם לא הצליחו לנחש
+  const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
+  if (currDiffIdx >= 0 && currDiffIdx < DIFFICULTY_ORDER.length - 1) {
+    const nextDiff = DIFFICULTY_ORDER[currDiffIdx + 1];
+    setActiveDifficultyUI(nextDiff);
+    dom.levelUpNotice.textContent = won
+      ? `⬆️ עלית אוטומטית לרמת "${DIFFICULTIES[nextDiff].label}" (ניתן לשנות ידנית למעלה)`
+      : `➡️ ממשיכים לרמת "${DIFFICULTIES[nextDiff].label}" (ניתן לשנות ידנית למעלה)`;
+    dom.levelUpNotice.style.display = "inline-block";
+  } else {
     dom.levelUpNotice.style.display = "none";
   }
 

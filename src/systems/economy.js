@@ -3,7 +3,7 @@ import { dom } from "../dom.js";
 import { state } from "../state.js";
 import { saveUserStats } from "../services/storage.js";
 
-// מערכת נקודות וכלכלת משחק (מוכנה לשימוש עתידי בחנות)
+// מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
@@ -16,17 +16,42 @@ export function formatPoints(value) {
   });
 }
 
-export function calculateRoundReward(durationSec, difficultyLevel) {
+export function calculateRoundReward(
+  durationSec,
+  difficultyLevel,
+  { usedHint = false, usedEasySearch = false } = {}
+) {
+  // משתמש לא רשום (אורח) לא יכול להרוויח קריסטלים
+  if (!state.currentUser) return 0;
+
   const base = BASE_POINTS_BY_DURATION[String(durationSec)] ?? 0;
-  const multiplier = DIFFICULTIES[difficultyLevel]?.pointsMultiplier ?? 1;
-  return roundPoints(base * multiplier);
+  const diffMultiplier = DIFFICULTIES[difficultyLevel]?.pointsMultiplier ?? 1;
+  let reward = base * diffMultiplier;
+
+  // אם הופעל רמז בסיבוב: 0 קריסטלים ברוב הרמות, וחצי כמות ברמה הכי קשה (impossible)
+  if (usedHint) {
+    if (difficultyLevel === "impossible") {
+      reward *= 0.5;
+    } else {
+      return 0;
+    }
+  }
+
+  // בחיפוש קל מקבלים חצי (×0.5) מהכמות הרגילה
+  if (usedEasySearch) {
+    reward *= 0.5;
+  }
+
+  return roundPoints(reward);
 }
 
 export function getPointsBalance() {
+  if (!state.currentUser) return 0;
   return roundPoints(state.userStats?.points || 0);
 }
 
 export function awardPoints(amount, { persist = true } = {}) {
+  if (!state.currentUser) return 0;
   const delta = roundPoints(amount);
   if (delta <= 0 || !state.userStats) return 0;
 
@@ -40,13 +65,14 @@ export function awardPoints(amount, { persist = true } = {}) {
 }
 
 export function canAfford(cost) {
+  if (!state.currentUser) return false;
   const normalizedCost = roundPoints(cost);
   return normalizedCost >= 0 && getPointsBalance() >= normalizedCost;
 }
 
 export function spendPoints(cost) {
   const normalizedCost = roundPoints(cost);
-  if (normalizedCost < 0 || !canAfford(normalizedCost) || !state.userStats) {
+  if (!state.currentUser || normalizedCost < 0 || !canAfford(normalizedCost) || !state.userStats) {
     return false;
   }
 
@@ -57,13 +83,20 @@ export function spendPoints(cost) {
 }
 
 export function updatePointsDisplay(animate = false) {
+  const isLoggedIn = Boolean(state.currentUser);
   const balance = getPointsBalance();
   if (dom.pointsCountEl) {
     dom.pointsCountEl.textContent = formatPoints(balance);
   }
-  if (dom.pointsBadge && animate) {
-    dom.pointsBadge.classList.remove("points-pop");
-    void dom.pointsBadge.offsetWidth;
-    dom.pointsBadge.classList.add("points-pop");
+  if (dom.pointsBadge) {
+    dom.pointsBadge.classList.toggle("guest-locked", !isLoggedIn);
+    dom.pointsBadge.title = isLoggedIn
+      ? "יתרת קריסטלים (ישמש לקנייה בחנות)"
+      : "התחבר או הירשם כדי לצבור קריסטלים";
+    if (animate && isLoggedIn) {
+      dom.pointsBadge.classList.remove("points-pop");
+      void dom.pointsBadge.offsetWidth;
+      dom.pointsBadge.classList.add("points-pop");
+    }
   }
 }

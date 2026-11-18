@@ -56,6 +56,9 @@ export function initDrawerListeners() {
 
   dom.easySearchSettingToggle.addEventListener("click", () => {
     state.easySearchFiftyActive = !state.easySearchFiftyActive;
+    if (state.easySearchFiftyActive) {
+      state.usedEasySearchInRound = true;
+    }
     dom.easySearchSettingToggle.classList.toggle("on", state.easySearchFiftyActive);
     updateSettingsStatusPills();
     if (dom.guessInput.value.trim().length > 0 && !dom.guessInput.disabled) {

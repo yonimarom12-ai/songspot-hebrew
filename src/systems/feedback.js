@@ -88,18 +88,21 @@ export function resetHintButtons() {
 export function initHintListeners() {
   dom.hintArtistBtn.addEventListener("click", () => {
     if (!state.currentSong) return;
+    state.usedHintInRound = true;
     dom.hintArtistBtn.classList.add("revealed");
     dom.hintArtistBtn.textContent = `🎤 זמר/ת: ${state.currentSong.artist}`;
   });
 
   dom.hintYearBtn.addEventListener("click", () => {
     if (!state.currentSong) return;
+    state.usedHintInRound = true;
     dom.hintYearBtn.classList.add("revealed");
     dom.hintYearBtn.textContent = `📅 יצא בשנת: ${state.currentSong.releaseYear || "לא ידועה"}`;
   });
 
   dom.hintPatternBtn.addEventListener("click", () => {
     if (!state.currentSong) return;
+    state.usedHintInRound = true;
     dom.hintPatternBtn.classList.add("revealed");
     const words = state.currentSong.title.trim().split(/\s+/);
     const firstLetter = state.currentSong.title.trim().charAt(0);

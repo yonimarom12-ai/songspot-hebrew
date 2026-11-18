@@ -117,7 +117,12 @@ export function initAuthListeners() {
       return;
     }
 
-    // שומר את החשבון ומעביר אליו את הסטטיסטיקות הנוכחיות שנצברו כ"אורח"
+    // שומר את החשבון ומעביר אליו את הסטטיסטיקות הנוכחיות שנצברו כ"אורח" (ללא קריסטלים מאורח)
+    state.userStats = {
+      ...state.userStats,
+      points: 0,
+      totalPointsEarned: 0
+    };
     accounts[username] = {
       username,
       email,

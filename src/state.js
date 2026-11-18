@@ -17,6 +17,8 @@ export const state = {
 
   currentAttempt: 0,
   currentSong: null,
+  usedHintInRound: false,
+  usedEasySearchInRound: false,
   searchDebounce: null,
   activeFetchRoundId: 0,
   isPlayingSnippet: false,
