@@ -3,8 +3,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 4px;
-  gap: 8px;
+  padding-top: 4px;
+  padding-bottom: 8px;
+  gap: 10px;
 }
 
 .brand {
@@ -206,41 +207,117 @@
   animation: pointsPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.profile-btn {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: var(--surface-elevated);
-  border: 1px solid var(--border);
-  color: var(--text-main);
-  display: inline-flex;
+/* Bottom Navigation Bar (Instagram / App Style) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 320;
+  background: rgba(14, 14, 14, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid #242424;
+  padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+}
+
+.bottom-nav-inner {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-around;
+}
+
+.bottom-nav-item {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, transform 0.18s ease;
 }
 
-.profile-btn:hover {
-  background: var(--surface-hover);
-  border-color: #444;
+.bottom-nav-item:active {
+  transform: scale(0.93);
 }
 
-.profile-btn svg {
-  width: 15px;
-  height: 15px;
+.bottom-nav-item svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  transition: fill 0.2s ease, transform 0.2s ease;
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bottom-nav-item.active {
+  color: var(--text-main);
+}
+
+.bottom-nav-item.active svg {
   fill: var(--spotify-green);
+}
+
+/* Center Main Game Button in Bottom Nav */
+.bottom-nav-item.nav-main-game .nav-main-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #222222;
+  border: 1.5px solid #383838;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bottom-nav-item.nav-main-game svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-main);
+}
+
+.bottom-nav-item.nav-main-game.active .nav-main-icon-wrap {
+  background: var(--spotify-green);
+  border-color: var(--spotify-green);
+  box-shadow: 0 4px 16px rgba(29, 185, 84, 0.45);
+}
+
+.bottom-nav-item.nav-main-game.active svg {
+  fill: #000000;
+}
+
+.bottom-nav-item.nav-main-game.active {
+  color: var(--spotify-green);
 }
 
 .filter-summary-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  margin-top: 8px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 8px;
 }
 
 .filter-pills-group {

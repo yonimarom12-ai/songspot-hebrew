@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css">
-  <link rel="stylesheet" href="styles/header.css">
-  <link rel="stylesheet" href="styles/player.css">
-  <link rel="stylesheet" href="styles/interaction.css">
-  <link rel="stylesheet" href="styles/drawer.css">
-  <link rel="stylesheet" href="styles/profile-modal.css">
-  <link rel="stylesheet" href="styles/animations.css">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119c">
+  <link rel="stylesheet" href="styles/header.css?v=20261119c">
+  <link rel="stylesheet" href="styles/player.css?v=20261119c">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119c">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119c">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119c">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119c">
 </head>
 
 <body>
@@ -70,14 +70,6 @@
               <polygon points="14,1 18.5,9.5 14,11 9.5,9.5" fill="#ffffff" opacity="0.55" />
             </svg>
             <span class="points-count-text" id="points-count">0</span>
-          </button>
-
-          <button class="profile-btn" id="profile-btn" type="button">
-            <svg viewBox="0 0 24 24">
-              <path
-                d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
-            </svg>
-            <span id="profile-btn-label">אורח</span>
           </button>
         </div>
       </header>
@@ -486,9 +478,61 @@
     </div>
   </div>
 
+  <!-- חלון חנות הקריסטלים (בקרוב) -->
+  <div class="modal-backdrop" id="shop-modal-backdrop">
+    <div class="profile-modal" role="dialog" aria-label="חנות הקריסטלים">
+      <div class="modal-header">
+        <h2 class="modal-title">💎 חנות הקריסטלים</h2>
+        <button class="drawer-close-btn" id="shop-close-btn" aria-label="סגור חנות">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="wallet-summary-card">
+          <div class="wallet-summary-main">
+            <span class="wallet-summary-label">💎 היתרה שלך לקניות בחנות</span>
+            <span class="wallet-summary-val" id="shop-points-balance">0</span>
+          </div>
+        </div>
+
+        <div class="empty-gallery-msg" style="padding: 28px 16px; font-size: 13px; line-height: 1.6;">
+          <div style="font-size: 28px; margin-bottom: 8px;">🛒</div>
+          <strong style="color: var(--text-main); font-size: 15px; display: block; margin-bottom: 4px;">החנות בבנייה ותיפתח בקרוב!</strong>
+          <span>המשך לצבור קריסטלים בניחושים נכונים — בקרוב תוכל לרכוש כאן עזרים למשחק, הקפאת רצף, ועיצובים מיוחדים.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- סרגל ניווט תחתון (בסגנון אפליקציות / אינסטגרם) -->
+  <nav class="bottom-nav" aria-label="ניווט ראשי">
+    <div class="bottom-nav-inner">
+      <button class="bottom-nav-item" id="profile-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
+        </svg>
+        <span class="bottom-nav-label" id="profile-btn-label">אורח</span>
+      </button>
+
+      <button class="bottom-nav-item nav-main-game active" id="nav-game-btn" type="button" aria-label="המשחק הראשי">
+        <div class="nav-main-icon-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3a9 9 0 0 0-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1a7 7 0 0 1 14 0v1h-4v8h4c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z" />
+          </svg>
+        </div>
+        <span class="bottom-nav-label">משחק</span>
+      </button>
+
+      <button class="bottom-nav-item" id="nav-shop-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z" />
+        </svg>
+        <span class="bottom-nav-label">חנות</span>
+      </button>
+    </div>
+  </nav>
+
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="src/main.js?v=20261119c"></script>
 </body>
 
 </html>

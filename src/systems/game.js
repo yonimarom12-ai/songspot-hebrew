@@ -267,16 +267,14 @@ export function endRound(won) {
     if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   }
 
-  // מעבר אוטומטי לשלב הבא גם בניצחון וגם אם לא הצליחו לנחש
+  // מעבר אוטומטי לשלב הבא גם בניצחון וגם אם לא הצליחו לנחש (ללא הודעת טקסט)
   const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
   if (currDiffIdx >= 0 && currDiffIdx < DIFFICULTY_ORDER.length - 1) {
     const nextDiff = DIFFICULTY_ORDER[currDiffIdx + 1];
     setActiveDifficultyUI(nextDiff);
-    dom.levelUpNotice.textContent = won
-      ? `⬆️ עלית אוטומטית לרמת "${DIFFICULTIES[nextDiff].label}" (ניתן לשנות ידנית למעלה)`
-      : `➡️ ממשיכים לרמת "${DIFFICULTIES[nextDiff].label}" (ניתן לשנות ידנית למעלה)`;
-    dom.levelUpNotice.style.display = "inline-block";
-  } else {
+  }
+  if (dom.levelUpNotice) {
+    dom.levelUpNotice.textContent = "";
     dom.levelUpNotice.style.display = "none";
   }
 

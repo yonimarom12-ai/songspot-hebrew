@@ -8,15 +8,17 @@
 
 .search-skip-row {
   display: flex;
-  align-items: stretch;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 8px;
   width: 100%;
 }
 
 .search-box {
   position: relative;
-  flex: 0 0 calc(70% - 4px);
-  max-width: calc(70% - 4px);
+  flex: 7 1 0%;
+  width: 70%;
   min-width: 0;
 }
 
@@ -154,10 +156,10 @@
 }
 
 .btn-secondary {
-  flex: 0 0 calc(30% - 4px);
-  max-width: calc(30% - 4px);
+  flex: 3 0 0%;
+  width: 30%;
   height: 44px;
-  padding: 0 8px;
+  padding: 0 6px;
   font-size: 12.5px;
   white-space: nowrap;
   display: inline-flex;

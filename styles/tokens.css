@@ -47,16 +47,18 @@ body {
   max-width: 470px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 16px 16px 28px;
+  padding: 22px 16px 88px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 14px;
 }
 
 .gameplay-cluster {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 6px;
+  gap: 14px;
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: 8px 0 18px;
 }

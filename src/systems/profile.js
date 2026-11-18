@@ -143,19 +143,69 @@ export function renderProfileStatsModal() {
   }
 }
 
+export function updateBottomNavActiveTab(activeTab = "game") {
+  if (dom.profileBtn) dom.profileBtn.classList.toggle("active", activeTab === "profile");
+  if (dom.navGameBtn) dom.navGameBtn.classList.toggle("active", activeTab === "game");
+  if (dom.navShopBtn) dom.navShopBtn.classList.toggle("active", activeTab === "shop");
+}
+
+export function toggleShopModal(isOpen) {
+  if (isOpen) {
+    if (dom.profileModalBackdrop?.classList.contains("open")) {
+      stopGalleryPreview();
+      dom.profileModalBackdrop.classList.remove("open");
+    }
+    if (dom.shopPointsBalance) {
+      dom.shopPointsBalance.textContent = formatPoints(getPointsBalance());
+    }
+  }
+  if (dom.shopModalBackdrop) {
+    dom.shopModalBackdrop.classList.toggle("open", isOpen);
+  }
+  updateBottomNavActiveTab(isOpen ? "shop" : "game");
+}
+
 export function toggleProfileModal(isOpen) {
   if (isOpen) {
+    if (dom.shopModalBackdrop?.classList.contains("open")) {
+      dom.shopModalBackdrop.classList.remove("open");
+    }
     renderProfileStatsModal();
   } else {
     stopGalleryPreview();
   }
   dom.profileModalBackdrop.classList.toggle("open", isOpen);
+  updateBottomNavActiveTab(isOpen ? "profile" : "game");
 }
 
 export function initProfileListeners() {
-  dom.profileBtn.addEventListener("click", () => toggleProfileModal(true));
+  dom.profileBtn.addEventListener("click", () => {
+    const isAlreadyOpen = dom.profileModalBackdrop.classList.contains("open");
+    toggleProfileModal(!isAlreadyOpen);
+  });
+  if (dom.navGameBtn) {
+    dom.navGameBtn.addEventListener("click", () => {
+      toggleProfileModal(false);
+      toggleShopModal(false);
+      updateBottomNavActiveTab("game");
+    });
+  }
+  if (dom.navShopBtn) {
+    dom.navShopBtn.addEventListener("click", () => {
+      const isAlreadyOpen = dom.shopModalBackdrop?.classList.contains("open");
+      toggleShopModal(!isAlreadyOpen);
+    });
+  }
+  if (dom.shopCloseBtn) {
+    dom.shopCloseBtn.addEventListener("click", () => toggleShopModal(false));
+  }
+  if (dom.shopModalBackdrop) {
+    dom.shopModalBackdrop.addEventListener("click", (e) => {
+      if (e.target === dom.shopModalBackdrop) toggleShopModal(false);
+    });
+  }
   dom.streakBadge.addEventListener("click", () => toggleProfileModal(true));
-  if (dom.pointsBadge) dom.pointsBadge.addEventListener("click", () => toggleProfileModal(true));
+  if (dom.pointsBadge) dom.pointsBadge.addEventListener("click", () => toggleShopModal(true));
   dom.profileCloseBtn.addEventListener("click", () => toggleProfileModal(false));
   dom.profileModalBackdrop.addEventListener("click", (e) => {
     if (e.target === dom.profileModalBackdrop) toggleProfileModal(false);

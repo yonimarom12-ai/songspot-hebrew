@@ -58,6 +58,11 @@ export const dom = {
   profileBtnLabel: document.getElementById("profile-btn-label"),
   profileModalBackdrop: document.getElementById("profile-modal-backdrop"),
   profileCloseBtn: document.getElementById("profile-close-btn"),
+  navGameBtn: document.getElementById("nav-game-btn"),
+  navShopBtn: document.getElementById("nav-shop-btn"),
+  shopModalBackdrop: document.getElementById("shop-modal-backdrop"),
+  shopCloseBtn: document.getElementById("shop-close-btn"),
+  shopPointsBalance: document.getElementById("shop-points-balance"),
 
   // Auth DOM
   loggedUserBar: document.getElementById("logged-user-bar"),
