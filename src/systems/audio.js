@@ -3,8 +3,10 @@ import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js";
 import { state } from "../state.js";
 
 let beforePlaySnippetHook = null;
-let pendingDecode = null; // { roundId, promise }
+let pendingRawFetch = null; // { roundId, promise }
+let pendingDecode = null;   // { roundId, promise }
 let playToken = 0;
+let audioUnlocked = false;
 
 export function setBeforePlaySnippetHook(fn) {
   beforePlaySnippetHook = fn;
@@ -19,7 +21,6 @@ function configureAudioSession() {
   } catch (e) { }
 }
 
-// יוצר AudioContext (מותר גם בלי מגע משתמש — הוא פשוט מתחיל במצב suspended)
 function getAudioContext() {
   if (state.audioCtx) return state.audioCtx;
   try {
@@ -34,27 +35,48 @@ function getAudioContext() {
 export function initAudioContext() {
   configureAudioSession();
   const ctx = getAudioContext();
-  if (ctx && ctx.state !== "running") {
+  if (!ctx) return null;
+
+  if (ctx.state !== "running") {
     try {
       const p = ctx.resume();
       if (p && typeof p.catch === "function") p.catch(() => { });
     } catch (e) { }
   }
+
+  // טריק רשמי ל-iOS Safari: ניגון דגימה שקטה של 1 sample משחרר את Web Audio מיידית במגע הראשון
+  if (!audioUnlocked) {
+    try {
+      const silentBuf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = silentBuf;
+      src.connect(ctx.destination);
+      src.start(0);
+      audioUnlocked = true;
+    } catch (e) { }
+  }
+
+  // אם הקובץ הגולמי של הסיבוב כבר ירד בזמן שה-AudioContext היה נעול — מפענחים אותו מיד!
+  if (state.rawAudioBuffer && !state.audioBuffer && !pendingDecode) {
+    decodeRawAudioForRound(state.rawAudioBuffer, state.activeFetchRoundId);
+  }
+
   return ctx;
 }
 
-// משחרר את נעילת האודיו במובייל במגע הראשון של המשתמש
 export function unlockAudioOnFirstGesture() {
   const unlock = () => {
     initAudioContext();
     document.removeEventListener("touchstart", unlock, true);
     document.removeEventListener("pointerdown", unlock, true);
+    document.removeEventListener("click", unlock, true);
   };
   document.addEventListener("touchstart", unlock, { capture: true, passive: true });
   document.addEventListener("pointerdown", unlock, { capture: true, passive: true });
+  document.addEventListener("click", unlock, { capture: true, passive: true });
 }
 
-// חוסם שליטה בשיר דרך ה-Dynamic Island / מסך הנעילה / מרכז הבקרה (מונע האזנה ל-30 שניות מלאות)
+// חוסם שליטה בשיר דרך ה-Dynamic Island / מסך הנעילה / מרכז הבקרה
 export function installMediaSessionGuards() {
   if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
   const block = () => {
@@ -69,7 +91,6 @@ export function installMediaSessionGuards() {
   }
 }
 
-// מנקה את נגן ה-<audio> כדי שה-iPhone יסיר אותו מה-Dynamic Island
 export function releaseMediaElement() {
   const audio = state.fallbackAudio;
   try { audio.pause(); } catch (e) { }
@@ -89,15 +110,45 @@ export function releaseMediaElement() {
 
 function decodeCompat(ctx, arrayBuffer) {
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("decode timeout")), 5000);
+    const done = (fn) => (val) => {
+      clearTimeout(timer);
+      fn(val);
+    };
     try {
-      const maybePromise = ctx.decodeAudioData(arrayBuffer, resolve, reject);
+      const copy = arrayBuffer.slice(0);
+      const maybePromise = ctx.decodeAudioData(copy, done(resolve), done(reject));
       if (maybePromise && typeof maybePromise.then === "function") {
-        maybePromise.then(resolve, reject);
+        maybePromise.then(done(resolve), done(reject));
       }
     } catch (e) {
+      clearTimeout(timer);
       reject(e);
     }
   });
+}
+
+function decodeRawAudioForRound(rawBuffer, roundId) {
+  const ctx = getAudioContext();
+  if (!ctx || !rawBuffer) return Promise.resolve(null);
+
+  const promise = decodeCompat(ctx, rawBuffer)
+    .then(decoded => {
+      if (roundId === state.activeFetchRoundId) {
+        state.audioBuffer = decoded;
+        state.rawAudioBuffer = null; // שחרור זיכרון גולמי במובייל
+      }
+      return decoded;
+    })
+    .catch(() => {
+      if (roundId === state.activeFetchRoundId) {
+        state.audioDecodeFailed = true;
+      }
+      return null;
+    });
+
+  pendingDecode = { roundId, promise };
+  return promise;
 }
 
 async function fetchArrayBuffer(url, timeoutMs) {
@@ -114,24 +165,30 @@ async function fetchArrayBuffer(url, timeoutMs) {
   }
 }
 
-// טוען ומפענח מראש את קטע השמע של הסיבוב — כך שהלחיצה על Play מתנגנת מיידית ובדיוק של אלפית שנייה
+// מוריד את קובץ השמע מראש מיד כשהשיר נבחר; מפענח מיד רק אם ה-AudioContext כבר פתוח (מונע תקיעת decodeAudioData ב-iOS!)
 export function preloadAudioBufferInBackground(previewUrl, roundId) {
+  state.audioBuffer = null;
+  state.rawAudioBuffer = null;
   state.audioDecodeFailed = false;
-  const ctx = getAudioContext();
-  if (!ctx || !previewUrl) {
+  pendingDecode = null;
+
+  if (!previewUrl) {
     state.audioDecodeFailed = true;
-    pendingDecode = null;
+    pendingRawFetch = null;
     return Promise.resolve(null);
   }
 
   const promise = (async () => {
     try {
-      const raw = await fetchArrayBuffer(previewUrl, 10000);
-      const decoded = await decodeCompat(ctx, raw);
-      if (roundId === state.activeFetchRoundId) {
-        state.audioBuffer = decoded;
+      const raw = await fetchArrayBuffer(previewUrl, 5500);
+      if (roundId !== state.activeFetchRoundId) return null;
+      state.rawAudioBuffer = raw;
+
+      // אם AudioContext כבר רץ (מסיבוב 1 ואילך אחרי המגע הראשון), מפענחים מראש ב-40ms -> לחיצה על Play היא 0ms!
+      if (state.audioCtx && state.audioCtx.state === "running") {
+        await decodeRawAudioForRound(raw, roundId);
       }
-      return decoded;
+      return raw;
     } catch (e) {
       if (roundId === state.activeFetchRoundId) {
         state.audioDecodeFailed = true;
@@ -140,7 +197,7 @@ export function preloadAudioBufferInBackground(previewUrl, roundId) {
     }
   })();
 
-  pendingDecode = { roundId, promise };
+  pendingRawFetch = { roundId, promise };
   return promise;
 }
 
@@ -240,7 +297,7 @@ function startBufferSnippet(ctx, buffer, duration, targetPct) {
   source.connect(ctx.destination);
   state.activeSource = source;
 
-  const when = ctx.currentTime + 0.01;
+  const when = ctx.currentTime + 0.005;
   source.start(when, START_OFFSET, duration);
   startProgressLoop(duration);
 
@@ -249,7 +306,7 @@ function startBufferSnippet(ctx, buffer, duration, targetPct) {
   }, duration * 1000 + 10);
 }
 
-// גיבוי בלבד: ניגון דרך <audio> (רק אם הפענוח של Web Audio נכשל)
+// גיבוי בלבד: ניגון דרך <audio> (רק אם הורדה/פענוח של Web Audio נכשלו)
 function playViaMediaElement(duration, targetPct) {
   const audio = state.fallbackAudio;
   const url = state.currentSong.previewUrl;
@@ -315,7 +372,7 @@ function playViaMediaElement(duration, targetPct) {
       stopAudioVisuals();
       if (dom.statusLabel) dom.statusLabel.textContent = "הטעינה התעכבה — לחץ שוב על ניגון";
     }
-  }, 10000);
+  }, 8000);
 
   const p = audio.play();
   if (p && typeof p.then === "function") {
@@ -323,7 +380,7 @@ function playViaMediaElement(duration, targetPct) {
       if (state.isPlayingSnippet && !watchStarted) beginWatch();
     }).catch(() => {
       stopAudioVisuals();
-      if (dom.statusLabel) dom.statusLabel.textContent = "הדפדפן חסם את הניגון — לחץ שוב על ניגון";
+      if (dom.statusLabel) dom.statusLabel.textContent = "לחץ שוב על ניגון";
     });
   }
 }
@@ -338,7 +395,7 @@ export function playSnippet() {
   stopAudioVisuals();
   if (!state.currentSong || !state.currentSong.previewUrl) return;
 
-  // חייב לקרות בתוך הלחיצה עצמה כדי לשחרר את האודיו ב-iOS
+  // שחרור Web Audio מיידית בתוך מחוות הלחיצה
   const ctx = initAudioContext();
   const resumePromise = ctx && ctx.state !== "running"
     ? Promise.resolve(ctx.resume()).catch(() => { })
@@ -346,38 +403,63 @@ export function playSnippet() {
 
   const duration = DURATIONS[state.currentAttempt];
   const targetPct = STAGE_STOPS_PCT[state.currentAttempt];
+  const roundId = state.activeFetchRoundId;
   setPlayingVisuals();
   const myToken = playToken;
 
-  // מסלול מועדף: Web Audio עם באפר מפוענח מראש (מדויק, מיידי, ולא מופיע ב-Dynamic Island)
+  // 1. הכי מהיר (0ms): הבאפר כבר מפוענח ב-RAM
   if (ctx && state.audioBuffer) {
     const buffer = state.audioBuffer;
-    resumePromise.then(() => {
-      if (myToken !== playToken || !state.isPlayingSnippet) return;
+    if (ctx.state === "running") {
       startBufferSnippet(ctx, buffer, duration, targetPct);
-    });
+    } else {
+      resumePromise.then(() => {
+        if (myToken !== playToken || !state.isPlayingSnippet) return;
+        startBufferSnippet(ctx, buffer, duration, targetPct);
+      });
+    }
     return;
   }
 
-  // הבאפר עדיין בטעינה — ממתינים לו במקום לעבור ל-<audio> הלא מדויק
-  if (ctx && !state.audioDecodeFailed && pendingDecode && pendingDecode.roundId === state.activeFetchRoundId) {
+  // 2. הקובץ הגולמי כבר ירד או עדיין יורד (לוקח ~40–400ms בלבד)
+  if (ctx && !state.audioDecodeFailed) {
     const prevStatus = dom.statusLabel ? dom.statusLabel.textContent : "";
-    if (dom.statusLabel) dom.statusLabel.textContent = "טוען את קטע השמע...";
+    if (dom.statusLabel) dom.statusLabel.textContent = "מכין שמע...";
 
-    Promise.all([resumePromise, pendingDecode.promise]).then(([, buffer]) => {
+    (async () => {
+      await resumePromise;
+      if (myToken !== playToken || !state.isPlayingSnippet) return;
+
+      let buffer = state.audioBuffer;
+      if (!buffer && pendingDecode && pendingDecode.roundId === roundId) {
+        buffer = await pendingDecode.promise;
+      }
+      if (!buffer && state.rawAudioBuffer) {
+        buffer = await decodeRawAudioForRound(state.rawAudioBuffer, roundId);
+      }
+      if (!buffer && pendingRawFetch && pendingRawFetch.roundId === roundId) {
+        const raw = await pendingRawFetch.promise;
+        if (raw && !state.audioBuffer && myToken === playToken) {
+          buffer = await decodeRawAudioForRound(raw, roundId);
+        } else {
+          buffer = state.audioBuffer;
+        }
+      }
+
       if (myToken !== playToken || !state.isPlayingSnippet) return;
       if (dom.statusLabel) dom.statusLabel.textContent = prevStatus;
+
       if (buffer) {
         startBufferSnippet(ctx, buffer, duration, targetPct);
       } else {
         stopAudioVisuals();
         if (dom.statusLabel) dom.statusLabel.textContent = "לחץ שוב על ניגון";
       }
-    });
+    })();
     return;
   }
 
-  // גיבוי אחרון: <audio>
+  // 3. גיבוי אחרון (רק אם Web Audio נכשל)
   playViaMediaElement(duration, targetPct);
 }
 
@@ -392,7 +474,7 @@ export function playRevealPreview() {
       state.activeSource = source;
       Promise.resolve(ctx.state !== "running" ? ctx.resume() : null).catch(() => { }).then(() => {
         if (state.activeSource !== source) return;
-        source.start(ctx.currentTime + 0.01, 0);
+        source.start(ctx.currentTime + 0.005, 0);
         dom.equalizer.classList.add("playing");
       });
       source.onended = () => {

@@ -1,15 +1,15 @@
 import { ARTISTS_DB } from "../data/artists.js";
 import { DIFFICULTIES } from "../data/config.js";
-import { state } from "../state.js";
+import { state, isIOS } from "../state.js";
 import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js";
-import { safeStorageGet, safeStorageSet } from "./storage.js";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
   "נעימה", "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"
 ];
 
-export function fetchItunesJsonp(url, timeoutMs = 6500) {
+export function fetchItunesJsonp(url, timeoutMs = 5500) {
   return new Promise((resolve, reject) => {
     const callbackName = "itunesCb_" + Math.random().toString(36).slice(2, 11);
     const script = document.createElement("script");
@@ -56,24 +56,29 @@ async function fetchJsonWithTimeout(url, timeoutMs) {
   }
 }
 
-async function fetchViaCorsProxy(url, timeoutMs = 7500) {
+async function fetchViaCorsProxy(url, timeoutMs = 6000) {
   const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   return await fetchJsonWithTimeout(proxyUrl, timeoutMs);
 }
 
-const TRANSPORT_KEY = "songspot_itunes_transport_v1";
+// מנקה מפתח ישן שעלול היה להיתקע על "proxy" איטי
+safeStorageRemove("songspot_itunes_transport_v1");
+
+const TRANSPORT_KEY = "songspot_itunes_transport_v2";
 const TRANSPORTS = {
-  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 3000)),
-  jsonp: (url, t) => fetchItunesJsonp(url, t),
-  proxy: (url, t) => fetchViaCorsProxy(url, t)
+  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 2500)),
+  jsonp: (url, t) => fetchItunesJsonp(url, Math.min(t, 5500)),
+  proxy: (url, t) => fetchViaCorsProxy(url, Math.min(t, 6000))
 };
 
-// זוכר (גם בין ביקורים) איזה ערוץ עבד במכשיר הזה — כדי שהאייפון לא יבזבז זמן על ערוצים חסומים
+// שומר רק ערוצים ישירים ומהירים (fetch / jsonp) — לעולם לא שומר proxy כברירת מחדל כדי למנוע האטה קבועה
 let preferredTransport = safeStorageGet(TRANSPORT_KEY);
-if (!TRANSPORTS[preferredTransport]) preferredTransport = null;
+if (preferredTransport !== "fetch" && preferredTransport !== "jsonp") {
+  preferredTransport = isIOS ? "jsonp" : null;
+}
 
-function rememberTransport(name) {
-  if (preferredTransport !== name) {
+function rememberDirectTransport(name) {
+  if ((name === "fetch" || name === "jsonp") && preferredTransport !== name) {
     preferredTransport = name;
     safeStorageSet(TRANSPORT_KEY, name);
   }
@@ -83,69 +88,64 @@ function isValidPayload(data) {
   return data && Array.isArray(data.results);
 }
 
-// מריץ כמה ערוצים במקביל ומחזיר את הראשון שהצליח
-function firstSuccessful(names, url, timeoutMs) {
-  return new Promise((resolve, reject) => {
-    let pending = names.length;
-    let lastErr = null;
-    if (pending === 0) return reject(new Error("no transports"));
-    for (const name of names) {
-      TRANSPORTS[name](url, timeoutMs)
-        .then(data => {
-          if (isValidPayload(data)) {
-            rememberTransport(name);
-            resolve(data);
-          } else {
-            throw new Error("bad payload");
-          }
-        })
-        .catch(err => {
-          lastErr = err;
-          pending--;
-          if (pending === 0) reject(lastErr);
-        });
-    }
-  });
-}
+// מונע שליחה כפולה של אותה בקשה במקביל
+const inFlightRequests = new Map();
 
-export async function fetchItunesData(url, timeoutMs = 7500) {
-  // 1. ערוץ שכבר הוכח כעובד במכשיר הזה
-  if (preferredTransport) {
-    try {
-      const data = await TRANSPORTS[preferredTransport](url, timeoutMs);
-      if (isValidPayload(data)) return data;
-    } catch (e) { }
-    const others = Object.keys(TRANSPORTS).filter(n => n !== preferredTransport);
-    return await firstSuccessful(others, url, timeoutMs);
+export async function fetchItunesData(url, timeoutMs = 6000) {
+  if (inFlightRequests.has(url)) {
+    return await inFlightRequests.get(url);
   }
 
-  // 2. ביקור ראשון: fetch רגיל, ואם נכשל — JSONP ו-Proxy במקביל (הראשון שעונה מנצח)
-  try {
-    const data = await TRANSPORTS.fetch(url, timeoutMs);
-    if (isValidPayload(data)) {
-      rememberTransport("fetch");
-      return data;
+  const reqPromise = (async () => {
+    // ב-iOS מדלגים מיד ל-JSONP ישיר מול Apple (~250ms) בלי לבזבז 3 שניות על fetch שייחסם ב-CORS
+    const order = preferredTransport === "jsonp"
+      ? ["jsonp", "fetch", "proxy"]
+      : preferredTransport === "fetch"
+        ? ["fetch", "jsonp", "proxy"]
+        : ["fetch", "jsonp", "proxy"];
+
+    let lastErr = null;
+    for (const name of order) {
+      try {
+        const data = await TRANSPORTS[name](url, timeoutMs);
+        if (isValidPayload(data)) {
+          rememberDirectTransport(name);
+          return data;
+        }
+      } catch (err) {
+        lastErr = err;
+      }
     }
-  } catch (e) { }
-  return await firstSuccessful(["jsonp", "proxy"], url, timeoutMs);
+    throw lastErr || new Error("All iTunes transports failed");
+  })();
+
+  inFlightRequests.set(url, reqPromise);
+  try {
+    return await reqPromise;
+  } finally {
+    inFlightRequests.delete(url);
+  }
 }
 
-// ===== מטמון קטלוגים מקומי (מאיץ טעינה בביקורים חוזרים) =====
+// ===== מטמון קטלוגים מקומי בזיכרון + localStorage (מונע JSON.parse חוזר שגורם לתקיעות במובייל) =====
 const CATALOG_CACHE_KEY = "songspot_catalog_cache_v1";
-const CATALOG_CACHE_MAX = 45;
+const CATALOG_CACHE_MAX = 32;
 const CATALOG_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+let persistedCatalogsMap = null;
 
-function loadPersistedCatalogs() {
+function getPersistedMap() {
+  if (persistedCatalogsMap) return persistedCatalogsMap;
   try {
     const parsed = JSON.parse(safeStorageGet(CATALOG_CACHE_KEY) || "{}");
-    return parsed && typeof parsed === "object" ? parsed : {};
+    persistedCatalogsMap = parsed && typeof parsed === "object" ? parsed : {};
   } catch (e) {
-    return {};
+    persistedCatalogsMap = {};
   }
+  return persistedCatalogsMap;
 }
 
 export function hydratePersistedCatalogs() {
-  const all = loadPersistedCatalogs();
+  const all = getPersistedMap();
   const now = Date.now();
   for (const [artistName, entry] of Object.entries(all)) {
     if (!entry || !Array.isArray(entry.tracks) || entry.tracks.length === 0) continue;
@@ -160,7 +160,7 @@ export function hydratePersistedCatalogs() {
 }
 
 function getPersistedCatalog(artistName) {
-  const all = loadPersistedCatalogs();
+  const all = getPersistedMap();
   const entry = all[artistName];
   if (!entry || !Array.isArray(entry.tracks) || Date.now() - (entry.ts || 0) > CATALOG_CACHE_TTL_MS) {
     return null;
@@ -169,8 +169,17 @@ function getPersistedCatalog(artistName) {
 }
 
 function persistCatalog(artistName, tracks) {
-  const all = loadPersistedCatalogs();
-  all[artistName] = { ts: Date.now(), tracks };
+  const all = getPersistedMap();
+  // שומר גרסה קומפקטית (עד 45 שירים לאמן) כדי לא להכביד על localStorage במובייל
+  const compactTracks = tracks.slice(0, 45).map(s => ({
+    trackId: s.trackId,
+    title: s.title,
+    artist: s.artist,
+    releaseYear: s.releaseYear,
+    previewUrl: s.previewUrl,
+    artwork: s.artwork
+  }));
+  all[artistName] = { ts: Date.now(), tracks: compactTracks };
   const names = Object.keys(all);
   if (names.length > CATALOG_CACHE_MAX) {
     names
@@ -315,7 +324,7 @@ export async function getArtistCatalog(artistName) {
     return persisted;
   }
 
-  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=60&term=${encodeURIComponent(artistName)}`;
+  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=50&term=${encodeURIComponent(artistName)}`;
   const data = await fetchItunesData(url);
 
   let uniqueTracks = [];
@@ -363,30 +372,22 @@ export function pickFreshSongFromCachedPool(candidatePool) {
   return chosenArtistSongs[Math.floor(Math.random() * chosenArtistSongs.length)];
 }
 
-// טוען ברקע קטלוגים לכל 3 שכבות הקושי + אמן רענן נוסף לרמה הנוכחית, כדי שגם מעבר ידני בין שלבים יהיה מיידי
+// חימום רקע עדין (אמן אחד בלבד בכל פעם עם מרווח מינימלי כדי לעולם לא להיחסם ע"י מגבלת הקצב של iTunes)
 let warmingInProgress = false;
-export async function warmCatalogCache(extraCurrentCount = 1) {
-  if (warmingInProgress) return;
+let lastWarmAt = 0;
+
+export async function warmCatalogCache() {
+  const now = Date.now();
+  if (warmingInProgress || now - lastWarmAt < 4500) return;
   warmingInProgress = true;
+  lastWarmAt = now;
   try {
     const isAllGenres = state.selectedGenres.has("all") || state.selectedGenres.size === 0;
     const isAllDecades = state.selectedDecades.has("all") || state.selectedDecades.size === 0;
-    const toWarm = [];
-    const queuedNames = new Set();
 
-    const queueUncachedFrom = (list, needed) => {
-      const uncached = list.filter(
-        a => !(state.artistCatalogCache[a.name]?.length > 0) && !queuedNames.has(a.name)
-      );
-      for (let i = 0; i < needed && uncached.length > 0; i++) {
-        const idx = Math.floor(Math.random() * uncached.length);
-        const [picked] = uncached.splice(idx, 1);
-        queuedNames.add(picked.name);
-        toWarm.push(picked);
-      }
-    };
+    let targetArtist = null;
 
-    // 1. מוודא שלכל אחת מ-3 השכבות (קל/בינוני/קשה/קשה מאוד/בלתי אפשרי) יש לפחות 2 אמנים מוכנים במטמון
+    // 1. מחפש קודם שכבת קושי שעדיין יש בה פחות מ-2 אמנים במטמון
     for (const tier of ["superstars", "established", "indie_deep"]) {
       const tierArtists = ARTISTS_DB.filter(artist => {
         if (artist.tier !== tier) return false;
@@ -396,21 +397,26 @@ export async function warmCatalogCache(extraCurrentCount = 1) {
       });
       const cachedCount = tierArtists.filter(a => state.artistCatalogCache[a.name]?.length > 0).length;
       if (cachedCount < 2) {
-        queueUncachedFrom(tierArtists, 2 - cachedCount);
+        const uncached = tierArtists.filter(a => !(state.artistCatalogCache[a.name]?.length > 0));
+        if (uncached.length > 0) {
+          targetArtist = uncached[Math.floor(Math.random() * uncached.length)];
+          break;
+        }
       }
     }
 
-    // 2. בנוסף, טוען אמן רענן אחד לרמה הנוכחית כדי לשמור על גיוון מתמיד
-    if (extraCurrentCount > 0) {
-      queueUncachedFrom(getCandidatePool(), extraCurrentCount);
+    // 2. אם לכל השכבות כבר יש 2+ אמנים, מוסיף אמן חדש לרמה הנוכחית לגיוון
+    if (!targetArtist) {
+      const uncachedCurrent = getCandidatePool().filter(a => !(state.artistCatalogCache[a.name]?.length > 0));
+      if (uncachedCurrent.length > 0) {
+        targetArtist = uncachedCurrent[Math.floor(Math.random() * uncachedCurrent.length)];
+      }
     }
 
-    // טוען עד 3 אמנים ברקע בסבב חימום אחד (כדי לא להעמיס על הרשת)
-    for (const artist of toWarm.slice(0, 3)) {
-      try {
-        await getArtistCatalog(artist.name);
-      } catch (e) { }
+    if (targetArtist) {
+      await getArtistCatalog(targetArtist.name);
     }
+  } catch (e) {
   } finally {
     warmingInProgress = false;
   }

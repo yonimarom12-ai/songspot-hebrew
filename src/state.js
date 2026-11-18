@@ -51,6 +51,7 @@ export const state = {
   // Web Audio API & Fallback Audio
   audioCtx: null,
   audioBuffer: null,
+  rawAudioBuffer: null,
   audioDecodeFailed: false,
   activeSource: null,
   fallbackAudio,

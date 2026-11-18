@@ -57,6 +57,7 @@ export function resetUI() {
   state.usedHintInRound = false;
   state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.audioBuffer = null;
+  state.rawAudioBuffer = null;
   stopAudioVisuals(0);
   releaseMediaElement();
   resetHintButtons();
@@ -120,27 +121,50 @@ export async function fetchRandomSong() {
       if (batchArtists.length === 0) break;
 
       const allowFallback = batch >= 2;
-      const results = await Promise.allSettled(
-        batchArtists.map(async (picked) => {
-          const catalog = await getArtistCatalog(picked.name);
-          if (!catalog || catalog.length === 0) return null;
-          return pickSongFromCatalog(catalog, picked.tier, allowFallback);
-        })
-      );
+      // מחזיר מיד את השיר הראשון שמתקבל (בלי לחכות לאמן השני אם הוא איטי!)
+      const batchResult = await new Promise((resolve) => {
+        let pending = batchArtists.length;
+        let resolved = false;
+        let errMsg = "";
+        let empties = 0;
+
+        for (const picked of batchArtists) {
+          getArtistCatalog(picked.name)
+            .then((catalog) => {
+              const song = catalog && catalog.length > 0
+                ? pickSongFromCatalog(catalog, picked.tier, allowFallback)
+                : null;
+              if (song && !resolved) {
+                resolved = true;
+                resolve({ song, errMsg, empties });
+                return;
+              }
+              empties++;
+              pending--;
+              if (pending === 0 && !resolved) {
+                resolved = true;
+                resolve({ song: null, errMsg, empties });
+              }
+            })
+            .catch((err) => {
+              errMsg = err?.message || "network";
+              pending--;
+              if (pending === 0 && !resolved) {
+                resolved = true;
+                resolve({ song: null, errMsg, empties });
+              }
+            });
+        }
+      });
 
       if (roundId !== state.activeFetchRoundId) return;
 
-      for (const res of results) {
-        if (res.status === "fulfilled" && res.value) {
-          selectedSong = res.value;
-          break;
-        } else if (res.status === "fulfilled") {
-          emptyCatalogCount++;
-        } else {
-          lastErrorMsg = res.reason?.message || "network";
-        }
+      if (batchResult.song) {
+        selectedSong = batchResult.song;
+        break;
       }
-      if (selectedSong) break;
+      emptyCatalogCount += batchResult.empties;
+      if (batchResult.errMsg) lastErrorMsg = batchResult.errMsg;
     }
   }
 
@@ -183,8 +207,8 @@ export async function fetchRandomSong() {
   dom.skipBtn.disabled = false;
   updateSubmitButtonVisibility();
 
-  // מחמם ברקע את כל 3 שכבות הקושי + אמן רענן לרמה הנוכחית כדי שגם מעבר ידני בין שלבים יהיה מיידי
-  warmTimerId = setTimeout(() => warmCatalogCache(1), 1200);
+  // מחמם בעדינות אמן אחד ברקע אחרי שהמשתמש כבר בשלב (מונע עומס על מגבלת הקצב של iTunes)
+  warmTimerId = setTimeout(() => warmCatalogCache(), 3500);
 }
 
 export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0) {
