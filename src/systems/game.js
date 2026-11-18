@@ -299,8 +299,7 @@ export function endRound(won) {
 
     playRevealPreview();
   } else {
-    dom.statusLabel.textContent = "נגמרו הניסיונות";
-    dom.statusLabel.style.color = "var(--danger)";
+    dom.statusLabel.textContent = "";
     if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   }
 

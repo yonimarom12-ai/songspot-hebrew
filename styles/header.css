@@ -52,77 +52,90 @@
   }
 }
 
-/* Animated Fire Streak Badge */
+/* Animated Fire Streak Badge (Floating Bottom-Left) */
 .streak-fire-badge {
-  position: relative;
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  z-index: 90;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 38px;
+  width: 38px;
+  height: 42px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
 }
 
 .streak-fire-badge:hover {
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
 .streak-fire-svg {
-  width: 36px;
-  height: 38px;
+  width: 38px;
+  height: 42px;
   overflow: visible;
-  filter: drop-shadow(0 0 8px rgba(255, 115, 0, 0.55));
+  filter: drop-shadow(0 2px 10px rgba(255, 102, 0, 0.5));
 }
 
 .streak-fire-badge.active-streak .flame-outer {
-  animation: flamePulse 1.15s ease-in-out infinite alternate;
+  animation: flamePulse 1.25s ease-in-out infinite alternate;
+  transform-origin: 50% 85%;
+}
+
+.streak-fire-badge.active-streak .flame-mid {
+  animation: flameFlicker 0.95s ease-in-out infinite alternate-reverse;
   transform-origin: 50% 85%;
 }
 
 .streak-fire-badge.active-streak .flame-inner {
-  animation: flameFlicker 0.75s ease-in-out infinite alternate;
+  animation: flameFlicker 0.72s ease-in-out infinite alternate;
   transform-origin: 50% 85%;
 }
 
 .streak-fire-badge.zero-streak .streak-fire-svg {
-  filter: grayscale(0.75) opacity(0.65);
+  filter: grayscale(0.8) opacity(0.5);
 }
 
 @keyframes flamePulse {
   0% {
-    transform: scale(0.96) rotate(-2deg);
+    transform: scale(0.96) rotate(-1.5deg);
   }
 
   100% {
-    transform: scale(1.07) rotate(2deg);
+    transform: scale(1.06) rotate(1.5deg);
   }
 }
 
 @keyframes flameFlicker {
   0% {
-    transform: scaleY(0.92) translateY(1px);
-    opacity: 0.85;
+    transform: scaleY(0.93) translateY(1px);
+    opacity: 0.86;
   }
 
   100% {
-    transform: scaleY(1.08) translateY(-1px);
+    transform: scaleY(1.06) translateY(-1px);
     opacity: 1;
   }
 }
 
 .streak-count-text {
   position: absolute;
-  bottom: 5px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 12px;
-  font-weight: 800;
-  color: #ffffff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 2px #000;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(110, 32, 0, 0.88);
+  text-shadow: 0 1px 1px rgba(255, 240, 180, 0.45);
   pointer-events: none;
   line-height: 1;
+}
+
+.streak-fire-badge.zero-streak .streak-count-text {
+  color: rgba(255, 255, 255, 0.65);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 /* Crystal Currency Counter (No Background Pill) */
@@ -298,7 +311,8 @@
 /* Colored Difficulty Chips */
 .chips-wrapper {
   display: flex;
-  gap: 7px;
+  justify-content: space-between;
+  gap: 5px;
   overflow-x: auto;
   padding: 4px 2px 6px;
   scrollbar-width: none;
@@ -309,11 +323,13 @@
 }
 
 .chip {
+  flex: 1 1 auto;
+  text-align: center;
   border: 1px solid transparent;
-  padding: 8px 14px;
+  padding: 6px 8px;
   border-radius: 999px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;

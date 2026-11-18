@@ -279,6 +279,7 @@ export function stopAudioVisuals(finalPct = null) {
   }
 
   dom.playIcon.innerHTML = PLAY_SVG;
+  if (dom.playBtn) dom.playBtn.classList.remove("is-playing");
   dom.equalizer.classList.remove("playing");
   dom.discWrapper.classList.remove("spinning");
 }
@@ -286,6 +287,7 @@ export function stopAudioVisuals(finalPct = null) {
 function setPlayingVisuals() {
   state.isPlayingSnippet = true;
   dom.playIcon.innerHTML = PAUSE_SVG;
+  if (dom.playBtn) dom.playBtn.classList.add("is-playing");
   dom.equalizer.classList.add("playing");
   dom.discWrapper.classList.add("spinning");
 }

@@ -13,63 +13,7 @@
 }
 
 .disc-wrapper {
-  width: 148px;
-  height: 148px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #282828 0%, #111 60%, #050505 100%);
-  border: 4px solid #222;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  margin-bottom: 18px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
-  overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.disc-wrapper.revealed {
-  border-radius: 12px;
-  border-color: transparent;
-  transform: scale(1.04);
-}
-
-.disc-wrapper.spinning {
-  animation: spin 6s linear infinite;
-}
-
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.disc-center-hole {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--bg-pure);
-  border: 3px solid #333;
-  z-index: 2;
-  transition: opacity 0.3s;
-}
-
-.disc-wrapper.revealed .disc-center-hole {
-  opacity: 0;
-}
-
-.cover-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.disc-wrapper.revealed .cover-img {
-  opacity: 1;
+  display: none !important;
 }
 
 /* Equalizer Wave Animation */
@@ -279,13 +223,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
+  padding: 6px 0 4px;
 }
 
 .play-fab {
-  width: 64px;
-  height: 64px;
+  position: relative;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   background: var(--level-color);
   border: none;
@@ -293,8 +239,63 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px var(--level-glow);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease, box-shadow 0.25s ease;
+  z-index: 1;
+  box-shadow: 0 10px 30px var(--level-glow);
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease, box-shadow 0.25s ease, filter 0.2s ease;
+}
+
+.play-fab::before,
+.play-fab::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--level-color);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.play-fab:not(:disabled):not(.is-playing)::before {
+  animation: playReadyBreath 2.4s ease-in-out infinite;
+}
+
+.play-fab.is-playing {
+  transform: scale(1.04);
+  box-shadow: 0 12px 36px var(--level-glow);
+}
+
+.play-fab.is-playing::before {
+  animation: playSonicRipple 1.35s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.play-fab.is-playing::after {
+  animation: playSonicRipple 1.35s cubic-bezier(0.16, 1, 0.3, 1) infinite 0.65s;
+}
+
+@keyframes playReadyBreath {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.14);
+    opacity: 0.32;
+  }
+}
+
+@keyframes playSonicRipple {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
 }
 
 .play-fab:hover:not(:disabled) {
@@ -303,7 +304,7 @@
 }
 
 .play-fab:active:not(:disabled) {
-  transform: scale(0.94);
+  transform: scale(0.93);
 }
 
 .play-fab:disabled {
@@ -314,10 +315,15 @@
 }
 
 .play-fab svg {
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   fill: #000000;
   margin-right: -2px;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.play-fab.is-playing svg {
+  margin-right: 0;
 }
 
 /* 15s Hints Panel */
