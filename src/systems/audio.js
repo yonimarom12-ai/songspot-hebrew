@@ -8,6 +8,13 @@ let pendingDecode = null;   // { roundId, promise }
 let playToken = 0;
 let audioUnlocked = false;
 
+// מצב השמעה חי — מאפשר הארכת ההשמעה ברצף כשלוחצים "דלג" תוך כדי ניגון
+let activeGainNode = null;
+let snippetStartPerf = null;
+let snippetStartCtxTime = null;
+let activeDurationSec = 0;
+let activeTargetPct = 0;
+
 export function setBeforePlaySnippetHook(fn) {
   beforePlaySnippetHook = fn;
 }
@@ -226,28 +233,33 @@ export function updateTimelineMarkerForStage(stageIdx) {
   }
 }
 
-export function startProgressLoop(durationSec) {
+export function startProgressLoop(durationSec, resetStart = true) {
   cancelAnimationFrame(state.rafProgressId);
-  const startStamp = performance.now();
+  activeDurationSec = durationSec;
+  if (resetStart || snippetStartPerf === null) {
+    snippetStartPerf = performance.now();
+    if (dom.playbackFill) dom.playbackFill.style.width = "0%";
+  }
 
   function tick(now) {
     if (!state.isPlayingSnippet) return;
-    const elapsedSec = (now - startStamp) / 1000;
+    const elapsedSec = (now - snippetStartPerf) / 1000;
     if (dom.playbackFill) {
-      dom.playbackFill.style.width = `${elapsedSecondsToBarPercent(Math.min(elapsedSec, durationSec))}%`;
+      dom.playbackFill.style.width = `${elapsedSecondsToBarPercent(Math.min(elapsedSec, activeDurationSec))}%`;
     }
-    if (elapsedSec < durationSec) {
+    if (elapsedSec < activeDurationSec) {
       state.rafProgressId = requestAnimationFrame(tick);
     }
   }
 
-  if (dom.playbackFill) dom.playbackFill.style.width = "0%";
   state.rafProgressId = requestAnimationFrame(tick);
 }
 
 export function stopAudioVisuals(finalPct = null) {
   playToken++;
   state.isPlayingSnippet = false;
+  snippetStartPerf = null;
+  snippetStartCtxTime = null;
   clearTimeout(state.uiTimer);
   clearTimeout(state.playStartGuardTimer);
   state.playStartGuardTimer = null;
@@ -268,6 +280,11 @@ export function stopAudioVisuals(finalPct = null) {
     try { state.activeSource.stop(); } catch (e) { }
     try { state.activeSource.disconnect(); } catch (e) { }
     state.activeSource = null;
+  }
+
+  if (activeGainNode) {
+    try { activeGainNode.disconnect(); } catch (e) { }
+    activeGainNode = null;
   }
 
   try {
@@ -292,26 +309,75 @@ function setPlayingVisuals() {
   dom.discWrapper.classList.add("spinning");
 }
 
-// ניגון מדויק דרך Web Audio: מתחיל בדיוק ב-START_OFFSET ונעצר בדיוק אחרי duration שניות
+// מאריך את ההשמעה הפעילה לשלב הבא בלי לאפס או לעצור את השיר המתנגן
+export function extendActivePlaybackToStage(stageIdx) {
+  if (!state.isPlayingSnippet) return false;
+  const idx = Math.min(stageIdx, DURATIONS.length - 1);
+  const newDuration = DURATIONS[idx];
+  const newTargetPct = STAGE_STOPS_PCT[idx];
+  activeDurationSec = newDuration;
+  activeTargetPct = newTargetPct;
+
+  // אם השיר מתנגן דרך Web Audio — מעדכנים את מועד ההשתקה והסיום לזמן החדש
+  if (state.activeSource && state.audioCtx && snippetStartCtxTime !== null) {
+    const ctx = state.audioCtx;
+    const elapsedCtx = Math.max(0, ctx.currentTime - snippetStartCtxTime);
+    const remainingSec = Math.max(0.02, newDuration - elapsedCtx);
+
+    if (activeGainNode) {
+      try {
+        activeGainNode.gain.cancelScheduledValues(ctx.currentTime);
+        activeGainNode.gain.setValueAtTime(1, ctx.currentTime);
+        activeGainNode.gain.setValueAtTime(0, snippetStartCtxTime + newDuration);
+      } catch (e) { }
+    }
+
+    clearTimeout(state.uiTimer);
+    state.uiTimer = setTimeout(() => {
+      stopAudioVisuals(activeTargetPct);
+    }, remainingSec * 1000 + 15);
+  }
+
+  // ממשיך את לולאת בר ההתקדמות מאותה נקודה אל היעד החדש
+  if (snippetStartPerf !== null) {
+    startProgressLoop(newDuration, false);
+  }
+  return true;
+}
+
+// ניגון מדויק דרך Web Audio: מאפשר גם הארכה חיה תוך כדי ניגון כשלוחצים "דלג"
 function startBufferSnippet(ctx, buffer, duration, targetPct) {
   const source = ctx.createBufferSource();
   source.buffer = buffer;
-  source.connect(ctx.destination);
+
+  const gainNode = ctx.createGain();
+  source.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
   state.activeSource = source;
+  activeGainNode = gainNode;
+  activeDurationSec = duration;
+  activeTargetPct = targetPct;
 
   const when = ctx.currentTime + 0.005;
-  source.start(when, START_OFFSET, duration);
-  startProgressLoop(duration);
+  snippetStartCtxTime = when;
+  gainNode.gain.setValueAtTime(1, when);
+  gainNode.gain.setValueAtTime(0, when + duration);
+
+  source.start(when, START_OFFSET);
+  startProgressLoop(duration, true);
 
   state.uiTimer = setTimeout(() => {
-    stopAudioVisuals(targetPct);
-  }, duration * 1000 + 10);
+    stopAudioVisuals(activeTargetPct);
+  }, duration * 1000 + 15);
 }
 
 // גיבוי בלבד: ניגון דרך <audio> (רק אם הורדה/פענוח של Web Audio נכשלו)
 function playViaMediaElement(duration, targetPct) {
   const audio = state.fallbackAudio;
   const url = state.currentSong.previewUrl;
+  activeDurationSec = duration;
+  activeTargetPct = targetPct;
 
   if (audio.getAttribute("src") !== url || audio.error) {
     audio.src = url;
@@ -340,14 +406,14 @@ function playViaMediaElement(duration, targetPct) {
           lastCt = ct;
         } else if (!audio.seeking && ct > lastCt + 0.002) {
           realStartStamp = now;
-          startProgressLoop(duration);
+          startProgressLoop(activeDurationSec, true);
         }
         state.uiTimer = requestAnimationFrame(watch);
         return;
       }
 
-      if (now - realStartStamp >= duration * 1000) {
-        stopAudioVisuals(targetPct);
+      if (now - realStartStamp >= activeDurationSec * 1000) {
+        stopAudioVisuals(activeTargetPct);
         releaseMediaElement();
       } else {
         state.uiTimer = requestAnimationFrame(watch);

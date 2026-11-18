@@ -16,6 +16,7 @@ import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
   stopAudioVisuals,
+  extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
 } from "./audio.js";
@@ -329,7 +330,7 @@ export function endRound(won) {
 }
 
 export function advanceAttempt() {
-  stopAudioVisuals();
+  const wasPlaying = state.isPlayingSnippet;
   closeSuggestionsDropdown();
   dom.segments[state.currentAttempt].classList.remove("active");
   dom.segments[state.currentAttempt].classList.add("wrong");
@@ -345,6 +346,11 @@ export function advanceAttempt() {
     updateTimelineMarkerForStage(state.currentAttempt);
     updateSkipButtonLabel();
     updateHintsPanelVisibility();
+
+    // אם השיר התנגן בזמן הלחיצה על "דלג" — ממשיכים להשמיע ברצף עד סוף השלב החדש בלי לאפס
+    if (wasPlaying) {
+      extendActivePlaybackToStage(state.currentAttempt);
+    }
   } else {
     endRound(false);
   }
