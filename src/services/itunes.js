@@ -2,6 +2,7 @@ import { ARTISTS_DB } from "../data/artists.js";
 import { DIFFICULTIES } from "../data/config.js";
 import { state } from "../state.js";
 import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js";
+import { safeStorageGet, safeStorageSet } from "./storage.js";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -60,45 +61,109 @@ async function fetchViaCorsProxy(url, timeoutMs = 7500) {
   return await fetchJsonWithTimeout(proxyUrl, timeoutMs);
 }
 
-// זוכר איזה ערוץ תקשורת עבד בסשן הנוכחי (fetch / jsonp / proxy) כדי למנוע עיכובים חוזרים ב-iOS Safari
-let preferredTransport = null;
+const TRANSPORT_KEY = "songspot_itunes_transport_v1";
+const TRANSPORTS = {
+  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 3000)),
+  jsonp: (url, t) => fetchItunesJsonp(url, t),
+  proxy: (url, t) => fetchViaCorsProxy(url, t)
+};
+
+// זוכר (גם בין ביקורים) איזה ערוץ עבד במכשיר הזה — כדי שהאייפון לא יבזבז זמן על ערוצים חסומים
+let preferredTransport = safeStorageGet(TRANSPORT_KEY);
+if (!TRANSPORTS[preferredTransport]) preferredTransport = null;
+
+function rememberTransport(name) {
+  if (preferredTransport !== name) {
+    preferredTransport = name;
+    safeStorageSet(TRANSPORT_KEY, name);
+  }
+}
+
+function isValidPayload(data) {
+  return data && Array.isArray(data.results);
+}
+
+// מריץ כמה ערוצים במקביל ומחזיר את הראשון שהצליח
+function firstSuccessful(names, url, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let pending = names.length;
+    let lastErr = null;
+    if (pending === 0) return reject(new Error("no transports"));
+    for (const name of names) {
+      TRANSPORTS[name](url, timeoutMs)
+        .then(data => {
+          if (isValidPayload(data)) {
+            rememberTransport(name);
+            resolve(data);
+          } else {
+            throw new Error("bad payload");
+          }
+        })
+        .catch(err => {
+          lastErr = err;
+          pending--;
+          if (pending === 0) reject(lastErr);
+        });
+    }
+  });
+}
 
 export async function fetchItunesData(url, timeoutMs = 7500) {
-  const attempts = [];
-  if (preferredTransport === "jsonp") {
-    attempts.push(
-      { name: "jsonp", fn: () => fetchItunesJsonp(url, timeoutMs) },
-      { name: "proxy", fn: () => fetchViaCorsProxy(url, timeoutMs) },
-      { name: "fetch", fn: () => fetchJsonWithTimeout(url, Math.min(timeoutMs, 3500)) }
-    );
-  } else if (preferredTransport === "proxy") {
-    attempts.push(
-      { name: "proxy", fn: () => fetchViaCorsProxy(url, timeoutMs) },
-      { name: "jsonp", fn: () => fetchItunesJsonp(url, timeoutMs) },
-      { name: "fetch", fn: () => fetchJsonWithTimeout(url, Math.min(timeoutMs, 3500)) }
-    );
-  } else {
-    attempts.push(
-      { name: "fetch", fn: () => fetchJsonWithTimeout(url, Math.min(timeoutMs, 3500)) },
-      { name: "jsonp", fn: () => fetchItunesJsonp(url, Math.min(timeoutMs, 6000)) },
-      { name: "proxy", fn: () => fetchViaCorsProxy(url, timeoutMs) }
-    );
-  }
-
-  let lastErr = null;
-  for (const step of attempts) {
+  // 1. ערוץ שכבר הוכח כעובד במכשיר הזה
+  if (preferredTransport) {
     try {
-      const data = await step.fn();
-      if (data && Array.isArray(data.results)) {
-        preferredTransport = step.name;
-        return data;
-      }
-    } catch (err) {
-      lastErr = err;
-    }
+      const data = await TRANSPORTS[preferredTransport](url, timeoutMs);
+      if (isValidPayload(data)) return data;
+    } catch (e) { }
+    const others = Object.keys(TRANSPORTS).filter(n => n !== preferredTransport);
+    return await firstSuccessful(others, url, timeoutMs);
   }
 
-  throw lastErr || new Error("All iTunes transports failed");
+  // 2. ביקור ראשון: fetch רגיל, ואם נכשל — JSONP ו-Proxy במקביל (הראשון שעונה מנצח)
+  try {
+    const data = await TRANSPORTS.fetch(url, timeoutMs);
+    if (isValidPayload(data)) {
+      rememberTransport("fetch");
+      return data;
+    }
+  } catch (e) { }
+  return await firstSuccessful(["jsonp", "proxy"], url, timeoutMs);
+}
+
+// ===== מטמון קטלוגים מקומי (מאיץ טעינה בביקורים חוזרים) =====
+const CATALOG_CACHE_KEY = "songspot_catalog_cache_v1";
+const CATALOG_CACHE_MAX = 30;
+const CATALOG_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+
+function loadPersistedCatalogs() {
+  try {
+    const parsed = JSON.parse(safeStorageGet(CATALOG_CACHE_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function getPersistedCatalog(artistName) {
+  const all = loadPersistedCatalogs();
+  const entry = all[artistName];
+  if (!entry || !Array.isArray(entry.tracks) || Date.now() - (entry.ts || 0) > CATALOG_CACHE_TTL_MS) {
+    return null;
+  }
+  return entry.tracks;
+}
+
+function persistCatalog(artistName, tracks) {
+  const all = loadPersistedCatalogs();
+  all[artistName] = { ts: Date.now(), tracks };
+  const names = Object.keys(all);
+  if (names.length > CATALOG_CACHE_MAX) {
+    names
+      .sort((a, b) => (all[a].ts || 0) - (all[b].ts || 0))
+      .slice(0, names.length - CATALOG_CACHE_MAX)
+      .forEach(n => delete all[n]);
+  }
+  safeStorageSet(CATALOG_CACHE_KEY, JSON.stringify(all));
 }
 
 // מוודא ששם השיר הוא אכן בעברית (מונע דליפה של שירים באנגלית או בשפות זרות אחרות)
@@ -225,6 +290,16 @@ export async function getArtistCatalog(artistName) {
     return state.artistCatalogCache[artistName];
   }
 
+  // מטמון מקומי מביקור קודם — טעינה מיידית בלי רשת
+  const persisted = getPersistedCatalog(artistName);
+  if (persisted && persisted.length > 0) {
+    state.artistCatalogCache[artistName] = persisted;
+    for (const s of persisted) {
+      state.discoveredSongsMap.set(`${normalizeHebrew(s.title)}_${normalizeHebrew(artistName)}`, s);
+    }
+    return persisted;
+  }
+
   const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=60&term=${encodeURIComponent(artistName)}`;
   const data = await fetchItunesData(url);
 
@@ -239,8 +314,28 @@ export async function getArtistCatalog(artistName) {
 
   if (uniqueTracks.length > 0) {
     state.artistCatalogCache[artistName] = uniqueTracks;
+    persistCatalog(artistName, uniqueTracks);
   }
   return uniqueTracks;
+}
+
+// טוען ברקע קטלוגים של כמה אמנים מתאימים כדי שהסיבוב הבא יהיה מיידי
+let warmingInProgress = false;
+export async function warmCatalogCache(count = 2) {
+  if (warmingInProgress) return;
+  warmingInProgress = true;
+  try {
+    const pool = getCandidatePool().filter(a => !(state.artistCatalogCache[a.name]?.length > 0));
+    for (let i = 0; i < count && pool.length > 0; i++) {
+      const idx = Math.floor(Math.random() * pool.length);
+      const [artist] = pool.splice(idx, 1);
+      try {
+        await getArtistCatalog(artist.name);
+      } catch (e) { }
+    }
+  } finally {
+    warmingInProgress = false;
+  }
 }
 
 export function pickSongFromCatalog(catalog, chosenTierName, allowFallbackIfEmptyDecade = false) {

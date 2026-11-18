@@ -8,12 +8,15 @@ import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
   pickSongFromCatalog,
-  getCandidatePool
+  getCandidatePool,
+  warmCatalogCache
 } from "../services/itunes.js";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
-  stopAudioVisuals
+  stopAudioVisuals,
+  releaseMediaElement,
+  playRevealPreview
 } from "./audio.js";
 import { launchWinConfetti } from "./confetti.js";
 import {
@@ -54,6 +57,7 @@ export function resetUI() {
   state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.audioBuffer = null;
   stopAudioVisuals(0);
+  releaseMediaElement();
   resetHintButtons();
 
   dom.discWrapper.classList.remove("revealed");
@@ -147,10 +151,9 @@ export async function fetchRandomSong() {
   prepareEasySearchMaskForRound();
 
   dom.songCover.src = state.currentSong.artwork;
-  state.fallbackAudio.src = state.currentSong.previewUrl;
-  try {
-    state.fallbackAudio.load();
-  } catch (e) { }
+
+  // מתחילים לטעון ולפענח את השמע מיד — עוד לפני שהשחקן לוחץ Play
+  preloadAudioBufferInBackground(state.currentSong.previewUrl, roundId);
 
   dom.statusLabel.textContent = "מוכן! לחץ על ניגון";
   dom.playBtn.disabled = false;
@@ -158,7 +161,8 @@ export async function fetchRandomSong() {
   dom.skipBtn.disabled = false;
   updateSubmitButtonVisibility();
 
-  preloadAudioBufferInBackground(state.currentSong.previewUrl, roundId);
+  // מחמם את המטמון בשקט עם אמנים נוספים כדי שהשיר הבא ייטען מהר
+  setTimeout(() => warmCatalogCache(2), 2500);
 }
 
 export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0) {
@@ -247,15 +251,7 @@ export function endRound(won) {
       dom.pointsEarnedNotice.style.display = "inline-flex";
     }
 
-    try {
-      state.fallbackAudio.currentTime = 0;
-      const winPlay = state.fallbackAudio.play();
-      if (winPlay && typeof winPlay.then === "function") {
-        winPlay.then(() => dom.equalizer.classList.add("playing")).catch(() => { });
-      } else {
-        dom.equalizer.classList.add("playing");
-      }
-    } catch (e) { }
+    playRevealPreview();
   } else {
     dom.statusLabel.textContent = "נגמרו הניסיונות";
     dom.statusLabel.style.color = "var(--danger)";

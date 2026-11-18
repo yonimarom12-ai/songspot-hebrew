@@ -1,6 +1,6 @@
 import { dom } from "./dom.js";
 import { initStorageState } from "./services/storage.js";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture } from "./systems/audio.js";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js";
 import { initHintListeners } from "./systems/feedback.js";
 import { initSearchListeners } from "./systems/search.js";
 import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js";
@@ -21,6 +21,7 @@ function bootApp() {
 
   // Unlock mobile Web Audio on first touch/tap
   unlockAudioOnFirstGesture();
+  installMediaSessionGuards();
 
   // Prevent main snippet audio and gallery preview audio from overlapping
   setBeforePlaySnippetHook(stopGalleryPreview);
