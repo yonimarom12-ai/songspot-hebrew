@@ -2,22 +2,31 @@
 .interaction-area {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   position: relative;
+}
+
+.search-skip-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
 }
 
 .search-box {
   position: relative;
-  width: 100%;
+  flex: 0 0 calc(70% - 4px);
+  max-width: calc(70% - 4px);
+  min-width: 0;
 }
 
 .search-icon {
   position: absolute;
-  right: 16px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   fill: var(--text-sub);
   pointer-events: none;
   transition: fill 0.25s ease;
@@ -25,10 +34,11 @@
 
 .search-input {
   width: 100%;
+  height: 44px;
   background: var(--surface-elevated);
   border: 1.5px solid transparent;
   border-radius: 999px;
-  padding: 14px 44px 14px 18px;
+  padding: 10px 40px 10px 14px;
   color: var(--text-main);
   font-family: inherit;
   font-size: 16px;
@@ -127,10 +137,11 @@
 }
 
 .btn-primary {
-  flex: 2;
+  width: 100%;
   background: var(--spotify-green);
   color: #000000;
   display: none;
+  padding: 12px 18px;
 }
 
 .btn-primary.visible {
@@ -143,7 +154,15 @@
 }
 
 .btn-secondary {
-  flex: 1;
+  flex: 0 0 calc(30% - 4px);
+  max-width: calc(30% - 4px);
+  height: 44px;
+  padding: 0 8px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   color: var(--text-main);
   border: 1px solid #535353;
