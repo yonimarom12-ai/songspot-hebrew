@@ -8,6 +8,7 @@ import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
   pickSongFromCatalog,
+  pickFreshSongFromCachedPool,
   getCandidatePool,
   warmCatalogCache
 } from "../services/itunes.js";
@@ -87,38 +88,59 @@ export function resetUI() {
   });
 }
 
+let warmTimerId = null;
+
 export async function fetchRandomSong() {
   const roundId = ++state.activeFetchRoundId;
+  clearTimeout(warmTimerId);
   resetUI();
   dom.statusLabel.textContent = "שולף שיר חדש מהקטלוג...";
   dom.retryBtn.style.display = "none";
 
-  let selectedSong = null;
   const candidatePool = getCandidatePool();
-  const triedArtists = new Set();
+  let selectedSong = pickFreshSongFromCachedPool(candidatePool);
   let lastErrorMsg = "";
   let emptyCatalogCount = 0;
 
-  for (let attempt = 0; attempt < 7; attempt++) {
-    if (roundId !== state.activeFetchRoundId || candidatePool.length === 0) break;
+  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — שולפים 2 אמנים במקביל בכל סבב (פי 2 מהר יותר)
+  if (!selectedSong) {
+    const triedArtists = new Set();
 
-    const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
-    const pickFrom = remaining.length > 0 ? remaining : candidatePool;
-    const picked = pickFrom[Math.floor(Math.random() * pickFrom.length)];
-    triedArtists.add(picked.name);
+    for (let batch = 0; batch < 4; batch++) {
+      if (roundId !== state.activeFetchRoundId || candidatePool.length === 0) break;
 
-    try {
-      const catalog = await getArtistCatalog(picked.name);
+      const batchArtists = [];
+      for (let k = 0; k < 2; k++) {
+        const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
+        if (remaining.length === 0) break;
+        const picked = remaining[Math.floor(Math.random() * remaining.length)];
+        triedArtists.add(picked.name);
+        batchArtists.push(picked);
+      }
+      if (batchArtists.length === 0) break;
+
+      const allowFallback = batch >= 2;
+      const results = await Promise.allSettled(
+        batchArtists.map(async (picked) => {
+          const catalog = await getArtistCatalog(picked.name);
+          if (!catalog || catalog.length === 0) return null;
+          return pickSongFromCatalog(catalog, picked.tier, allowFallback);
+        })
+      );
+
       if (roundId !== state.activeFetchRoundId) return;
 
-      if (catalog && catalog.length > 0) {
-        selectedSong = pickSongFromCatalog(catalog, picked.tier, attempt >= 4);
-        if (selectedSong) break;
-      } else {
-        emptyCatalogCount++;
+      for (const res of results) {
+        if (res.status === "fulfilled" && res.value) {
+          selectedSong = res.value;
+          break;
+        } else if (res.status === "fulfilled") {
+          emptyCatalogCount++;
+        } else {
+          lastErrorMsg = res.reason?.message || "network";
+        }
       }
-    } catch (err) {
-      lastErrorMsg = err?.message || "network";
+      if (selectedSong) break;
     }
   }
 
@@ -161,8 +183,8 @@ export async function fetchRandomSong() {
   dom.skipBtn.disabled = false;
   updateSubmitButtonVisibility();
 
-  // מחמם את המטמון בשקט עם אמנים נוספים כדי שהשיר הבא ייטען מהר
-  setTimeout(() => warmCatalogCache(2), 2500);
+  // מחמם ברקע את כל 3 שכבות הקושי + אמן רענן לרמה הנוכחית כדי שגם מעבר ידני בין שלבים יהיה מיידי
+  warmTimerId = setTimeout(() => warmCatalogCache(1), 1200);
 }
 
 export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0) {

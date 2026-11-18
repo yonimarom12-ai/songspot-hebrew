@@ -1,5 +1,6 @@
 import { dom } from "./dom.js";
 import { initStorageState } from "./services/storage.js";
+import { hydratePersistedCatalogs } from "./services/itunes.js";
 import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js";
 import { initHintListeners } from "./systems/feedback.js";
 import { initSearchListeners } from "./systems/search.js";
@@ -16,8 +17,9 @@ import {
 } from "./systems/game.js";
 
 function bootApp() {
-  // Hydrate persisted user, stats, and played track IDs safely
+  // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
   initStorageState();
+  hydratePersistedCatalogs();
 
   // Unlock mobile Web Audio on first touch/tap
   unlockAudioOnFirstGesture();

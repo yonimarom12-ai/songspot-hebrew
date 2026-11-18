@@ -132,7 +132,7 @@ export async function fetchItunesData(url, timeoutMs = 7500) {
 
 // ===== מטמון קטלוגים מקומי (מאיץ טעינה בביקורים חוזרים) =====
 const CATALOG_CACHE_KEY = "songspot_catalog_cache_v1";
-const CATALOG_CACHE_MAX = 30;
+const CATALOG_CACHE_MAX = 45;
 const CATALOG_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 
 function loadPersistedCatalogs() {
@@ -141,6 +141,21 @@ function loadPersistedCatalogs() {
     return parsed && typeof parsed === "object" ? parsed : {};
   } catch (e) {
     return {};
+  }
+}
+
+export function hydratePersistedCatalogs() {
+  const all = loadPersistedCatalogs();
+  const now = Date.now();
+  for (const [artistName, entry] of Object.entries(all)) {
+    if (!entry || !Array.isArray(entry.tracks) || entry.tracks.length === 0) continue;
+    if (now - (entry.ts || 0) > CATALOG_CACHE_TTL_MS) continue;
+    if (!state.artistCatalogCache[artistName]?.length) {
+      state.artistCatalogCache[artistName] = entry.tracks;
+    }
+    for (const s of entry.tracks) {
+      state.discoveredSongsMap.set(`${normalizeHebrew(s.title)}_${normalizeHebrew(artistName)}`, s);
+    }
   }
 }
 
@@ -319,16 +334,79 @@ export async function getArtistCatalog(artistName) {
   return uniqueTracks;
 }
 
-// טוען ברקע קטלוגים של כמה אמנים מתאימים כדי שהסיבוב הבא יהיה מיידי
+// בוחר מיד שיר רענן (שעוד לא הושמע) מתוך אמנים שכבר טעונים במטמון עבור רמת הקושי הנוכחית
+export function pickFreshSongFromCachedPool(candidatePool) {
+  const diffObj = DIFFICULTIES[state.currentDifficulty];
+  const cachedOptions = [];
+
+  for (const artist of candidatePool) {
+    const catalog = state.artistCatalogCache[artist.name];
+    if (!catalog || catalog.length === 0) continue;
+
+    const decadeFiltered = catalog.filter(s => doesYearMatchSelectedDecades(s.releaseYear));
+    if (decadeFiltered.length === 0) continue;
+
+    const range = diffObj.tiers[artist.tier] || [0, 8];
+    const startIdx = Math.min(range[0], Math.max(0, decadeFiltered.length - 1));
+    const endIdx = Math.min(range[1], decadeFiltered.length);
+    let slice = decadeFiltered.slice(startIdx, endIdx);
+    if (slice.length === 0) slice = decadeFiltered;
+
+    const unplayed = slice.filter(s => !state.playedTrackIds.has(s.trackId));
+    if (unplayed.length > 0) {
+      cachedOptions.push(unplayed);
+    }
+  }
+
+  if (cachedOptions.length === 0) return null;
+  const chosenArtistSongs = cachedOptions[Math.floor(Math.random() * cachedOptions.length)];
+  return chosenArtistSongs[Math.floor(Math.random() * chosenArtistSongs.length)];
+}
+
+// טוען ברקע קטלוגים לכל 3 שכבות הקושי + אמן רענן נוסף לרמה הנוכחית, כדי שגם מעבר ידני בין שלבים יהיה מיידי
 let warmingInProgress = false;
-export async function warmCatalogCache(count = 2) {
+export async function warmCatalogCache(extraCurrentCount = 1) {
   if (warmingInProgress) return;
   warmingInProgress = true;
   try {
-    const pool = getCandidatePool().filter(a => !(state.artistCatalogCache[a.name]?.length > 0));
-    for (let i = 0; i < count && pool.length > 0; i++) {
-      const idx = Math.floor(Math.random() * pool.length);
-      const [artist] = pool.splice(idx, 1);
+    const isAllGenres = state.selectedGenres.has("all") || state.selectedGenres.size === 0;
+    const isAllDecades = state.selectedDecades.has("all") || state.selectedDecades.size === 0;
+    const toWarm = [];
+    const queuedNames = new Set();
+
+    const queueUncachedFrom = (list, needed) => {
+      const uncached = list.filter(
+        a => !(state.artistCatalogCache[a.name]?.length > 0) && !queuedNames.has(a.name)
+      );
+      for (let i = 0; i < needed && uncached.length > 0; i++) {
+        const idx = Math.floor(Math.random() * uncached.length);
+        const [picked] = uncached.splice(idx, 1);
+        queuedNames.add(picked.name);
+        toWarm.push(picked);
+      }
+    };
+
+    // 1. מוודא שלכל אחת מ-3 השכבות (קל/בינוני/קשה/קשה מאוד/בלתי אפשרי) יש לפחות 2 אמנים מוכנים במטמון
+    for (const tier of ["superstars", "established", "indie_deep"]) {
+      const tierArtists = ARTISTS_DB.filter(artist => {
+        if (artist.tier !== tier) return false;
+        const genreOk = isAllGenres || artist.genres.some(g => state.selectedGenres.has(g));
+        const decadeOk = isAllDecades || artist.decades.some(d => state.selectedDecades.has(d));
+        return genreOk && decadeOk;
+      });
+      const cachedCount = tierArtists.filter(a => state.artistCatalogCache[a.name]?.length > 0).length;
+      if (cachedCount < 2) {
+        queueUncachedFrom(tierArtists, 2 - cachedCount);
+      }
+    }
+
+    // 2. בנוסף, טוען אמן רענן אחד לרמה הנוכחית כדי לשמור על גיוון מתמיד
+    if (extraCurrentCount > 0) {
+      queueUncachedFrom(getCandidatePool(), extraCurrentCount);
+    }
+
+    // טוען עד 3 אמנים ברקע בסבב חימום אחד (כדי לא להעמיס על הרשת)
+    for (const artist of toWarm.slice(0, 3)) {
       try {
         await getArtistCatalog(artist.name);
       } catch (e) { }
