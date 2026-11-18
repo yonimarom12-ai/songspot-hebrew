@@ -56,29 +56,51 @@ async function fetchJsonWithTimeout(url, timeoutMs) {
   }
 }
 
-async function fetchViaCorsProxy(url, timeoutMs = 6000) {
+async function fetchViaCorsProxyIo(url, timeoutMs = 4500) {
+  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+  return await fetchJsonWithTimeout(proxyUrl, timeoutMs);
+}
+
+async function fetchViaCodeTabs(url, timeoutMs = 4500) {
+  const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+  return await fetchJsonWithTimeout(proxyUrl, timeoutMs);
+}
+
+async function fetchViaAllOriginsRaw(url, timeoutMs = 5500) {
   const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   return await fetchJsonWithTimeout(proxyUrl, timeoutMs);
 }
 
-// מנקה מפתח ישן שעלול היה להיתקע על "proxy" איטי
-safeStorageRemove("songspot_itunes_transport_v1");
-
-const TRANSPORT_KEY = "songspot_itunes_transport_v2";
-const TRANSPORTS = {
-  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 2500)),
-  jsonp: (url, t) => fetchItunesJsonp(url, Math.min(t, 5500)),
-  proxy: (url, t) => fetchViaCorsProxy(url, Math.min(t, 6000))
-};
-
-// שומר רק ערוצים ישירים ומהירים (fetch / jsonp) — לעולם לא שומר proxy כברירת מחדל כדי למנוע האטה קבועה
-let preferredTransport = safeStorageGet(TRANSPORT_KEY);
-if (preferredTransport !== "fetch" && preferredTransport !== "jsonp") {
-  preferredTransport = isIOS ? "jsonp" : null;
+async function fetchViaAllOriginsGet(url, timeoutMs = 5500) {
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const wrapper = await fetchJsonWithTimeout(proxyUrl, timeoutMs);
+  if (wrapper && typeof wrapper.contents === "string") {
+    return JSON.parse(wrapper.contents);
+  }
+  throw new Error("Invalid allorigins wrapper");
 }
 
-function rememberDirectTransport(name) {
-  if ((name === "fetch" || name === "jsonp") && preferredTransport !== name) {
+// ניקוי מפתחות ישנים
+safeStorageRemove("songspot_itunes_transport_v1");
+safeStorageRemove("songspot_itunes_transport_v2");
+
+const TRANSPORT_KEY = "songspot_itunes_transport_v3";
+const TRANSPORTS = {
+  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 2500)),
+  jsonp: (url, t) => fetchItunesJsonp(url, Math.min(t, 4000)),
+  corsproxy: (url, t) => fetchViaCorsProxyIo(url, Math.min(t, 4500)),
+  codetabs: (url, t) => fetchViaCodeTabs(url, Math.min(t, 4500)),
+  allorigins: (url, t) => fetchViaAllOriginsRaw(url, Math.min(t, 5500)),
+  allorigins_get: (url, t) => fetchViaAllOriginsGet(url, Math.min(t, 5500))
+};
+
+let preferredTransport = safeStorageGet(TRANSPORT_KEY);
+if (!TRANSPORTS[preferredTransport]) {
+  preferredTransport = null;
+}
+
+function rememberTransport(name) {
+  if (TRANSPORTS[name] && preferredTransport !== name) {
     preferredTransport = name;
     safeStorageSet(TRANSPORT_KEY, name);
   }
@@ -88,35 +110,64 @@ function isValidPayload(data) {
   return data && Array.isArray(data.results);
 }
 
+// מריץ כמה ערוצים במקביל ומחזיר מיד את הראשון שמחזיר תשובה תקינה (200-500ms גם ב-Safari!)
+function raceTransports(names, url, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let pending = names.length;
+    let settled = false;
+    let lastErr = null;
+    if (pending === 0) return reject(new Error("no transports"));
+
+    for (const name of names) {
+      TRANSPORTS[name](url, timeoutMs)
+        .then(data => {
+          if (isValidPayload(data)) {
+            if (!settled) {
+              settled = true;
+              rememberTransport(name);
+              resolve(data);
+            }
+          } else {
+            throw new Error("bad payload");
+          }
+        })
+        .catch(err => {
+          lastErr = err;
+          pending--;
+          if (pending === 0 && !settled) {
+            settled = true;
+            reject(lastErr || new Error("all transports failed"));
+          }
+        });
+    }
+  });
+}
+
 // מונע שליחה כפולה של אותה בקשה במקביל
 const inFlightRequests = new Map();
 
-export async function fetchItunesData(url, timeoutMs = 6000) {
+export async function fetchItunesData(url, timeoutMs = 5500) {
   if (inFlightRequests.has(url)) {
     return await inFlightRequests.get(url);
   }
 
   const reqPromise = (async () => {
-    // ב-iOS מדלגים מיד ל-JSONP ישיר מול Apple (~250ms) בלי לבזבז 3 שניות על fetch שייחסם ב-CORS
-    const order = preferredTransport === "jsonp"
-      ? ["jsonp", "fetch", "proxy"]
-      : preferredTransport === "fetch"
-        ? ["fetch", "jsonp", "proxy"]
-        : ["fetch", "jsonp", "proxy"];
-
-    let lastErr = null;
-    for (const name of order) {
+    // 1. אם כבר נמצא ערוץ מהיר שעובד במכשיר הזה — מנסים אותו ראשון עם timeout קצר
+    if (preferredTransport && TRANSPORTS[preferredTransport]) {
       try {
-        const data = await TRANSPORTS[name](url, timeoutMs);
-        if (isValidPayload(data)) {
-          rememberDirectTransport(name);
-          return data;
-        }
-      } catch (err) {
-        lastErr = err;
+        const data = await TRANSPORTS[preferredTransport](url, Math.min(timeoutMs, 3200));
+        if (isValidPayload(data)) return data;
+      } catch (e) {
+        preferredTransport = null;
       }
     }
-    throw lastErr || new Error("All iTunes transports failed");
+
+    // 2. מריץ במקביל את כל הערוצים (ישיר + JSONP + 4 שרתי Proxy מהירים) — הראשון שעונה מנצח מיד!
+    const allNames = isIOS
+      ? ["jsonp", "corsproxy", "codetabs", "allorigins", "allorigins_get", "fetch"]
+      : ["fetch", "jsonp", "corsproxy", "codetabs", "allorigins", "allorigins_get"];
+
+    return await raceTransports(allNames, url, timeoutMs);
   })();
 
   inFlightRequests.set(url, reqPromise);

@@ -52,17 +52,22 @@
   }
 }
 
-/* Animated Fire Streak Badge (Floating Bottom-Left) */
+/* Animated Fire Streak Badge (In the freed upper slot below filters) */
+.streak-top-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+
 .streak-fire-badge {
-  position: fixed;
-  bottom: 14px;
-  left: 14px;
-  z-index: 90;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 42px;
+  width: 42px;
+  height: 46px;
   cursor: pointer;
   user-select: none;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
@@ -73,8 +78,8 @@
 }
 
 .streak-fire-svg {
-  width: 38px;
-  height: 42px;
+  width: 42px;
+  height: 46px;
   overflow: visible;
   filter: drop-shadow(0 2px 10px rgba(255, 102, 0, 0.5));
 }
@@ -308,13 +313,13 @@
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
 }
 
-/* Colored Difficulty Chips */
+/* Colored Difficulty Chips (Compact height & snuggled above player card) */
 .chips-wrapper {
   display: flex;
   justify-content: space-between;
   gap: 5px;
   overflow-x: auto;
-  padding: 4px 2px 6px;
+  padding: 2px 2px 0;
   scrollbar-width: none;
 }
 
@@ -326,10 +331,11 @@
   flex: 1 1 auto;
   text-align: center;
   border: 1px solid transparent;
-  padding: 6px 8px;
+  padding: 4px 7px;
+  line-height: 1.15;
   border-radius: 999px;
   font-family: inherit;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;

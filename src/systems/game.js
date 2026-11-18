@@ -104,68 +104,31 @@ export async function fetchRandomSong() {
   let lastErrorMsg = "";
   let emptyCatalogCount = 0;
 
-  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — שולפים 2 אמנים במקביל בכל סבב (פי 2 מהר יותר)
+  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — שולפים אמן עם מנוע המירוץ הרב-ערוצי
   if (!selectedSong) {
     const triedArtists = new Set();
 
-    for (let batch = 0; batch < 4; batch++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       if (roundId !== state.activeFetchRoundId || candidatePool.length === 0) break;
 
-      const batchArtists = [];
-      for (let k = 0; k < 2; k++) {
-        const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
-        if (remaining.length === 0) break;
-        const picked = remaining[Math.floor(Math.random() * remaining.length)];
-        triedArtists.add(picked.name);
-        batchArtists.push(picked);
-      }
-      if (batchArtists.length === 0) break;
+      const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
+      if (remaining.length === 0) break;
+      const picked = remaining[Math.floor(Math.random() * remaining.length)];
+      triedArtists.add(picked.name);
 
-      const allowFallback = batch >= 2;
-      // מחזיר מיד את השיר הראשון שמתקבל (בלי לחכות לאמן השני אם הוא איטי!)
-      const batchResult = await new Promise((resolve) => {
-        let pending = batchArtists.length;
-        let resolved = false;
-        let errMsg = "";
-        let empties = 0;
+      try {
+        const catalog = await getArtistCatalog(picked.name);
+        if (roundId !== state.activeFetchRoundId) return;
 
-        for (const picked of batchArtists) {
-          getArtistCatalog(picked.name)
-            .then((catalog) => {
-              const song = catalog && catalog.length > 0
-                ? pickSongFromCatalog(catalog, picked.tier, allowFallback)
-                : null;
-              if (song && !resolved) {
-                resolved = true;
-                resolve({ song, errMsg, empties });
-                return;
-              }
-              empties++;
-              pending--;
-              if (pending === 0 && !resolved) {
-                resolved = true;
-                resolve({ song: null, errMsg, empties });
-              }
-            })
-            .catch((err) => {
-              errMsg = err?.message || "network";
-              pending--;
-              if (pending === 0 && !resolved) {
-                resolved = true;
-                resolve({ song: null, errMsg, empties });
-              }
-            });
+        if (catalog && catalog.length > 0) {
+          selectedSong = pickSongFromCatalog(catalog, picked.tier, attempt >= 3);
+          if (selectedSong) break;
+        } else {
+          emptyCatalogCount++;
         }
-      });
-
-      if (roundId !== state.activeFetchRoundId) return;
-
-      if (batchResult.song) {
-        selectedSong = batchResult.song;
-        break;
+      } catch (err) {
+        lastErrorMsg = err?.message || "network";
       }
-      emptyCatalogCount += batchResult.empties;
-      if (batchResult.errMsg) lastErrorMsg = batchResult.errMsg;
     }
   }
 

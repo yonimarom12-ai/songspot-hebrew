@@ -72,34 +72,6 @@
             <span class="points-count-text" id="points-count">0</span>
           </button>
 
-          <!-- אנימציית אש עם מספר רצף הניצחונות בתוכו (ממוקם בפינה השמאלית התחתונה) -->
-          <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
-            <svg class="streak-fire-svg" viewBox="0 0 38 44">
-              <defs>
-                <linearGradient id="fireGradOuter" x1="50%" y1="100%" x2="50%" y2="0%">
-                  <stop offset="0%" stop-color="#d91b00" />
-                  <stop offset="48%" stop-color="#ff6a00" />
-                  <stop offset="100%" stop-color="#ffbe1a" />
-                </linearGradient>
-                <linearGradient id="fireGradMid" x1="50%" y1="100%" x2="50%" y2="0%">
-                  <stop offset="0%" stop-color="#ff5e00" />
-                  <stop offset="100%" stop-color="#ffd54a" />
-                </linearGradient>
-                <linearGradient id="fireGradInner" x1="50%" y1="100%" x2="50%" y2="0%">
-                  <stop offset="0%" stop-color="#ffae00" />
-                  <stop offset="100%" stop-color="#fff4b8" />
-                </linearGradient>
-              </defs>
-              <path class="flame-outer" fill="url(#fireGradOuter)"
-                d="M19 2C19 2 31.5 11.5 31.5 24.5C31.5 33.4 25.9 40.5 19 40.5C12.1 40.5 6.5 33.4 6.5 24.5C6.5 18.6 9.6 13.1 12.6 9.8C12.2 13.1 14 15.6 15.6 16.2C14.1 11 16.2 5.6 19 2Z" />
-              <path class="flame-mid" fill="url(#fireGradMid)" opacity="0.88"
-                d="M19 9.5C19 9.5 27.2 16.8 27.2 25.5C27.2 32.1 23.6 37.5 19 37.5C14.4 37.5 10.8 32.1 10.8 25.5C10.8 20.5 14.5 15 19 9.5Z" />
-              <path class="flame-inner" fill="url(#fireGradInner)"
-                d="M19 16.5C19 16.5 24 21.2 24 27C24 31.7 21.8 35.5 19 35.5C16.2 35.5 14 31.7 14 27C14 23.5 16.4 19.8 19 16.5Z" />
-            </svg>
-            <span class="streak-count-text" id="streak-count">0</span>
-          </div>
-
           <button class="profile-btn" id="profile-btn" type="button">
             <svg viewBox="0 0 24 24">
               <path
@@ -118,6 +90,38 @@
         <div class="streams-pill" id="streams-badge">15M - 50M+ השמעות</div>
       </div>
 
+      <!-- אש הרצף במקום שהתפנה מתחת לסרגל העליון -->
+      <div class="streak-top-slot">
+        <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
+          <svg class="streak-fire-svg" viewBox="0 0 38 44">
+            <defs>
+              <linearGradient id="fireGradOuter" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" stop-color="#d91b00" />
+                <stop offset="48%" stop-color="#ff6a00" />
+                <stop offset="100%" stop-color="#ffbe1a" />
+              </linearGradient>
+              <linearGradient id="fireGradMid" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" stop-color="#ff5e00" />
+                <stop offset="100%" stop-color="#ffd54a" />
+              </linearGradient>
+              <linearGradient id="fireGradInner" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" stop-color="#ffae00" />
+                <stop offset="100%" stop-color="#fff4b8" />
+              </linearGradient>
+            </defs>
+            <path class="flame-outer" fill="url(#fireGradOuter)"
+              d="M19 2C19 2 31.5 11.5 31.5 24.5C31.5 33.4 25.9 40.5 19 40.5C12.1 40.5 6.5 33.4 6.5 24.5C6.5 18.6 9.6 13.1 12.6 9.8C12.2 13.1 14 15.6 15.6 16.2C14.1 11 16.2 5.6 19 2Z" />
+            <path class="flame-mid" fill="url(#fireGradMid)" opacity="0.88"
+              d="M19 9.5C19 9.5 27.2 16.8 27.2 25.5C27.2 32.1 23.6 37.5 19 37.5C14.4 37.5 10.8 32.1 10.8 25.5C10.8 20.5 14.5 15 19 9.5Z" />
+            <path class="flame-inner" fill="url(#fireGradInner)"
+              d="M19 16.5C19 16.5 24 21.2 24 27C24 31.7 21.8 35.5 19 35.5C16.2 35.5 14 31.7 14 27C14 23.5 16.4 19.8 19 16.5Z" />
+          </svg>
+          <span class="streak-count-text" id="streak-count">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gameplay-cluster">
       <div class="chips-wrapper" id="difficulty-bar">
         <button class="chip active" data-level="easy">קל</button>
         <button class="chip" data-level="medium">בינוני</button>
@@ -125,9 +129,8 @@
         <button class="chip" data-level="very_hard">קשה מאוד</button>
         <button class="chip" data-level="impossible">בלתי אפשרי</button>
       </div>
-    </div>
 
-    <main class="player-card" id="player-card">
+      <main class="player-card" id="player-card">
       <div class="disc-wrapper" id="disc-wrapper">
         <div class="disc-center-hole"></div>
         <img class="cover-img" id="song-cover" src="" alt="Cover" />
@@ -210,6 +213,7 @@
         <button class="btn btn-secondary" id="skip-btn" disabled>דלג (+0.5ש')</button>
       </div>
     </footer>
+    </div>
   </div>
 
   <!-- תפריט צד: הגדרות, עשורים וז'אנרים -->
