@@ -3,6 +3,11 @@ import { DIFFICULTIES } from "../data/config.js";
 import { state } from "../state.js";
 import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js";
 
+const BANNED_TRACK_WORDS = [
+  "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי",
+  "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"
+];
+
 export function fetchItunesJsonp(url, timeoutMs = 7000) {
   return new Promise((resolve, reject) => {
     const callbackName = "itunesCb_" + Math.random().toString(36).slice(2, 11);
@@ -46,16 +51,50 @@ export async function fetchItunesData(url, timeoutMs = 6500) {
   }
 }
 
-export function isValidStudioTrack(track, expectedArtist) {
+function findDominantArtistId(results, expectedArtist) {
+  const normExpected = normalizeHebrew(expectedArtist);
+  const idCounts = new Map();
+  let matchedArtistId = null;
+
+  for (let i = 0; i < Math.min(results.length, 25); i++) {
+    const t = results[i];
+    if (!t || !t.artistId || !t.artistName) continue;
+    const normTrackArtist = normalizeHebrew(t.artistName);
+    if (normTrackArtist && (normTrackArtist.includes(normExpected) || normExpected.includes(normTrackArtist))) {
+      matchedArtistId = t.artistId;
+      break;
+    }
+    idCounts.set(t.artistId, (idCounts.get(t.artistId) || 0) + 1);
+  }
+
+  if (matchedArtistId) return matchedArtistId;
+
+  let bestId = null;
+  let bestCount = 0;
+  for (const [id, count] of idCounts.entries()) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestId = id;
+    }
+  }
+  return bestCount >= 2 ? bestId : null;
+}
+
+export function isValidStudioTrack(track, expectedArtist, dominantArtistId = null, allowHebrewTitleFallback = false) {
   if (!track || !track.previewUrl || !track.trackName || !track.artistName) return false;
   const lowerTitle = track.trackName.toLowerCase();
-  const bannedWords = ["karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"];
-  if (bannedWords.some(w => lowerTitle.includes(w))) return false;
+  if (BANNED_TRACK_WORDS.some(w => lowerTitle.includes(w))) return false;
 
   const normArtist = normalizeHebrew(expectedArtist);
   const normTrackArtist = normalizeHebrew(track.artistName);
-  const hasHebrewTitle = /[\u0590-\u05FF]/.test(track.trackName);
-  return normTrackArtist.includes(normArtist) || normArtist.includes(normTrackArtist) || hasHebrewTitle;
+  const isNameMatch = normTrackArtist.includes(normArtist) || normArtist.includes(normTrackArtist);
+  const isIdMatch = Boolean(dominantArtistId && track.artistId === dominantArtistId);
+
+  if (isNameMatch || isIdMatch) return true;
+  if (allowHebrewTitleFallback) {
+    return /[\u0590-\u05FF]/.test(track.trackName);
+  }
+  return false;
 }
 
 export function doesYearMatchSelectedDecades(releaseYear) {
@@ -70,38 +109,49 @@ export function doesYearMatchSelectedDecades(releaseYear) {
   return false;
 }
 
+function extractTracksFromResults(results, artistName, dominantArtistId, allowHebrewTitleFallback) {
+  const uniqueTracks = [];
+  const seenTitles = new Set();
+
+  for (const t of results) {
+    if (!isValidStudioTrack(t, artistName, dominantArtistId, allowHebrewTitleFallback)) continue;
+    const cleanTitle = cleanTrackTitle(t.trackName);
+    const normTitle = normalizeHebrew(cleanTitle);
+    if (!normTitle || seenTitles.has(normTitle)) continue;
+
+    seenTitles.add(normTitle);
+    const releaseYear = t.releaseDate ? new Date(t.releaseDate).getFullYear() : null;
+    const songObj = {
+      trackId: t.trackId,
+      title: cleanTitle,
+      itunesTitle: t.trackName,
+      artist: artistName,
+      releaseYear: releaseYear && !isNaN(releaseYear) ? releaseYear : null,
+      previewUrl: t.previewUrl,
+      artwork: (t.artworkUrl100 || "").replace("100x100bb", "400x400bb")
+    };
+
+    uniqueTracks.push(songObj);
+    state.discoveredSongsMap.set(`${normTitle}_${normalizeHebrew(artistName)}`, songObj);
+  }
+
+  return uniqueTracks;
+}
+
 export async function getArtistCatalog(artistName) {
   if (state.artistCatalogCache[artistName]?.length > 0) {
     return state.artistCatalogCache[artistName];
   }
 
-  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=60&term=${encodeURIComponent(artistName)}`;
+  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=150&term=${encodeURIComponent(artistName)}`;
   const data = await fetchItunesData(url);
 
-  const uniqueTracks = [];
-  const seenTitles = new Set();
-
-  if (data && Array.isArray(data.results)) {
-    for (const t of data.results) {
-      if (!isValidStudioTrack(t, artistName)) continue;
-      const cleanTitle = cleanTrackTitle(t.trackName);
-      const normTitle = normalizeHebrew(cleanTitle);
-      if (!normTitle || seenTitles.has(normTitle)) continue;
-
-      seenTitles.add(normTitle);
-      const releaseYear = t.releaseDate ? new Date(t.releaseDate).getFullYear() : null;
-      const songObj = {
-        trackId: t.trackId,
-        title: cleanTitle,
-        itunesTitle: t.trackName,
-        artist: artistName,
-        releaseYear: releaseYear && !isNaN(releaseYear) ? releaseYear : null,
-        previewUrl: t.previewUrl,
-        artwork: (t.artworkUrl100 || "").replace("100x100bb", "400x400bb")
-      };
-
-      uniqueTracks.push(songObj);
-      state.discoveredSongsMap.set(`${normTitle}_${normalizeHebrew(artistName)}`, songObj);
+  let uniqueTracks = [];
+  if (data && Array.isArray(data.results) && data.results.length > 0) {
+    const dominantArtistId = findDominantArtistId(data.results, artistName);
+    uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId, false);
+    if (uniqueTracks.length === 0) {
+      uniqueTracks = extractTracksFromResults(data.results, artistName, dominantArtistId, true);
     }
   }
 
