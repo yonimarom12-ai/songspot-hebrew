@@ -136,7 +136,9 @@ export async function fetchRandomSong() {
 
   dom.songCover.src = state.currentSong.artwork;
   state.fallbackAudio.src = state.currentSong.previewUrl;
-  state.fallbackAudio.load();
+  try {
+    state.fallbackAudio.load();
+  } catch (e) { }
 
   dom.statusLabel.textContent = "מוכן! לחץ על ניגון";
   dom.playBtn.disabled = false;
@@ -235,8 +237,12 @@ export function endRound(won) {
 
     try {
       state.fallbackAudio.currentTime = 0;
-      state.fallbackAudio.play().catch(() => { });
-      dom.equalizer.classList.add("playing");
+      const winPlay = state.fallbackAudio.play();
+      if (winPlay && typeof winPlay.then === "function") {
+        winPlay.then(() => dom.equalizer.classList.add("playing")).catch(() => { });
+      } else {
+        dom.equalizer.classList.add("playing");
+      }
     } catch (e) { }
   } else {
     dom.statusLabel.textContent = "נגמרו הניסיונות";

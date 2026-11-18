@@ -39,18 +39,27 @@ export function fetchItunesJsonp(url, timeoutMs = 9000) {
   });
 }
 
-export async function fetchItunesData(url, timeoutMs = 9000) {
+let preferJsonp = false;
+
+export async function fetchItunesData(url, timeoutMs = 8500) {
+  if (preferJsonp) {
+    return await fetchItunesJsonp(url, timeoutMs);
+  }
+
   let timer = null;
   try {
     const hasAbort = typeof AbortController !== "undefined";
     const controller = hasAbort ? new AbortController() : null;
+    const fetchTimeout = Math.min(timeoutMs, 3500);
     if (controller) {
-      timer = setTimeout(() => controller.abort(), timeoutMs);
+      timer = setTimeout(() => controller.abort(), fetchTimeout);
     }
     const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
     if (!res.ok) throw new Error("HTTP " + res.status);
     return await res.json();
   } catch (err) {
+    // אם fetch נחסם ב-CORS (נפוץ ב-iOS Safari), עוברים ישירות ל-JSONP בהמשך הסשן
+    preferJsonp = true;
     return await fetchItunesJsonp(url, timeoutMs);
   } finally {
     if (timer) clearTimeout(timer);

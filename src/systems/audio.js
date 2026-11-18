@@ -1,6 +1,6 @@
 import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js";
 import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js";
-import { state } from "../state.js";
+import { state, isIOS } from "../state.js";
 
 let beforePlaySnippetHook = null;
 
@@ -9,6 +9,15 @@ export function setBeforePlaySnippetHook(fn) {
 }
 
 export function initAudioContext() {
+  try {
+    // ב-iOS 17+ מאפשר השמעת סאונד גם כשמתג ההשתקה הפיזי באייפון פעיל
+    if (typeof navigator !== "undefined" && navigator.audioSession) {
+      navigator.audioSession.type = "playback";
+    }
+  } catch (e) { }
+
+  if (isIOS) return;
+
   try {
     if (!state.audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -32,6 +41,9 @@ export function unlockAudioOnFirstGesture() {
 }
 
 export async function preloadAudioBufferInBackground(previewUrl, roundId) {
+  // ב-iOS משתמשים ב-<audio> ישיר כדי לא להיחסם ע"י מתג ההשתקה או CORS של קובץ ה-m4a
+  if (isIOS) return;
+
   let timer = null;
   try {
     if (!state.audioCtx || state.audioCtx.state !== "running") return;
@@ -144,6 +156,8 @@ export function playSnippet() {
   stopAudioVisuals();
   initAudioContext();
 
+  if (!state.currentSong || !state.currentSong.previewUrl) return;
+
   const duration = DURATIONS[state.currentAttempt];
   const targetPct = STAGE_STOPS_PCT[state.currentAttempt];
   state.isPlayingSnippet = true;
@@ -151,7 +165,7 @@ export function playSnippet() {
   dom.equalizer.classList.add("playing");
   dom.discWrapper.classList.add("spinning");
 
-  if (state.audioCtx && state.audioBuffer && state.audioCtx.state === "running") {
+  if (!isIOS && state.audioCtx && state.audioBuffer && state.audioCtx.state === "running") {
     state.activeSource = state.audioCtx.createBufferSource();
     state.activeSource.buffer = state.audioBuffer;
     state.activeSource.connect(state.audioCtx.destination);
@@ -162,67 +176,103 @@ export function playSnippet() {
     state.uiTimer = setTimeout(() => {
       stopAudioVisuals(targetPct);
     }, duration * 1000);
-  } else {
-    if (!state.audioBuffer && state.currentSong) {
-      preloadAudioBufferInBackground(state.currentSong.previewUrl, state.activeFetchRoundId);
-    }
+    return;
+  }
 
-    // במובייל (במיוחד iOS Safari) מותר להזיז currentTime רק אם המטא-דאטה כבר נטענה
-    if (state.fallbackAudio.readyState >= 1) {
-      try {
-        state.fallbackAudio.currentTime = START_OFFSET;
-      } catch (e) { }
-    }
+  if (!isIOS && !state.audioBuffer && state.currentSong) {
+    preloadAudioBufferInBackground(state.currentSong.previewUrl, state.activeFetchRoundId);
+  }
 
-    const startSnippetCountdown = () => {
-      clearTimeout(state.playStartGuardTimer);
-      state.playStartGuardTimer = null;
+  const audio = state.fallbackAudio;
 
-      if (state.fallbackAudio.currentTime < START_OFFSET - 0.05) {
-        try {
-          state.fallbackAudio.currentTime = START_OFFSET;
-        } catch (e) { }
-      }
+  // אם האלמנט ריק או נתקל בשגיאה קודמת — טען מחדש את הקישור
+  if (!audio.src || audio.error) {
+    audio.src = state.currentSong.previewUrl;
+  }
 
-      const startStamp = performance.now();
-      startProgressLoop(duration);
+  // הזזת נקודת התחלה רק כשהמטא-דאטה כבר טעונה (מונע תקיעת Seek ב-iOS Safari)
+  if (audio.readyState >= 1) {
+    try {
+      audio.currentTime = START_OFFSET;
+    } catch (e) { }
+  }
 
-      function checkFrame(now) {
-        if (!state.isPlayingSnippet) return;
-        if (now - startStamp >= duration * 1000) {
-          stopAudioVisuals(targetPct);
-        } else {
-          state.uiTimer = requestAnimationFrame(checkFrame);
+  let lastCt = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+  let realStartStamp = null;
+  let countdownStarted = false;
+
+  const beginRealPlaybackWatch = () => {
+    if (countdownStarted || !state.isPlayingSnippet) return;
+    countdownStarted = true;
+    clearTimeout(state.playStartGuardTimer);
+    state.playStartGuardTimer = null;
+
+    const watchUntilAudible = (now) => {
+      if (!state.isPlayingSnippet) return;
+      const ct = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+
+      if (realStartStamp === null) {
+        if (ct < lastCt) {
+          // קפיצה אחורה בסיום Seek לנקודת ההתחלה
+          lastCt = ct;
+        } else if (!audio.seeking && ct > lastCt + 0.002) {
+          // הסאונד באמת התחיל להתקדם ברמקול (מדלג על כל זמן הטעינה/Seek ב-iOS)
+          realStartStamp = now;
+          startProgressLoop(duration);
         }
+        state.uiTimer = requestAnimationFrame(watchUntilAudible);
+        return;
       }
-      state.uiTimer = requestAnimationFrame(checkFrame);
-    };
 
-    state.activeOnPlayingHandler = () => {
-      state.fallbackAudio.removeEventListener("playing", state.activeOnPlayingHandler);
-      state.activeOnPlayingHandler = null;
-      startSnippetCountdown();
-    };
-
-    state.activeOnErrorHandler = () => {
-      stopAudioVisuals();
-    };
-
-    state.fallbackAudio.addEventListener("playing", state.activeOnPlayingHandler);
-    state.fallbackAudio.addEventListener("error", state.activeOnErrorHandler);
-
-    // מגן מפני תקיעה אם הדפדפן במובייל חסם או נתקע בטעינת האודיו
-    state.playStartGuardTimer = setTimeout(() => {
-      if (state.isPlayingSnippet && state.activeOnPlayingHandler) {
-        stopAudioVisuals();
+      if (now - realStartStamp >= duration * 1000) {
+        stopAudioVisuals(targetPct);
+      } else {
+        state.uiTimer = requestAnimationFrame(watchUntilAudible);
       }
-    }, 8000);
+    };
 
-    const playPromise = state.fallbackAudio.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => {
-        stopAudioVisuals();
-      });
+    state.uiTimer = requestAnimationFrame(watchUntilAudible);
+  };
+
+  state.activeOnPlayingHandler = () => {
+    audio.removeEventListener("playing", state.activeOnPlayingHandler);
+    state.activeOnPlayingHandler = null;
+    beginRealPlaybackWatch();
+  };
+
+  state.activeOnErrorHandler = () => {
+    stopAudioVisuals();
+    if (dom.statusLabel) {
+      dom.statusLabel.textContent = "שגיאה בטעינת השמע — לחץ שוב על ניגון או דלג לשיר הבא";
     }
+  };
+
+  audio.addEventListener("playing", state.activeOnPlayingHandler);
+  audio.addEventListener("error", state.activeOnErrorHandler);
+
+  // מגן מפני תקיעה אם הרשת במובייל לא הגיבה תוך 10 שניות
+  state.playStartGuardTimer = setTimeout(() => {
+    if (state.isPlayingSnippet && realStartStamp === null) {
+      stopAudioVisuals();
+      if (dom.statusLabel) {
+        dom.statusLabel.textContent = "הטעינה התעכבה — לחץ שוב על ניגון";
+      }
+    }
+  }, 10000);
+
+  const playPromise = audio.play();
+  if (playPromise && typeof playPromise.then === "function") {
+    playPromise
+      .then(() => {
+        if (state.isPlayingSnippet && !countdownStarted) {
+          beginRealPlaybackWatch();
+        }
+      })
+      .catch(() => {
+        stopAudioVisuals();
+        if (dom.statusLabel) {
+          dom.statusLabel.textContent = "הדפדפן חסם את הניגון — לחץ שוב על כפתור הניגון";
+        }
+      });
   }
 }
