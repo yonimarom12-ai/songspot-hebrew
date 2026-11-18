@@ -1,0 +1,306 @@
+/* Header */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+  gap: 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  width: 30px;
+  height: 30px;
+  fill: var(--spotify-green);
+  filter: drop-shadow(0 0 10px rgba(29, 185, 84, 0.35));
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Animated Fire Streak Badge */
+.streak-fire-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 38px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.streak-fire-badge:hover {
+  transform: scale(1.08);
+}
+
+.streak-fire-svg {
+  width: 36px;
+  height: 38px;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(255, 115, 0, 0.55));
+}
+
+.streak-fire-badge.active-streak .flame-outer {
+  animation: flamePulse 1.15s ease-in-out infinite alternate;
+  transform-origin: 50% 85%;
+}
+
+.streak-fire-badge.active-streak .flame-inner {
+  animation: flameFlicker 0.75s ease-in-out infinite alternate;
+  transform-origin: 50% 85%;
+}
+
+.streak-fire-badge.zero-streak .streak-fire-svg {
+  filter: grayscale(0.75) opacity(0.65);
+}
+
+@keyframes flamePulse {
+  0% {
+    transform: scale(0.96) rotate(-2deg);
+  }
+
+  100% {
+    transform: scale(1.07) rotate(2deg);
+  }
+}
+
+@keyframes flameFlicker {
+  0% {
+    transform: scaleY(0.92) translateY(1px);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: scaleY(1.08) translateY(-1px);
+    opacity: 1;
+  }
+}
+
+.streak-count-text {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 2px #000;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.profile-btn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-btn:hover {
+  background: var(--surface-hover);
+  border-color: #444;
+}
+
+.profile-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: var(--spotify-green);
+}
+
+.filter-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+
+.filter-pills-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.streams-pill {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-sub);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.genre-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--spotify-green);
+  background: rgba(29, 185, 84, 0.12);
+  border: 1px solid rgba(29, 185, 84, 0.3);
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.genre-pill:hover {
+  background: rgba(29, 185, 84, 0.22);
+}
+
+/* Hamburger Icon Button */
+.menu-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.menu-toggle-btn:hover {
+  background: var(--surface-hover);
+  border-color: #3e3e3e;
+}
+
+.menu-toggle-btn:active {
+  transform: scale(0.94);
+}
+
+.menu-bar {
+  width: 17px;
+  height: 2px;
+  background-color: var(--text-main);
+  border-radius: 2px;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+/* Colored Difficulty Chips */
+.chips-wrapper {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  scrollbar-width: none;
+}
+
+.chips-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  border: 1px solid transparent;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chip[data-level="easy"] {
+  background: rgba(30, 215, 96, 0.14);
+  color: var(--easy-color);
+  border-color: rgba(30, 215, 96, 0.26);
+}
+
+.chip[data-level="medium"] {
+  background: rgba(245, 197, 24, 0.14);
+  color: var(--medium-color);
+  border-color: rgba(245, 197, 24, 0.26);
+}
+
+.chip[data-level="hard"] {
+  background: rgba(255, 140, 26, 0.14);
+  color: var(--hard-color);
+  border-color: rgba(255, 140, 26, 0.26);
+}
+
+.chip[data-level="very_hard"] {
+  background: rgba(255, 77, 77, 0.14);
+  color: var(--very-hard-color);
+  border-color: rgba(255, 77, 77, 0.26);
+}
+
+.chip[data-level="impossible"] {
+  background: rgba(184, 110, 255, 0.14);
+  color: var(--impossible-color);
+  border-color: rgba(184, 110, 255, 0.26);
+}
+
+.chip[data-level="easy"].active {
+  background: var(--easy-color);
+  color: #000000;
+  box-shadow: 0 0 18px rgba(30, 215, 96, 0.55);
+}
+
+.chip[data-level="medium"].active {
+  background: var(--medium-color);
+  color: #000000;
+  box-shadow: 0 0 18px rgba(245, 197, 24, 0.55);
+}
+
+.chip[data-level="hard"].active {
+  background: var(--hard-color);
+  color: #000000;
+  box-shadow: 0 0 18px rgba(255, 140, 26, 0.55);
+}
+
+.chip[data-level="very_hard"].active {
+  background: var(--very-hard-color);
+  color: #000000;
+  box-shadow: 0 0 18px rgba(255, 77, 77, 0.55);
+}
+
+.chip[data-level="impossible"].active {
+  background: var(--impossible-color);
+  color: #000000;
+  box-shadow: 0 0 18px rgba(184, 110, 255, 0.55);
+}

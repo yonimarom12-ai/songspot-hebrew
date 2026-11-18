@@ -1,0 +1,80 @@
+// Centralized DOM References & SVG Icon Constants
+export const dom = {
+  playBtn: document.getElementById("play-btn"),
+  playIcon: document.getElementById("play-icon"),
+  playTimeLabel: document.getElementById("play-time-label"),
+  durationBadge: document.getElementById("duration-badge"),
+  playbackFill: document.getElementById("playback-fill"),
+  timelineMarker: document.getElementById("timeline-marker"),
+  markerTimeLabel: document.getElementById("marker-time-label"),
+  guessInput: document.getElementById("guess-input"),
+  searchIcon: document.querySelector(".search-icon"),
+  suggestionsList: document.getElementById("suggestions-list"),
+  submitBtn: document.getElementById("submit-btn"),
+  skipBtn: document.getElementById("skip-btn"),
+  statusLabel: document.getElementById("status-label"),
+  retryBtn: document.getElementById("retry-btn"),
+  streamsBadge: document.getElementById("streams-badge"),
+  discWrapper: document.getElementById("disc-wrapper"),
+  equalizer: document.getElementById("equalizer"),
+  songCover: document.getElementById("song-cover"),
+  resultBanner: document.getElementById("result-banner"),
+  songTitleReveal: document.getElementById("song-title-reveal"),
+  songArtistReveal: document.getElementById("song-artist-reveal"),
+  levelUpNotice: document.getElementById("level-up-notice"),
+  nextBtn: document.getElementById("next-btn"),
+  segments: document.querySelectorAll(".segment"),
+  diffButtons: document.querySelectorAll(".chip"),
+  playerCard: document.getElementById("player-card"),
+
+  hintsPanel: document.getElementById("hints-panel"),
+  hintArtistBtn: document.getElementById("hint-artist-btn"),
+  hintYearBtn: document.getElementById("hint-year-btn"),
+  hintPatternBtn: document.getElementById("hint-pattern-btn"),
+  hintsSettingToggle: document.getElementById("hints-setting-toggle"),
+  easySearchSettingToggle: document.getElementById("easy-search-setting-toggle"),
+  redFeedbackSettingToggle: document.getElementById("red-feedback-setting-toggle"),
+  easySearchStatusPill: document.getElementById("easy-search-status-pill"),
+  redFeedbackStatusPill: document.getElementById("red-feedback-status-pill"),
+
+  menuToggleBtn: document.getElementById("menu-toggle-btn"),
+  activeGenrePill: document.getElementById("active-genre-pill"),
+  activeDecadePill: document.getElementById("active-decade-pill"),
+  sideDrawer: document.getElementById("side-drawer"),
+  drawerBackdrop: document.getElementById("drawer-backdrop"),
+  drawerCloseBtn: document.getElementById("drawer-close-btn"),
+  drawerApplyBtn: document.getElementById("drawer-apply-btn"),
+  genreOptionBtns: document.querySelectorAll(".genre-option"),
+  decadeOptionBtns: document.querySelectorAll(".decade-chip"),
+
+  streakBadge: document.getElementById("streak-badge"),
+  streakCountEl: document.getElementById("streak-count"),
+  profileBtn: document.getElementById("profile-btn"),
+  profileBtnLabel: document.getElementById("profile-btn-label"),
+  profileModalBackdrop: document.getElementById("profile-modal-backdrop"),
+  profileCloseBtn: document.getElementById("profile-close-btn"),
+
+  // Auth DOM
+  loggedUserBar: document.getElementById("logged-user-bar"),
+  loggedUsernameDisplay: document.getElementById("logged-username-display"),
+  logoutBtn: document.getElementById("logout-btn"),
+  authCard: document.getElementById("auth-card"),
+  authTabs: document.querySelectorAll(".auth-tab"),
+  loginForm: document.getElementById("login-form"),
+  registerForm: document.getElementById("register-form"),
+  forgotForm: document.getElementById("forgot-form"),
+  sendResetCodeBtn: document.getElementById("send-reset-code-btn"),
+  simulatedEmailBox: document.getElementById("simulated-email-box"),
+  forgotStep2: document.getElementById("forgot-step-2"),
+  authMsg: document.getElementById("auth-msg"),
+  statsLockWrapper: document.getElementById("stats-lock-wrapper"),
+  regUsernameInput: document.getElementById("reg-username"),
+  regUsernameHint: document.getElementById("reg-username-hint"),
+
+  // Confetti
+  confettiCanvas: document.getElementById("confetti-canvas")
+};
+
+export const PLAY_SVG = '<path d="M8 5v14l11-7z"/>';
+export const PAUSE_SVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+export const SPOTIFY_SVG = '<path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.469-.077-.335.132-.67.469-.746 3.809-.87 7.076-.496 9.713 1.115.293.18.386.563.207.856zm1.224-2.723c-.226.367-.706.482-1.072.257-2.687-1.652-6.785-2.131-9.965-1.166-.413.125-.848-.106-.973-.517-.125-.413.108-.848.52-.973 3.632-1.102 8.147-.568 11.234 1.328.366.226.48.707.256 1.071zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.493.15-1.016-.128-1.166-.62-.149-.493.129-1.016.621-1.166 3.532-1.073 9.404-.865 13.115 1.338.445.264.59.838.327 1.282-.264.444-.838.59-1.28.322z"/>';

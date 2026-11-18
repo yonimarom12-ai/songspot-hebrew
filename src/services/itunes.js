@@ -1,0 +1,147 @@
+import { ARTISTS_DB } from "../data/artists.js";
+import { DIFFICULTIES } from "../data/config.js";
+import { state } from "../state.js";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js";
+
+export function fetchItunesJsonp(url, timeoutMs = 7000) {
+  return new Promise((resolve, reject) => {
+    const callbackName = "itunesCb_" + Math.random().toString(36).slice(2, 11);
+    const script = document.createElement("script");
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("JSONP timeout"));
+    }, timeoutMs);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("JSONP network error"));
+    };
+
+    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + callbackName;
+    document.head.appendChild(script);
+  });
+}
+
+export async function fetchItunesData(url, timeoutMs = 6500) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  } catch (err) {
+    return await fetchItunesJsonp(url, timeoutMs);
+  }
+}
+
+export function isValidStudioTrack(track, expectedArtist) {
+  if (!track || !track.previewUrl || !track.trackName || !track.artistName) return false;
+  const lowerTitle = track.trackName.toLowerCase();
+  const bannedWords = ["karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "remix", "רמיקס", "live", "הופעה", "אקפלה", "intro", "סקיט"];
+  if (bannedWords.some(w => lowerTitle.includes(w))) return false;
+
+  const normArtist = normalizeHebrew(expectedArtist);
+  const normTrackArtist = normalizeHebrew(track.artistName);
+  const hasHebrewTitle = /[\u0590-\u05FF]/.test(track.trackName);
+  return normTrackArtist.includes(normArtist) || normArtist.includes(normTrackArtist) || hasHebrewTitle;
+}
+
+export function doesYearMatchSelectedDecades(releaseYear) {
+  if (state.selectedDecades.has("all") || state.selectedDecades.size === 0 || !releaseYear) return true;
+  for (const dec of state.selectedDecades) {
+    if (dec === "1970-1990" && releaseYear < 1990) return true;
+    if (dec === "1990-2000" && releaseYear >= 1990 && releaseYear < 2000) return true;
+    if (dec === "2000-2010" && releaseYear >= 2000 && releaseYear < 2010) return true;
+    if (dec === "2010-2020" && releaseYear >= 2010 && releaseYear < 2020) return true;
+    if (dec === "2020-2030" && releaseYear >= 2020) return true;
+  }
+  return false;
+}
+
+export async function getArtistCatalog(artistName) {
+  if (state.artistCatalogCache[artistName]?.length > 0) {
+    return state.artistCatalogCache[artistName];
+  }
+
+  const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=60&term=${encodeURIComponent(artistName)}`;
+  const data = await fetchItunesData(url);
+
+  const uniqueTracks = [];
+  const seenTitles = new Set();
+
+  if (data && Array.isArray(data.results)) {
+    for (const t of data.results) {
+      if (!isValidStudioTrack(t, artistName)) continue;
+      const cleanTitle = cleanTrackTitle(t.trackName);
+      const normTitle = normalizeHebrew(cleanTitle);
+      if (!normTitle || seenTitles.has(normTitle)) continue;
+
+      seenTitles.add(normTitle);
+      const releaseYear = t.releaseDate ? new Date(t.releaseDate).getFullYear() : null;
+      const songObj = {
+        trackId: t.trackId,
+        title: cleanTitle,
+        itunesTitle: t.trackName,
+        artist: artistName,
+        releaseYear: releaseYear && !isNaN(releaseYear) ? releaseYear : null,
+        previewUrl: t.previewUrl,
+        artwork: (t.artworkUrl100 || "").replace("100x100bb", "400x400bb")
+      };
+
+      uniqueTracks.push(songObj);
+      state.discoveredSongsMap.set(`${normTitle}_${normalizeHebrew(artistName)}`, songObj);
+    }
+  }
+
+  if (uniqueTracks.length > 0) {
+    state.artistCatalogCache[artistName] = uniqueTracks;
+  }
+  return uniqueTracks;
+}
+
+export function pickSongFromCatalog(catalog, chosenTierName, allowFallbackIfEmptyDecade = false) {
+  const decadeFiltered = catalog.filter(s => doesYearMatchSelectedDecades(s.releaseYear));
+  const sourceCatalog = decadeFiltered.length > 0 ? decadeFiltered : (allowFallbackIfEmptyDecade ? catalog : []);
+  if (sourceCatalog.length === 0) return null;
+
+  const diffObj = DIFFICULTIES[state.currentDifficulty];
+  const range = diffObj.tiers[chosenTierName] || [0, 8];
+
+  const startIdx = Math.min(range[0], Math.max(0, sourceCatalog.length - 1));
+  const endIdx = Math.min(range[1], sourceCatalog.length);
+  let slice = sourceCatalog.slice(startIdx, endIdx);
+  if (slice.length === 0) slice = sourceCatalog;
+
+  const unplayedSlice = slice.filter(s => !state.playedTrackIds.has(s.trackId));
+  const finalPool = unplayedSlice.length > 0 ? unplayedSlice : slice;
+  return finalPool[Math.floor(Math.random() * finalPool.length)];
+}
+
+export function getCandidatePool() {
+  const isAllGenres = state.selectedGenres.has("all") || state.selectedGenres.size === 0;
+  const isAllDecades = state.selectedDecades.has("all") || state.selectedDecades.size === 0;
+  const allowedTiers = Object.keys(DIFFICULTIES[state.currentDifficulty].tiers);
+
+  const filterByCriteria = (restrictToDifficultyTiers) =>
+    ARTISTS_DB.filter(artist => {
+      if (restrictToDifficultyTiers && !allowedTiers.includes(artist.tier)) return false;
+      const genreOk = isAllGenres || artist.genres.some(g => state.selectedGenres.has(g));
+      const decadeOk = isAllDecades || artist.decades.some(d => state.selectedDecades.has(d));
+      return genreOk && decadeOk;
+    });
+
+  const primaryPool = filterByCriteria(true);
+  return primaryPool.length > 0 ? primaryPool : filterByCriteria(false);
+}

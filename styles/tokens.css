@@ -1,0 +1,49 @@
+:root {
+  --bg-pure: #000000;
+  --surface: #121212;
+  --surface-elevated: #181818;
+  --surface-hover: #282828;
+  --border: #2a2a2a;
+  --spotify-green: #1DB954;
+  --spotify-green-hover: #1ed760;
+  --text-main: #FFFFFF;
+  --text-sub: #B3B3B3;
+  --text-muted: #727272;
+  --danger: #E91429;
+  --easy-color: #1ed760;
+  --medium-color: #f5c518;
+  --hard-color: #ff8c1a;
+  --very-hard-color: #ff4d4d;
+  --impossible-color: #b86eff;
+  --level-color: #1ed760;
+  --level-glow: rgba(30, 215, 96, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-pure);
+  color: var(--text-main);
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-x: hidden;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 470px;
+  min-height: 100dvh;
+  padding: 18px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}

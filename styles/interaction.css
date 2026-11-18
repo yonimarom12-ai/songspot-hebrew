@@ -1,0 +1,202 @@
+/* Search & Controls Area */
+.interaction-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  fill: var(--text-sub);
+  pointer-events: none;
+  transition: fill 0.25s ease;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--surface-elevated);
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: 14px 44px 14px 18px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  outline: none;
+  background: #242424;
+  border-color: var(--text-main);
+}
+
+.search-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  background: #242424;
+  border: 1px solid #333;
+  border-radius: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.85);
+  animation: fadeUp 0.18s ease-out;
+}
+
+.suggestion-row {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #2e2e2e;
+  border-right: 3px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.suggestion-row:last-child {
+  border-bottom: none;
+}
+
+.suggestion-row:hover,
+.suggestion-row.highlighted,
+.suggestion-row.kb-active {
+  background: #333333;
+  border-right-color: var(--spotify-green);
+}
+
+.suggestion-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.suggestion-artist {
+  font-size: 12px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.buttons-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  border: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  flex: 2;
+  background: var(--spotify-green);
+  color: #000000;
+  display: none;
+}
+
+.btn-primary.visible {
+  display: block;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--spotify-green-hover);
+  transform: scale(1.02);
+}
+
+.btn-secondary {
+  flex: 1;
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid #535353;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.result-banner {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+  animation: fadeUp 0.3s ease-out;
+}
+
+.song-reveal-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+}
+
+.song-reveal-artist {
+  font-size: 14px;
+  color: var(--text-sub);
+  margin: 0;
+  text-align: center;
+}
+
+.level-up-notice {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--medium-color);
+  background: rgba(245, 197, 24, 0.12);
+  border: 1px solid rgba(245, 197, 24, 0.3);
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: none;
+}
+
+.btn-next {
+  width: 100%;
+  background: var(--text-main);
+  color: #000000;
+  margin-top: 4px;
+}
+
+.btn-next:hover {
+  background: #e6e6e6;
+  transform: scale(1.02);
+}
