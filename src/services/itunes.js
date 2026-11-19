@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261119h";
-import { DIFFICULTIES } from "../data/config.js?v=20261119h";
-import { state, isIOS } from "../state.js?v=20261119h";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119h";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261119h";
+import { ARTISTS_DB } from "../data/artists.js?v=20261119i";
+import { DIFFICULTIES } from "../data/config.js?v=20261119i";
+import { state, isIOS } from "../state.js?v=20261119i";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119i";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261119i";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -394,12 +394,38 @@ export async function getArtistCatalog(artistName) {
   return uniqueTracks;
 }
 
+// מעדיף שירים שמעולם לא הושמעו; אם כולם הושמעו — נותן עדיפות נמוכה מאוד לשירים שהושמעו לאחרונה
+export function pickWithRecencyPriority(tracks) {
+  if (!tracks || tracks.length === 0) return null;
+  const unplayed = tracks.filter(s => !state.playedTrackIds.has(s.trackId));
+  if (unplayed.length > 0) {
+    return unplayed[Math.floor(Math.random() * unplayed.length)];
+  }
+
+  // מיון לפי סדר השמעה (הישנים ביותר ראשונים, האחרונים שהושמעו בסוף)
+  const historyOrder = Array.from(state.playedTrackIds);
+  const recencyMap = new Map();
+  historyOrder.forEach((id, idx) => recencyMap.set(id, idx));
+
+  const sortedByOldest = [...tracks].sort(
+    (a, b) => (recencyMap.get(a.trackId) ?? -1) - (recencyMap.get(b.trackId) ?? -1)
+  );
+  // בוחר אקראית מתוך ה-35% הישנים ביותר כדי ששירים אחרונים כמעט לא יחזרו
+  const oldestPoolSize = Math.max(1, Math.ceil(sortedByOldest.length * 0.35));
+  const oldestPool = sortedByOldest.slice(0, oldestPoolSize);
+  return oldestPool[Math.floor(Math.random() * oldestPool.length)];
+}
+
 // בוחר מיד שיר רענן (שעוד לא הושמע) מתוך אמנים שכבר טעונים במטמון עבור רמת הקושי הנוכחית
 export function pickFreshSongFromCachedPool(candidatePool) {
   const diffObj = DIFFICULTIES[state.currentDifficulty];
-  const cachedOptions = [];
+  const freshNonRecent = [];
+  const freshNotLast = [];
 
   for (const artist of candidatePool) {
+    // מונע לחלוטין שני שירים של אותו זמר ברצף
+    if (state.lastPlayedArtist && artist.name === state.lastPlayedArtist) continue;
+
     const catalog = state.artistCatalogCache[artist.name];
     if (!catalog || catalog.length === 0) continue;
 
@@ -414,12 +440,17 @@ export function pickFreshSongFromCachedPool(candidatePool) {
 
     const unplayed = slice.filter(s => !state.playedTrackIds.has(s.trackId));
     if (unplayed.length > 0) {
-      cachedOptions.push(unplayed);
+      if (!state.recentArtists.includes(artist.name)) {
+        freshNonRecent.push(unplayed);
+      } else {
+        freshNotLast.push(unplayed);
+      }
     }
   }
 
-  if (cachedOptions.length === 0) return null;
-  const chosenArtistSongs = cachedOptions[Math.floor(Math.random() * cachedOptions.length)];
+  const chosenBucket = freshNonRecent.length > 0 ? freshNonRecent : freshNotLast;
+  if (chosenBucket.length === 0) return null;
+  const chosenArtistSongs = chosenBucket[Math.floor(Math.random() * chosenBucket.length)];
   return chosenArtistSongs[Math.floor(Math.random() * chosenArtistSongs.length)];
 }
 
@@ -486,9 +517,7 @@ export function pickSongFromCatalog(catalog, chosenTierName, allowFallbackIfEmpt
   let slice = sourceCatalog.slice(startIdx, endIdx);
   if (slice.length === 0) slice = sourceCatalog;
 
-  const unplayedSlice = slice.filter(s => !state.playedTrackIds.has(s.trackId));
-  const finalPool = unplayedSlice.length > 0 ? unplayedSlice : slice;
-  return finalPool[Math.floor(Math.random() * finalPool.length)];
+  return pickWithRecencyPriority(slice);
 }
 
 export function getCandidatePool() {

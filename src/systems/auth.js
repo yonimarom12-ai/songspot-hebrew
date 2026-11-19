@@ -1,10 +1,10 @@
-import { dom } from "../dom.js?v=20261119h";
-import { state } from "../state.js?v=20261119h";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261119h";
-import { stopGalleryPreview } from "./gallery.js?v=20261119h";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261119h";
-import { updatePointsDisplay } from "./economy.js?v=20261119h";
-import { applyEquippedCosmetics } from "./shop.js?v=20261119h";
+import { dom } from "../dom.js?v=20261119i";
+import { state } from "../state.js?v=20261119i";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261119i";
+import { stopGalleryPreview } from "./gallery.js?v=20261119i";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261119i";
+import { updatePointsDisplay } from "./economy.js?v=20261119i";
+import { applyEquippedCosmetics } from "./shop.js?v=20261119i";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;

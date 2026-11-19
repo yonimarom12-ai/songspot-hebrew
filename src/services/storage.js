@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261119h";
+import { state } from "../state.js?v=20261119i";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -118,6 +118,8 @@ export function loadPlayedIds() {
 }
 
 export function markSongAsPlayed(trackId) {
+  // מחיקה והוספה מחדש שומרות על סדר הכרונולוגי (האחרונים שהושמעו נמצאים בסוף)
+  state.playedTrackIds.delete(trackId);
   state.playedTrackIds.add(trackId);
   if (state.playedTrackIds.size > 1500) {
     state.playedTrackIds = new Set(Array.from(state.playedTrackIds).slice(-800));

@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119h">
-  <link rel="stylesheet" href="styles/header.css?v=20261119h">
-  <link rel="stylesheet" href="styles/player.css?v=20261119h">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119h">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119h">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119h">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119h">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119i">
+  <link rel="stylesheet" href="styles/header.css?v=20261119i">
+  <link rel="stylesheet" href="styles/player.css?v=20261119i">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119i">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119i">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119i">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119i">
 </head>
 
 <body>
@@ -173,12 +173,19 @@
         </div>
       </div>
 
-      <div class="result-banner" id="result-banner">
-        <p class="song-reveal-title" id="song-title-reveal"></p>
-        <p class="song-reveal-artist" id="song-artist-reveal"></p>
-        <div class="points-earned-notice" id="points-earned-notice"></div>
-        <div class="level-up-notice" id="level-up-notice"></div>
-        <button class="btn btn-next" id="next-btn">לשיר הבא</button>
+      <div class="result-banner reveal-fullscreen" id="result-banner" role="dialog" aria-label="חשיפת השיר">
+        <div class="reveal-bg-blur" id="reveal-bg-blur"></div>
+        <div class="reveal-fullscreen-card">
+          <span class="reveal-outcome-badge" id="reveal-outcome-badge"></span>
+          <div class="reveal-cover-wrap">
+            <img class="reveal-cover-img" id="reveal-cover-img" alt="עטיפת האלבום" />
+          </div>
+          <p class="song-reveal-title" id="song-title-reveal"></p>
+          <p class="song-reveal-artist" id="song-artist-reveal"></p>
+          <div class="points-earned-notice" id="points-earned-notice"></div>
+          <div class="level-up-notice" id="level-up-notice"></div>
+          <button class="btn btn-next" id="next-btn">לשיר הבא</button>
+        </div>
       </div>
     </main>
 
@@ -373,31 +380,32 @@
           </div>
 
           <!-- טופס התחברות -->
-          <form class="auth-form active" id="login-form">
+          <form class="auth-form active" id="login-form" autocomplete="off">
             <input type="text" class="auth-input" id="login-username" placeholder="שם משתמש" required
-              autocomplete="username" />
+              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <input type="password" class="auth-input" id="login-password" placeholder="סיסמא" required
-              autocomplete="current-password" />
+              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <button type="submit" class="auth-submit-btn">התחבר לחשבון</button>
           </form>
 
           <!-- טופס הרשמה -->
-          <form class="auth-form" id="register-form">
+          <form class="auth-form" id="register-form" autocomplete="off">
             <input type="text" class="auth-input" id="reg-username"
-              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required autocomplete="username" />
+              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required
+              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <div class="username-live-hint" id="reg-username-hint"></div>
             <input type="email" class="auth-input" id="reg-email" placeholder="כתובת אימייל (לשחזור סיסמא)" required
-              autocomplete="email" />
+              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <input type="password" class="auth-input" id="reg-password" placeholder="בחר סיסמא (לפחות 4 תווים)" required
-              autocomplete="new-password" />
+              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <button type="submit" class="auth-submit-btn">צור חשבון ושמור נתונים</button>
           </form>
 
           <!-- טופס שכחתי סיסמא -->
-          <form class="auth-form" id="forgot-form">
+          <form class="auth-form" id="forgot-form" autocomplete="off">
             <div id="forgot-step-1" style="display: flex; flex-direction: column; gap: 8px;">
               <input type="text" class="auth-input" id="forgot-identifier"
-                placeholder="הזן שם משתמש או אימייל שנרשמת איתו" />
+                placeholder="הזן שם משתמש או אימייל שנרשמת איתו" autocomplete="off" />
               <button type="button" class="auth-submit-btn" id="send-reset-code-btn">שלח קוד אימות למייל</button>
             </div>
 
@@ -405,8 +413,9 @@
 
             <div id="forgot-step-2" style="display: none; flex-direction: column; gap: 8px;">
               <input type="text" class="auth-input" id="reset-code-input" placeholder="הזן קוד בן 6 ספרות מהמייל"
-                maxlength="6" />
-              <input type="password" class="auth-input" id="reset-new-password" placeholder="בחר סיסמא חדשה" />
+                maxlength="6" autocomplete="off" />
+              <input type="password" class="auth-input" id="reset-new-password" placeholder="בחר סיסמא חדשה"
+                autocomplete="off" />
               <button type="submit" class="auth-submit-btn">אפס סיסמא והתחבר</button>
             </div>
           </form>
@@ -459,19 +468,35 @@
                 </div>
               </div>
 
-              <form class="favorites-edit-form" id="profile-favorites-form" style="display: none;">
-                <label class="fav-field">
-                  <span>🎵 שיר מועדף</span>
-                  <input type="text" class="auth-input" id="fav-song-input" placeholder="לדוגמה: תתארו לכם" maxlength="60" />
-                </label>
-                <label class="fav-field">
-                  <span>💿 אלבום מועדף</span>
-                  <input type="text" class="auth-input" id="fav-album-input" placeholder="לדוגמה: שפויים" maxlength="60" />
-                </label>
-                <label class="fav-field">
-                  <span>🎤 זמר/ת מועדף/ת</span>
-                  <input type="text" class="auth-input" id="fav-artist-input" placeholder="לדוגמה: שלמה ארצי" maxlength="60" />
-                </label>
+              <form class="favorites-edit-form" id="profile-favorites-form" style="display: none;" autocomplete="off">
+                <div class="fav-field">
+                  <label for="fav-song-input">🎵 שיר מועדף (חפש ובחר מהרשימה)</label>
+                  <div class="fav-search-box">
+                    <input type="text" class="auth-input fav-search-input" id="fav-song-input"
+                      placeholder="חפש שיר קיים..." autocomplete="off" />
+                    <button type="button" class="fav-clear-btn" data-clear-fav="song" aria-label="נקה שיר">✕</button>
+                    <div class="fav-suggestions-dropdown" id="fav-song-suggestions"></div>
+                  </div>
+                </div>
+                <div class="fav-field">
+                  <label for="fav-album-input">💿 אלבום מועדף (חפש ובחר מהרשימה)</label>
+                  <div class="fav-search-box">
+                    <input type="text" class="auth-input fav-search-input" id="fav-album-input"
+                      placeholder="חפש אלבום קיים..." autocomplete="off" />
+                    <button type="button" class="fav-clear-btn" data-clear-fav="album" aria-label="נקה אלבום">✕</button>
+                    <div class="fav-suggestions-dropdown" id="fav-album-suggestions"></div>
+                  </div>
+                </div>
+                <div class="fav-field">
+                  <label for="fav-artist-input">🎤 זמר/ת מועדף/ת (חפש ובחר מהרשימה)</label>
+                  <div class="fav-search-box">
+                    <input type="text" class="auth-input fav-search-input" id="fav-artist-input"
+                      placeholder="חפש זמר/ת קיים/ת..." autocomplete="off" />
+                    <button type="button" class="fav-clear-btn" data-clear-fav="artist" aria-label="נקה זמר">✕</button>
+                    <div class="fav-suggestions-dropdown" id="fav-artist-suggestions"></div>
+                  </div>
+                </div>
+                <div class="fav-form-error" id="fav-form-error"></div>
                 <div class="fav-form-actions">
                   <button type="submit" class="auth-submit-btn">שמור שינויים</button>
                   <button type="button" class="logout-btn" id="cancel-profile-edit-btn">ביטול</button>
@@ -584,7 +609,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119h"></script>
+  <script type="module" src="src/main.js?v=20261119i"></script>
 </body>
 
 </html>

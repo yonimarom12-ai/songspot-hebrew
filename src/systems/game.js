@@ -1,17 +1,18 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119h";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119h";
-import { dom } from "../dom.js?v=20261119h";
-import { state } from "../state.js?v=20261119h";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119h";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119h";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119i";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119i";
+import { dom } from "../dom.js?v=20261119i";
+import { state } from "../state.js?v=20261119i";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119i";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119i";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
   pickSongFromCatalog,
   pickFreshSongFromCachedPool,
+  pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261119h";
+} from "../services/itunes.js?v=20261119i";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -19,25 +20,25 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261119h";
-import { launchWinConfetti } from "./confetti.js?v=20261119h";
+} from "./audio.js?v=20261119i";
+import { launchWinConfetti } from "./confetti.js?v=20261119i";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261119h";
+} from "./feedback.js?v=20261119i";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261119h";
-import { updateStreakDisplay } from "./profile.js?v=20261119h";
+} from "./search.js?v=20261119i";
+import { updateStreakDisplay } from "./profile.js?v=20261119i";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
   updatePointsDisplay
-} from "./economy.js?v=20261119h";
+} from "./economy.js?v=20261119i";
 
 export function setActiveDifficultyUI(level) {
   state.currentDifficulty = level;
@@ -81,6 +82,7 @@ export function resetUI() {
   dom.submitBtn.disabled = true;
   dom.skipBtn.disabled = true;
   dom.playBtn.disabled = true;
+  dom.resultBanner.classList.remove("open", "is-win", "is-loss");
   dom.resultBanner.style.display = "none";
   if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   dom.levelUpNotice.style.display = "none";
@@ -114,7 +116,12 @@ export async function fetchRandomSong() {
 
       const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
       if (remaining.length === 0) break;
-      const picked = remaining[Math.floor(Math.random() * remaining.length)];
+
+      // מונע בחירה של אותו זמר פעמיים ברצף ומעדיף זמרים שלא הופיעו בסיבובים האחרונים
+      const nonRecent = remaining.filter(a => !state.recentArtists.includes(a.name));
+      const notLast = remaining.filter(a => a.name !== state.lastPlayedArtist);
+      const pickPool = nonRecent.length > 0 ? nonRecent : (notLast.length > 0 ? notLast : remaining);
+      const picked = pickPool[Math.floor(Math.random() * pickPool.length)];
       triedArtists.add(picked.name);
 
       try {
@@ -144,10 +151,13 @@ export async function fetchRandomSong() {
       const decadeOk = doesYearMatchSelectedDecades(s.releaseYear);
       return genreOk && decadeOk;
     });
-    const cachedSongs = filteredCached.length > 0 ? filteredCached : allCached;
-    const unplayedCached = cachedSongs.filter(s => !state.playedTrackIds.has(s.trackId));
-    const pool = unplayedCached.length > 0 ? unplayedCached : cachedSongs;
-    selectedSong = pool[Math.floor(Math.random() * pool.length)];
+    const baseCached = filteredCached.length > 0 ? filteredCached : allCached;
+    const notLastArtistCached = baseCached.filter(s => s.artist !== state.lastPlayedArtist);
+    const nonRecentArtistCached = notLastArtistCached.filter(s => !state.recentArtists.includes(s.artist));
+    const cachedSongs = nonRecentArtistCached.length > 0
+      ? nonRecentArtistCached
+      : (notLastArtistCached.length > 0 ? notLastArtistCached : baseCached);
+    selectedSong = pickWithRecencyPriority(cachedSongs);
   }
 
   if (!selectedSong) {
@@ -158,6 +168,11 @@ export async function fetchRandomSong() {
   }
 
   state.currentSong = selectedSong;
+  state.lastPlayedArtist = selectedSong.artist;
+  state.recentArtists = [
+    selectedSong.artist,
+    ...state.recentArtists.filter(a => a !== selectedSong.artist)
+  ].slice(0, 3);
   markSongAsPlayed(state.currentSong.trackId);
   prepareEasySearchMaskForRound();
 
@@ -270,19 +285,38 @@ export function endRound(won) {
     if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   }
 
-  // מעבר אוטומטי לשלב הבא גם בניצחון וגם אם לא הצליחו לנחש (ללא הודעת טקסט)
+  // מעבר לשלב הבא יקרה רק בלחיצה על "לשיר הבא", ואחרי בלתי אפשרי חוזר לקל בלולאה
   const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
-  if (currDiffIdx >= 0 && currDiffIdx < DIFFICULTY_ORDER.length - 1) {
-    const nextDiff = DIFFICULTY_ORDER[currDiffIdx + 1];
-    setActiveDifficultyUI(nextDiff);
+  if (currDiffIdx >= 0) {
+    state.pendingNextDifficulty = DIFFICULTY_ORDER[(currDiffIdx + 1) % DIFFICULTY_ORDER.length];
   }
   if (dom.levelUpNotice) {
     dom.levelUpNotice.textContent = "";
     dom.levelUpNotice.style.display = "none";
   }
 
+  const hiResArt = (state.currentSong.artwork || "").replace("400x400bb", "600x600bb");
+  const revealCover = document.getElementById("reveal-cover-img");
+  const revealBg = document.getElementById("reveal-bg-blur");
+  const revealOutcome = document.getElementById("reveal-outcome-badge");
+  if (revealCover) {
+    revealCover.src = hiResArt;
+    revealCover.alt = state.currentSong.title;
+  }
+  if (revealBg) {
+    revealBg.style.backgroundImage = hiResArt ? `url("${hiResArt}")` : "";
+  }
+  if (revealOutcome) {
+    revealOutcome.textContent = won
+      ? `✓ זיהית נכון תוך ${solvedAtSec} שניות!`
+      : "השיר היה:";
+    revealOutcome.className = `reveal-outcome-badge ${won ? "is-win" : "is-loss"}`;
+  }
+
   dom.songTitleReveal.textContent = state.currentSong.title;
   dom.songArtistReveal.textContent = state.currentSong.artist;
+  dom.resultBanner.classList.remove("is-win", "is-loss");
+  dom.resultBanner.classList.add(won ? "is-win" : "is-loss", "open");
   dom.resultBanner.style.display = "flex";
 
   clearSearchBarFeedback();
@@ -352,9 +386,18 @@ export function handleGuess() {
   }
 }
 
+export function goToNextSong() {
+  if (state.pendingNextDifficulty) {
+    setActiveDifficultyUI(state.pendingNextDifficulty);
+    state.pendingNextDifficulty = null;
+  }
+  fetchRandomSong();
+}
+
 export function initDifficultyListeners() {
   dom.diffButtons.forEach(btn => {
     btn.addEventListener("click", () => {
+      state.pendingNextDifficulty = null;
       setActiveDifficultyUI(btn.dataset.level);
       fetchRandomSong();
     });

@@ -1,10 +1,13 @@
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119h";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261119h";
-import { state } from "../state.js?v=20261119h";
-import { saveUserStats } from "../services/storage.js?v=20261119h";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261119h";
-import { formatPoints, getPointsBalance } from "./economy.js?v=20261119h";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261119h";
+import { ARTISTS_DB } from "../data/artists.js?v=20261119i";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119i";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261119i";
+import { state } from "../state.js?v=20261119i";
+import { saveUserStats } from "../services/storage.js?v=20261119i";
+import { fetchItunesData } from "../services/itunes.js?v=20261119i";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119i";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261119i";
+import { formatPoints, getPointsBalance } from "./economy.js?v=20261119i";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261119i";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -148,6 +151,194 @@ export function renderProfileStatsModal() {
   }
 }
 
+const FAV_FIELD_CONFIG = {
+  song: { inputId: "fav-song-input", listId: "fav-song-suggestions", labelHe: "שיר מועדף" },
+  album: { inputId: "fav-album-input", listId: "fav-album-suggestions", labelHe: "אלבום מועדף" },
+  artist: { inputId: "fav-artist-input", listId: "fav-artist-suggestions", labelHe: "זמר/ת מועדף/ת" }
+};
+
+const pendingFavoriteSelection = { song: "", album: "", artist: "" };
+const favSearchTimers = { song: null, album: null, artist: null };
+
+function closeFavDropdown(field) {
+  const list = document.getElementById(FAV_FIELD_CONFIG[field].listId);
+  if (list) {
+    list.style.display = "none";
+    list.innerHTML = "";
+  }
+}
+
+function closeAllFavDropdowns() {
+  Object.keys(FAV_FIELD_CONFIG).forEach(closeFavDropdown);
+}
+
+function setFavFormError(text = "") {
+  const errEl = document.getElementById("fav-form-error");
+  if (errEl) errEl.textContent = text;
+}
+
+function syncFavInputVisual(field) {
+  const input = document.getElementById(FAV_FIELD_CONFIG[field].inputId);
+  if (!input) return;
+  const val = input.value.trim();
+  const isPicked = Boolean(val && val === pendingFavoriteSelection[field]);
+  input.classList.toggle("is-selected", isPicked);
+  input.classList.toggle("is-unpicked", Boolean(val && !isPicked));
+}
+
+function renderFavSuggestions(field, items, queryAtCall) {
+  const cfg = FAV_FIELD_CONFIG[field];
+  const input = document.getElementById(cfg.inputId);
+  const list = document.getElementById(cfg.listId);
+  if (!input || !list || input.value.trim() !== queryAtCall) return;
+
+  list.innerHTML = "";
+  if (!items || items.length === 0) {
+    list.style.display = "none";
+    return;
+  }
+
+  items.forEach(item => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "fav-suggestion-row";
+
+    const mainSpan = document.createElement("span");
+    mainSpan.className = "fav-suggestion-title";
+    mainSpan.textContent = item.primary;
+    row.appendChild(mainSpan);
+
+    if (item.secondary) {
+      const subSpan = document.createElement("span");
+      subSpan.className = "fav-suggestion-sub";
+      subSpan.textContent = item.secondary;
+      row.appendChild(subSpan);
+    }
+
+    row.addEventListener("mousedown", (e) => e.preventDefault());
+    row.addEventListener("click", () => {
+      pendingFavoriteSelection[field] = item.displayValue;
+      input.value = item.displayValue;
+      syncFavInputVisual(field);
+      setFavFormError("");
+      closeFavDropdown(field);
+    });
+
+    list.appendChild(row);
+  });
+
+  list.style.display = "block";
+}
+
+function getLocalFavoriteMatches(field, normalizedQuery) {
+  if (!normalizedQuery) return [];
+  const results = [];
+  const seen = new Set();
+
+  if (field === "artist") {
+    for (const a of ARTISTS_DB) {
+      if (normalizeHebrew(a.name).includes(normalizedQuery)) {
+        const key = normalizeHebrew(a.name);
+        if (!seen.has(key)) {
+          seen.add(key);
+          results.push({ primary: a.name, secondary: "", displayValue: a.name });
+        }
+      }
+      if (results.length >= 6) break;
+    }
+  } else if (field === "song") {
+    for (const s of state.discoveredSongsMap.values()) {
+      if (
+        normalizeHebrew(s.title).includes(normalizedQuery) ||
+        normalizeHebrew(s.artist).includes(normalizedQuery)
+      ) {
+        const displayValue = `${s.title} - ${s.artist}`;
+        const key = normalizeHebrew(displayValue);
+        if (!seen.has(key)) {
+          seen.add(key);
+          results.push({ primary: s.title, secondary: s.artist, displayValue });
+        }
+      }
+      if (results.length >= 6) break;
+    }
+  }
+  return results;
+}
+
+function triggerFavoriteSearch(field) {
+  const cfg = FAV_FIELD_CONFIG[field];
+  const input = document.getElementById(cfg.inputId);
+  if (!input) return;
+
+  const val = input.value.trim();
+  clearTimeout(favSearchTimers[field]);
+
+  if (val !== pendingFavoriteSelection[field]) {
+    pendingFavoriteSelection[field] = "";
+  }
+  syncFavInputVisual(field);
+
+  if (val.length < 1) {
+    closeFavDropdown(field);
+    return;
+  }
+
+  const normalizedVal = normalizeHebrew(val);
+  const localMatches = getLocalFavoriteMatches(field, normalizedVal);
+  if (localMatches.length > 0) {
+    renderFavSuggestions(field, localMatches, val);
+  }
+
+  if (val.length < 2) return;
+
+  const entityMap = { song: "song", album: "album", artist: "musicArtist" };
+  favSearchTimers[field] = setTimeout(async () => {
+    try {
+      const url = `https://itunes.apple.com/search?country=IL&media=music&entity=${entityMap[field]}&limit=10&term=${encodeURIComponent(val)}`;
+      const data = await fetchItunesData(url, 4000);
+      if (input.value.trim() !== val) return;
+
+      const combined = [...localMatches];
+      const seen = new Set(combined.map(c => normalizeHebrew(c.displayValue)));
+
+      if (data?.results) {
+        for (const r of data.results) {
+          let item = null;
+          if (field === "song") {
+            const cleanTitle = cleanTrackTitle(r.trackName || "");
+            const artistName = (r.artistName || "").trim();
+            if (!cleanTitle || !artistName) continue;
+            item = { primary: cleanTitle, secondary: artistName, displayValue: `${cleanTitle} - ${artistName}` };
+          } else if (field === "album") {
+            const albumName = (r.collectionName || "").trim();
+            const artistName = (r.artistName || "").trim();
+            if (!albumName) continue;
+            item = {
+              primary: albumName,
+              secondary: artistName,
+              displayValue: artistName ? `${albumName} - ${artistName}` : albumName
+            };
+          } else if (field === "artist") {
+            const artistName = (r.artistName || "").trim();
+            if (!artistName) continue;
+            item = { primary: artistName, secondary: r.primaryGenreName || "", displayValue: artistName };
+          }
+
+          if (!item) continue;
+          const key = normalizeHebrew(item.displayValue);
+          if (!seen.has(key)) {
+            seen.add(key);
+            combined.push(item);
+          }
+          if (combined.length >= 8) break;
+        }
+      }
+
+      renderFavSuggestions(field, combined.slice(0, 8), val);
+    } catch (e) { }
+  }, 240);
+}
+
 function renderProfileFavorites() {
   const favs = state.userStats?.favorites || { song: "", album: "", artist: "" };
   const pairs = [
@@ -171,14 +362,18 @@ function setFavoritesEditMode(isEditing) {
   const savedMsg = document.getElementById("fav-saved-msg");
   if (!view || !form) return;
 
+  closeAllFavDropdowns();
+  setFavFormError("");
+
   if (isEditing) {
     const favs = state.userStats?.favorites || { song: "", album: "", artist: "" };
-    const songIn = document.getElementById("fav-song-input");
-    const albumIn = document.getElementById("fav-album-input");
-    const artistIn = document.getElementById("fav-artist-input");
-    if (songIn) songIn.value = favs.song || "";
-    if (albumIn) albumIn.value = favs.album || "";
-    if (artistIn) artistIn.value = favs.artist || "";
+    Object.keys(FAV_FIELD_CONFIG).forEach(field => {
+      const existingVal = (favs[field] || "").trim();
+      pendingFavoriteSelection[field] = existingVal;
+      const input = document.getElementById(FAV_FIELD_CONFIG[field].inputId);
+      if (input) input.value = existingVal;
+      syncFavInputVisual(field);
+    });
     if (savedMsg) savedMsg.textContent = "";
   }
 
@@ -271,14 +466,54 @@ export function initProfileListeners() {
   if (cancelProfileEditBtn) {
     cancelProfileEditBtn.addEventListener("click", () => setFavoritesEditMode(false));
   }
+  Object.keys(FAV_FIELD_CONFIG).forEach(field => {
+    const input = document.getElementById(FAV_FIELD_CONFIG[field].inputId);
+    if (input) {
+      input.addEventListener("input", () => triggerFavoriteSearch(field));
+      input.addEventListener("focus", () => {
+        if (input.value.trim().length >= 1 && input.value.trim() !== pendingFavoriteSelection[field]) {
+          triggerFavoriteSearch(field);
+        }
+      });
+      input.addEventListener("blur", () => {
+        setTimeout(() => closeFavDropdown(field), 160);
+      });
+    }
+  });
+
+  document.querySelectorAll("[data-clear-fav]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const field = btn.dataset.clearFav;
+      if (!FAV_FIELD_CONFIG[field]) return;
+      pendingFavoriteSelection[field] = "";
+      const input = document.getElementById(FAV_FIELD_CONFIG[field].inputId);
+      if (input) input.value = "";
+      syncFavInputVisual(field);
+      closeFavDropdown(field);
+      setFavFormError("");
+    });
+  });
+
   if (favForm) {
     favForm.addEventListener("submit", (e) => {
       e.preventDefault();
       if (!state.currentUser || !state.userStats) return;
+
+      // מאמת שכל שדה שהוקלד בו טקסט נבחר מתוך רשימת החיפוש (שיר/אלבום/זמר קיים בלבד)
+      for (const field of Object.keys(FAV_FIELD_CONFIG)) {
+        const input = document.getElementById(FAV_FIELD_CONFIG[field].inputId);
+        const raw = (input?.value || "").trim();
+        if (raw && raw !== pendingFavoriteSelection[field]) {
+          setFavFormError(`יש לבחור ${FAV_FIELD_CONFIG[field].labelHe} קיים מתוך רשימת החיפוש`);
+          input?.focus();
+          return;
+        }
+      }
+
       state.userStats.favorites = {
-        song: (document.getElementById("fav-song-input")?.value || "").trim().slice(0, 60),
-        album: (document.getElementById("fav-album-input")?.value || "").trim().slice(0, 60),
-        artist: (document.getElementById("fav-artist-input")?.value || "").trim().slice(0, 60)
+        song: pendingFavoriteSelection.song || "",
+        album: pendingFavoriteSelection.album || "",
+        artist: pendingFavoriteSelection.artist || ""
       };
       saveUserStats();
       renderProfileFavorites();

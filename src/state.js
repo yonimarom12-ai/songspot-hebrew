@@ -30,6 +30,9 @@ export const state = {
 
   currentAttempt: 0,
   currentSong: null,
+  lastPlayedArtist: null,
+  recentArtists: [],
+  pendingNextDifficulty: null,
   usedHintInRound: false,
   usedEasySearchInRound: false,
   usedRedFeedbackInRound: false,

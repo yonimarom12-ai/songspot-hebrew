@@ -1,13 +1,13 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119h";
-import { dom } from "../dom.js?v=20261119h";
-import { state } from "../state.js?v=20261119h";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119i";
+import { dom } from "../dom.js?v=20261119i";
+import { state } from "../state.js?v=20261119i";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261119h";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119h";
-import { fetchRandomSong } from "./game.js?v=20261119h";
+} from "./feedback.js?v=20261119i";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119i";
+import { fetchRandomSong } from "./game.js?v=20261119i";
 
 // Drawer & Multi-Select Filters Logic
 export function toggleDrawer(isOpen) {
