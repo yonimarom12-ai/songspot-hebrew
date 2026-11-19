@@ -5,10 +5,10 @@ import {
   CUSTOM_BACKGROUND_PRICE,
   findAvatar,
   findBackground
-} from "../data/shop.js";
-import { state } from "../state.js";
-import { saveUserStats } from "../services/storage.js";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js";
+} from "../data/shop.js?v=20261119h";
+import { state } from "../state.js?v=20261119h";
+import { saveUserStats } from "../services/storage.js?v=20261119h";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261119h";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }

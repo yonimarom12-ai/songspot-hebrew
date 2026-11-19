@@ -1,10 +1,10 @@
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js";
-import { state } from "../state.js";
-import { saveUserStats } from "../services/storage.js";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js";
-import { formatPoints, getPointsBalance } from "./economy.js";
-import { renderShop, clearShopPreview } from "./shop.js";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119h";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261119h";
+import { state } from "../state.js?v=20261119h";
+import { saveUserStats } from "../services/storage.js?v=20261119h";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261119h";
+import { formatPoints, getPointsBalance } from "./economy.js?v=20261119h";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261119h";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;

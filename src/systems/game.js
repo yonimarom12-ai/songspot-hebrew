@@ -1,9 +1,9 @@
-import { ARTIST_BY_NAME } from "../data/artists.js";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js";
-import { dom } from "../dom.js";
-import { state } from "../state.js";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119h";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119h";
+import { dom } from "../dom.js?v=20261119h";
+import { state } from "../state.js?v=20261119h";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119h";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119h";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -11,7 +11,7 @@ import {
   pickFreshSongFromCachedPool,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js";
+} from "../services/itunes.js?v=20261119h";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -19,25 +19,25 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js";
-import { launchWinConfetti } from "./confetti.js";
+} from "./audio.js?v=20261119h";
+import { launchWinConfetti } from "./confetti.js?v=20261119h";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js";
+} from "./feedback.js?v=20261119h";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js";
-import { updateStreakDisplay } from "./profile.js";
+} from "./search.js?v=20261119h";
+import { updateStreakDisplay } from "./profile.js?v=20261119h";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
   updatePointsDisplay
-} from "./economy.js";
+} from "./economy.js?v=20261119h";
 
 export function setActiveDifficultyUI(level) {
   state.currentDifficulty = level;
