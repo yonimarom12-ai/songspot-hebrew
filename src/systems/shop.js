@@ -1,4 +1,11 @@
-import { SHOP_AVATARS, SHOP_BACKGROUNDS, findAvatar, findBackground } from "../data/shop.js";
+import {
+  SHOP_AVATARS,
+  SHOP_BACKGROUNDS,
+  CUSTOM_AVATAR_PRICE,
+  CUSTOM_BACKGROUND_PRICE,
+  findAvatar,
+  findBackground
+} from "../data/shop.js";
 import { state } from "../state.js";
 import { saveUserStats } from "../services/storage.js";
 import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js";
@@ -6,6 +13,7 @@ import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./econom
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
 let isPeeking = false;
+let pendingUploadType = null; // "avatar" | "background"
 
 function getOwnedItems() {
   if (!state.userStats) return [];
@@ -28,11 +36,64 @@ function getEquipped(type) {
     : (state.userStats.equippedBackground || "default");
 }
 
+function getCustomData(type) {
+  if (!state.userStats) return "";
+  return type === "avatar"
+    ? (state.userStats.customAvatarData || "")
+    : (state.userStats.customBackgroundData || "");
+}
+
+function buildCustomBackgroundCss(dataUrl) {
+  return `linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.62)), url("${dataUrl}") center / cover no-repeat`;
+}
+
+function resolveEquippedBg() {
+  const id = getEquipped("background");
+  const customData = getCustomData("background");
+  if (id === "custom" && customData) {
+    return {
+      id: "custom",
+      name: "רקע אישי מתמונה",
+      css: buildCustomBackgroundCss(customData),
+      customDataUrl: customData,
+      price: CUSTOM_BACKGROUND_PRICE
+    };
+  }
+  return findBackground(id);
+}
+
+function resolveEquippedAvatar() {
+  const id = getEquipped("avatar");
+  const customData = getCustomData("avatar");
+  if (id === "custom" && customData) {
+    return {
+      id: "custom",
+      name: "תמונת פרופיל אישית",
+      emoji: "",
+      bg: `url("${customData}") center / cover no-repeat`,
+      customDataUrl: customData,
+      price: CUSTOM_AVATAR_PRICE
+    };
+  }
+  return findAvatar(id);
+}
+
 function setShopMessage(text, kind = "") {
   const el = document.getElementById("shop-msg");
   if (!el) return;
   el.textContent = text;
   el.className = `shop-msg ${kind}`;
+}
+
+function applyAvatarToEl(el, avatar) {
+  if (!el) return;
+  if (avatar.customDataUrl) {
+    el.textContent = "";
+    el.style.background = `url("${avatar.customDataUrl}") center / cover no-repeat`;
+  } else {
+    el.textContent = avatar.emoji || "🎧";
+    el.style.background = avatar.bg || "";
+  }
 }
 
 function applyCosmeticsVisuals(bg, avatar) {
@@ -46,34 +107,28 @@ function applyCosmeticsVisuals(bg, avatar) {
   const navAvatar = document.getElementById("nav-avatar");
   const navIcon = document.getElementById("nav-profile-icon");
   if (navAvatar) {
-    navAvatar.textContent = avatar.emoji;
-    navAvatar.style.background = avatar.bg;
+    applyAvatarToEl(navAvatar, avatar);
     navAvatar.style.display = "inline-flex";
   }
   if (navIcon) navIcon.style.display = "none";
 
   const modalAvatar = document.getElementById("profile-modal-avatar");
-  if (modalAvatar) {
-    modalAvatar.textContent = avatar.emoji;
-    modalAvatar.style.background = avatar.bg;
-  }
+  applyAvatarToEl(modalAvatar, avatar);
 }
 
 // מחיל את הרקע ותמונת הפרופיל שנרכשו והופעלו בפועל
 export function applyEquippedCosmetics() {
-  const bg = findBackground(getEquipped("background"));
-  const avatar = findAvatar(getEquipped("avatar"));
-  applyCosmeticsVisuals(bg, avatar);
+  applyCosmeticsVisuals(resolveEquippedBg(), resolveEquippedAvatar());
 }
 
 // מחיל זמנית את הפריט שבתצוגה מקדימה (בלי לשמור ובלי לשלם)
 function applyPreviewVisuals() {
   const bg = previewSelection?.type === "background"
     ? previewSelection.item
-    : findBackground(getEquipped("background"));
+    : resolveEquippedBg();
   const avatar = previewSelection?.type === "avatar"
     ? previewSelection.item
-    : findAvatar(getEquipped("avatar"));
+    : resolveEquippedAvatar();
   applyCosmeticsVisuals(bg, avatar);
 }
 
@@ -108,9 +163,59 @@ function exitPeekToShop() {
   renderShop();
 }
 
+// דחיסה והקטנה של תמונה בצד הלקוח כדי לשמור בצורה בטוחה ב-localStorage
+function compressUploadedImage(file, type) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("שגיאה בקריאת הקובץ"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("קובץ התמונה לא תקין"));
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("שגיאה בעיבוד התמונה"));
+
+        if (type === "avatar") {
+          const size = 160;
+          canvas.width = size;
+          canvas.height = size;
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        } else {
+          const maxDim = 960;
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function triggerCustomImageUpload(type) {
+  const input = document.getElementById("shop-image-upload-input");
+  if (!input) return;
+  pendingUploadType = type;
+  input.value = "";
+  input.click();
+}
+
 function purchaseOrEquip(type, item) {
   const owned = isOwned(type, item);
   const wasPeeking = isPeeking;
+
+  if (item.id === "custom" && !item.customDataUrl) {
+    triggerCustomImageUpload(type);
+    return;
+  }
 
   if (!owned) {
     if (!state.currentUser) {
@@ -133,6 +238,11 @@ function purchaseOrEquip(type, item) {
     setShopMessage(`✓ רכשת והפעלת את "${item.name}"!`, "success");
   } else {
     setShopMessage(`✓ "${item.name}" הופעל`, "success");
+  }
+
+  if (item.id === "custom" && item.customDataUrl) {
+    if (type === "avatar") state.userStats.customAvatarData = item.customDataUrl;
+    else state.userStats.customBackgroundData = item.customDataUrl;
   }
 
   if (type === "avatar") state.userStats.equippedAvatar = item.id;
@@ -161,7 +271,8 @@ function renderPeekBanner() {
 
   const { type, item } = previewSelection;
   const owned = isOwned(type, item);
-  const equipped = getEquipped(type) === item.id;
+  const isNewCustomUpload = item.id === "custom" && item.customDataUrl !== getCustomData(type);
+  const equipped = getEquipped(type) === item.id && !isNewCustomUpload;
 
   banner.innerHTML = "";
 
@@ -184,7 +295,7 @@ function renderPeekBanner() {
     const buyBtn = document.createElement("button");
     buyBtn.type = "button";
     buyBtn.className = "shop-peek-btn primary";
-    buyBtn.textContent = owned ? "הפעל" : `קנה 💎 ${item.price}`;
+    buyBtn.textContent = owned ? (isNewCustomUpload ? "שמור והפעל" : "הפעל") : `קנה 💎 ${formatPoints(item.price)}`;
     buyBtn.addEventListener("click", () => purchaseOrEquip(type, item));
     actions.appendChild(buyBtn);
   }
@@ -219,15 +330,15 @@ function renderPreviewPanel() {
 
   const { type, item } = previewSelection;
   const owned = isOwned(type, item);
-  const equipped = getEquipped(type) === item.id;
-  const currentBg = type === "background" ? item : findBackground(getEquipped("background"));
-  const currentAvatar = type === "avatar" ? item : findAvatar(getEquipped("avatar"));
+  const isNewCustomUpload = item.id === "custom" && item.customDataUrl !== getCustomData(type);
+  const equipped = getEquipped(type) === item.id && !isNewCustomUpload;
+  const currentBg = type === "background" ? item : resolveEquippedBg();
+  const currentAvatar = type === "avatar" ? item : resolveEquippedAvatar();
   const displayName = state.currentUser || "אורח";
 
   panel.style.display = "flex";
   panel.innerHTML = "";
 
-  // כותרת פאנל תצוגה מקדימה
   const header = document.createElement("div");
   header.className = "shop-preview-header";
 
@@ -257,7 +368,6 @@ function renderPreviewPanel() {
 
   header.append(titleWrap, closeBtn);
 
-  // תצוגת המוקאפ החיה (מראה את הרקע + האוואטר + שחקן מיני)
   const stage = document.createElement("div");
   stage.className = "shop-preview-stage";
   stage.style.background = currentBg.css;
@@ -267,8 +377,7 @@ function renderPreviewPanel() {
 
   const mockAv = document.createElement("span");
   mockAv.className = "shop-preview-mock-avatar";
-  mockAv.style.background = currentAvatar.bg;
-  mockAv.textContent = currentAvatar.emoji;
+  applyAvatarToEl(mockAv, currentAvatar);
 
   const mockName = document.createElement("span");
   mockName.className = "shop-preview-mock-name";
@@ -282,7 +391,6 @@ function renderPreviewPanel() {
 
   stage.append(mockProfile, mockPlay);
 
-  // כפתורי פעולה: קנייה / הפעלה + הצצה על המסך האמיתי
   const actions = document.createElement("div");
   actions.className = "shop-preview-actions";
 
@@ -293,10 +401,10 @@ function renderPreviewPanel() {
     primaryBtn.textContent = "✓ בשימוש כעת";
     primaryBtn.disabled = true;
   } else if (owned) {
-    primaryBtn.textContent = "הפעל פריט";
+    primaryBtn.textContent = isNewCustomUpload ? "שמור והפעל תמונה" : "הפעל פריט";
     primaryBtn.addEventListener("click", () => purchaseOrEquip(type, item));
   } else {
-    primaryBtn.textContent = `קנה ב-💎 ${item.price}`;
+    primaryBtn.textContent = `קנה ב-💎 ${formatPoints(item.price)}`;
     primaryBtn.addEventListener("click", () => purchaseOrEquip(type, item));
   }
 
@@ -307,13 +415,22 @@ function renderPreviewPanel() {
   peekBtn.addEventListener("click", enterPeekMode);
 
   actions.append(primaryBtn, peekBtn);
+
+  if (item.id === "custom") {
+    const changePhotoBtn = document.createElement("button");
+    changePhotoBtn.type = "button";
+    changePhotoBtn.className = "shop-preview-btn change-photo";
+    changePhotoBtn.textContent = "📸 בחר תמונה אחרת";
+    changePhotoBtn.addEventListener("click", () => triggerCustomImageUpload(type));
+    actions.appendChild(changePhotoBtn);
+  }
+
   panel.append(header, stage, actions);
 }
 
 function selectForPreview(type, item) {
   setShopMessage("");
   if (previewSelection && previewSelection.type === type && previewSelection.item.id === item.id) {
-    // לחיצה שנייה על אותו פריט בבעלות מפעילה אותו ישירות לנוחות
     if (isOwned(type, item) && getEquipped(type) !== item.id) {
       purchaseOrEquip(type, item);
       return;
@@ -327,6 +444,105 @@ function selectForPreview(type, item) {
 
   const panel = document.getElementById("shop-preview-panel");
   if (panel) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function buildCustomUploadCard(type) {
+  const isAvatar = type === "avatar";
+  const price = isAvatar ? CUSTOM_AVATAR_PRICE : CUSTOM_BACKGROUND_PRICE;
+  const savedData = getCustomData(type);
+  const owned = getOwnedItems().includes(itemKey(type, "custom"));
+  const equipped = getEquipped(type) === "custom" && Boolean(savedData);
+  const isPreviewed = previewSelection?.type === type && previewSelection?.item.id === "custom";
+
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = `shop-item vip-custom ${equipped ? "equipped" : ""} ${isPreviewed ? "previewing" : ""}`;
+
+  const vipBadge = document.createElement("span");
+  vipBadge.className = "shop-vip-badge";
+  vipBadge.textContent = "👑 VIP · העלאה אישית";
+
+  const row = document.createElement("div");
+  row.className = "shop-vip-row";
+
+  const preview = document.createElement("div");
+  if (isAvatar) {
+    preview.className = "shop-avatar-preview";
+    if (savedData) {
+      preview.style.background = `url("${savedData}") center / cover no-repeat`;
+    } else {
+      preview.style.background = "linear-gradient(135deg,#f5af19,#8e2de2)";
+      preview.textContent = "📸";
+    }
+  } else {
+    preview.className = "shop-bg-preview shop-vip-bg-thumb";
+    if (savedData) {
+      preview.style.background = buildCustomBackgroundCss(savedData);
+    } else {
+      preview.style.background = "linear-gradient(135deg,#2a0b3d 0%,#b88a00 100%)";
+      preview.textContent = "🖼️";
+    }
+  }
+
+  const info = document.createElement("div");
+  info.className = "shop-vip-info";
+
+  const title = document.createElement("span");
+  title.className = "shop-item-name";
+  title.textContent = isAvatar ? "העלה תמונת פרופיל משלך" : "העלה תמונת רקע משלך";
+
+  const sub = document.createElement("span");
+  sub.className = "shop-vip-sub";
+  sub.textContent = owned
+    ? "פתוח בבעלותך · לחץ להפעלה או החלפת תמונה"
+    : "בחר תמונה מהגלריה וצפה בתצוגה מקדימה לפני התשלום";
+
+  info.append(title, sub);
+
+  const action = document.createElement("span");
+  action.className = "shop-item-action";
+  if (equipped) {
+    action.textContent = "בשימוש";
+    action.classList.add("is-equipped");
+  } else if (isPreviewed) {
+    action.textContent = "בתצוגה";
+    action.classList.add("is-previewing");
+  } else if (owned) {
+    action.textContent = savedData ? "הפעל / החלף" : "העלה תמונה";
+    action.classList.add("is-owned");
+  } else {
+    action.textContent = `💎 ${formatPoints(price)}`;
+  }
+
+  row.append(preview, info, action);
+  card.append(vipBadge, row);
+
+  card.addEventListener("click", () => {
+    setShopMessage("");
+    if (owned && savedData) {
+      const customItem = isAvatar
+        ? {
+            id: "custom",
+            name: "תמונת פרופיל אישית",
+            emoji: "",
+            bg: `url("${savedData}") center / cover no-repeat`,
+            customDataUrl: savedData,
+            price
+          }
+        : {
+            id: "custom",
+            name: "רקע אישי מתמונה",
+            css: buildCustomBackgroundCss(savedData),
+            customDataUrl: savedData,
+            price
+          };
+      selectForPreview(type, customItem);
+    } else {
+      triggerCustomImageUpload(type);
+    }
+  });
+
+  return card;
 }
 
 function buildCard(type, item) {
@@ -364,7 +580,7 @@ function buildCard(type, item) {
     action.textContent = "הפעל";
     action.classList.add("is-owned");
   } else {
-    action.textContent = `💎 ${item.price}`;
+    action.textContent = `💎 ${formatPoints(item.price)}`;
   }
 
   card.append(preview, name, action);
@@ -388,6 +604,8 @@ export function renderShop() {
   grid.className = `shop-grid ${activeShopTab === "avatars" ? "avatars" : "backgrounds"}`;
 
   const type = activeShopTab === "avatars" ? "avatar" : "background";
+  grid.appendChild(buildCustomUploadCard(type));
+
   const items = activeShopTab === "avatars" ? SHOP_AVATARS : SHOP_BACKGROUNDS;
   items.forEach(item => grid.appendChild(buildCard(type, item)));
 }
@@ -401,4 +619,50 @@ export function initShopListeners() {
       renderShop();
     });
   });
+
+  const fileInput = document.getElementById("shop-image-upload-input");
+  if (fileInput) {
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      const type = pendingUploadType || (activeShopTab === "avatars" ? "avatar" : "background");
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        setShopMessage("יש לבחור קובץ תמונה בלבד", "error");
+        return;
+      }
+
+      try {
+        setShopMessage("מעבד תמונה לתצוגה מקדימה...", "");
+        const dataUrl = await compressUploadedImage(file, type);
+        const isAvatar = type === "avatar";
+        const price = isAvatar ? CUSTOM_AVATAR_PRICE : CUSTOM_BACKGROUND_PRICE;
+        const customItem = isAvatar
+          ? {
+              id: "custom",
+              name: "תמונת פרופיל אישית",
+              emoji: "",
+              bg: `url("${dataUrl}") center / cover no-repeat`,
+              customDataUrl: dataUrl,
+              price
+            }
+          : {
+              id: "custom",
+              name: "רקע אישי מתמונה",
+              css: buildCustomBackgroundCss(dataUrl),
+              customDataUrl: dataUrl,
+              price
+            };
+
+        setShopMessage("");
+        previewSelection = { type, item: customItem };
+        applyPreviewVisuals();
+        renderShop();
+
+        const panel = document.getElementById("shop-preview-panel");
+        if (panel) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (err) {
+        setShopMessage(err?.message || "שגיאה בטעינת התמונה", "error");
+      }
+    });
+  }
 }

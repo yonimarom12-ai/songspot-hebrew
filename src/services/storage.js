@@ -35,7 +35,10 @@ export function getDefaultStats() {
     wonSongs: [],
     ownedItems: [],
     equippedAvatar: "default",
-    equippedBackground: "default"
+    equippedBackground: "default",
+    customAvatarData: "",
+    customBackgroundData: "",
+    favorites: { song: "", album: "", artist: "" }
   };
 }
 
@@ -54,7 +57,14 @@ export function normalizeStatsObj(parsed) {
     byLevel: { ...def.byLevel, ...(parsed.byLevel || {}) },
     bySpeed: { ...def.bySpeed, ...(parsed.bySpeed || {}) },
     wonSongs: Array.isArray(parsed.wonSongs) ? parsed.wonSongs : [],
-    ownedItems: Array.isArray(parsed.ownedItems) ? parsed.ownedItems : []
+    ownedItems: Array.isArray(parsed.ownedItems) ? parsed.ownedItems : [],
+    customAvatarData: typeof parsed.customAvatarData === "string" ? parsed.customAvatarData : "",
+    customBackgroundData: typeof parsed.customBackgroundData === "string" ? parsed.customBackgroundData : "",
+    favorites: {
+      song: typeof parsed.favorites?.song === "string" ? parsed.favorites.song : "",
+      album: typeof parsed.favorites?.album === "string" ? parsed.favorites.album : "",
+      artist: typeof parsed.favorites?.artist === "string" ? parsed.favorites.artist : ""
+    }
   };
 }
 

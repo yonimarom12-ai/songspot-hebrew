@@ -1,4 +1,7 @@
 // קטלוג פריטי החנות: תמונות פרופיל ורקעים למסך
+export const CUSTOM_AVATAR_PRICE = 1500;
+export const CUSTOM_BACKGROUND_PRICE = 2000;
+
 export const SHOP_AVATARS = [
   { id: "default", name: "אוזניות", emoji: "🎧", bg: "linear-gradient(135deg,#1db954,#0f6e31)", price: 0 },
   { id: "mic", name: "מיקרופון", emoji: "🎤", bg: "linear-gradient(135deg,#ff5f6d,#ffc371)", price: 40 },

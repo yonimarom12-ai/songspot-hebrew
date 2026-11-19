@@ -1,6 +1,7 @@
 import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js";
 import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js";
 import { state } from "../state.js";
+import { saveUserStats } from "../services/storage.js";
 import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js";
 import { formatPoints, getPointsBalance } from "./economy.js";
 import { renderShop, clearShopPreview } from "./shop.js";
@@ -53,6 +54,9 @@ export function renderProfileStatsModal() {
   document.getElementById("stat-best-streak").textContent = `${state.userStats.bestStreak || 0}🔥`;
   if (dom.statPoints) dom.statPoints.textContent = formatPoints(getPointsBalance());
   if (dom.statTotalPoints) dom.statTotalPoints.textContent = formatPoints(state.userStats.totalPointsEarned || getPointsBalance());
+
+  renderProfileFavorites();
+  setFavoritesEditMode(false);
 
   renderStatBars("stats-by-level", DIFFICULTY_ORDER.map(lvl => ({
     label: DIFFICULTIES[lvl].label,
@@ -144,6 +148,45 @@ export function renderProfileStatsModal() {
   }
 }
 
+function renderProfileFavorites() {
+  const favs = state.userStats?.favorites || { song: "", album: "", artist: "" };
+  const pairs = [
+    ["fav-song-display", favs.song],
+    ["fav-album-display", favs.album],
+    ["fav-artist-display", favs.artist]
+  ];
+  pairs.forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const trimmed = (val || "").trim();
+    el.textContent = trimmed || "לא נבחר עדיין";
+    el.classList.toggle("is-empty", !trimmed);
+  });
+}
+
+function setFavoritesEditMode(isEditing) {
+  const view = document.getElementById("profile-favorites-view");
+  const form = document.getElementById("profile-favorites-form");
+  const editBtn = document.getElementById("edit-profile-btn");
+  const savedMsg = document.getElementById("fav-saved-msg");
+  if (!view || !form) return;
+
+  if (isEditing) {
+    const favs = state.userStats?.favorites || { song: "", album: "", artist: "" };
+    const songIn = document.getElementById("fav-song-input");
+    const albumIn = document.getElementById("fav-album-input");
+    const artistIn = document.getElementById("fav-artist-input");
+    if (songIn) songIn.value = favs.song || "";
+    if (albumIn) albumIn.value = favs.album || "";
+    if (artistIn) artistIn.value = favs.artist || "";
+    if (savedMsg) savedMsg.textContent = "";
+  }
+
+  view.style.display = isEditing ? "none" : "flex";
+  form.style.display = isEditing ? "flex" : "none";
+  if (editBtn) editBtn.style.display = isEditing ? "none" : "inline-flex";
+}
+
 export function updateBottomNavActiveTab(activeTab = "game") {
   if (dom.profileBtn) dom.profileBtn.classList.toggle("active", activeTab === "profile");
   if (dom.navGameBtn) dom.navGameBtn.classList.toggle("active", activeTab === "game");
@@ -214,4 +257,37 @@ export function initProfileListeners() {
   dom.profileModalBackdrop.addEventListener("click", (e) => {
     if (e.target === dom.profileModalBackdrop) toggleProfileModal(false);
   });
+
+  const editProfileBtn = document.getElementById("edit-profile-btn");
+  const cancelProfileEditBtn = document.getElementById("cancel-profile-edit-btn");
+  const favForm = document.getElementById("profile-favorites-form");
+
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", () => {
+      if (!state.currentUser) return;
+      setFavoritesEditMode(true);
+    });
+  }
+  if (cancelProfileEditBtn) {
+    cancelProfileEditBtn.addEventListener("click", () => setFavoritesEditMode(false));
+  }
+  if (favForm) {
+    favForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!state.currentUser || !state.userStats) return;
+      state.userStats.favorites = {
+        song: (document.getElementById("fav-song-input")?.value || "").trim().slice(0, 60),
+        album: (document.getElementById("fav-album-input")?.value || "").trim().slice(0, 60),
+        artist: (document.getElementById("fav-artist-input")?.value || "").trim().slice(0, 60)
+      };
+      saveUserStats();
+      renderProfileFavorites();
+      setFavoritesEditMode(false);
+      const savedMsg = document.getElementById("fav-saved-msg");
+      if (savedMsg) {
+        savedMsg.textContent = "✓ הפרופיל נשמר בהצלחה";
+        setTimeout(() => { if (savedMsg) savedMsg.textContent = ""; }, 2600);
+      }
+    });
+  }
 }

@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119e">
-  <link rel="stylesheet" href="styles/header.css?v=20261119e">
-  <link rel="stylesheet" href="styles/player.css?v=20261119e">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119e">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119e">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119e">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119e">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119g">
+  <link rel="stylesheet" href="styles/header.css?v=20261119g">
+  <link rel="stylesheet" href="styles/player.css?v=20261119g">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119g">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119g">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119g">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119g">
 </head>
 
 <body>
@@ -428,13 +428,56 @@
           <div class="stats-lock-content">
             <div class="wallet-summary-card">
               <div class="wallet-summary-main">
-                <span class="wallet-summary-label">💎 יתרת קריסטלים (לחנות העתידית)</span>
+                <span class="wallet-summary-label">💎 יתרת קריסטלים</span>
                 <span class="wallet-summary-val" id="stat-points">0</span>
               </div>
               <div class="wallet-summary-meta">
                 <span>סה"כ נצבר</span>
                 <strong id="stat-total-points">0</strong>
               </div>
+            </div>
+
+            <!-- מועדפים אישיים + עריכת פרופיל -->
+            <div class="profile-favorites-card">
+              <div class="profile-favorites-header">
+                <h3 class="stats-sec-title">⭐ המועדפים שלי</h3>
+                <button type="button" class="edit-profile-btn" id="edit-profile-btn">✏️ ערוך פרופיל</button>
+              </div>
+
+              <div class="favorites-view" id="profile-favorites-view">
+                <div class="fav-row">
+                  <span class="fav-label">🎵 שיר מועדף</span>
+                  <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
+                </div>
+                <div class="fav-row">
+                  <span class="fav-label">💿 אלבום מועדף</span>
+                  <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
+                </div>
+                <div class="fav-row">
+                  <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
+                  <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
+                </div>
+              </div>
+
+              <form class="favorites-edit-form" id="profile-favorites-form" style="display: none;">
+                <label class="fav-field">
+                  <span>🎵 שיר מועדף</span>
+                  <input type="text" class="auth-input" id="fav-song-input" placeholder="לדוגמה: תתארו לכם" maxlength="60" />
+                </label>
+                <label class="fav-field">
+                  <span>💿 אלבום מועדף</span>
+                  <input type="text" class="auth-input" id="fav-album-input" placeholder="לדוגמה: שפויים" maxlength="60" />
+                </label>
+                <label class="fav-field">
+                  <span>🎤 זמר/ת מועדף/ת</span>
+                  <input type="text" class="auth-input" id="fav-artist-input" placeholder="לדוגמה: שלמה ארצי" maxlength="60" />
+                </label>
+                <div class="fav-form-actions">
+                  <button type="submit" class="auth-submit-btn">שמור שינויים</button>
+                  <button type="button" class="logout-btn" id="cancel-profile-edit-btn">ביטול</button>
+                </div>
+              </form>
+              <div class="fav-saved-msg" id="fav-saved-msg"></div>
             </div>
 
             <div class="kpi-grid">
@@ -502,6 +545,7 @@
         <div class="shop-preview-panel" id="shop-preview-panel" style="display: none;"></div>
         <div class="shop-msg" id="shop-msg"></div>
         <div class="shop-grid avatars" id="shop-grid"></div>
+        <input type="file" id="shop-image-upload-input" accept="image/*" style="display: none;" />
       </div>
     </div>
   </div>
@@ -540,7 +584,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119f"></script>
+  <script type="module" src="src/main.js?v=20261119g"></script>
 </body>
 
 </html>
