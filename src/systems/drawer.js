@@ -1,13 +1,12 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119k";
-import { dom } from "../dom.js?v=20261119k";
-import { state } from "../state.js?v=20261119k";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119m";
+import { dom } from "../dom.js?v=20261119m";
+import { state } from "../state.js?v=20261119m";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261119k";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119k";
-import { fetchRandomSong } from "./game.js?v=20261119k";
+} from "./feedback.js?v=20261119m";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119m";
 
 // Drawer & Multi-Select Filters Logic
 export function toggleDrawer(isOpen) {
@@ -93,9 +92,5 @@ export function initDrawerListeners() {
   dom.drawerBackdrop.addEventListener("click", () => toggleDrawer(false));
   dom.drawerApplyBtn.addEventListener("click", () => {
     toggleDrawer(false);
-    const gameScreen = document.getElementById("screen-game");
-    if (gameScreen?.classList.contains("active")) {
-      fetchRandomSong();
-    }
   });
 }

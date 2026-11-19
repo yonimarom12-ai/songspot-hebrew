@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261119k";
-import { dom } from "../dom.js?v=20261119k";
-import { state } from "../state.js?v=20261119k";
-import { saveUserStats } from "../services/storage.js?v=20261119k";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261119m";
+import { dom } from "../dom.js?v=20261119m";
+import { state } from "../state.js?v=20261119m";
+import { saveUserStats } from "../services/storage.js?v=20261119m";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
@@ -116,9 +116,10 @@ export function launchCrystalRewardAnimation(earnedAmount) {
   if (!state.currentUser || !earnedAmount || earnedAmount <= 0) return;
 
   const targetEl = dom.pointsBadge || document.getElementById("home-points-btn");
-  const targetRect = targetEl
-    ? targetEl.getBoundingClientRect()
-    : { left: 40, top: 28, width: 20, height: 20 };
+  const rawRect = targetEl ? targetEl.getBoundingClientRect() : null;
+  const targetRect = (rawRect && rawRect.width > 0 && rawRect.height > 0)
+    ? rawRect
+    : { left: window.innerWidth / 2 - 10, top: 28, width: 20, height: 20 };
 
   const startX = window.innerWidth / 2;
   const startY = window.innerHeight * 0.56;

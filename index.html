@@ -8,14 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119k">
-  <link rel="stylesheet" href="styles/home.css?v=20261119k">
-  <link rel="stylesheet" href="styles/header.css?v=20261119k">
-  <link rel="stylesheet" href="styles/player.css?v=20261119k">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119k">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119k">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119k">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119k">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119m">
+  <link rel="stylesheet" href="styles/home.css?v=20261119m">
+  <link rel="stylesheet" href="styles/header.css?v=20261119m">
+  <link rel="stylesheet" href="styles/player.css?v=20261119m">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119m">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119m">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119m">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119m">
 </head>
 
 <body>
@@ -226,7 +226,7 @@
     <div>
       <header class="top-bar">
         <div class="brand">
-          <button class="lobby-exit-btn" id="exit-to-lobby-btn" type="button" aria-label="יציאה ללובי">🏠 ללובי</button>
+          <button class="lobby-exit-btn" id="exit-to-lobby-btn" type="button" aria-label="יציאה ללובי" title="חזור ללובי">🏠</button>
           <h1 class="brand-title">נחש את השיר</h1>
         </div>
 
@@ -423,20 +423,20 @@
   </div>
   </section>
 
-  <!-- תפריט צד: הגדרות, עשורים וז'אנרים -->
+  <!-- תפריט צד: הגדרות משחק -->
   <div class="drawer-backdrop" id="drawer-backdrop"></div>
-  <aside class="side-drawer" id="side-drawer" aria-label="תפריט הגדרות וסינון">
+  <aside class="side-drawer" id="side-drawer" aria-label="תפריט הגדרות">
     <div class="drawer-header">
       <div class="drawer-title-group">
-        <h2 class="drawer-title">הגדרות וסינון שירים</h2>
-        <p class="drawer-subtitle">התאם ז'אנרים, עשורים ועזרים</p>
+        <h2 class="drawer-title">הגדרות משחק</h2>
+        <p class="drawer-subtitle">התאם עזרים והעדפות</p>
       </div>
       <button class="drawer-close-btn" id="drawer-close-btn" aria-label="סגור תפריט">&times;</button>
     </div>
 
     <div class="drawer-scroll-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <h3 class="drawer-section-title">הגדרות משחק</h3>
+        <h3 class="drawer-section-title">עזרים במשחק</h3>
 
         <div class="setting-row">
           <div class="setting-info">
@@ -465,97 +465,10 @@
             aria-label="הפעל רמזים ב-15 שניות"></button>
         </div>
       </div>
-
-      <div>
-        <h3 class="drawer-section-title">סינון לפי עשורים</h3>
-        <div class="decade-grid" id="decade-list">
-          <button type="button" class="decade-chip full-span selected" data-decade="all">כל השנים והעשורים</button>
-          <button type="button" class="decade-chip" data-decade="1970-1990">שנות ה-70 וה-80 (עד 1990)</button>
-          <button type="button" class="decade-chip" data-decade="1990-2000">שנות ה-90 (1990–2000)</button>
-          <button type="button" class="decade-chip" data-decade="2000-2010">שנות ה-2000 (2000–2010)</button>
-          <button type="button" class="decade-chip" data-decade="2010-2020">שנות ה-2010 (2010–2020)</button>
-          <button type="button" class="decade-chip full-span" data-decade="2020-2030">שנות ה-2020 (2020 והלאה)</button>
-        </div>
-      </div>
-
-      <div>
-        <h3 class="drawer-section-title">בחירת ז'אנרים</h3>
-        <div class="genre-list" id="genre-list">
-          <button type="button" class="genre-option selected" data-genre="all">
-            <div class="genre-option-info">
-              <span class="genre-option-name">כל הז'אנרים</span>
-              <span class="genre-option-desc">כל השירים והאמנים בקטלוג הישראלי</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-
-          <button type="button" class="genre-option" data-genre="pop">
-            <div class="genre-option-info">
-              <span class="genre-option-name">פופ ומיינסטרים</span>
-              <span class="genre-option-desc">נועה קירל, עדן חסון, יסמין מועלם, סטטיק ובן אל...</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-
-          <button type="button" class="genre-option" data-genre="mizrahi">
-            <div class="genre-option-info">
-              <span class="genre-option-name">מזרחית וים-תיכוני</span>
-              <span class="genre-option-desc">עומר אדם, אייל גולן, אושר כהן, פאר טסי, שרית חדד...</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-
-          <button type="button" class="genre-option" data-genre="rock_classics">
-            <div class="genre-option-info">
-              <span class="genre-option-name">רוק וקלאסיקות ישראליות</span>
-              <span class="genre-option-desc">שלמה ארצי, אריק איינשטיין, משינה, כוורת, ברי סחרוף...</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-
-          <button type="button" class="genre-option" data-genre="hiphop">
-            <div class="genre-option-info">
-              <span class="genre-option-name">היפ-הופ, ראפ וגרוב</span>
-              <span class="genre-option-desc">טונה, רביד פלוטניק, הדג נחש, נס וסטילה, שב"ק ס...</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-
-          <button type="button" class="genre-option" data-genre="soul_faith">
-            <div class="genre-option-info">
-              <span class="genre-option-name">נשמה, אמונה ויוצרים</span>
-              <span class="genre-option-desc">חנן בן ארי, ישי ריבו, עידן רייכל, אביתר בנאי, עידן עמדי...</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-
-          <button type="button" class="genre-option" data-genre="indie">
-            <div class="genre-option-info">
-              <span class="genre-option-name">אינדי ואלטרנטיב</span>
-              <span class="genre-option-desc">ג'ירפות, אלג'יר, שלומי שבן, החברים של נטאשה, רוקפור...</span>
-            </div>
-            <span class="genre-check"><svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg></span>
-          </button>
-        </div>
-      </div>
     </div>
 
     <div class="drawer-footer">
-      <button type="button" class="drawer-apply-btn" id="drawer-apply-btn">החל ובחר שיר חדש</button>
+      <button type="button" class="drawer-apply-btn" id="drawer-apply-btn">שמור וסגור</button>
     </div>
   </aside>
 
@@ -815,7 +728,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119k"></script>
+  <script type="module" src="src/main.js?v=20261119m"></script>
 </body>
 
 </html>
