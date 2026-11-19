@@ -1,17 +1,24 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119m";
-import { dom } from "../dom.js?v=20261119m";
-import { state } from "../state.js?v=20261119m";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119n";
+import { dom } from "../dom.js?v=20261119n";
+import { state } from "../state.js?v=20261119n";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261119m";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119m";
+} from "./feedback.js?v=20261119n";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119n";
 
-// Drawer & Multi-Select Filters Logic
+let settingsScreenHandler = null;
+
+export function setSettingsScreenHandler(fn) {
+  settingsScreenHandler = fn;
+}
+
+// פתיחה/סגירה של דף ההגדרות הנפרד
 export function toggleDrawer(isOpen) {
-  dom.sideDrawer.classList.toggle("open", isOpen);
-  dom.drawerBackdrop.classList.toggle("open", isOpen);
+  if (settingsScreenHandler) {
+    settingsScreenHandler(isOpen);
+  }
 }
 
 export function formatFilterPillLabel(selectedSet, labelsMap, allText, pluralUnit) {
@@ -83,14 +90,10 @@ export function initDrawerListeners() {
     updateHintsPanelVisibility();
   });
 
-  dom.easySearchStatusPill.addEventListener("click", () => toggleDrawer(true));
-  dom.redFeedbackStatusPill.addEventListener("click", () => toggleDrawer(true));
-  dom.menuToggleBtn.addEventListener("click", () => toggleDrawer(true));
-  dom.activeGenrePill.addEventListener("click", () => toggleDrawer(true));
-  dom.activeDecadePill.addEventListener("click", () => toggleDrawer(true));
-  dom.drawerCloseBtn.addEventListener("click", () => toggleDrawer(false));
-  dom.drawerBackdrop.addEventListener("click", () => toggleDrawer(false));
-  dom.drawerApplyBtn.addEventListener("click", () => {
-    toggleDrawer(false);
-  });
+  if (dom.easySearchStatusPill) dom.easySearchStatusPill.addEventListener("click", () => toggleDrawer(true));
+  if (dom.redFeedbackStatusPill) dom.redFeedbackStatusPill.addEventListener("click", () => toggleDrawer(true));
+  if (dom.menuToggleBtn) dom.menuToggleBtn.addEventListener("click", () => toggleDrawer(true));
+  if (dom.drawerApplyBtn) {
+    dom.drawerApplyBtn.addEventListener("click", () => toggleDrawer(false));
+  }
 }

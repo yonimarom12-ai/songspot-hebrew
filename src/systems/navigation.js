@@ -1,14 +1,15 @@
-import { state } from "../state.js?v=20261119m";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261119m";
-import { updateFilterPillsUI, toggleDrawer } from "./drawer.js?v=20261119m";
-import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261119m";
-import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261119m";
+import { state } from "../state.js?v=20261119n";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261119n";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261119n";
+import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261119n";
+import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261119n";
 
 const SCREEN_IDS = {
   home: "screen-home",
   "setup-genres": "screen-setup-genres",
   "setup-decades": "screen-setup-decades",
   mode: "screen-mode",
+  settings: "screen-settings",
   game: "screen-game"
 };
 
@@ -71,6 +72,7 @@ const MODE_CATALOG = {
 
 let currentScreen = "home";
 let currentModeKey = null;
+let returnScreenFromSettings = "home";
 
 export function showScreen(screenName) {
   currentScreen = screenName;
@@ -79,10 +81,10 @@ export function showScreen(screenName) {
     if (el) el.classList.toggle("active", key === screenName);
   });
 
-  // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/מודים
+  // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/מודים/הגדרות
   document.body.classList.toggle("hide-bottom-nav", screenName !== "home");
 
-  if (screenName !== "game") {
+  if (screenName !== "game" && screenName !== "settings") {
     stopAudioVisuals();
     releaseMediaElement();
     const reveal = document.getElementById("result-banner");
@@ -152,6 +154,21 @@ function startGameDirectly(difficulty = "easy") {
 }
 
 export function initNavigationListeners() {
+  // מחבר את פתיחת/סגירת ההגדרות כדף מסך מלא נפרד
+  setSettingsScreenHandler((isOpen) => {
+    if (isOpen) {
+      if (currentScreen !== "settings") returnScreenFromSettings = currentScreen;
+      showScreen("settings");
+    } else {
+      showScreen(returnScreenFromSettings || "home");
+    }
+  });
+
+  const settingsBackBtn = document.getElementById("settings-back-btn");
+  if (settingsBackBtn) {
+    settingsBackBtn.addEventListener("click", () => toggleDrawer(false));
+  }
+
   // כפתורי לובי עליונים
   const homeAvatarBtn = document.getElementById("home-avatar-btn");
   const homeStreakBtn = document.getElementById("home-streak-btn");

@@ -1,9 +1,9 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119m";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119m";
-import { dom } from "../dom.js?v=20261119m";
-import { state } from "../state.js?v=20261119m";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119m";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119m";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119n";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119n";
+import { dom } from "../dom.js?v=20261119n";
+import { state } from "../state.js?v=20261119n";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119n";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119n";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -12,7 +12,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261119m";
+} from "../services/itunes.js?v=20261119n";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -20,26 +20,26 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261119m";
-import { launchWinConfetti } from "./confetti.js?v=20261119m";
+} from "./audio.js?v=20261119n";
+import { launchWinConfetti } from "./confetti.js?v=20261119n";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261119m";
+} from "./feedback.js?v=20261119n";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261119m";
-import { updateStreakDisplay } from "./profile.js?v=20261119m";
+} from "./search.js?v=20261119n";
+import { updateStreakDisplay } from "./profile.js?v=20261119n";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261119m";
+} from "./economy.js?v=20261119n";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;

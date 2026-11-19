@@ -523,6 +523,12 @@
 }
 
 /* Mode Detail Screen */
+.settings-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .mode-detail-card {
   background: var(--surface);
   border: 1.5px solid var(--border);

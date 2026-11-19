@@ -8,14 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119m">
-  <link rel="stylesheet" href="styles/home.css?v=20261119m">
-  <link rel="stylesheet" href="styles/header.css?v=20261119m">
-  <link rel="stylesheet" href="styles/player.css?v=20261119m">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119m">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119m">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119m">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119m">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119n">
+  <link rel="stylesheet" href="styles/home.css?v=20261119n">
+  <link rel="stylesheet" href="styles/header.css?v=20261119n">
+  <link rel="stylesheet" href="styles/player.css?v=20261119n">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119n">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119n">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119n">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119n">
 </head>
 
 <body>
@@ -423,21 +423,20 @@
   </div>
   </section>
 
-  <!-- תפריט צד: הגדרות משחק -->
-  <div class="drawer-backdrop" id="drawer-backdrop"></div>
-  <aside class="side-drawer" id="side-drawer" aria-label="תפריט הגדרות">
-    <div class="drawer-header">
-      <div class="drawer-title-group">
-        <h2 class="drawer-title">הגדרות משחק</h2>
-        <p class="drawer-subtitle">התאם עזרים והעדפות</p>
+  <!-- ===== מסך 6: דף הגדרות משחק ===== -->
+  <section class="app-screen" id="screen-settings" aria-label="הגדרות משחק">
+    <div class="app-shell setup-shell">
+      <div class="setup-top-bar">
+        <button type="button" class="setup-back-btn" id="settings-back-btn">→ חזור</button>
+        <span class="setup-step-badge">⚙️ הגדרות</span>
       </div>
-      <button class="drawer-close-btn" id="drawer-close-btn" aria-label="סגור תפריט">&times;</button>
-    </div>
 
-    <div class="drawer-scroll-body">
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <h3 class="drawer-section-title">עזרים במשחק</h3>
+      <div class="setup-header">
+        <h2 class="setup-title">הגדרות משחק</h2>
+        <p class="setup-subtitle">התאם עזרים והעדפות לפני או במהלך המשחק</p>
+      </div>
 
+      <div class="settings-page-list">
         <div class="setting-row">
           <div class="setting-info">
             <span class="setting-name">חיפוש קל (צמצום 50%)</span>
@@ -465,12 +464,10 @@
             aria-label="הפעל רמזים ב-15 שניות"></button>
         </div>
       </div>
-    </div>
 
-    <div class="drawer-footer">
-      <button type="button" class="drawer-apply-btn" id="drawer-apply-btn">שמור וסגור</button>
+      <button type="button" class="setup-confirm-btn" id="drawer-apply-btn">שמור וחזור</button>
     </div>
-  </aside>
+  </section>
 
   <!-- חלון פרופיל וסטטיסטיקות -->
   <div class="modal-backdrop" id="profile-modal-backdrop">
@@ -728,7 +725,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119m"></script>
+  <script type="module" src="src/main.js?v=20261119n"></script>
 </body>
 
 </html>
