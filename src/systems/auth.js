@@ -4,6 +4,7 @@ import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, saf
 import { stopGalleryPreview } from "./gallery.js";
 import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js";
 import { updatePointsDisplay } from "./economy.js";
+import { applyEquippedCosmetics } from "./shop.js";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -138,6 +139,7 @@ export function initAuthListeners() {
     setAuthMessage("נרשמת והתחברת בהצלחה!", "success");
     updateStreakDisplay();
     updatePointsDisplay();
+    applyEquippedCosmetics();
     renderProfileStatsModal();
   });
 
@@ -161,6 +163,7 @@ export function initAuthListeners() {
     setAuthMessage("");
     updateStreakDisplay();
     updatePointsDisplay();
+    applyEquippedCosmetics();
     renderProfileStatsModal();
   });
 
@@ -229,6 +232,7 @@ export function initAuthListeners() {
     setAuthMessage("הסיסמא אופסה והתחברת בהצלחה!", "success");
     updateStreakDisplay();
     updatePointsDisplay();
+    applyEquippedCosmetics();
     renderProfileStatsModal();
   });
 
@@ -239,6 +243,7 @@ export function initAuthListeners() {
     state.userStats = loadUserStats();
     updateStreakDisplay();
     updatePointsDisplay();
+    applyEquippedCosmetics();
     renderProfileStatsModal();
   });
 }

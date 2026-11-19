@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119c">
-  <link rel="stylesheet" href="styles/header.css?v=20261119c">
-  <link rel="stylesheet" href="styles/player.css?v=20261119c">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119c">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119c">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119c">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119c">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119d">
+  <link rel="stylesheet" href="styles/header.css?v=20261119d">
+  <link rel="stylesheet" href="styles/player.css?v=20261119d">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119d">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119d">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119d">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119d">
 </head>
 
 <body>
@@ -357,7 +357,8 @@
         <!-- סרגל משתמש מחובר -->
         <div class="logged-user-bar" id="logged-user-bar">
           <div class="logged-user-info">
-            <span>👤 מחובר בתור: <strong id="logged-username-display"
+            <span class="profile-modal-avatar" id="profile-modal-avatar">🎧</span>
+            <span>מחובר בתור: <strong id="logged-username-display"
                 style="color: var(--spotify-green);"></strong></span>
           </div>
           <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
@@ -478,7 +479,7 @@
     </div>
   </div>
 
-  <!-- חלון חנות הקריסטלים (בקרוב) -->
+  <!-- חלון חנות הקריסטלים -->
   <div class="modal-backdrop" id="shop-modal-backdrop">
     <div class="profile-modal" role="dialog" aria-label="חנות הקריסטלים">
       <div class="modal-header">
@@ -493,11 +494,13 @@
           </div>
         </div>
 
-        <div class="empty-gallery-msg" style="padding: 28px 16px; font-size: 13px; line-height: 1.6;">
-          <div style="font-size: 28px; margin-bottom: 8px;">🛒</div>
-          <strong style="color: var(--text-main); font-size: 15px; display: block; margin-bottom: 4px;">החנות בבנייה ותיפתח בקרוב!</strong>
-          <span>המשך לצבור קריסטלים בניחושים נכונים — בקרוב תוכל לרכוש כאן עזרים למשחק, הקפאת רצף, ועיצובים מיוחדים.</span>
+        <div class="shop-tabs">
+          <button type="button" class="shop-tab active" data-shop-tab="avatars">תמונות פרופיל</button>
+          <button type="button" class="shop-tab" data-shop-tab="backgrounds">רקעים למסך</button>
         </div>
+
+        <div class="shop-msg" id="shop-msg"></div>
+        <div class="shop-grid avatars" id="shop-grid"></div>
       </div>
     </div>
   </div>
@@ -506,7 +509,8 @@
   <nav class="bottom-nav" aria-label="ניווט ראשי">
     <div class="bottom-nav-inner">
       <button class="bottom-nav-item" id="profile-btn" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+        <span class="nav-avatar" id="nav-avatar" style="display: none;"></span>
+        <svg id="nav-profile-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
         </svg>
         <span class="bottom-nav-label" id="profile-btn-label">אורח</span>
@@ -532,7 +536,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119c"></script>
+  <script type="module" src="src/main.js?v=20261119d"></script>
 </body>
 
 </html>

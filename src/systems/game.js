@@ -220,7 +220,7 @@ export function endRound(won) {
   stopAudioVisuals(won ? 100 : 0);
   closeSuggestionsDropdown();
   dom.hintsPanel.style.display = "none";
-  dom.discWrapper.classList.toggle("revealed", Boolean(won));
+  dom.discWrapper.classList.add("revealed");
   dom.durationBadge.style.display = "none";
   if (dom.timelineMarker) dom.timelineMarker.style.display = "none";
 

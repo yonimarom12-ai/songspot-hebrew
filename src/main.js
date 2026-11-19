@@ -7,6 +7,7 @@ import { initSearchListeners } from "./systems/search.js";
 import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js";
 import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js";
 import { updatePointsDisplay } from "./systems/economy.js";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js";
 import { initAuthListeners } from "./systems/auth.js";
 import { initDrawerListeners } from "./systems/drawer.js";
 import {
@@ -36,6 +37,7 @@ function bootApp() {
   initAuthListeners();
   initGalleryAudioListeners();
   initProfileListeners();
+  initShopListeners();
 
   // Core game control bindings
   dom.playBtn.addEventListener("click", playSnippet);
@@ -47,6 +49,7 @@ function bootApp() {
   // Boot application
   updateStreakDisplay();
   updatePointsDisplay();
+  applyEquippedCosmetics();
   fetchRandomSong();
 }
 

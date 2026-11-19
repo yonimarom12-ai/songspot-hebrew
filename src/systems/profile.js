@@ -3,6 +3,7 @@ import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js";
 import { state } from "../state.js";
 import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js";
 import { formatPoints, getPointsBalance } from "./economy.js";
+import { renderShop } from "./shop.js";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -155,9 +156,7 @@ export function toggleShopModal(isOpen) {
       stopGalleryPreview();
       dom.profileModalBackdrop.classList.remove("open");
     }
-    if (dom.shopPointsBalance) {
-      dom.shopPointsBalance.textContent = formatPoints(getPointsBalance());
-    }
+    renderShop();
   }
   if (dom.shopModalBackdrop) {
     dom.shopModalBackdrop.classList.toggle("open", isOpen);

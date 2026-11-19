@@ -32,7 +32,10 @@ export function getDefaultStats() {
     totalPointsEarned: 0,
     byLevel: { easy: 0, medium: 0, hard: 0, very_hard: 0, impossible: 0 },
     bySpeed: { "0.1": 0, "0.5": 0, "2": 0, "8": 0, "15": 0 },
-    wonSongs: []
+    wonSongs: [],
+    ownedItems: [],
+    equippedAvatar: "default",
+    equippedBackground: "default"
   };
 }
 
@@ -50,7 +53,8 @@ export function normalizeStatsObj(parsed) {
     totalPointsEarned,
     byLevel: { ...def.byLevel, ...(parsed.byLevel || {}) },
     bySpeed: { ...def.bySpeed, ...(parsed.bySpeed || {}) },
-    wonSongs: Array.isArray(parsed.wonSongs) ? parsed.wonSongs : []
+    wonSongs: Array.isArray(parsed.wonSongs) ? parsed.wonSongs : [],
+    ownedItems: Array.isArray(parsed.ownedItems) ? parsed.ownedItems : []
   };
 }
 
