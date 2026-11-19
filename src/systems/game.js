@@ -57,6 +57,7 @@ export function resetUI() {
   state.currentAttempt = 0;
   state.usedHintInRound = false;
   state.usedEasySearchInRound = state.easySearchFiftyActive;
+  state.usedRedFeedbackInRound = state.redFeedbackEnabled;
   state.audioBuffer = null;
   state.rawAudioBuffer = null;
   stopAudioVisuals(0);
@@ -228,8 +229,9 @@ export function endRound(won) {
   const playedDifficulty = state.currentDifficulty;
   const usedHint = state.usedHintInRound;
   const usedEasySearch = state.usedEasySearchInRound || state.easySearchFiftyActive;
+  const usedRedFeedback = (state.usedRedFeedbackInRound || state.redFeedbackEnabled) && solvedAtSec >= 8;
   const earnedPoints = won
-    ? calculateRoundReward(solvedAtSec, playedDifficulty, { usedHint, usedEasySearch })
+    ? calculateRoundReward(solvedAtSec, playedDifficulty, { usedHint, usedEasySearch, usedRedFeedback })
     : 0;
   recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints);
 
@@ -255,6 +257,7 @@ export function endRound(won) {
         if (mult > 1) notes.push(`×${mult}`);
         if (usedHint && playedDifficulty === "impossible") notes.push("רמז ×0.5");
         if (usedEasySearch) notes.push("חיפוש קל ×0.5");
+        if (usedRedFeedback) notes.push("חיווי אדום ×0.5");
         const suffix = notes.length > 0 ? ` (${notes.join(" · ")})` : "";
         dom.pointsEarnedNotice.textContent = `💎 +${formatPoints(earnedPoints)} קריסטלים${suffix}`;
       }

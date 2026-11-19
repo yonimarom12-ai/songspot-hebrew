@@ -70,6 +70,9 @@ export function initDrawerListeners() {
 
   dom.redFeedbackSettingToggle.addEventListener("click", () => {
     state.redFeedbackEnabled = !state.redFeedbackEnabled;
+    if (state.redFeedbackEnabled) {
+      state.usedRedFeedbackInRound = true;
+    }
     dom.redFeedbackSettingToggle.classList.toggle("on", state.redFeedbackEnabled);
     updateSettingsStatusPills();
     updateSearchBarProximityFeedback(dom.guessInput.value);

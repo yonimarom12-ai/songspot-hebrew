@@ -19,7 +19,7 @@ export function formatPoints(value) {
 export function calculateRoundReward(
   durationSec,
   difficultyLevel,
-  { usedHint = false, usedEasySearch = false } = {}
+  { usedHint = false, usedEasySearch = false, usedRedFeedback = false } = {}
 ) {
   // משתמש לא רשום (אורח) לא יכול להרוויח קריסטלים
   if (!state.currentUser) return 0;
@@ -39,6 +39,11 @@ export function calculateRoundReward(
 
   // בחיפוש קל מקבלים חצי (×0.5) מהכמות הרגילה
   if (usedEasySearch) {
+    reward *= 0.5;
+  }
+
+  // בחיווי אדום מקבלים 50% פחות קריסטלים בשלבים 8 ו-15 שניות
+  if (usedRedFeedback && Number(durationSec) >= 8) {
     reward *= 0.5;
   }
 

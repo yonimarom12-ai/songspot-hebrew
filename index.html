@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119d">
-  <link rel="stylesheet" href="styles/header.css?v=20261119d">
-  <link rel="stylesheet" href="styles/player.css?v=20261119d">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119d">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119d">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119d">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119d">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119e">
+  <link rel="stylesheet" href="styles/header.css?v=20261119e">
+  <link rel="stylesheet" href="styles/player.css?v=20261119e">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119e">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119e">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119e">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119e">
 </head>
 
 <body>
@@ -237,7 +237,7 @@
         <div class="setting-row">
           <div class="setting-info">
             <span class="setting-name">חיווי אדום בהקלדה שגויה (מ-8ש')</span>
-            <span class="setting-desc">צובע את שורת החיפוש באדום אם מקלידים אותיות שגויות משלב 8 שניות</span>
+            <span class="setting-desc">צובע את שורת החיפוש באדום בהקלדה שגויה משלב 8ש' (מזכה ב-×0.5 קריסטלים ב-8ש' ו-15ש')</span>
           </div>
           <button type="button" class="switch-toggle" id="red-feedback-setting-toggle"
             aria-label="הפעל חיווי אדום ב-8 שניות"></button>
@@ -248,7 +248,7 @@
             <span class="setting-name">רמזים בשלב 15 שניות</span>
             <span class="setting-desc">הצג כפתורי רמז (זמר, שנה, אות ראשונה) כשמגיעים ל-15ש'</span>
           </div>
-          <button type="button" class="switch-toggle on" id="hints-setting-toggle"
+          <button type="button" class="switch-toggle" id="hints-setting-toggle"
             aria-label="הפעל רמזים ב-15 שניות"></button>
         </div>
       </div>
@@ -499,11 +499,15 @@
           <button type="button" class="shop-tab" data-shop-tab="backgrounds">רקעים למסך</button>
         </div>
 
+        <div class="shop-preview-panel" id="shop-preview-panel" style="display: none;"></div>
         <div class="shop-msg" id="shop-msg"></div>
         <div class="shop-grid avatars" id="shop-grid"></div>
       </div>
     </div>
   </div>
+
+  <!-- באנר צף למצב הצצה (תצוגה מקדימה על מסך המשחק) -->
+  <div class="shop-peek-banner" id="shop-peek-banner" role="region" aria-label="תצוגה מקדימה"></div>
 
   <!-- סרגל ניווט תחתון (בסגנון אפליקציות / אינסטגרם) -->
   <nav class="bottom-nav" aria-label="ניווט ראשי">
@@ -536,7 +540,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119d"></script>
+  <script type="module" src="src/main.js?v=20261119f"></script>
 </body>
 
 </html>

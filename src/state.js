@@ -22,8 +22,8 @@ export const state = {
   currentDifficulty: "easy",
   selectedGenres: new Set(["all"]),
   selectedDecades: new Set(["all"]),
-  hintsEnabled: true,
   // כבוי כברירת מחדל לפי בקשת המשתמש
+  hintsEnabled: false,
   easySearchFiftyActive: false,
   redFeedbackEnabled: false,
   currentRoundEasyMask: new Map(),
@@ -32,6 +32,7 @@ export const state = {
   currentSong: null,
   usedHintInRound: false,
   usedEasySearchInRound: false,
+  usedRedFeedbackInRound: false,
   searchDebounce: null,
   activeFetchRoundId: 0,
   isPlayingSnippet: false,
