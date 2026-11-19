@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261119i";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261119i";
-import { state } from "../state.js?v=20261119i";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261119j";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261119j";
+import { state } from "../state.js?v=20261119j";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -261,10 +261,13 @@ export function stopAudioVisuals(finalPct = null) {
   snippetStartPerf = null;
   snippetStartCtxTime = null;
   clearTimeout(state.uiTimer);
+  state.uiTimer = null;
   clearTimeout(state.playStartGuardTimer);
   state.playStartGuardTimer = null;
-  cancelAnimationFrame(state.uiTimer);
+  cancelAnimationFrame(state.rafWatchId);
+  state.rafWatchId = null;
   cancelAnimationFrame(state.rafProgressId);
+  state.rafProgressId = null;
 
   if (state.activeOnPlayingHandler) {
     state.fallbackAudio.removeEventListener("playing", state.activeOnPlayingHandler);
@@ -408,7 +411,7 @@ function playViaMediaElement(duration, targetPct) {
           realStartStamp = now;
           startProgressLoop(activeDurationSec, true);
         }
-        state.uiTimer = requestAnimationFrame(watch);
+        state.rafWatchId = requestAnimationFrame(watch);
         return;
       }
 
@@ -416,10 +419,10 @@ function playViaMediaElement(duration, targetPct) {
         stopAudioVisuals(activeTargetPct);
         releaseMediaElement();
       } else {
-        state.uiTimer = requestAnimationFrame(watch);
+        state.rafWatchId = requestAnimationFrame(watch);
       }
     };
-    state.uiTimer = requestAnimationFrame(watch);
+    state.rafWatchId = requestAnimationFrame(watch);
   };
 
   state.activeOnPlayingHandler = () => {
@@ -520,8 +523,8 @@ export function playSnippet() {
       if (buffer) {
         startBufferSnippet(ctx, buffer, duration, targetPct);
       } else {
-        stopAudioVisuals();
-        if (dom.statusLabel) dom.statusLabel.textContent = "לחץ שוב על ניגון";
+        // גיבוי אוטומטי ל-<audio> בלי לדרוש מהמשתמש ללחוץ שוב על ניגון
+        playViaMediaElement(duration, targetPct);
       }
     })();
     return;

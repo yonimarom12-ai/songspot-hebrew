@@ -1,13 +1,21 @@
-import { dom } from "../dom.js?v=20261119i";
-import { state } from "../state.js?v=20261119i";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261119i";
-import { stopGalleryPreview } from "./gallery.js?v=20261119i";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261119i";
-import { updatePointsDisplay } from "./economy.js?v=20261119i";
-import { applyEquippedCosmetics } from "./shop.js?v=20261119i";
+import { dom } from "../dom.js?v=20261119j";
+import { state } from "../state.js?v=20261119j";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261119j";
+import { stopGalleryPreview } from "./gallery.js?v=20261119j";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261119j";
+import { updatePointsDisplay } from "./economy.js?v=20261119j";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261119j";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
+
+function syncAuthUI() {
+  clearShopPreview();
+  updateStreakDisplay();
+  updatePointsDisplay();
+  applyEquippedCosmetics();
+  renderProfileStatsModal();
+}
 
 export function findExistingAccountKey(accounts, rawUsername) {
   const target = (rawUsername || "").trim().toLowerCase();
@@ -137,10 +145,7 @@ export function initAuthListeners() {
     dom.registerForm.reset();
     updateLiveUsernameFeedback();
     setAuthMessage("נרשמת והתחברת בהצלחה!", "success");
-    updateStreakDisplay();
-    updatePointsDisplay();
-    applyEquippedCosmetics();
-    renderProfileStatsModal();
+    syncAuthUI();
   });
 
   dom.loginForm.addEventListener("submit", (e) => {
@@ -161,10 +166,7 @@ export function initAuthListeners() {
     state.userStats = normalizeStatsObj(acc.stats);
     dom.loginForm.reset();
     setAuthMessage("");
-    updateStreakDisplay();
-    updatePointsDisplay();
-    applyEquippedCosmetics();
-    renderProfileStatsModal();
+    syncAuthUI();
   });
 
   dom.sendResetCodeBtn.addEventListener("click", () => {
@@ -186,12 +188,23 @@ export function initAuthListeners() {
 
     state.pendingResetAccountKey = foundKey;
     state.pendingResetCode = String(Math.floor(100000 + Math.random() * 900000));
-    const targetEmail = accounts[foundKey].email;
+    const targetEmail = accounts[foundKey].email || "";
 
-    dom.simulatedEmailBox.innerHTML = `
-      📧 <strong>נשלח קוד אימות לכתובת ${targetEmail}</strong><br/>
-      <span>קוד האימות שלך לשחזור הסיסמא הוא: <strong style="color:var(--spotify-green); font-size:13px; letter-spacing:1px;">${state.pendingResetCode}</strong></span>
-    `;
+    // בניית DOM בטוחה עם textContent (ללא innerHTML על מייל משתמש)
+    dom.simulatedEmailBox.textContent = "";
+    const line1 = document.createElement("strong");
+    line1.textContent = `📧 נשלח קוד אימות לכתובת ${targetEmail}`;
+    const br = document.createElement("br");
+    const line2 = document.createElement("span");
+    line2.textContent = "קוד האימות שלך לשחזור הסיסמא הוא: ";
+    const codeStrong = document.createElement("strong");
+    codeStrong.style.color = "var(--spotify-green)";
+    codeStrong.style.fontSize = "13px";
+    codeStrong.style.letterSpacing = "1px";
+    codeStrong.textContent = state.pendingResetCode;
+    line2.appendChild(codeStrong);
+    dom.simulatedEmailBox.append(line1, br, line2);
+
     dom.simulatedEmailBox.classList.add("visible");
     dom.forgotStep2.style.display = "flex";
     setAuthMessage("קוד אימות בן 6 ספרות נשלח למייל שלך!", "success");
@@ -230,10 +243,7 @@ export function initAuthListeners() {
     dom.forgotStep2.style.display = "none";
     dom.forgotForm.reset();
     setAuthMessage("הסיסמא אופסה והתחברת בהצלחה!", "success");
-    updateStreakDisplay();
-    updatePointsDisplay();
-    applyEquippedCosmetics();
-    renderProfileStatsModal();
+    syncAuthUI();
   });
 
   dom.logoutBtn.addEventListener("click", () => {
@@ -241,9 +251,6 @@ export function initAuthListeners() {
     state.currentUser = null;
     safeStorageRemove("songspot_current_user_v1");
     state.userStats = loadUserStats();
-    updateStreakDisplay();
-    updatePointsDisplay();
-    applyEquippedCosmetics();
-    renderProfileStatsModal();
+    syncAuthUI();
   });
 }

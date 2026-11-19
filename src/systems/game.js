@@ -1,9 +1,9 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119i";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119i";
-import { dom } from "../dom.js?v=20261119i";
-import { state } from "../state.js?v=20261119i";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119i";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119i";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119j";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119j";
+import { dom } from "../dom.js?v=20261119j";
+import { state } from "../state.js?v=20261119j";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119j";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119j";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -12,7 +12,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261119i";
+} from "../services/itunes.js?v=20261119j";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -20,25 +20,25 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261119i";
-import { launchWinConfetti } from "./confetti.js?v=20261119i";
+} from "./audio.js?v=20261119j";
+import { launchWinConfetti } from "./confetti.js?v=20261119j";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261119i";
+} from "./feedback.js?v=20261119j";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261119i";
-import { updateStreakDisplay } from "./profile.js?v=20261119i";
+} from "./search.js?v=20261119j";
+import { updateStreakDisplay } from "./profile.js?v=20261119j";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
   updatePointsDisplay
-} from "./economy.js?v=20261119i";
+} from "./economy.js?v=20261119j";
 
 export function setActiveDifficultyUI(level) {
   state.currentDifficulty = level;

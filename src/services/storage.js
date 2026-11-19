@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261119i";
+import { state } from "../state.js?v=20261119j";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -12,7 +12,10 @@ export function safeStorageGet(key) {
 export function safeStorageSet(key, value) {
   try {
     window.localStorage.setItem(key, value);
-  } catch (e) { }
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 export function safeStorageRemove(key) {
@@ -77,7 +80,7 @@ export function loadAccountsMap() {
 }
 
 export function saveAccountsMap(accounts) {
-  safeStorageSet("songspot_accounts_v1", JSON.stringify(accounts));
+  return safeStorageSet("songspot_accounts_v1", JSON.stringify(accounts));
 }
 
 export function loadUserStats() {
@@ -101,12 +104,13 @@ export function saveUserStats() {
       const accounts = loadAccountsMap();
       if (accounts[state.currentUser]) {
         accounts[state.currentUser].stats = state.userStats;
-        saveAccountsMap(accounts);
-        return;
+        return saveAccountsMap(accounts);
       }
     }
-    safeStorageSet("songspot_guest_stats_v2", JSON.stringify(state.userStats));
-  } catch (e) { }
+    return safeStorageSet("songspot_guest_stats_v2", JSON.stringify(state.userStats));
+  } catch (e) {
+    return false;
+  }
 }
 
 export function loadPlayedIds() {

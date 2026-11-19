@@ -5,10 +5,10 @@ import {
   CUSTOM_BACKGROUND_PRICE,
   findAvatar,
   findBackground
-} from "../data/shop.js?v=20261119i";
-import { state } from "../state.js?v=20261119i";
-import { saveUserStats } from "../services/storage.js?v=20261119i";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261119i";
+} from "../data/shop.js?v=20261119j";
+import { state } from "../state.js?v=20261119j";
+import { saveUserStats } from "../services/storage.js?v=20261119j";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261119j";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -47,17 +47,31 @@ function buildCustomBackgroundCss(dataUrl) {
   return `linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.62)), url("${dataUrl}") center / cover no-repeat`;
 }
 
+function buildCustomItem(type, dataUrl) {
+  if (type === "avatar") {
+    return {
+      id: "custom",
+      name: "תמונת פרופיל אישית",
+      emoji: "",
+      bg: `url("${dataUrl}") center / cover no-repeat`,
+      customDataUrl: dataUrl,
+      price: CUSTOM_AVATAR_PRICE
+    };
+  }
+  return {
+    id: "custom",
+    name: "רקע אישי מתמונה",
+    css: buildCustomBackgroundCss(dataUrl),
+    customDataUrl: dataUrl,
+    price: CUSTOM_BACKGROUND_PRICE
+  };
+}
+
 function resolveEquippedBg() {
   const id = getEquipped("background");
   const customData = getCustomData("background");
   if (id === "custom" && customData) {
-    return {
-      id: "custom",
-      name: "רקע אישי מתמונה",
-      css: buildCustomBackgroundCss(customData),
-      customDataUrl: customData,
-      price: CUSTOM_BACKGROUND_PRICE
-    };
+    return buildCustomItem("background", customData);
   }
   return findBackground(id);
 }
@@ -66,14 +80,7 @@ function resolveEquippedAvatar() {
   const id = getEquipped("avatar");
   const customData = getCustomData("avatar");
   if (id === "custom" && customData) {
-    return {
-      id: "custom",
-      name: "תמונת פרופיל אישית",
-      emoji: "",
-      bg: `url("${customData}") center / cover no-repeat`,
-      customDataUrl: customData,
-      price: CUSTOM_AVATAR_PRICE
-    };
+    return buildCustomItem("avatar", customData);
   }
   return findAvatar(id);
 }
@@ -240,6 +247,9 @@ function purchaseOrEquip(type, item) {
     setShopMessage(`✓ "${item.name}" הופעל`, "success");
   }
 
+  const prevCustomData = getCustomData(type);
+  const prevEquipped = getEquipped(type);
+
   if (item.id === "custom" && item.customDataUrl) {
     if (type === "avatar") state.userStats.customAvatarData = item.customDataUrl;
     else state.userStats.customBackgroundData = item.customDataUrl;
@@ -248,7 +258,28 @@ function purchaseOrEquip(type, item) {
   if (type === "avatar") state.userStats.equippedAvatar = item.id;
   else state.userStats.equippedBackground = item.id;
 
-  saveUserStats();
+  const savedOk = saveUserStats();
+  if (!savedOk && item.id === "custom") {
+    // אם אין מקום ב-localStorage לתמונה, משחזרים מצב קודם בלי לאבד נתונים
+    if (type === "avatar") {
+      state.userStats.customAvatarData = prevCustomData;
+      state.userStats.equippedAvatar = prevEquipped;
+    } else {
+      state.userStats.customBackgroundData = prevCustomData;
+      state.userStats.equippedBackground = prevEquipped;
+    }
+    if (!owned) {
+      state.userStats.points = Math.round(((state.userStats.points || 0) + item.price) * 100) / 100;
+      const key = itemKey(type, item.id);
+      state.userStats.ownedItems = getOwnedItems().filter(k => k !== key);
+    }
+    saveUserStats();
+    if (wasPeeking) exitPeekToShop();
+    setShopMessage("אין מספיק מקום אחסון בדפדפן לתמונה זו — נסה תמונה קטנה יותר", "error");
+    renderShop();
+    return;
+  }
+
   previewSelection = null;
   hidePeekBanner();
   applyEquippedCosmetics();
@@ -520,23 +551,7 @@ function buildCustomUploadCard(type) {
   card.addEventListener("click", () => {
     setShopMessage("");
     if (owned && savedData) {
-      const customItem = isAvatar
-        ? {
-            id: "custom",
-            name: "תמונת פרופיל אישית",
-            emoji: "",
-            bg: `url("${savedData}") center / cover no-repeat`,
-            customDataUrl: savedData,
-            price
-          }
-        : {
-            id: "custom",
-            name: "רקע אישי מתמונה",
-            css: buildCustomBackgroundCss(savedData),
-            customDataUrl: savedData,
-            price
-          };
-      selectForPreview(type, customItem);
+      selectForPreview(type, buildCustomItem(type, savedData));
     } else {
       triggerCustomImageUpload(type);
     }
@@ -634,27 +649,8 @@ export function initShopListeners() {
       try {
         setShopMessage("מעבד תמונה לתצוגה מקדימה...", "");
         const dataUrl = await compressUploadedImage(file, type);
-        const isAvatar = type === "avatar";
-        const price = isAvatar ? CUSTOM_AVATAR_PRICE : CUSTOM_BACKGROUND_PRICE;
-        const customItem = isAvatar
-          ? {
-              id: "custom",
-              name: "תמונת פרופיל אישית",
-              emoji: "",
-              bg: `url("${dataUrl}") center / cover no-repeat`,
-              customDataUrl: dataUrl,
-              price
-            }
-          : {
-              id: "custom",
-              name: "רקע אישי מתמונה",
-              css: buildCustomBackgroundCss(dataUrl),
-              customDataUrl: dataUrl,
-              price
-            };
-
         setShopMessage("");
-        previewSelection = { type, item: customItem };
+        previewSelection = { type, item: buildCustomItem(type, dataUrl) };
         applyPreviewVisuals();
         renderShop();
 

@@ -63,6 +63,7 @@ export const state = {
   activeOnErrorHandler: null,
   playStartGuardTimer: null,
   uiTimer: null,
+  rafWatchId: null,
   rafProgressId: null,
 
   // נגן ייעודי לגלריית השירים בפרופיל
