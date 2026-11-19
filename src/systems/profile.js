@@ -1,19 +1,21 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261119j";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119j";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261119j";
-import { state } from "../state.js?v=20261119j";
-import { saveUserStats } from "../services/storage.js?v=20261119j";
-import { fetchItunesData } from "../services/itunes.js?v=20261119j";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119j";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261119j";
-import { formatPoints, getPointsBalance } from "./economy.js?v=20261119j";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261119j";
+import { ARTISTS_DB } from "../data/artists.js?v=20261119k";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119k";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261119k";
+import { state } from "../state.js?v=20261119k";
+import { saveUserStats } from "../services/storage.js?v=20261119k";
+import { fetchItunesData } from "../services/itunes.js?v=20261119k";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119k";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261119k";
+import { formatPoints, getPointsBalance } from "./economy.js?v=20261119k";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261119k";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
   dom.streakCountEl.textContent = s;
   dom.streakBadge.classList.toggle("active-streak", s > 0);
   dom.streakBadge.classList.toggle("zero-streak", s === 0);
+  const homeStreakEl = document.getElementById("home-streak-count");
+  if (homeStreakEl) homeStreakEl.textContent = s;
   if (dom.profileBtnLabel) {
     dom.profileBtnLabel.textContent = state.currentUser ? state.currentUser : "אורח";
   }

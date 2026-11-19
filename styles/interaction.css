@@ -320,13 +320,13 @@
   padding: 14px 22px;
   font-size: 15px;
   font-weight: 800;
-  background: var(--spotify-green);
-  color: #000000;
+  background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+  color: #ffffff;
   margin-top: 8px;
-  box-shadow: 0 10px 28px rgba(29, 185, 84, 0.4);
+  box-shadow: 0 10px 28px rgba(168, 85, 247, 0.5);
 }
 
 .btn-next:hover {
-  background: var(--spotify-green-hover);
+  filter: brightness(1.08);
   transform: scale(1.02);
 }

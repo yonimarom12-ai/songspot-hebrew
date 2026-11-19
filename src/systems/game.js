@@ -1,9 +1,9 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119j";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119j";
-import { dom } from "../dom.js?v=20261119j";
-import { state } from "../state.js?v=20261119j";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119j";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119j";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119k";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119k";
+import { dom } from "../dom.js?v=20261119k";
+import { state } from "../state.js?v=20261119k";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119k";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119k";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -12,7 +12,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261119j";
+} from "../services/itunes.js?v=20261119k";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -20,25 +20,87 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261119j";
-import { launchWinConfetti } from "./confetti.js?v=20261119j";
+} from "./audio.js?v=20261119k";
+import { launchWinConfetti } from "./confetti.js?v=20261119k";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261119j";
+} from "./feedback.js?v=20261119k";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261119j";
-import { updateStreakDisplay } from "./profile.js?v=20261119j";
+} from "./search.js?v=20261119k";
+import { updateStreakDisplay } from "./profile.js?v=20261119k";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
-  updatePointsDisplay
-} from "./economy.js?v=20261119j";
+  updatePointsDisplay,
+  launchCrystalRewardAnimation
+} from "./economy.js?v=20261119k";
+
+let loadingDelayTimer = null;
+let loadingTickTimer = null;
+let loadingHideTimer = null;
+let loadingProgress = 0;
+
+function stopLoadingTimers() {
+  clearTimeout(loadingDelayTimer);
+  clearInterval(loadingTickTimer);
+  clearTimeout(loadingHideTimer);
+  loadingDelayTimer = null;
+  loadingTickTimer = null;
+  loadingHideTimer = null;
+}
+
+function showSongLoadingBar(label = "טוען שיר...") {
+  const wrap = document.getElementById("song-loading-wrap");
+  const fill = document.getElementById("song-loading-fill");
+  const text = document.getElementById("song-loading-text");
+  if (!wrap || !fill) return;
+  clearTimeout(loadingHideTimer);
+  loadingProgress = Math.max(loadingProgress, 18);
+  fill.style.width = `${loadingProgress}%`;
+  if (text) text.textContent = label;
+  wrap.classList.add("visible");
+
+  if (!loadingTickTimer) {
+    loadingTickTimer = setInterval(() => {
+      if (loadingProgress < 90) {
+        loadingProgress = Math.min(90, loadingProgress + (90 - loadingProgress) * 0.18 + 2);
+        fill.style.width = `${Math.round(loadingProgress)}%`;
+      }
+    }, 180);
+  }
+}
+
+function startSongLoadingBar({ immediate = false, label = "טוען שיר..." } = {}) {
+  stopLoadingTimers();
+  loadingProgress = 12;
+  if (immediate) {
+    showSongLoadingBar(label);
+  } else {
+    // מופיע אוטומטית אם הטעינה לוקחת יותר משנייה שלמה
+    loadingDelayTimer = setTimeout(() => showSongLoadingBar(label), 1000);
+  }
+}
+
+function finishSongLoadingBar() {
+  stopLoadingTimers();
+  const wrap = document.getElementById("song-loading-wrap");
+  const fill = document.getElementById("song-loading-fill");
+  if (!wrap || !fill) return;
+  if (!wrap.classList.contains("visible")) return;
+  loadingProgress = 100;
+  fill.style.width = "100%";
+  loadingHideTimer = setTimeout(() => {
+    wrap.classList.remove("visible");
+    fill.style.width = "0%";
+    loadingProgress = 0;
+  }, 240);
+}
 
 export function setActiveDifficultyUI(level) {
   state.currentDifficulty = level;
@@ -107,8 +169,9 @@ export async function fetchRandomSong() {
   let lastErrorMsg = "";
   let emptyCatalogCount = 0;
 
-  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — שולפים אמן עם מנוע המירוץ הרב-ערוצי
+  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — מציגים בר טעינה ושולפים אמן מהרשת
   if (!selectedSong) {
+    startSongLoadingBar({ immediate: true, label: "טוען שיר חדש..." });
     const triedArtists = new Set();
 
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -161,6 +224,7 @@ export async function fetchRandomSong() {
   }
 
   if (!selectedSong) {
+    finishSongLoadingBar();
     const diag = lastErrorMsg ? ` (${lastErrorMsg})` : (emptyCatalogCount > 0 ? " (0 תוצאות תואמות)" : "");
     dom.statusLabel.textContent = `לא נמצאו שירים בסינון זה או שיש שגיאת רשת${diag}. נסה שוב.`;
     dom.retryBtn.style.display = "inline-block";
@@ -178,8 +242,18 @@ export async function fetchRandomSong() {
 
   dom.songCover.src = state.currentSong.artwork;
 
-  // מתחילים לטעון ולפענח את השמע מיד — עוד לפני שהשחקן לוחץ Play
-  preloadAudioBufferInBackground(state.currentSong.previewUrl, roundId);
+  // מתחילים לטעון ולפענח את השמע מיד — אם טעינת השמע לוקחת יותר משנייה, בר הטעינה מוצג עד לסיום
+  const wrap = document.getElementById("song-loading-wrap");
+  if (!wrap?.classList.contains("visible")) {
+    startSongLoadingBar({ immediate: false, label: "טוען שמע..." });
+  } else {
+    showSongLoadingBar("טוען שמע...");
+  }
+  preloadAudioBufferInBackground(state.currentSong.previewUrl, roundId).finally(() => {
+    if (roundId === state.activeFetchRoundId) {
+      finishSongLoadingBar();
+    }
+  });
 
   dom.statusLabel.textContent = "מוכן! לחץ על ניגון";
   dom.playBtn.disabled = false;
@@ -257,6 +331,9 @@ export function endRound(won) {
     dom.statusLabel.textContent = `זיהית נכון תוך ${solvedAtSec} שניות!`;
     dom.statusLabel.style.color = "var(--spotify-green)";
     launchWinConfetti();
+    if (earnedPoints > 0) {
+      launchCrystalRewardAnimation(earnedPoints);
+    }
 
     if (dom.pointsEarnedNotice) {
       dom.pointsEarnedNotice.classList.remove("is-muted");

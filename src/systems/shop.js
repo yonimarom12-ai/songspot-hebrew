@@ -5,10 +5,10 @@ import {
   CUSTOM_BACKGROUND_PRICE,
   findAvatar,
   findBackground
-} from "../data/shop.js?v=20261119j";
-import { state } from "../state.js?v=20261119j";
-import { saveUserStats } from "../services/storage.js?v=20261119j";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261119j";
+} from "../data/shop.js?v=20261119k";
+import { state } from "../state.js?v=20261119k";
+import { saveUserStats } from "../services/storage.js?v=20261119k";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261119k";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -121,6 +121,9 @@ function applyCosmeticsVisuals(bg, avatar) {
 
   const modalAvatar = document.getElementById("profile-modal-avatar");
   applyAvatarToEl(modalAvatar, avatar);
+
+  const homeAvatar = document.getElementById("home-avatar-btn");
+  applyAvatarToEl(homeAvatar, avatar);
 }
 
 // מחיל את הרקע ותמונת הפרופיל שנרכשו והופעלו בפועל

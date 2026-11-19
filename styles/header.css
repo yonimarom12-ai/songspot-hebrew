@@ -209,10 +209,10 @@
   left: 0;
   right: 0;
   z-index: 320;
-  background: rgba(14, 14, 14, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid #242424;
+  background: rgba(14, 9, 32, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(192, 132, 252, 0.22);
   padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
@@ -282,11 +282,12 @@
 }
 
 .bottom-nav-item.active {
-  color: var(--text-main);
+  color: #ffffff;
 }
 
 .bottom-nav-item.active svg {
-  fill: var(--spotify-green);
+  fill: var(--accent-purple-bright);
+  filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.65));
 }
 
 /* Center Main Game Button in Bottom Nav */
@@ -294,13 +295,13 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #222222;
-  border: 1.5px solid #383838;
+  background: rgba(36, 22, 74, 0.95);
+  border: 1.5px solid rgba(192, 132, 252, 0.42);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: -12px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
   transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -311,17 +312,17 @@
 }
 
 .bottom-nav-item.nav-main-game.active .nav-main-icon-wrap {
-  background: var(--spotify-green);
-  border-color: var(--spotify-green);
-  box-shadow: 0 4px 16px rgba(29, 185, 84, 0.45);
+  background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+  border-color: #e9d5ff;
+  box-shadow: 0 4px 18px rgba(168, 85, 247, 0.6);
 }
 
 .bottom-nav-item.nav-main-game.active svg {
-  fill: #000000;
+  fill: #ffffff;
 }
 
 .bottom-nav-item.nav-main-game.active {
-  color: var(--spotify-green);
+  color: var(--accent-purple-bright);
 }
 
 .filter-summary-row {

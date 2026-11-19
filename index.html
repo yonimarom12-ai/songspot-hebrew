@@ -4,41 +4,240 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SongSpot IL</title>
+  <title>נחש את השיר</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261119j">
-  <link rel="stylesheet" href="styles/header.css?v=20261119j">
-  <link rel="stylesheet" href="styles/player.css?v=20261119j">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261119j">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261119j">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119j">
-  <link rel="stylesheet" href="styles/animations.css?v=20261119j">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261119k">
+  <link rel="stylesheet" href="styles/home.css?v=20261119k">
+  <link rel="stylesheet" href="styles/header.css?v=20261119k">
+  <link rel="stylesheet" href="styles/player.css?v=20261119k">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261119k">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261119k">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261119k">
+  <link rel="stylesheet" href="styles/animations.css?v=20261119k">
 </head>
 
 <body>
   <canvas id="confetti-canvas"></canvas>
 
+  <!-- ===== מסך 1: לובי הבית ===== -->
+  <section class="app-screen active" id="screen-home" aria-label="תפריט בית">
+    <div class="home-stage-glow"></div>
+    <div class="app-shell home-shell">
+      <header class="home-top-bar">
+        <div class="home-top-right">
+          <button type="button" class="home-avatar-btn" id="home-avatar-btn" aria-label="פתח פרופיל">🎧</button>
+          <div class="home-status-pill">
+            <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
+              <span>🔥</span><span id="home-streak-count">0</span>
+            </button>
+            <span class="home-stat-divider"></span>
+            <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים">
+              <span>💎</span><span id="home-points-count">0</span>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="home-gear-btn" id="home-settings-btn" aria-label="הגדרות">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="home-hero">
+        <div class="home-eq-logo" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <h1 class="home-title">נחש את השיר</h1>
+      </div>
+
+      <button type="button" class="home-quickplay-btn" id="home-quickplay-btn">
+        <span class="quickplay-play-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+        </span>
+        <span class="quickplay-text">
+          <span class="quickplay-title">משחק מהיר</span>
+          <span class="quickplay-sub">בחרו ז'אנרים ועשורים ונחשו את השיר!</span>
+        </span>
+      </button>
+
+      <div class="home-modes-grid">
+        <button type="button" class="mode-card theme-blue" data-open-mode="1v1">
+          <span class="mode-card-icon">👥</span>
+          <span class="mode-card-title">1 נגד 1</span>
+          <span class="mode-card-sub">אתגרו חבר</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-gold" data-open-mode="leaderboard">
+          <span class="mode-card-icon">🏆</span>
+          <span class="mode-card-title">דירוג עולמי</span>
+          <span class="mode-card-sub">תתחרו עם כולם</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-pink" data-open-mode="marathon">
+          <span class="mode-card-icon">♾️</span>
+          <span class="mode-card-title">מרתון</span>
+          <span class="mode-card-sub">כמה שאתם יכולים</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-green" data-open-mode="timed">
+          <span class="mode-card-icon">⏱️</span>
+          <span class="mode-card-title">משחק בזמן</span>
+          <span class="mode-card-sub">נחשו כמה שירים שתוכלו</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-cyan" data-open-mode="daily">
+          <span class="mode-card-icon">📅</span>
+          <span class="mode-card-title">אתגר יומי</span>
+          <span class="mode-card-sub">שיר חדש בכל יום</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-violet" id="home-shop-card-btn">
+          <span class="mode-card-icon">💎</span>
+          <span class="mode-card-title">חנות</span>
+          <span class="mode-card-sub">רקעים ותמונות פרופיל</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+      </div>
+
+      <button type="button" class="home-weekly-banner" data-open-mode="weekly">
+        <span class="weekly-thumb">👑</span>
+        <span class="weekly-meta">
+          <span class="weekly-title">השיר השבועי 👑</span>
+          <span class="weekly-sub">תוכלו לגלות אותו עכשיו!</span>
+        </span>
+        <span style="font-size: 18px; opacity: 0.75;">‹</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== מסך 2: בחירת ז'אנרים (משחק מהיר - שלב 1) ===== -->
+  <section class="app-screen" id="screen-setup-genres" aria-label="בחירת ז'אנרים">
+    <div class="app-shell setup-shell">
+      <div class="setup-top-bar">
+        <button type="button" class="setup-back-btn" id="setup-genres-back-btn">→ ללובי</button>
+        <span class="setup-step-badge">שלב 1 מתוך 2</span>
+      </div>
+      <div class="setup-header">
+        <h2 class="setup-title">איזה ז'אנרים בא לך?</h2>
+        <p class="setup-subtitle">אפשר לבחור ז'אנר אחד, כמה ביחד, או הכל</p>
+      </div>
+      <div class="setup-grid" id="setup-genres-grid">
+        <button type="button" class="setup-choice-card full-span selected" data-setup-genre="all">
+          <span class="setup-choice-title">🎵 כל הז'אנרים (מומלץ)</span>
+          <span class="setup-choice-desc">מיקס של כל המוזיקה הישראלית</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-genre="pop">
+          <span class="setup-choice-title">✨ פופ ומיינסטרים</span>
+          <span class="setup-choice-desc">נועה קירל, אנה זק, נתן גושן...</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-genre="mizrahi">
+          <span class="setup-choice-title">🥁 מזרחית וים תיכוני</span>
+          <span class="setup-choice-desc">עומר אדם, אייל גולן, עדן בן זקן...</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-genre="rock_classics">
+          <span class="setup-choice-title">🎸 רוק וקלאסיקות</span>
+          <span class="setup-choice-desc">שלמה ארצי, משינה, כוורת, אריק...</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-genre="hiphop">
+          <span class="setup-choice-title">🎤 היפ-הופ וראפ</span>
+          <span class="setup-choice-desc">טונה, רביד פלוטניק, הדג נחש...</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-genre="soul_faith">
+          <span class="setup-choice-title">💛 נשמה ויוצרים</span>
+          <span class="setup-choice-desc">חנן בן ארי, ישי ריבו, עידן רייכל...</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-genre="indie">
+          <span class="setup-choice-title">🌙 אינדי ואלטרנטיב</span>
+          <span class="setup-choice-desc">ג'ירפות, שלומי שבן, אלג'יר...</span>
+        </button>
+      </div>
+      <button type="button" class="setup-confirm-btn" id="setup-genres-confirm-btn">אישור · המשך לעשורים</button>
+    </div>
+  </section>
+
+  <!-- ===== מסך 3: בחירת עשורים (משחק מהיר - שלב 2) ===== -->
+  <section class="app-screen" id="screen-setup-decades" aria-label="בחירת עשורים">
+    <div class="app-shell setup-shell">
+      <div class="setup-top-bar">
+        <button type="button" class="setup-back-btn" id="setup-decades-back-btn">→ חזור לז'אנרים</button>
+        <span class="setup-step-badge">שלב 2 מתוך 2</span>
+      </div>
+      <div class="setup-header">
+        <h2 class="setup-title">מאיזה עשורים?</h2>
+        <p class="setup-subtitle">בחר עשור אחד או יותר — ואז מתחילים!</p>
+      </div>
+      <div class="setup-grid" id="setup-decades-grid">
+        <button type="button" class="setup-choice-card full-span selected" data-setup-decade="all">
+          <span class="setup-choice-title">🕰️ כל השנים והעשורים</span>
+          <span class="setup-choice-desc">מהקלאסיקות הגדולות ועד הלהיטים של היום</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-decade="1970-1990">
+          <span class="setup-choice-title">📻 שנות ה-70 וה-80</span>
+          <span class="setup-choice-desc">עד 1990</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-decade="1990-2000">
+          <span class="setup-choice-title">📼 שנות ה-90</span>
+          <span class="setup-choice-desc">1990–2000</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-decade="2000-2010">
+          <span class="setup-choice-title">💿 שנות ה-2000</span>
+          <span class="setup-choice-desc">2000–2010</span>
+        </button>
+        <button type="button" class="setup-choice-card" data-setup-decade="2010-2020">
+          <span class="setup-choice-title">📱 שנות ה-2010</span>
+          <span class="setup-choice-desc">2010–2020</span>
+        </button>
+        <button type="button" class="setup-choice-card full-span" data-setup-decade="2020-2030">
+          <span class="setup-choice-title">🔥 הלהיטים החדשים (2020+)</span>
+          <span class="setup-choice-desc">השירים הכי חמים של השנים האחרונות</span>
+        </button>
+      </div>
+      <button type="button" class="setup-confirm-btn" id="setup-decades-confirm-btn">אישור · התחל לשחק ▶</button>
+    </div>
+  </section>
+
+  <!-- ===== מסך 4: מסכי מודים נוספים ===== -->
+  <section class="app-screen" id="screen-mode" aria-label="מצב משחק">
+    <div class="app-shell setup-shell">
+      <div class="setup-top-bar">
+        <button type="button" class="setup-back-btn" id="mode-back-lobby-btn">→ ללובי</button>
+        <span class="setup-step-badge" id="mode-screen-badge">מצב משחק</span>
+      </div>
+      <div class="mode-detail-card">
+        <div class="mode-detail-icon" id="mode-detail-icon">🏆</div>
+        <h2 class="mode-detail-title" id="mode-detail-title"></h2>
+        <p class="mode-detail-desc" id="mode-detail-desc"></p>
+        <span class="mode-detail-badge" id="mode-detail-status"></span>
+        <button type="button" class="setup-confirm-btn" id="mode-detail-action-btn" style="margin-top: 10px;"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 5: מסך המשחק (ניחוש השיר) ===== -->
+  <section class="app-screen" id="screen-game" aria-label="משחק ניחוש השיר">
   <div class="app-shell">
     <div>
       <header class="top-bar">
         <div class="brand">
-          <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="פתח תפריט והגדרות">
+          <button class="lobby-exit-btn" id="exit-to-lobby-btn" type="button" aria-label="יציאה ללובי">🏠 ללובי</button>
+          <h1 class="brand-title">נחש את השיר</h1>
+        </div>
+
+        <div class="meta-badges">
+          <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="פתח הגדרות וסינון" style="width:32px;height:32px;">
             <span class="menu-bar"></span>
             <span class="menu-bar"></span>
             <span class="menu-bar"></span>
           </button>
-          <svg class="brand-icon" viewBox="0 0 24 24">
-            <path
-              d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.469-.077-.335.132-.67.469-.746 3.809-.87 7.076-.496 9.713 1.115.293.18.386.563.207.856zm1.224-2.723c-.226.367-.706.482-1.072.257-2.687-1.652-6.785-2.131-9.965-1.166-.413.125-.848-.106-.973-.517-.125-.413.108-.848.52-.973 3.632-1.102 8.147-.568 11.234 1.328.366.226.48.707.256 1.071zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.493.15-1.016-.128-1.166-.62-.149-.493.129-1.016.621-1.166 3.532-1.073 9.404-.865 13.115 1.338.445.264.59.838.327 1.282-.264.444-.838.59-1.28.322z" />
-          </svg>
-          <h1 class="brand-title">SongSpot</h1>
-        </div>
-
-        <div class="meta-badges">
-          <!-- יתרת קריסטלים למשחק ולחנות העתידית (למשתמשים רשומים) -->
-          <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים (ישמש לקנייה בחנות)">
+          <!-- יתרת קריסטלים -->
+          <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים">
             <svg class="points-crystal-svg" viewBox="0 0 28 32" aria-hidden="true">
               <defs>
                 <linearGradient id="crystalTop" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -137,6 +336,12 @@
       </div>
 
       <div class="status-text" id="status-label">מתחבר לקטלוג המוזיקה...</div>
+      <div class="song-loading-wrap" id="song-loading-wrap" aria-live="polite">
+        <div class="song-loading-track">
+          <div class="song-loading-fill" id="song-loading-fill"></div>
+        </div>
+        <span class="song-loading-text" id="song-loading-text">טוען שיר...</span>
+      </div>
       <button class="retry-inline-btn" id="retry-btn">נסה שוב</button>
 
       <div class="timeline-wrapper" id="timeline-wrapper">
@@ -216,6 +421,7 @@
     </footer>
     </div>
   </div>
+  </section>
 
   <!-- תפריט צד: הגדרות, עשורים וז'אנרים -->
   <div class="drawer-backdrop" id="drawer-backdrop"></div>
@@ -589,13 +795,13 @@
         <span class="bottom-nav-label" id="profile-btn-label">אורח</span>
       </button>
 
-      <button class="bottom-nav-item nav-main-game active" id="nav-game-btn" type="button" aria-label="המשחק הראשי">
+      <button class="bottom-nav-item nav-main-game active" id="nav-game-btn" type="button" aria-label="תפריט הבית">
         <div class="nav-main-icon-wrap">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 3a9 9 0 0 0-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1a7 7 0 0 1 14 0v1h-4v8h4c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z" />
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
           </svg>
         </div>
-        <span class="bottom-nav-label">משחק</span>
+        <span class="bottom-nav-label">בית</span>
       </button>
 
       <button class="bottom-nav-item" id="nav-shop-btn" type="button">
@@ -609,7 +815,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261119j"></script>
+  <script type="module" src="src/main.js?v=20261119k"></script>
 </body>
 
 </html>

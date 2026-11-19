@@ -1,22 +1,23 @@
-import { dom } from "./dom.js?v=20261119j";
-import { initStorageState } from "./services/storage.js?v=20261119j";
-import { hydratePersistedCatalogs } from "./services/itunes.js?v=20261119j";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261119j";
-import { initHintListeners } from "./systems/feedback.js?v=20261119j";
-import { initSearchListeners } from "./systems/search.js?v=20261119j";
-import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261119j";
-import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261119j";
-import { updatePointsDisplay } from "./systems/economy.js?v=20261119j";
-import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261119j";
-import { initAuthListeners } from "./systems/auth.js?v=20261119j";
-import { initDrawerListeners } from "./systems/drawer.js?v=20261119j";
+import { dom } from "./dom.js?v=20261119k";
+import { initStorageState } from "./services/storage.js?v=20261119k";
+import { hydratePersistedCatalogs } from "./services/itunes.js?v=20261119k";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261119k";
+import { initHintListeners } from "./systems/feedback.js?v=20261119k";
+import { initSearchListeners } from "./systems/search.js?v=20261119k";
+import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261119k";
+import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261119k";
+import { updatePointsDisplay } from "./systems/economy.js?v=20261119k";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261119k";
+import { initAuthListeners } from "./systems/auth.js?v=20261119k";
+import { initDrawerListeners } from "./systems/drawer.js?v=20261119k";
+import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261119k";
 import {
   fetchRandomSong,
   goToNextSong,
   handleGuess,
   advanceAttempt,
   initDifficultyListeners
-} from "./systems/game.js?v=20261119j";
+} from "./systems/game.js?v=20261119k";
 
 function bootApp() {
   // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
@@ -39,6 +40,7 @@ function bootApp() {
   initGalleryAudioListeners();
   initProfileListeners();
   initShopListeners();
+  initNavigationListeners();
 
   // Core game control bindings
   dom.playBtn.addEventListener("click", playSnippet);
@@ -47,11 +49,11 @@ function bootApp() {
   dom.retryBtn.addEventListener("click", fetchRandomSong);
   dom.nextBtn.addEventListener("click", goToNextSong);
 
-  // Boot application
+  // Boot application -> תפריט הבית הוא המסך הראשון שהשחקן רואה
   updateStreakDisplay();
   updatePointsDisplay();
   applyEquippedCosmetics();
-  fetchRandomSong();
+  showScreen("home");
 }
 
 if (document.readyState === "loading") {

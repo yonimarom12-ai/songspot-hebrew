@@ -1,22 +1,27 @@
 :root {
-  --bg-pure: #000000;
-  --surface: #121212;
-  --surface-elevated: #181818;
-  --surface-hover: #282828;
-  --border: #2a2a2a;
-  --spotify-green: #1DB954;
-  --spotify-green-hover: #1ed760;
+  --bg-pure: #090616;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(146, 62, 255, 0.34) 0%, rgba(45, 16, 92, 0.42) 32%, #090616 74%);
+  --surface: rgba(20, 14, 42, 0.86);
+  --surface-elevated: rgba(31, 21, 62, 0.9);
+  --surface-hover: rgba(46, 32, 88, 0.94);
+  --border: rgba(168, 120, 255, 0.22);
+  --spotify-green: #1ed760;
+  --spotify-green-hover: #2ee670;
+  --accent-purple: #9d4edd;
+  --accent-purple-bright: #c084fc;
+  --accent-pink: #ec4899;
+  --accent-cyan: #38d9ff;
   --text-main: #FFFFFF;
-  --text-sub: #B3B3B3;
-  --text-muted: #727272;
-  --danger: #E91429;
+  --text-sub: #c4b8e0;
+  --text-muted: #8477a8;
+  --danger: #ff4764;
   --easy-color: #1ed760;
   --medium-color: #f5c518;
   --hard-color: #ff8c1a;
   --very-hard-color: #ff4d4d;
-  --impossible-color: #b86eff;
-  --level-color: #1ed760;
-  --level-glow: rgba(30, 215, 96, 0.55);
+  --impossible-color: #c084fc;
+  --level-color: #c084fc;
+  --level-glow: rgba(192, 132, 252, 0.55);
 }
 
 * {
@@ -33,6 +38,8 @@ body {
   padding: 0;
   font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-pure);
+  background-image: var(--bg-stage);
+  background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
   min-height: 100dvh;
@@ -42,12 +49,38 @@ body {
   overflow-x: hidden;
 }
 
+.app-screen {
+  display: none;
+  width: 100%;
+  max-width: 470px;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-screen.active {
+  display: flex;
+  flex-direction: column;
+  animation: screenFadeIn 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes screenFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .app-shell {
   width: 100%;
   max-width: 470px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 22px 16px 88px;
+  padding: 18px 16px 32px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

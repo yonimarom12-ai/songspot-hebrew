@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261119j";
-import { dom } from "../dom.js?v=20261119j";
-import { state } from "../state.js?v=20261119j";
-import { saveUserStats } from "../services/storage.js?v=20261119j";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261119k";
+import { dom } from "../dom.js?v=20261119k";
+import { state } from "../state.js?v=20261119k";
+import { saveUserStats } from "../services/storage.js?v=20261119k";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
@@ -90,8 +90,13 @@ export function spendPoints(cost) {
 export function updatePointsDisplay(animate = false) {
   const isLoggedIn = Boolean(state.currentUser);
   const balance = getPointsBalance();
+  const formatted = formatPoints(balance);
   if (dom.pointsCountEl) {
-    dom.pointsCountEl.textContent = formatPoints(balance);
+    dom.pointsCountEl.textContent = formatted;
+  }
+  const homePointsEl = document.getElementById("home-points-count");
+  if (homePointsEl) {
+    homePointsEl.textContent = formatted;
   }
   if (dom.pointsBadge) {
     dom.pointsBadge.classList.toggle("guest-locked", !isLoggedIn);
@@ -103,5 +108,54 @@ export function updatePointsDisplay(animate = false) {
       void dom.pointsBadge.offsetWidth;
       dom.pointsBadge.classList.add("points-pop");
     }
+  }
+}
+
+// אנימציית קבלת קריסטלים: קריסטלים זוהרים שעפים אל מד הקריסטלים + טקסט מרחף
+export function launchCrystalRewardAnimation(earnedAmount) {
+  if (!state.currentUser || !earnedAmount || earnedAmount <= 0) return;
+
+  const targetEl = dom.pointsBadge || document.getElementById("home-points-btn");
+  const targetRect = targetEl
+    ? targetEl.getBoundingClientRect()
+    : { left: 40, top: 28, width: 20, height: 20 };
+
+  const startX = window.innerWidth / 2;
+  const startY = window.innerHeight * 0.56;
+  const endX = targetRect.left + targetRect.width / 2;
+  const endY = targetRect.top + targetRect.height / 2;
+
+  // טקסט צף "+X 💎"
+  const floatText = document.createElement("div");
+  floatText.className = "crystal-float-text";
+  floatText.textContent = `+${formatPoints(earnedAmount)} 💎`;
+  floatText.style.left = `${startX}px`;
+  floatText.style.top = `${startY - 26}px`;
+  document.body.appendChild(floatText);
+  setTimeout(() => floatText.remove(), 1200);
+
+  // חלקיקי קריסטל עפים אל המונה
+  const count = Math.min(10, Math.max(5, Math.ceil(earnedAmount / 2)));
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement("div");
+    p.className = "crystal-fly-particle";
+    p.textContent = "💎";
+    const jitterX = (Math.random() - 0.5) * 90;
+    const jitterY = (Math.random() - 0.5) * 50;
+    p.style.left = `${startX + jitterX}px`;
+    p.style.top = `${startY + jitterY}px`;
+    p.style.opacity = "1";
+    p.style.transform = "scale(0.6)";
+    document.body.appendChild(p);
+
+    const delay = i * 55;
+    setTimeout(() => {
+      const dx = endX - (startX + jitterX);
+      const dy = endY - (startY + jitterY);
+      p.style.transform = `translate(${dx}px, ${dy}px) scale(1.15) rotate(${(Math.random() - 0.5) * 90}deg)`;
+      p.style.opacity = "0";
+    }, 30 + delay);
+
+    setTimeout(() => p.remove(), 980 + delay);
   }
 }
