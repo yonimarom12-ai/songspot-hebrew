@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261120e";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120e";
-import { dom } from "../dom.js?v=20261120e";
-import { state } from "../state.js?v=20261120e";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261120e";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261120e";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261120e";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261120f";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120f";
+import { dom } from "../dom.js?v=20261120f";
+import { state } from "../state.js?v=20261120f";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261120f";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261120f";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261120f";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -13,7 +13,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261120e";
+} from "../services/itunes.js?v=20261120f";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -22,19 +22,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261120e";
-import { launchWinConfetti } from "./confetti.js?v=20261120e";
+} from "./audio.js?v=20261120f";
+import { launchWinConfetti } from "./confetti.js?v=20261120f";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261120e";
+} from "./feedback.js?v=20261120f";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261120e";
-import { updateStreakDisplay } from "./profile.js?v=20261120e";
+} from "./search.js?v=20261120f";
+import { updateStreakDisplay } from "./profile.js?v=20261120f";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -42,8 +42,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261120e";
-import { recordQuestProgress } from "./quests.js?v=20261120e";
+} from "./economy.js?v=20261120f";
+import { recordQuestProgress } from "./quests.js?v=20261120f";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -52,8 +52,8 @@ import {
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong
-} from "./timed.js?v=20261120e";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261120e";
+} from "./timed.js?v=20261120f";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261120f";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -430,12 +430,13 @@ export function endRound(won) {
       }
       dom.pointsEarnedNotice.style.display = "inline-flex";
     }
-
-    playRevealPreview();
   } else {
     dom.statusLabel.textContent = "";
     if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   }
+
+  // משמיע אוטומטית את השיר המלא גם בניצחון וגם בהפסד (ונכבה אוטומטית כשממשיכים לשיר הבא)
+  playRevealPreview();
 
   // מעבר לשלב הבא יקרה רק בלחיצה על "לשיר הבא", ואחרי בלתי אפשרי חוזר לקל בלולאה
   const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
@@ -607,10 +608,6 @@ export function goToNextSong() {
 }
 
 export function initDifficultyListeners() {
-  const replayBtn = document.getElementById("reveal-replay-btn");
-  if (replayBtn) {
-    replayBtn.addEventListener("click", () => playRevealPreview());
-  }
   dom.diffButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       state.pendingNextDifficulty = null;
