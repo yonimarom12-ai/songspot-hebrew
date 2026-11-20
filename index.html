@@ -8,14 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261120d">
-  <link rel="stylesheet" href="styles/home.css?v=20261120d">
-  <link rel="stylesheet" href="styles/header.css?v=20261120d">
-  <link rel="stylesheet" href="styles/player.css?v=20261120d">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261120d">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261120d">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261120d">
-  <link rel="stylesheet" href="styles/animations.css?v=20261120d">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261120e">
+  <link rel="stylesheet" href="styles/home.css?v=20261120e">
+  <link rel="stylesheet" href="styles/header.css?v=20261120e">
+  <link rel="stylesheet" href="styles/player.css?v=20261120e">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261120e">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261120e">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261120e">
+  <link rel="stylesheet" href="styles/animations.css?v=20261120e">
 </head>
 
 <body>
@@ -669,124 +669,170 @@
           </div>
 
           <div class="stats-lock-content">
-            <div class="wallet-summary-card">
-              <div class="wallet-summary-main">
-                <span class="wallet-summary-label">💎 יתרת קריסטלים</span>
-                <span class="wallet-summary-val" id="stat-points">0</span>
-              </div>
-              <div class="wallet-summary-meta">
-                <span>סה"כ נצבר</span>
-                <strong id="stat-total-points">0</strong>
-              </div>
-            </div>
-
-            <!-- מועדפים אישיים + עריכת פרופיל -->
-            <div class="profile-favorites-card">
-              <div class="profile-favorites-header">
-                <h3 class="stats-sec-title">⭐ המועדפים שלי</h3>
-                <button type="button" class="edit-profile-btn" id="edit-profile-btn">✏️ ערוך פרופיל</button>
-              </div>
-
-              <div class="favorites-view" id="profile-favorites-view">
-                <div class="fav-row">
-                  <span class="fav-label">🎵 שיר מועדף</span>
-                  <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
+            <!-- תצוגת פרופיל ראשית -->
+            <div class="profile-subview active" id="profile-view-main">
+              <div class="wallet-summary-card">
+                <div class="wallet-summary-main">
+                  <span class="wallet-summary-label">💎 יתרת קריסטלים</span>
+                  <span class="wallet-summary-val" id="stat-points">0</span>
                 </div>
-                <div class="fav-row">
-                  <span class="fav-label">💿 אלבום מועדף</span>
-                  <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
-                </div>
-                <div class="fav-row">
-                  <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
-                  <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
+                <div class="wallet-summary-meta">
+                  <span>סה"כ נצבר</span>
+                  <strong id="stat-total-points">0</strong>
                 </div>
               </div>
 
-              <form class="favorites-edit-form" id="profile-favorites-form" style="display: none;" autocomplete="off">
-                <div class="fav-field">
-                  <label for="fav-song-input">🎵 שיר מועדף (חפש ובחר מהרשימה)</label>
-                  <div class="fav-search-box">
-                    <input type="text" class="auth-input fav-search-input" id="fav-song-input"
-                      placeholder="חפש שיר קיים..." autocomplete="off" />
-                    <button type="button" class="fav-clear-btn" data-clear-fav="song" aria-label="נקה שיר">✕</button>
-                    <div class="fav-suggestions-dropdown" id="fav-song-suggestions"></div>
+              <!-- מועדפים אישיים + עריכת פרופיל -->
+              <div class="profile-favorites-card">
+                <div class="profile-favorites-header">
+                  <h3 class="stats-sec-title">⭐ המועדפים שלי</h3>
+                  <button type="button" class="edit-profile-btn" id="edit-profile-btn">✏️ ערוך פרופיל</button>
+                </div>
+
+                <div class="favorites-view" id="profile-favorites-view">
+                  <div class="fav-row">
+                    <span class="fav-label">🎵 שיר מועדף</span>
+                    <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
+                  </div>
+                  <div class="fav-row">
+                    <span class="fav-label">💿 אלבום מועדף</span>
+                    <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
+                  </div>
+                  <div class="fav-row">
+                    <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
+                    <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
                   </div>
                 </div>
-                <div class="fav-field">
-                  <label for="fav-album-input">💿 אלבום מועדף (חפש ובחר מהרשימה)</label>
-                  <div class="fav-search-box">
-                    <input type="text" class="auth-input fav-search-input" id="fav-album-input"
-                      placeholder="חפש אלבום קיים..." autocomplete="off" />
-                    <button type="button" class="fav-clear-btn" data-clear-fav="album" aria-label="נקה אלבום">✕</button>
-                    <div class="fav-suggestions-dropdown" id="fav-album-suggestions"></div>
+
+                <form class="favorites-edit-form" id="profile-favorites-form" style="display: none;" autocomplete="off">
+                  <div class="fav-field">
+                    <label for="fav-song-input">🎵 שיר מועדף (חפש ובחר מהרשימה)</label>
+                    <div class="fav-search-box">
+                      <input type="text" class="auth-input fav-search-input" id="fav-song-input"
+                        placeholder="חפש שיר קיים..." autocomplete="off" />
+                      <button type="button" class="fav-clear-btn" data-clear-fav="song" aria-label="נקה שיר">✕</button>
+                      <div class="fav-suggestions-dropdown" id="fav-song-suggestions"></div>
+                    </div>
                   </div>
-                </div>
-                <div class="fav-field">
-                  <label for="fav-artist-input">🎤 זמר/ת מועדף/ת (חפש ובחר מהרשימה)</label>
-                  <div class="fav-search-box">
-                    <input type="text" class="auth-input fav-search-input" id="fav-artist-input"
-                      placeholder="חפש זמר/ת קיים/ת..." autocomplete="off" />
-                    <button type="button" class="fav-clear-btn" data-clear-fav="artist" aria-label="נקה זמר">✕</button>
-                    <div class="fav-suggestions-dropdown" id="fav-artist-suggestions"></div>
+                  <div class="fav-field">
+                    <label for="fav-album-input">💿 אלבום מועדף (חפש ובחר מהרשימה)</label>
+                    <div class="fav-search-box">
+                      <input type="text" class="auth-input fav-search-input" id="fav-album-input"
+                        placeholder="חפש אלבום קיים..." autocomplete="off" />
+                      <button type="button" class="fav-clear-btn" data-clear-fav="album" aria-label="נקה אלבום">✕</button>
+                      <div class="fav-suggestions-dropdown" id="fav-album-suggestions"></div>
+                    </div>
                   </div>
+                  <div class="fav-field">
+                    <label for="fav-artist-input">🎤 זמר/ת מועדף/ת (חפש ובחר מהרשימה)</label>
+                    <div class="fav-search-box">
+                      <input type="text" class="auth-input fav-search-input" id="fav-artist-input"
+                        placeholder="חפש זמר/ת קיים/ת..." autocomplete="off" />
+                      <button type="button" class="fav-clear-btn" data-clear-fav="artist" aria-label="נקה זמר">✕</button>
+                      <div class="fav-suggestions-dropdown" id="fav-artist-suggestions"></div>
+                    </div>
+                  </div>
+                  <div class="fav-form-error" id="fav-form-error"></div>
+                  <div class="fav-form-actions">
+                    <button type="submit" class="auth-submit-btn">שמור שינויים</button>
+                    <button type="button" class="logout-btn" id="cancel-profile-edit-btn">ביטול</button>
+                  </div>
+                </form>
+                <div class="fav-saved-msg" id="fav-saved-msg"></div>
+              </div>
+
+              <div class="stats-section">
+                <h3 class="stats-sec-title">🎯 משימות יומיות</h3>
+                <div class="quests-list" id="profile-quests-list"></div>
+              </div>
+
+              <div class="stats-section">
+                <h3 class="stats-sec-title">🏅 הישגים ותגים</h3>
+                <div class="badges-grid" id="profile-badges-grid"></div>
+              </div>
+
+              <!-- שני כפתורים בתחתית הפרופיל: סטטיסטיקות + גלריית שירים -->
+              <div class="profile-subnav-row">
+                <button type="button" class="profile-subnav-btn" id="open-profile-stats-btn">📊 סטטיסטיקות</button>
+                <button type="button" class="profile-subnav-btn" id="open-profile-gallery-btn">🎵 גלריית שירים</button>
+              </div>
+            </div>
+
+            <!-- תת-תצוגה: סטטיסטיקות -->
+            <div class="profile-subview" id="profile-view-stats">
+              <button type="button" class="profile-subview-back" data-profile-back="main">→ חזור לפרופיל</button>
+
+              <div class="kpi-grid">
+                <div class="kpi-card">
+                  <span class="kpi-val" id="stat-heard">0</span>
+                  <span class="kpi-label">שירים ששמעת</span>
                 </div>
-                <div class="fav-form-error" id="fav-form-error"></div>
-                <div class="fav-form-actions">
-                  <button type="submit" class="auth-submit-btn">שמור שינויים</button>
-                  <button type="button" class="logout-btn" id="cancel-profile-edit-btn">ביטול</button>
+                <div class="kpi-card">
+                  <span class="kpi-val" id="stat-won">0</span>
+                  <span class="kpi-label">זיהית נכון</span>
                 </div>
-              </form>
-              <div class="fav-saved-msg" id="fav-saved-msg"></div>
-            </div>
+                <div class="kpi-card">
+                  <span class="kpi-val" id="stat-rate">0%</span>
+                  <span class="kpi-label">אחוז הצלחה</span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-val" id="stat-best-streak">0🔥</span>
+                  <span class="kpi-label">שיא רצף</span>
+                </div>
+              </div>
 
-            <div class="kpi-grid">
-              <div class="kpi-card">
-                <span class="kpi-val" id="stat-heard">0</span>
-                <span class="kpi-label">שירים ששמעת</span>
+              <div class="stats-section">
+                <h3 class="stats-sec-title">הצלחות לפי רמת קושי</h3>
+                <div id="stats-by-level"></div>
               </div>
-              <div class="kpi-card">
-                <span class="kpi-val" id="stat-won">0</span>
-                <span class="kpi-label">זיהית נכון</span>
-              </div>
-              <div class="kpi-card">
-                <span class="kpi-val" id="stat-rate">0%</span>
-                <span class="kpi-label">אחוז הצלחה</span>
-              </div>
-              <div class="kpi-card">
-                <span class="kpi-val" id="stat-best-streak">0🔥</span>
-                <span class="kpi-label">שיא רצף</span>
+
+              <div class="stats-section">
+                <h3 class="stats-sec-title">הצלחות לפי מהירות זיהוי</h3>
+                <div id="stats-by-speed"></div>
               </div>
             </div>
 
-            <div class="stats-section">
-              <h3 class="stats-sec-title">🎯 משימות יומיות</h3>
-              <div class="quests-list" id="profile-quests-list"></div>
-            </div>
+            <!-- תת-תצוגה: גלריית שירים -->
+            <div class="profile-subview" id="profile-view-gallery">
+              <button type="button" class="profile-subview-back" data-profile-back="main">→ חזור לפרופיל</button>
 
-            <div class="stats-section">
-              <h3 class="stats-sec-title">🏅 הישגים ותגים</h3>
-              <div class="badges-grid" id="profile-badges-grid"></div>
-            </div>
-
-            <div class="stats-section">
-              <h3 class="stats-sec-title">הצלחות לפי רמת קושי</h3>
-              <div id="stats-by-level"></div>
-            </div>
-
-            <div class="stats-section">
-              <h3 class="stats-sec-title">הצלחות לפי מהירות זיהוי</h3>
-              <div id="stats-by-speed"></div>
-            </div>
-
-            <div class="stats-section">
-              <h3 class="stats-sec-title">
-                <span>🎵 גלריית השירים שזיהית</span>
-                <span class="stats-sec-sub">לחץ להשמעה וקישור ל-Spotify ▶</span>
-              </h3>
-              <div class="gallery-grid" id="won-gallery-grid"></div>
+              <div class="stats-section">
+                <h3 class="stats-sec-title">
+                  <span>🎵 גלריית השירים שזיהית</span>
+                  <span class="stats-sec-sub">לחץ להשמעה וקישור ל-Spotify ▶</span>
+                </h3>
+                <div class="gallery-grid" id="won-gallery-grid"></div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- חלון נתוני אש הרצף -->
+  <div class="modal-backdrop" id="streak-modal-backdrop">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-label="נתוני רצף ניצחונות">
+      <div class="modal-header">
+        <h2 class="modal-title">🔥 אש הרצף שלך</h2>
+        <button class="drawer-close-btn" id="streak-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="streak-info-grid">
+          <div class="streak-info-box">
+            <span class="streak-info-val" id="streak-modal-current">0🔥</span>
+            <span class="streak-info-label">רצף נוכחי</span>
+          </div>
+          <div class="streak-info-box highlight">
+            <span class="streak-info-val" id="streak-modal-mult">×1</span>
+            <span class="streak-info-label">מכפיל קריסטלים</span>
+          </div>
+          <div class="streak-info-box">
+            <span class="streak-info-val" id="streak-modal-best">0🏆</span>
+            <span class="streak-info-label">שיא רצף</span>
+          </div>
+        </div>
+        <p class="streak-modal-hint" id="streak-modal-hint"></p>
       </div>
     </div>
   </div>
@@ -883,7 +929,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261120d"></script>
+  <script type="module" src="src/main.js?v=20261120e"></script>
 </body>
 
 </html>

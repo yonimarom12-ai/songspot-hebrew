@@ -1,11 +1,11 @@
-import { dom } from "../dom.js?v=20261120d";
-import { state } from "../state.js?v=20261120d";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261120d";
-import { syncAccountToCloud, loadAccountFromCloud } from "../services/cloud.js?v=20261120d";
-import { stopGalleryPreview } from "./gallery.js?v=20261120d";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261120d";
-import { updatePointsDisplay } from "./economy.js?v=20261120d";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261120d";
+import { dom } from "../dom.js?v=20261120e";
+import { state } from "../state.js?v=20261120e";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261120e";
+import { syncAccountToCloud, loadAccountFromCloud } from "../services/cloud.js?v=20261120e";
+import { stopGalleryPreview } from "./gallery.js?v=20261120e";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261120e";
+import { updatePointsDisplay } from "./economy.js?v=20261120e";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261120e";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;

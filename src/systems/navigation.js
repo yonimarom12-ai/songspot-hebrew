@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261120d";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120d";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120d";
-import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261120d";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261120d";
-import { stopTimedRun } from "./timed.js?v=20261120d";
-import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261120d";
-import { playClickSfx } from "./sfx.js?v=20261120d";
+import { state } from "../state.js?v=20261120e";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120e";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120e";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, updateBottomNavActiveTab } from "./profile.js?v=20261120e";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261120e";
+import { stopTimedRun } from "./timed.js?v=20261120e";
+import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261120e";
+import { playClickSfx } from "./sfx.js?v=20261120e";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -227,7 +227,7 @@ export function initNavigationListeners() {
   const homeShopCardBtn = document.getElementById("home-shop-card-btn");
 
   if (homeAvatarBtn) homeAvatarBtn.addEventListener("click", () => toggleProfileModal(true));
-  if (homeStreakBtn) homeStreakBtn.addEventListener("click", () => toggleProfileModal(true));
+  if (homeStreakBtn) homeStreakBtn.addEventListener("click", () => toggleStreakModal(true));
   if (homePointsBtn) homePointsBtn.addEventListener("click", () => toggleShopModal(true));
   if (homeSettingsBtn) homeSettingsBtn.addEventListener("click", () => toggleDrawer(true));
   if (homeShopCardBtn) homeShopCardBtn.addEventListener("click", () => toggleShopModal(true));

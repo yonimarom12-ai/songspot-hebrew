@@ -1,4 +1,4 @@
-import { loadAccountsMap } from "./storage.js?v=20261120d";
+import { loadAccountsMap } from "./storage.js?v=20261120e";
 
 // הגדרות ענן (Supabase) — כדי להפעיל שמירה בענן ודירוג עולמי אמיתי, הדבק כאן את ה-URL וה-Anon Key מהפרויקט החינמי שלך ב-Supabase
 export const CLOUD_CONFIG = {

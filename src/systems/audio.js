@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261120d";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261120d";
-import { state } from "../state.js?v=20261120d";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261120e";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261120e";
+import { state } from "../state.js?v=20261120e";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -17,6 +17,7 @@ let activeDurationSec = 0;
 let activeTargetPct = 0;
 let audioHealthTimer = null;
 let lifecycleGuardsInstalled = false;
+let needsContextRebuildOnGesture = false;
 
 export function setBeforePlaySnippetHook(fn) {
   beforePlaySnippetHook = fn;
@@ -34,8 +35,11 @@ function configureAudioSession() {
 function attachContextStateListener(ctx) {
   if (!ctx) return;
   ctx.onstatechange = () => {
-    if (ctx.state !== "running") {
-      // ב-iOS Safari המעבר ל-interrupted/suspended מחייב שחרור מחדש במגע הבא
+    if (ctx.state === "interrupted" || ctx.state === "closed") {
+      // ב-iOS Safari אחרי interrupted, ה-AudioContext עלול להישאר מושתק גם אחרי resume -> מסמנים לבנייה מחדש במגע הבא
+      audioUnlocked = false;
+      needsContextRebuildOnGesture = true;
+    } else if (ctx.state !== "running") {
       audioUnlocked = false;
     }
   };
@@ -48,7 +52,9 @@ function recreateAudioContext() {
     state.audioCtx = null;
   }
   state.audioBuffer = null;
+  pendingDecode = null;
   audioUnlocked = false;
+  needsContextRebuildOnGesture = false;
   return getAudioContext();
 }
 
@@ -71,8 +77,8 @@ export function initAudioContext() {
   let ctx = getAudioContext();
   if (!ctx) return null;
 
-  // אם ה-AudioContext ב-iOS נתקע במצב interrupted או closed — יוצרים חדש נקי
-  if (ctx.state === "closed" || ctx.state === "interrupted") {
+  // אם המשתמש יצא מהדף וחזר (או ה-AudioContext נקטע ב-iOS) — סוגרים ובונים AudioContext טרי בתוך המגע!
+  if (needsContextRebuildOnGesture || ctx.state === "closed" || ctx.state === "interrupted") {
     ctx = recreateAudioContext();
     if (!ctx) return null;
   }
@@ -97,7 +103,7 @@ export function initAudioContext() {
     } catch (e) { }
   }
 
-  // אם הקובץ הגולמי של הסיבוב כבר ירד בזמן שה-AudioContext היה נעול — מפענחים אותו מיד!
+  // אם הקובץ הגולמי של הסיבוב זמין והבאפר טרם פוענח ב-AudioContext הנוכחי — מפענחים מיד (~25ms)
   if (state.rawAudioBuffer && !state.audioBuffer && !pendingDecode) {
     decodeRawAudioForRound(state.rawAudioBuffer, state.activeFetchRoundId);
   }
@@ -115,19 +121,29 @@ export function unlockAudioOnFirstGesture() {
 
   if (!lifecycleGuardsInstalled) {
     lifecycleGuardsInstalled = true;
-    const onForeground = () => {
-      if (document.hidden) return;
+    const markForRebuild = () => {
+      // יציאה מהדף/נעילת מסך באייפון עלולה לנתק את ערוץ השמע של ה-AudioContext הישן
+      stopAudioVisuals();
       audioUnlocked = false;
-      configureAudioSession();
-      if (state.audioCtx && state.audioCtx.state !== "running") {
-        try {
-          const p = state.audioCtx.resume();
-          if (p && typeof p.catch === "function") p.catch(() => { });
-        } catch (e) { }
-      }
+      needsContextRebuildOnGesture = true;
     };
-    document.addEventListener("visibilitychange", onForeground);
-    window.addEventListener("pageshow", onForeground);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        markForRebuild();
+      } else {
+        configureAudioSession();
+        needsContextRebuildOnGesture = true;
+        audioUnlocked = false;
+      }
+    });
+    window.addEventListener("pagehide", markForRebuild);
+    window.addEventListener("pageshow", (e) => {
+      configureAudioSession();
+      if (e.persisted || state.audioCtx) {
+        needsContextRebuildOnGesture = true;
+        audioUnlocked = false;
+      }
+    });
   }
 }
 
@@ -191,7 +207,7 @@ function decodeRawAudioForRound(rawBuffer, roundId) {
     .then(decoded => {
       if (roundId === state.activeFetchRoundId) {
         state.audioBuffer = decoded;
-        state.rawAudioBuffer = null; // שחרור זיכרון גולמי במובייל
+        // שומרים את rawAudioBuffer עד סוף הסיבוב כדי לאפשר פענוח מיידי מחדש אם AudioContext נבנה מחדש ב-iOS
       }
       return decoded;
     })

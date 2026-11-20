@@ -1,15 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261120d";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120d";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261120d";
-import { state } from "../state.js?v=20261120d";
-import { saveUserStats } from "../services/storage.js?v=20261120d";
-import { fetchItunesData } from "../services/itunes.js?v=20261120d";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120d";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261120d";
-import { formatPoints, getPointsBalance } from "./economy.js?v=20261120d";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261120d";
-import { renderQuestsAndBadgesModal } from "./quests.js?v=20261120d";
-import { renderQuestsAndBadgesModal } from "./quests.js?v=20261120c";
+import { ARTISTS_DB } from "../data/artists.js?v=20261120e";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120e";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261120e";
+import { state } from "../state.js?v=20261120e";
+import { saveUserStats } from "../services/storage.js?v=20261120e";
+import { fetchItunesData } from "../services/itunes.js?v=20261120e";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120e";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261120e";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261120e";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261120e";
+import { renderQuestsAndBadgesModal } from "./quests.js?v=20261120e";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -414,12 +413,57 @@ export function toggleShopModal(isOpen) {
   updateBottomNavActiveTab(isOpen ? "shop" : "game");
 }
 
+export function showProfileSubView(viewName = "main") {
+  if (viewName !== "gallery") stopGalleryPreview();
+  const views = {
+    main: "profile-view-main",
+    stats: "profile-view-stats",
+    gallery: "profile-view-gallery"
+  };
+  Object.entries(views).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("active", key === viewName);
+  });
+}
+
+export function toggleStreakModal(isOpen) {
+  const backdrop = document.getElementById("streak-modal-backdrop");
+  if (!backdrop) return;
+  if (isOpen) {
+    const curr = state.userStats?.currentStreak || 0;
+    const best = state.userStats?.bestStreak || 0;
+    const mult = getStreakMultiplier(curr);
+
+    const currEl = document.getElementById("streak-modal-current");
+    const multEl = document.getElementById("streak-modal-mult");
+    const bestEl = document.getElementById("streak-modal-best");
+    const hintEl = document.getElementById("streak-modal-hint");
+
+    if (currEl) currEl.textContent = `${curr}🔥`;
+    if (multEl) multEl.textContent = `×${mult}`;
+    if (bestEl) bestEl.textContent = `${best}🏆`;
+    if (hintEl) {
+      if (curr >= 10) {
+        hintEl.textContent = "🔥 אתה במכפיל המקסימלי (×2 קריסטלים לכל זיהוי)!";
+      } else if (curr >= 5) {
+        hintEl.textContent = `עוד ${10 - curr} ניצחונות ברצף למכפיל ×2 קריסטלים!`;
+      } else if (curr >= 3) {
+        hintEl.textContent = `עוד ${5 - curr} ניצחונות ברצף למכפיל ×1.35 קריסטלים!`;
+      } else {
+        hintEl.textContent = `עוד ${3 - curr} ניצחונות ברצף כדי להפעיל מכפיל ×1.15 קריסטלים!`;
+      }
+    }
+  }
+  backdrop.classList.toggle("open", isOpen);
+}
+
 export function toggleProfileModal(isOpen) {
   if (isOpen) {
     clearShopPreview();
     if (dom.shopModalBackdrop?.classList.contains("open")) {
       dom.shopModalBackdrop.classList.remove("open");
     }
+    showProfileSubView("main");
     renderProfileStatsModal();
   } else {
     stopGalleryPreview();
@@ -454,7 +498,24 @@ export function initProfileListeners() {
       if (e.target === dom.shopModalBackdrop) toggleShopModal(false);
     });
   }
-  dom.streakBadge.addEventListener("click", () => toggleProfileModal(true));
+  dom.streakBadge.addEventListener("click", () => toggleStreakModal(true));
+  const streakCloseBtn = document.getElementById("streak-close-btn");
+  const streakBackdrop = document.getElementById("streak-modal-backdrop");
+  if (streakCloseBtn) streakCloseBtn.addEventListener("click", () => toggleStreakModal(false));
+  if (streakBackdrop) {
+    streakBackdrop.addEventListener("click", (e) => {
+      if (e.target === streakBackdrop) toggleStreakModal(false);
+    });
+  }
+
+  const openStatsBtn = document.getElementById("open-profile-stats-btn");
+  const openGalleryBtn = document.getElementById("open-profile-gallery-btn");
+  if (openStatsBtn) openStatsBtn.addEventListener("click", () => showProfileSubView("stats"));
+  if (openGalleryBtn) openGalleryBtn.addEventListener("click", () => showProfileSubView("gallery"));
+  document.querySelectorAll("[data-profile-back]").forEach(btn => {
+    btn.addEventListener("click", () => showProfileSubView("main"));
+  });
+
   if (dom.pointsBadge) dom.pointsBadge.addEventListener("click", () => toggleShopModal(true));
   dom.profileCloseBtn.addEventListener("click", () => toggleProfileModal(false));
   dom.profileModalBackdrop.addEventListener("click", (e) => {
