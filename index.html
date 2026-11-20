@@ -8,14 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261120c">
-  <link rel="stylesheet" href="styles/home.css?v=20261120c">
-  <link rel="stylesheet" href="styles/header.css?v=20261120c">
-  <link rel="stylesheet" href="styles/player.css?v=20261120c">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261120c">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261120c">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261120c">
-  <link rel="stylesheet" href="styles/animations.css?v=20261120c">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261120d">
+  <link rel="stylesheet" href="styles/home.css?v=20261120d">
+  <link rel="stylesheet" href="styles/header.css?v=20261120d">
+  <link rel="stylesheet" href="styles/player.css?v=20261120d">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261120d">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261120d">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261120d">
+  <link rel="stylesheet" href="styles/animations.css?v=20261120d">
 </head>
 
 <body>
@@ -326,6 +326,7 @@
         <h2 class="mode-detail-title" id="mode-detail-title"></h2>
         <p class="mode-detail-desc" id="mode-detail-desc"></p>
         <span class="mode-detail-badge" id="mode-detail-status"></span>
+        <div class="leaderboard-wrap" id="mode-leaderboard-wrap" style="display: none;"></div>
         <button type="button" class="setup-confirm-btn" id="mode-detail-action-btn" style="margin-top: 10px;"></button>
       </div>
     </div>
@@ -392,6 +393,13 @@
             <button class="genre-pill" id="active-decade-pill" type="button">כל העשורים</button>
           </div>
           <div class="streams-pill" id="streams-badge">15M - 50M+ השמעות</div>
+        </div>
+
+        <div class="timed-hud-bar" id="timed-hud-bar" aria-live="polite">
+          <div class="timed-hud-pill clock">⏱️ <strong id="timed-clock-val">60s</strong></div>
+          <div class="timed-hud-pill score">🎵 <strong id="timed-score-val">0</strong> שירים</div>
+          <div class="timed-hud-pill best">🏆 שיא: <strong id="timed-best-val">0</strong></div>
+          <span class="timed-delta-flash" id="timed-delta-flash"></span>
         </div>
 
         <!-- אש הרצף במקום שהתפנה מתחת לסרגל העליון -->
@@ -751,6 +759,16 @@
             </div>
 
             <div class="stats-section">
+              <h3 class="stats-sec-title">🎯 משימות יומיות</h3>
+              <div class="quests-list" id="profile-quests-list"></div>
+            </div>
+
+            <div class="stats-section">
+              <h3 class="stats-sec-title">🏅 הישגים ותגים</h3>
+              <div class="badges-grid" id="profile-badges-grid"></div>
+            </div>
+
+            <div class="stats-section">
               <h3 class="stats-sec-title">הצלחות לפי רמת קושי</h3>
               <div id="stats-by-level"></div>
             </div>
@@ -813,6 +831,11 @@
       <p class="song-reveal-artist" id="song-artist-reveal"></p>
       <div class="points-earned-notice" id="points-earned-notice"></div>
       <div class="level-up-notice" id="level-up-notice"></div>
+      <div class="reveal-media-actions" id="reveal-media-actions">
+        <button type="button" class="reveal-action-chip replay" id="reveal-replay-btn">🔊 השמע שוב</button>
+        <a class="reveal-action-chip spotify" id="reveal-spotify-link" href="#" target="_blank" rel="noopener noreferrer">Spotify</a>
+        <a class="reveal-action-chip apple" id="reveal-apple-link" href="#" target="_blank" rel="noopener noreferrer">Apple Music</a>
+      </div>
       <button class="btn btn-next" id="next-btn">לשיר הבא</button>
     </div>
   </div>
@@ -860,7 +883,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261120c"></script>
+  <script type="module" src="src/main.js?v=20261120d"></script>
 </body>
 
 </html>

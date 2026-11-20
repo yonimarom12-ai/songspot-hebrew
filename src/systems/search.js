@@ -1,8 +1,8 @@
-import { dom } from "../dom.js?v=20261120c";
-import { state } from "../state.js?v=20261120c";
-import { cleanTrackTitle, normalizeHebrew, getSongKey } from "../utils/text.js?v=20261120c";
-import { fetchItunesData } from "../services/itunes.js?v=20261120c";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261120c";
+import { dom } from "../dom.js?v=20261120d";
+import { state } from "../state.js?v=20261120d";
+import { cleanTrackTitle, normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261120d";
+import { fetchItunesData } from "../services/itunes.js?v=20261120d";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261120d";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;
@@ -126,14 +126,20 @@ export function triggerSearchForCurrentInput() {
   }
 
   const normalizedVal = normalizeHebrew(val);
+  const fuzzyVal = normalizeHebrewFuzzy(val);
   if (!normalizedVal) {
     closeSuggestionsDropdown();
     return;
   }
 
+  const matchesText = (text) => {
+    const norm = normalizeHebrew(text);
+    if (norm.includes(normalizedVal)) return true;
+    return fuzzyVal.length >= 2 && normalizeHebrewFuzzy(text).includes(fuzzyVal);
+  };
+
   let localMatches = Array.from(state.discoveredSongsMap.values()).filter(s =>
-    normalizeHebrew(s.title).includes(normalizedVal) ||
-    normalizeHebrew(s.artist).includes(normalizedVal)
+    matchesText(s.title) || matchesText(s.artist)
   );
 
   if (state.easySearchFiftyActive) {

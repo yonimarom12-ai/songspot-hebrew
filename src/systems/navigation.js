@@ -1,9 +1,11 @@
-import { state } from "../state.js?v=20261120c";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120c";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120c";
-import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261120c";
-import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261120c";
-import { playClickSfx } from "./sfx.js?v=20261120c";
+import { state } from "../state.js?v=20261120d";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120d";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120d";
+import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261120d";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261120d";
+import { stopTimedRun } from "./timed.js?v=20261120d";
+import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261120d";
+import { playClickSfx } from "./sfx.js?v=20261120d";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -29,8 +31,8 @@ const MODE_CATALOG = {
     badge: "תחרות עולמית",
     icon: "🏆",
     title: "דירוג עולמי",
-    desc: "טבלת השחקנים המובילים ב״נחש את השיר״ לפי רצף ניצחונות, מהירות זיהוי וכמות קריסטלים.",
-    status: "🚧 לוח תוצאות עולמי יחובר בקרוב",
+    desc: "טבלת השחקנים המובילים ב״נחש את השיר״ לפי כמות זיהויים, שיא רצף וקריסטלים.",
+    status: "טוען דירוג...",
     actionLabel: "שחק וצבור קריסטלים ▶",
     action: "quickplay"
   },
@@ -44,13 +46,13 @@ const MODE_CATALOG = {
     action: "start-marathon"
   },
   timed: {
-    badge: "נגד השעון",
+    badge: "נגד השעון · 60 שניות",
     icon: "⏱️",
     title: "משחק בזמן",
-    desc: "60 שניות על השעון — נחשו כמה שיותר שירים ישראליים לפני שהזמן נגמר!",
-    status: "🚧 מצב שעון עצר בפיתוח · בקרוב",
-    actionLabel: "שחק משחק מהיר בינתיים ▶",
-    action: "quickplay"
+    desc: "60 שניות על השעון! כל זיהוי נכון מוסיף +5 שניות, טעות מורידה -3 שניות. כמה שירים תספיקו?",
+    status: "⚡ זמין למשחק עכשיו!",
+    actionLabel: "התחל משחק בזמן (60ש') ▶",
+    action: "start-timed"
   },
   daily: {
     badge: "אתגר יומי",
@@ -88,6 +90,7 @@ export function showScreen(screenName) {
   document.body.classList.toggle("hide-bottom-nav", screenName !== "home" && screenName !== "modes-hub");
 
   if (screenName !== "game" && screenName !== "settings") {
+    stopTimedRun();
     stopAudioVisuals();
     releaseMediaElement();
     const reveal = document.getElementById("result-banner");
@@ -147,7 +150,49 @@ function openModeScreen(modeKey) {
   if (status) status.textContent = cfg.status;
   if (actionBtn) actionBtn.textContent = cfg.actionLabel;
 
+  const lbWrap = document.getElementById("mode-leaderboard-wrap");
+  if (lbWrap) {
+    lbWrap.innerHTML = "";
+    lbWrap.style.display = modeKey === "leaderboard" ? "flex" : "none";
+  }
+
   showScreen("mode");
+
+  if (modeKey === "leaderboard" && lbWrap) {
+    fetchGlobalLeaderboard(25).then(({ source, rows }) => {
+      if (currentModeKey !== "leaderboard") return;
+      if (status) {
+        status.textContent = source === "cloud"
+          ? "☁️ דירוג עולמי חי מהענן"
+          : "📱 דירוג מקומי · הוסף Supabase ב-cloud.js לסנכרון עולמי";
+      }
+      lbWrap.innerHTML = "";
+      if (!rows || rows.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "lb-empty";
+        empty.textContent = "עדיין אין שחקנים רשומים בדירוג — הירשם בפרופיל ושחק כדי להיכנס לטבלה!";
+        lbWrap.appendChild(empty);
+        return;
+      }
+      rows.forEach((r, idx) => {
+        const item = document.createElement("div");
+        const isMe = state.currentUser && r.username.toLowerCase() === state.currentUser.toLowerCase();
+        item.className = `lb-row ${isMe ? "is-me" : ""}`;
+        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
+        const rankSpan = document.createElement("span");
+        rankSpan.className = "lb-rank";
+        rankSpan.textContent = medal;
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "lb-name";
+        nameSpan.textContent = r.username;
+        const metaSpan = document.createElement("span");
+        metaSpan.className = "lb-meta";
+        metaSpan.textContent = `${r.totalWon}🎵 · ${r.bestStreak}🔥 · ${r.points}💎`;
+        item.append(rankSpan, nameSpan, metaSpan);
+        lbWrap.appendChild(item);
+      });
+    });
+  }
 }
 
 function startGameDirectly(difficulty = "easy") {
@@ -259,6 +304,14 @@ export function initNavigationListeners() {
         state.selectedDecades.clear();
         state.selectedDecades.add("all");
         startGameDirectly("easy");
+      } else if (cfg.action === "start-timed") {
+        state.selectedGenres.clear();
+        state.selectedGenres.add("all");
+        state.selectedDecades.clear();
+        state.selectedDecades.add("all");
+        updateFilterPillsUI();
+        showScreen("game");
+        startTimedGameSession();
       } else if (cfg.action === "start-daily") {
         startGameDirectly("hard");
       } else if (cfg.action === "start-weekly") {

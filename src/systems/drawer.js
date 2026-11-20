@@ -1,13 +1,13 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261120c";
-import { dom } from "../dom.js?v=20261120c";
-import { state } from "../state.js?v=20261120c";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261120d";
+import { dom } from "../dom.js?v=20261120d";
+import { state } from "../state.js?v=20261120d";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261120c";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261120c";
-import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261120c";
+} from "./feedback.js?v=20261120d";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261120d";
+import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261120d";
 
 let settingsScreenHandler = null;
 

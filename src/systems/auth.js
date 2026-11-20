@@ -1,10 +1,11 @@
-import { dom } from "../dom.js?v=20261120c";
-import { state } from "../state.js?v=20261120c";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261120c";
-import { stopGalleryPreview } from "./gallery.js?v=20261120c";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261120c";
-import { updatePointsDisplay } from "./economy.js?v=20261120c";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261120c";
+import { dom } from "../dom.js?v=20261120d";
+import { state } from "../state.js?v=20261120d";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261120d";
+import { syncAccountToCloud, loadAccountFromCloud } from "../services/cloud.js?v=20261120d";
+import { stopGalleryPreview } from "./gallery.js?v=20261120d";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261120d";
+import { updatePointsDisplay } from "./economy.js?v=20261120d";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261120d";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -141,6 +142,7 @@ export function initAuthListeners() {
     saveAccountsMap(accounts);
     state.currentUser = username;
     safeStorageSet("songspot_current_user_v1", username);
+    syncAccountToCloud(username, state.userStats);
 
     dom.registerForm.reset();
     updateLiveUsernameFeedback();
@@ -167,6 +169,16 @@ export function initAuthListeners() {
     dom.loginForm.reset();
     setAuthMessage("");
     syncAuthUI();
+
+    // סנכרון אוטומטי מהענן (אם Supabase מוגדר)
+    loadAccountFromCloud(state.currentUser).then(cloudStats => {
+      if (cloudStats && state.currentUser === acc.username) {
+        if ((cloudStats.totalWon || 0) >= (state.userStats.totalWon || 0)) {
+          state.userStats = normalizeStatsObj({ ...state.userStats, ...cloudStats });
+          syncAuthUI();
+        }
+      }
+    });
   });
 
   dom.sendResetCodeBtn.addEventListener("click", () => {

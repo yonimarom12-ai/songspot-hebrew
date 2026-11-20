@@ -1,10 +1,11 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261120c";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261120c";
-import { state } from "../state.js?v=20261120c";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261120d";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261120d";
+import { state } from "../state.js?v=20261120d";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
 let pendingDecode = null;   // { roundId, promise }
+let prefetchedAudio = null; // { url, rawBuffer } - טעינה מוקדמת לשיר הבא בזמן מסך החשיפה
 let playToken = 0;
 let audioUnlocked = false;
 
@@ -219,6 +220,21 @@ async function fetchArrayBuffer(url, timeoutMs) {
   }
 }
 
+// טעינה מוקדמת של אודיו לשיר הבא ברקע (0ms המתנה בלחיצה על "לשיר הבא")
+export async function prefetchAudioRaw(previewUrl) {
+  if (!previewUrl) return null;
+  if (prefetchedAudio?.url === previewUrl && prefetchedAudio.rawBuffer) {
+    return prefetchedAudio.rawBuffer;
+  }
+  try {
+    const raw = await fetchArrayBuffer(previewUrl, 5500);
+    prefetchedAudio = { url: previewUrl, rawBuffer: raw };
+    return raw;
+  } catch (e) {
+    return null;
+  }
+}
+
 // מוריד את קובץ השמע מראש מיד כשהשיר נבחר; מפענח מיד רק אם ה-AudioContext כבר פתוח (מונע תקיעת decodeAudioData ב-iOS!)
 export function preloadAudioBufferInBackground(previewUrl, roundId) {
   state.audioBuffer = null;
@@ -234,7 +250,13 @@ export function preloadAudioBufferInBackground(previewUrl, roundId) {
 
   const promise = (async () => {
     try {
-      const raw = await fetchArrayBuffer(previewUrl, 5500);
+      let raw = null;
+      if (prefetchedAudio?.url === previewUrl && prefetchedAudio.rawBuffer) {
+        raw = prefetchedAudio.rawBuffer;
+        prefetchedAudio = null;
+      } else {
+        raw = await fetchArrayBuffer(previewUrl, 5500);
+      }
       if (roundId !== state.activeFetchRoundId) return null;
       state.rawAudioBuffer = raw;
 

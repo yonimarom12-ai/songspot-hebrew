@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261120c";
-import { dom } from "../dom.js?v=20261120c";
-import { state } from "../state.js?v=20261120c";
-import { saveUserStats } from "../services/storage.js?v=20261120c";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261120d";
+import { dom } from "../dom.js?v=20261120d";
+import { state } from "../state.js?v=20261120d";
+import { saveUserStats } from "../services/storage.js?v=20261120d";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
@@ -16,17 +16,27 @@ export function formatPoints(value) {
   });
 }
 
+// בונוס רצף ניצחונות (Streak Multiplier) שמגדיל את הרווח ונותן תמריץ אמיתי לרצף
+export function getStreakMultiplier(streak) {
+  const s = Number(streak) || 0;
+  if (s >= 10) return 2;
+  if (s >= 5) return 1.35;
+  if (s >= 3) return 1.15;
+  return 1;
+}
+
 export function calculateRoundReward(
   durationSec,
   difficultyLevel,
-  { usedHint = false, usedEasySearch = false, usedRedFeedback = false } = {}
+  { usedHint = false, usedEasySearch = false, usedRedFeedback = false, streak = 0 } = {}
 ) {
   // משתמש לא רשום (אורח) לא יכול להרוויח קריסטלים
   if (!state.currentUser) return 0;
 
   const base = BASE_POINTS_BY_DURATION[String(durationSec)] ?? 0;
   const diffMultiplier = DIFFICULTIES[difficultyLevel]?.pointsMultiplier ?? 1;
-  let reward = base * diffMultiplier;
+  const streakMultiplier = getStreakMultiplier(streak);
+  let reward = base * diffMultiplier * streakMultiplier;
 
   // אם הופעל רמז בסיבוב: 0 קריסטלים ברוב הרמות, וחצי כמות ברמה הכי קשה (impossible)
   if (usedHint) {

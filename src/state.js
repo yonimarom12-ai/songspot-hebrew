@@ -31,6 +31,7 @@ export const state = {
 
   currentAttempt: 0,
   currentSong: null,
+  preloadedNextSong: null,
   lastPlayedArtist: null,
   recentArtists: [],
   pendingNextDifficulty: null,

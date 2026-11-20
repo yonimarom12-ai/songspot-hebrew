@@ -317,6 +317,55 @@
   display: none;
 }
 
+.reveal-media-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.reveal-action-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transition: transform 0.15s ease, background 0.18s ease;
+}
+
+.reveal-action-chip:active {
+  transform: scale(0.95);
+}
+
+.reveal-action-chip.spotify {
+  background: rgba(30, 215, 96, 0.18);
+  border-color: rgba(30, 215, 96, 0.5);
+  color: #86efac;
+}
+
+.reveal-action-chip.apple {
+  background: rgba(250, 45, 72, 0.18);
+  border-color: rgba(250, 45, 72, 0.5);
+  color: #fda4af;
+}
+
+.reveal-action-chip.replay {
+  background: rgba(192, 132, 252, 0.2);
+  border-color: rgba(192, 132, 252, 0.5);
+  color: #e9d5ff;
+}
+
 .btn-next {
   width: 100%;
   max-width: 280px;
