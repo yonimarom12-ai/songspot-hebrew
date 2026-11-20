@@ -1,8 +1,8 @@
-import { dom } from "../dom.js?v=20261120b";
-import { state } from "../state.js?v=20261120b";
-import { cleanTrackTitle, normalizeHebrew, getSongKey } from "../utils/text.js?v=20261120b";
-import { fetchItunesData } from "../services/itunes.js?v=20261120b";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261120b";
+import { dom } from "../dom.js?v=20261120c";
+import { state } from "../state.js?v=20261120c";
+import { cleanTrackTitle, normalizeHebrew, getSongKey } from "../utils/text.js?v=20261120c";
+import { fetchItunesData } from "../services/itunes.js?v=20261120c";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261120c";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;

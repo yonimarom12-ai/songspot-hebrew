@@ -1,9 +1,9 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261120b";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120b";
-import { dom } from "../dom.js?v=20261120b";
-import { state } from "../state.js?v=20261120b";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120b";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261120b";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261120c";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120c";
+import { dom } from "../dom.js?v=20261120c";
+import { state } from "../state.js?v=20261120c";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120c";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261120c";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -12,7 +12,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261120b";
+} from "../services/itunes.js?v=20261120c";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -20,27 +20,27 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261120b";
-import { launchWinConfetti } from "./confetti.js?v=20261120b";
+} from "./audio.js?v=20261120c";
+import { launchWinConfetti } from "./confetti.js?v=20261120c";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261120b";
+} from "./feedback.js?v=20261120c";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261120b";
-import { updateStreakDisplay } from "./profile.js?v=20261120b";
+} from "./search.js?v=20261120c";
+import { updateStreakDisplay } from "./profile.js?v=20261120c";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261120b";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261120b";
+} from "./economy.js?v=20261120c";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261120c";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;

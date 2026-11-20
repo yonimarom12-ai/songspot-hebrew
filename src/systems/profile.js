@@ -1,13 +1,13 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261120b";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120b";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261120b";
-import { state } from "../state.js?v=20261120b";
-import { saveUserStats } from "../services/storage.js?v=20261120b";
-import { fetchItunesData } from "../services/itunes.js?v=20261120b";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120b";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261120b";
-import { formatPoints, getPointsBalance } from "./economy.js?v=20261120b";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261120b";
+import { ARTISTS_DB } from "../data/artists.js?v=20261120c";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120c";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261120c";
+import { state } from "../state.js?v=20261120c";
+import { saveUserStats } from "../services/storage.js?v=20261120c";
+import { fetchItunesData } from "../services/itunes.js?v=20261120c";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120c";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261120c";
+import { formatPoints, getPointsBalance } from "./economy.js?v=20261120c";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261120c";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -388,6 +388,8 @@ function setFavoritesEditMode(isEditing) {
 export function updateBottomNavActiveTab(activeTab = "game") {
   if (dom.profileBtn) dom.profileBtn.classList.toggle("active", activeTab === "profile");
   if (dom.navGameBtn) dom.navGameBtn.classList.toggle("active", activeTab === "game");
+  const navModesBtn = document.getElementById("nav-modes-btn");
+  if (navModesBtn) navModesBtn.classList.toggle("active", activeTab === "modes");
   if (dom.navShopBtn) dom.navShopBtn.classList.toggle("active", activeTab === "shop");
 }
 

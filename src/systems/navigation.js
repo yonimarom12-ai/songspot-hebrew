@@ -1,13 +1,13 @@
-import { state } from "../state.js?v=20261120b";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120b";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120b";
-import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261120b";
-import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261120b";
-import { playClickSfx } from "./sfx.js?v=20261120b";
-import { playClickSfx } from "./sfx.js?v=20261120a";
+import { state } from "../state.js?v=20261120c";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120c";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120c";
+import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261120c";
+import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261120c";
+import { playClickSfx } from "./sfx.js?v=20261120c";
 
 const SCREEN_IDS = {
   home: "screen-home",
+  "modes-hub": "screen-modes-hub",
   "setup-genres": "screen-setup-genres",
   "setup-decades": "screen-setup-decades",
   mode: "screen-mode",
@@ -84,8 +84,8 @@ export function showScreen(screenName) {
     if (el) el.classList.toggle("active", key === screenName);
   });
 
-  // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/מודים/הגדרות
-  document.body.classList.toggle("hide-bottom-nav", screenName !== "home");
+  // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/הגדרות (גלוי בבית ובמסך מצבי המשחק)
+  document.body.classList.toggle("hide-bottom-nav", screenName !== "home" && screenName !== "modes-hub");
 
   if (screenName !== "game" && screenName !== "settings") {
     stopAudioVisuals();
@@ -99,6 +99,8 @@ export function showScreen(screenName) {
 
   if (screenName === "home") {
     updateBottomNavActiveTab("game");
+  } else if (screenName === "modes-hub") {
+    updateBottomNavActiveTab("modes");
   }
   window.scrollTo({ top: 0, behavior: "instant" });
 }
@@ -228,7 +230,23 @@ export function initNavigationListeners() {
   });
 
   const modeBackBtn = document.getElementById("mode-back-lobby-btn");
-  if (modeBackBtn) modeBackBtn.addEventListener("click", () => showScreen("home"));
+  if (modeBackBtn) modeBackBtn.addEventListener("click", () => showScreen("modes-hub"));
+
+  // לשוניות סרגל תחתון: בית + משחקים (מודים)
+  const navModesBtn = document.getElementById("nav-modes-btn");
+  if (navModesBtn) {
+    navModesBtn.addEventListener("click", () => {
+      toggleProfileModal(false);
+      toggleShopModal(false);
+      showScreen("modes-hub");
+    });
+  }
+  const navGameBtn = document.getElementById("nav-game-btn");
+  if (navGameBtn) {
+    navGameBtn.addEventListener("click", () => {
+      showScreen("home");
+    });
+  }
 
   const modeActionBtn = document.getElementById("mode-detail-action-btn");
   if (modeActionBtn) {

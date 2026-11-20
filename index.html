@@ -8,14 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261120b">
-  <link rel="stylesheet" href="styles/home.css?v=20261120b">
-  <link rel="stylesheet" href="styles/header.css?v=20261120b">
-  <link rel="stylesheet" href="styles/player.css?v=20261120b">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261120b">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261120b">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261120b">
-  <link rel="stylesheet" href="styles/animations.css?v=20261120b">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261120c">
+  <link rel="stylesheet" href="styles/home.css?v=20261120c">
+  <link rel="stylesheet" href="styles/header.css?v=20261120c">
+  <link rel="stylesheet" href="styles/player.css?v=20261120c">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261120c">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261120c">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261120c">
+  <link rel="stylesheet" href="styles/animations.css?v=20261120c">
 </head>
 
 <body>
@@ -40,34 +40,51 @@
         </div>
         <button type="button" class="home-gear-btn" id="home-settings-btn" aria-label="הגדרות">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
+            <path
+              d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
           </svg>
         </button>
       </header>
 
-      <div class="home-hero">
-        <div class="home-eq-logo" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span>
+      <div class="home-center-stage">
+        <div class="home-hero">
+          <div class="home-eq-logo" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <h1 class="home-title">נחש את השיר</h1>
+          <p class="home-tagline">זהו להיטים ישראליים משבריר שנייה</p>
         </div>
-        <h1 class="home-title">נחש את השיר</h1>
-      </div>
 
-      <div class="quickplay-row-wrap">
-        <div class="hero-wave-bars" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span>
+        <div class="quickplay-row-wrap">
+          <div class="hero-wave-bars" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <button type="button" class="home-quickplay-btn" id="home-quickplay-btn">
+            <span class="quickplay-play-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+            <span class="quickplay-text">
+              <span class="quickplay-title">משחק מהיר</span>
+              <span class="quickplay-sub">נחשו את השיר!</span>
+            </span>
+          </button>
+          <div class="hero-wave-bars flipped" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
         </div>
-        <button type="button" class="home-quickplay-btn" id="home-quickplay-btn">
-          <span class="quickplay-play-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-          </span>
-          <span class="quickplay-text">
-            <span class="quickplay-title">משחק מהיר</span>
-            <span class="quickplay-sub">נחשו את השיר!</span>
-          </span>
-        </button>
-        <div class="hero-wave-bars flipped" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span>
-        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 1.5: תפריט כל מצבי המשחק (לשונית מודים בסרגל התחתון) ===== -->
+  <section class="app-screen" id="screen-modes-hub" aria-label="מצבי משחק">
+    <div class="home-stage-glow"></div>
+    <div class="app-shell home-shell">
+      <div class="setup-header" style="padding-top: 8px;">
+        <h2 class="setup-title">מצבי משחק</h2>
+        <p class="setup-subtitle">בחרו את האתגר הבא שלכם</p>
       </div>
 
       <div class="home-modes-grid">
@@ -84,7 +101,8 @@
               <path d="M5 31c0-5.5 4.5-9 10-9s10 3.5 10 9" fill="url(#vsGrad)" opacity="0.92" />
               <circle cx="49" cy="13" r="6" fill="url(#vsGrad)" />
               <path d="M39 31c0-5.5 4.5-9 10-9s10 3.5 10 9" fill="url(#vsGrad)" opacity="0.92" />
-              <text x="32" y="25" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="900" font-family="Rubik,sans-serif">VS</text>
+              <text x="32" y="25" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="900"
+                font-family="Rubik,sans-serif">VS</text>
             </svg>
           </span>
           <span class="mode-card-title">1 נגד 1</span>
@@ -103,10 +121,13 @@
                 </linearGradient>
               </defs>
               <path d="M13 8h22v11c0 6.5-4.8 11.5-11 11.5S13 25.5 13 19V8z" fill="url(#goldTrophy)" />
-              <path d="M13 11H8c0 6 2.5 10 6 10.5M35 11h5c0 6-2.5 10-6 10.5" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" />
+              <path d="M13 11H8c0 6 2.5 10 6 10.5M35 11h5c0 6-2.5 10-6 10.5" fill="none" stroke="#fbbf24"
+                stroke-width="3" stroke-linecap="round" />
               <rect x="21" y="30" width="6" height="6" fill="#d97706" />
               <rect x="15" y="36" width="18" height="4" rx="2" fill="url(#goldTrophy)" />
-              <polygon points="24,13 25.8,16.8 30,17.3 26.9,20.2 27.7,24.3 24,22.3 20.3,24.3 21.1,20.2 18,17.3 22.2,16.8" fill="#fff7cc" />
+              <polygon
+                points="24,13 25.8,16.8 30,17.3 26.9,20.2 27.7,24.3 24,22.3 20.3,24.3 21.1,20.2 18,17.3 22.2,16.8"
+                fill="#fff7cc" />
             </svg>
           </span>
           <span class="mode-card-title">דירוג עולמי</span>
@@ -124,7 +145,8 @@
                   <stop offset="100%" stop-color="#fb7185" />
                 </linearGradient>
               </defs>
-              <path d="M16 8c-5 0-9 3.6-9 8s4 8 9 8c6 0 10-16 24-16 5 0 9 3.6 9 8s-4 8-9 8c-6 0-10-16-24-16z" fill="none" stroke="url(#pinkInf)" stroke-width="4.5" stroke-linecap="round" />
+              <path d="M16 8c-5 0-9 3.6-9 8s4 8 9 8c6 0 10-16 24-16 5 0 9 3.6 9 8s-4 8-9 8c-6 0-10-16-24-16z"
+                fill="none" stroke="url(#pinkInf)" stroke-width="4.5" stroke-linecap="round" />
             </svg>
           </span>
           <span class="mode-card-title">מרתון</span>
@@ -142,8 +164,10 @@
                 </linearGradient>
               </defs>
               <rect x="20" y="5" width="8" height="4" rx="1.5" fill="#86efac" />
-              <circle cx="24" cy="27" r="14" fill="rgba(16,185,129,0.16)" stroke="url(#greenWatch)" stroke-width="3.5" />
-              <path d="M24 19v8l5 3" fill="none" stroke="#ecfccb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="24" cy="27" r="14" fill="rgba(16,185,129,0.16)" stroke="url(#greenWatch)"
+                stroke-width="3.5" />
+              <path d="M24 19v8l5 3" fill="none" stroke="#ecfccb" stroke-width="3" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
           </span>
           <span class="mode-card-title">משחק בזמן</span>
@@ -163,7 +187,8 @@
               <rect x="9" y="28" width="6" height="11" rx="2" fill="url(#cyanChart)" />
               <rect x="20" y="22" width="6" height="17" rx="2" fill="url(#cyanChart)" />
               <rect x="31" y="14" width="6" height="25" rx="2" fill="url(#cyanChart)" />
-              <path d="M9 22l9-6 6 3 11-10m0 0h-7m7 0v7" fill="none" stroke="#cffafe" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 22l9-6 6 3 11-10m0 0h-7m7 0v7" fill="none" stroke="#cffafe" stroke-width="2.8"
+                stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
           <span class="mode-card-title">אתגר יומי</span>
@@ -308,192 +333,195 @@
 
   <!-- ===== מסך 5: מסך המשחק (ניחוש השיר) ===== -->
   <section class="app-screen" id="screen-game" aria-label="משחק ניחוש השיר">
-  <div class="app-shell">
-    <div>
-      <header class="top-bar">
-        <div class="brand">
-          <button class="lobby-exit-btn" id="exit-to-lobby-btn" type="button" aria-label="יציאה ללובי" title="חזור ללובי">🏠</button>
-          <h1 class="brand-title">נחש את השיר</h1>
+    <div class="app-shell">
+      <div>
+        <header class="top-bar">
+          <div class="brand">
+            <button class="lobby-exit-btn" id="exit-to-lobby-btn" type="button" aria-label="יציאה ללובי"
+              title="חזור ללובי">🏠</button>
+            <h1 class="brand-title">נחש את השיר</h1>
+          </div>
+
+          <div class="meta-badges">
+            <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="פתח הגדרות וסינון"
+              style="width:32px;height:32px;">
+              <span class="menu-bar"></span>
+              <span class="menu-bar"></span>
+              <span class="menu-bar"></span>
+            </button>
+            <!-- יתרת קריסטלים -->
+            <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים">
+              <svg class="points-crystal-svg" viewBox="0 0 28 32" aria-hidden="true">
+                <defs>
+                  <linearGradient id="crystalTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#d6fbff" />
+                    <stop offset="55%" stop-color="#56e0ff" />
+                    <stop offset="100%" stop-color="#229bff" />
+                  </linearGradient>
+                  <linearGradient id="crystalLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#8bf0ff" />
+                    <stop offset="100%" stop-color="#3b82f6" />
+                  </linearGradient>
+                  <linearGradient id="crystalRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#38bdf8" />
+                    <stop offset="100%" stop-color="#6d28d9" />
+                  </linearGradient>
+                  <linearGradient id="crystalCore" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#e0faff" stop-opacity="0.95" />
+                    <stop offset="50%" stop-color="#38d9ff" stop-opacity="0.85" />
+                    <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.95" />
+                  </linearGradient>
+                </defs>
+                <!-- פאה מרכזית ומעטפת קריסטל רב-פאות -->
+                <polygon points="14,1 25,11 14,31 3,11" fill="url(#crystalRight)" />
+                <polygon points="14,1 3,11 14,14" fill="url(#crystalTop)" />
+                <polygon points="14,1 25,11 14,14" fill="url(#crystalLeft)" />
+                <polygon points="3,11 14,14 14,31" fill="url(#crystalLeft)" opacity="0.88" />
+                <polygon points="14,4 19.5,11.2 14,25.5 8.5,11.2" fill="url(#crystalCore)" />
+                <!-- הבזק אור עליון -->
+                <polygon points="14,1 18.5,9.5 14,11 9.5,9.5" fill="#ffffff" opacity="0.55" />
+              </svg>
+              <span class="points-count-text" id="points-count">0</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="filter-summary-row">
+          <div class="filter-pills-group">
+            <button class="genre-pill" id="active-genre-pill" type="button">כל הז'אנרים</button>
+            <button class="genre-pill" id="active-decade-pill" type="button">כל העשורים</button>
+          </div>
+          <div class="streams-pill" id="streams-badge">15M - 50M+ השמעות</div>
         </div>
 
-        <div class="meta-badges">
-          <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="פתח הגדרות וסינון" style="width:32px;height:32px;">
-            <span class="menu-bar"></span>
-            <span class="menu-bar"></span>
-            <span class="menu-bar"></span>
-          </button>
-          <!-- יתרת קריסטלים -->
-          <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים">
-            <svg class="points-crystal-svg" viewBox="0 0 28 32" aria-hidden="true">
+        <!-- אש הרצף במקום שהתפנה מתחת לסרגל העליון -->
+        <div class="streak-top-slot">
+          <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
+            <svg class="streak-fire-svg" viewBox="0 0 38 44">
               <defs>
-                <linearGradient id="crystalTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#d6fbff" />
-                  <stop offset="55%" stop-color="#56e0ff" />
-                  <stop offset="100%" stop-color="#229bff" />
+                <linearGradient id="fireGradOuter" x1="50%" y1="100%" x2="50%" y2="0%">
+                  <stop offset="0%" stop-color="#d91b00" />
+                  <stop offset="48%" stop-color="#ff6a00" />
+                  <stop offset="100%" stop-color="#ffbe1a" />
                 </linearGradient>
-                <linearGradient id="crystalLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#8bf0ff" />
-                  <stop offset="100%" stop-color="#3b82f6" />
+                <linearGradient id="fireGradMid" x1="50%" y1="100%" x2="50%" y2="0%">
+                  <stop offset="0%" stop-color="#ff5e00" />
+                  <stop offset="100%" stop-color="#ffd54a" />
                 </linearGradient>
-                <linearGradient id="crystalRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#38bdf8" />
-                  <stop offset="100%" stop-color="#6d28d9" />
-                </linearGradient>
-                <linearGradient id="crystalCore" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#e0faff" stop-opacity="0.95" />
-                  <stop offset="50%" stop-color="#38d9ff" stop-opacity="0.85" />
-                  <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.95" />
+                <linearGradient id="fireGradInner" x1="50%" y1="100%" x2="50%" y2="0%">
+                  <stop offset="0%" stop-color="#ffae00" />
+                  <stop offset="100%" stop-color="#fff4b8" />
                 </linearGradient>
               </defs>
-              <!-- פאה מרכזית ומעטפת קריסטל רב-פאות -->
-              <polygon points="14,1 25,11 14,31 3,11" fill="url(#crystalRight)" />
-              <polygon points="14,1 3,11 14,14" fill="url(#crystalTop)" />
-              <polygon points="14,1 25,11 14,14" fill="url(#crystalLeft)" />
-              <polygon points="3,11 14,14 14,31" fill="url(#crystalLeft)" opacity="0.88" />
-              <polygon points="14,4 19.5,11.2 14,25.5 8.5,11.2" fill="url(#crystalCore)" />
-              <!-- הבזק אור עליון -->
-              <polygon points="14,1 18.5,9.5 14,11 9.5,9.5" fill="#ffffff" opacity="0.55" />
+              <path class="flame-outer" fill="url(#fireGradOuter)"
+                d="M19 2C19 2 31.5 11.5 31.5 24.5C31.5 33.4 25.9 40.5 19 40.5C12.1 40.5 6.5 33.4 6.5 24.5C6.5 18.6 9.6 13.1 12.6 9.8C12.2 13.1 14 15.6 15.6 16.2C14.1 11 16.2 5.6 19 2Z" />
+              <path class="flame-mid" fill="url(#fireGradMid)" opacity="0.88"
+                d="M19 9.5C19 9.5 27.2 16.8 27.2 25.5C27.2 32.1 23.6 37.5 19 37.5C14.4 37.5 10.8 32.1 10.8 25.5C10.8 20.5 14.5 15 19 9.5Z" />
+              <path class="flame-inner" fill="url(#fireGradInner)"
+                d="M19 16.5C19 16.5 24 21.2 24 27C24 31.7 21.8 35.5 19 35.5C16.2 35.5 14 31.7 14 27C14 23.5 16.4 19.8 19 16.5Z" />
             </svg>
-            <span class="points-count-text" id="points-count">0</span>
-          </button>
+            <span class="streak-count-text" id="streak-count">0</span>
+          </div>
         </div>
-      </header>
-
-      <div class="filter-summary-row">
-        <div class="filter-pills-group">
-          <button class="genre-pill" id="active-genre-pill" type="button">כל הז'אנרים</button>
-          <button class="genre-pill" id="active-decade-pill" type="button">כל העשורים</button>
-        </div>
-        <div class="streams-pill" id="streams-badge">15M - 50M+ השמעות</div>
       </div>
 
-      <!-- אש הרצף במקום שהתפנה מתחת לסרגל העליון -->
-      <div class="streak-top-slot">
-        <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
-          <svg class="streak-fire-svg" viewBox="0 0 38 44">
-            <defs>
-              <linearGradient id="fireGradOuter" x1="50%" y1="100%" x2="50%" y2="0%">
-                <stop offset="0%" stop-color="#d91b00" />
-                <stop offset="48%" stop-color="#ff6a00" />
-                <stop offset="100%" stop-color="#ffbe1a" />
-              </linearGradient>
-              <linearGradient id="fireGradMid" x1="50%" y1="100%" x2="50%" y2="0%">
-                <stop offset="0%" stop-color="#ff5e00" />
-                <stop offset="100%" stop-color="#ffd54a" />
-              </linearGradient>
-              <linearGradient id="fireGradInner" x1="50%" y1="100%" x2="50%" y2="0%">
-                <stop offset="0%" stop-color="#ffae00" />
-                <stop offset="100%" stop-color="#fff4b8" />
-              </linearGradient>
-            </defs>
-            <path class="flame-outer" fill="url(#fireGradOuter)"
-              d="M19 2C19 2 31.5 11.5 31.5 24.5C31.5 33.4 25.9 40.5 19 40.5C12.1 40.5 6.5 33.4 6.5 24.5C6.5 18.6 9.6 13.1 12.6 9.8C12.2 13.1 14 15.6 15.6 16.2C14.1 11 16.2 5.6 19 2Z" />
-            <path class="flame-mid" fill="url(#fireGradMid)" opacity="0.88"
-              d="M19 9.5C19 9.5 27.2 16.8 27.2 25.5C27.2 32.1 23.6 37.5 19 37.5C14.4 37.5 10.8 32.1 10.8 25.5C10.8 20.5 14.5 15 19 9.5Z" />
-            <path class="flame-inner" fill="url(#fireGradInner)"
-              d="M19 16.5C19 16.5 24 21.2 24 27C24 31.7 21.8 35.5 19 35.5C16.2 35.5 14 31.7 14 27C14 23.5 16.4 19.8 19 16.5Z" />
-          </svg>
-          <span class="streak-count-text" id="streak-count">0</span>
+      <div class="gameplay-cluster">
+        <div class="chips-wrapper" id="difficulty-bar">
+          <button class="chip active" data-level="easy">קל</button>
+          <button class="chip" data-level="medium">בינוני</button>
+          <button class="chip" data-level="hard">קשה</button>
+          <button class="chip" data-level="very_hard">קשה מאוד</button>
+          <button class="chip" data-level="impossible">בלתי אפשרי</button>
         </div>
+
+        <main class="player-card" id="player-card">
+          <div class="disc-wrapper" id="disc-wrapper">
+            <div class="disc-center-hole"></div>
+            <img class="cover-img" id="song-cover" src="" alt="Cover" />
+          </div>
+
+          <div class="equalizer" id="equalizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+
+          <div class="status-text" id="status-label">מתחבר לקטלוג המוזיקה...</div>
+          <div class="song-loading-wrap" id="song-loading-wrap" aria-live="polite">
+            <div class="song-loading-track">
+              <div class="song-loading-fill" id="song-loading-fill"></div>
+            </div>
+            <span class="song-loading-text" id="song-loading-text">טוען שיר...</span>
+          </div>
+          <button class="retry-inline-btn" id="retry-btn">נסה שוב</button>
+
+          <div class="timeline-wrapper" id="timeline-wrapper">
+            <div class="segments-bar" id="segments-bar">
+              <div class="playback-fill" id="playback-fill"></div>
+              <div class="segment active"></div>
+              <div class="segment"></div>
+              <div class="segment"></div>
+              <div class="segment"></div>
+              <div class="segment"></div>
+            </div>
+            <div class="timeline-marker" id="timeline-marker">
+              <div class="marker-arrow"></div>
+              <span class="marker-time" id="marker-time-label">0.1s</span>
+            </div>
+          </div>
+
+          <div class="play-control-row" id="duration-badge">
+            <div class="game-wave-wing" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <button class="play-fab" id="play-btn" disabled aria-label="השמע">
+              <svg viewBox="0 0 24 24" id="play-icon">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+            <div class="side-duration-readout"><span id="play-time-label">0.1</span>s</div>
+          </div>
+
+          <div class="hints-panel" id="hints-panel">
+            <div class="hints-header">💡 רמזים ל-15ש' (שימוש מבטל קריסטלים לשלב; בבלתי אפשרי חצי כמות):</div>
+            <div class="hints-btns-row">
+              <button type="button" class="hint-chip-btn" id="hint-artist-btn">🎤 חשוף זמר/ת</button>
+              <button type="button" class="hint-chip-btn" id="hint-year-btn">📅 שנת יציאה</button>
+              <button type="button" class="hint-chip-btn" id="hint-pattern-btn">🔤 תבנית ואות ראשונה</button>
+            </div>
+          </div>
+        </main>
+
+        <footer class="interaction-area" id="interaction-area">
+          <div class="active-settings-pills">
+            <span class="setting-status-pill" id="easy-search-status-pill" title="לחץ לפתיחת הגדרות">🎯 חיפוש קל (50%)
+              פעיל</span>
+            <span class="setting-status-pill" id="red-feedback-status-pill" title="לחץ לפתיחת הגדרות">🔴 חיווי אדום
+              (8ש')
+              פעיל</span>
+          </div>
+
+          <div class="search-skip-row">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24">
+                <path
+                  d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z" />
+              </svg>
+              <input type="text" class="search-input" id="guess-input" placeholder="חפש שיר או זמר..." disabled
+                autocomplete="off" />
+              <div class="suggestions-dropdown" id="suggestions-list"></div>
+            </div>
+            <button class="btn btn-secondary" id="skip-btn" disabled>דלג (+0.5ש')</button>
+          </div>
+
+          <div class="buttons-row">
+            <button class="btn btn-primary" id="submit-btn" disabled>נחש</button>
+          </div>
+        </footer>
       </div>
     </div>
-
-    <div class="gameplay-cluster">
-      <div class="chips-wrapper" id="difficulty-bar">
-        <button class="chip active" data-level="easy">קל</button>
-        <button class="chip" data-level="medium">בינוני</button>
-        <button class="chip" data-level="hard">קשה</button>
-        <button class="chip" data-level="very_hard">קשה מאוד</button>
-        <button class="chip" data-level="impossible">בלתי אפשרי</button>
-      </div>
-
-      <main class="player-card" id="player-card">
-      <div class="disc-wrapper" id="disc-wrapper">
-        <div class="disc-center-hole"></div>
-        <img class="cover-img" id="song-cover" src="" alt="Cover" />
-      </div>
-
-      <div class="equalizer" id="equalizer">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-      </div>
-
-      <div class="status-text" id="status-label">מתחבר לקטלוג המוזיקה...</div>
-      <div class="song-loading-wrap" id="song-loading-wrap" aria-live="polite">
-        <div class="song-loading-track">
-          <div class="song-loading-fill" id="song-loading-fill"></div>
-        </div>
-        <span class="song-loading-text" id="song-loading-text">טוען שיר...</span>
-      </div>
-      <button class="retry-inline-btn" id="retry-btn">נסה שוב</button>
-
-      <div class="timeline-wrapper" id="timeline-wrapper">
-        <div class="segments-bar" id="segments-bar">
-          <div class="playback-fill" id="playback-fill"></div>
-          <div class="segment active"></div>
-          <div class="segment"></div>
-          <div class="segment"></div>
-          <div class="segment"></div>
-          <div class="segment"></div>
-        </div>
-        <div class="timeline-marker" id="timeline-marker">
-          <div class="marker-arrow"></div>
-          <span class="marker-time" id="marker-time-label">0.1s</span>
-        </div>
-      </div>
-
-      <div class="play-control-row" id="duration-badge">
-        <div class="game-wave-wing" aria-hidden="true">
-          <span></span><span></span><span></span><span></span>
-        </div>
-        <button class="play-fab" id="play-btn" disabled aria-label="השמע">
-          <svg viewBox="0 0 24 24" id="play-icon">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </button>
-        <div class="side-duration-readout"><span id="play-time-label">0.1</span>s</div>
-      </div>
-
-      <div class="hints-panel" id="hints-panel">
-        <div class="hints-header">💡 רמזים ל-15ש' (שימוש מבטל קריסטלים לשלב; בבלתי אפשרי חצי כמות):</div>
-        <div class="hints-btns-row">
-          <button type="button" class="hint-chip-btn" id="hint-artist-btn">🎤 חשוף זמר/ת</button>
-          <button type="button" class="hint-chip-btn" id="hint-year-btn">📅 שנת יציאה</button>
-          <button type="button" class="hint-chip-btn" id="hint-pattern-btn">🔤 תבנית ואות ראשונה</button>
-        </div>
-      </div>
-    </main>
-
-    <footer class="interaction-area" id="interaction-area">
-      <div class="active-settings-pills">
-        <span class="setting-status-pill" id="easy-search-status-pill" title="לחץ לפתיחת הגדרות">🎯 חיפוש קל (50%)
-          פעיל</span>
-        <span class="setting-status-pill" id="red-feedback-status-pill" title="לחץ לפתיחת הגדרות">🔴 חיווי אדום (8ש')
-          פעיל</span>
-      </div>
-
-      <div class="search-skip-row">
-        <div class="search-box">
-          <svg class="search-icon" viewBox="0 0 24 24">
-            <path
-              d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z" />
-          </svg>
-          <input type="text" class="search-input" id="guess-input" placeholder="חפש שיר או זמר..."
-            disabled autocomplete="off" />
-          <div class="suggestions-dropdown" id="suggestions-list"></div>
-        </div>
-        <button class="btn btn-secondary" id="skip-btn" disabled>דלג (+0.5ש')</button>
-      </div>
-
-      <div class="buttons-row">
-        <button class="btn btn-primary" id="submit-btn" disabled>נחש</button>
-      </div>
-    </footer>
-    </div>
-  </div>
   </section>
 
   <!-- ===== מסך 6: דף הגדרות משחק ===== -->
@@ -522,7 +550,8 @@
         <div class="setting-row">
           <div class="setting-info">
             <span class="setting-name">חיווי אדום בהקלדה שגויה (מ-8ש')</span>
-            <span class="setting-desc">צובע את שורת החיפוש באדום בהקלדה שגויה משלב 8ש' (מזכה ב-×0.5 קריסטלים ב-8ש' ו-15ש')</span>
+            <span class="setting-desc">צובע את שורת החיפוש באדום בהקלדה שגויה משלב 8ש' (מזכה ב-×0.5 קריסטלים ב-8ש'
+              ו-15ש')</span>
           </div>
           <button type="button" class="switch-toggle" id="red-feedback-setting-toggle"
             aria-label="הפעל חיווי אדום ב-8 שניות"></button>
@@ -563,8 +592,7 @@
         <div class="logged-user-bar" id="logged-user-bar">
           <div class="logged-user-info">
             <span class="profile-modal-avatar" id="profile-modal-avatar">🎧</span>
-            <span>מחובר בתור: <strong id="logged-username-display"
-                style="color: var(--spotify-green);"></strong></span>
+            <span>מחובר בתור: <strong id="logged-username-display" style="color: var(--spotify-green);"></strong></span>
           </div>
           <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
         </div>
@@ -579,8 +607,8 @@
 
           <!-- טופס התחברות -->
           <form class="auth-form active" id="login-form" autocomplete="off">
-            <input type="text" class="auth-input" id="login-username" placeholder="שם משתמש" required
-              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
+            <input type="text" class="auth-input" id="login-username" placeholder="שם משתמש" required autocomplete="off"
+              autocorrect="off" autocapitalize="none" spellcheck="false" />
             <input type="password" class="auth-input" id="login-password" placeholder="סיסמא" required
               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <button type="submit" class="auth-submit-btn">התחבר לחשבון</button>
@@ -589,8 +617,8 @@
           <!-- טופס הרשמה -->
           <form class="auth-form" id="register-form" autocomplete="off">
             <input type="text" class="auth-input" id="reg-username"
-              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required
-              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
+              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required autocomplete="off" autocorrect="off"
+              autocapitalize="none" spellcheck="false" />
             <div class="username-live-hint" id="reg-username-hint"></div>
             <input type="email" class="auth-input" id="reg-email" placeholder="כתובת אימייל (לשחזור סיסמא)" required
               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
@@ -798,7 +826,8 @@
       <button class="bottom-nav-item" id="profile-btn" type="button">
         <span class="nav-avatar" id="nav-avatar" style="display: none;"></span>
         <svg id="nav-profile-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
+          <path
+            d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
         </svg>
         <span class="bottom-nav-label" id="profile-btn-label">אורח</span>
       </button>
@@ -812,9 +841,17 @@
         <span class="bottom-nav-label">בית</span>
       </button>
 
+      <button class="bottom-nav-item" id="nav-modes-btn" type="button" aria-label="מצבי משחק">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" />
+        </svg>
+        <span class="bottom-nav-label">משחקים</span>
+      </button>
+
       <button class="bottom-nav-item" id="nav-shop-btn" type="button">
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z" />
+          <path
+            d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z" />
         </svg>
         <span class="bottom-nav-label">חנות</span>
       </button>
@@ -823,7 +860,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261120b"></script>
+  <script type="module" src="src/main.js?v=20261120c"></script>
 </body>
 
 </html>
