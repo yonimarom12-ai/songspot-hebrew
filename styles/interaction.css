@@ -180,15 +180,18 @@
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 260;
-  padding: calc(28px + env(safe-area-inset-top, 0px)) 20px calc(92px + env(safe-area-inset-bottom, 0px));
-  background: rgba(6, 6, 6, 0.92);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 280;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  background: rgba(9, 6, 22, 0.94);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow-y: auto;
+  overflow: hidden;
   animation: fadeInOverlay 0.28s ease-out;
 }
 

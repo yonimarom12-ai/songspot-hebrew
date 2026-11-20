@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261119n";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261119n";
-import { state } from "../state.js?v=20261119n";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261120b";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261120b";
+import { state } from "../state.js?v=20261120b";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -14,6 +14,8 @@ let snippetStartPerf = null;
 let snippetStartCtxTime = null;
 let activeDurationSec = 0;
 let activeTargetPct = 0;
+let audioHealthTimer = null;
+let lifecycleGuardsInstalled = false;
 
 export function setBeforePlaySnippetHook(fn) {
   beforePlaySnippetHook = fn;
@@ -28,11 +30,35 @@ function configureAudioSession() {
   } catch (e) { }
 }
 
+function attachContextStateListener(ctx) {
+  if (!ctx) return;
+  ctx.onstatechange = () => {
+    if (ctx.state !== "running") {
+      // ב-iOS Safari המעבר ל-interrupted/suspended מחייב שחרור מחדש במגע הבא
+      audioUnlocked = false;
+    }
+  };
+}
+
+function recreateAudioContext() {
+  if (state.audioCtx) {
+    try { state.audioCtx.onstatechange = null; } catch (e) { }
+    try { state.audioCtx.close(); } catch (e) { }
+    state.audioCtx = null;
+  }
+  state.audioBuffer = null;
+  audioUnlocked = false;
+  return getAudioContext();
+}
+
 function getAudioContext() {
-  if (state.audioCtx) return state.audioCtx;
+  if (state.audioCtx && state.audioCtx.state !== "closed") return state.audioCtx;
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) state.audioCtx = new AudioContextClass();
+    if (AudioContextClass) {
+      state.audioCtx = new AudioContextClass();
+      attachContextStateListener(state.audioCtx);
+    }
   } catch (e) {
     state.audioCtx = null;
   }
@@ -41,17 +67,24 @@ function getAudioContext() {
 
 export function initAudioContext() {
   configureAudioSession();
-  const ctx = getAudioContext();
+  let ctx = getAudioContext();
   if (!ctx) return null;
 
+  // אם ה-AudioContext ב-iOS נתקע במצב interrupted או closed — יוצרים חדש נקי
+  if (ctx.state === "closed" || ctx.state === "interrupted") {
+    ctx = recreateAudioContext();
+    if (!ctx) return null;
+  }
+
   if (ctx.state !== "running") {
+    audioUnlocked = false;
     try {
       const p = ctx.resume();
       if (p && typeof p.catch === "function") p.catch(() => { });
     } catch (e) { }
   }
 
-  // טריק רשמי ל-iOS Safari: ניגון דגימה שקטה של 1 sample משחרר את Web Audio מיידית במגע הראשון
+  // טריק רשמי ל-iOS Safari: ניגון דגימה שקטה של 1 sample משחרר את Web Audio מיידית במגע
   if (!audioUnlocked) {
     try {
       const silentBuf = ctx.createBuffer(1, 1, 22050);
@@ -74,13 +107,27 @@ export function initAudioContext() {
 export function unlockAudioOnFirstGesture() {
   const unlock = () => {
     initAudioContext();
-    document.removeEventListener("touchstart", unlock, true);
-    document.removeEventListener("pointerdown", unlock, true);
-    document.removeEventListener("click", unlock, true);
   };
-  document.addEventListener("touchstart", unlock, { capture: true, passive: true });
-  document.addEventListener("pointerdown", unlock, { capture: true, passive: true });
-  document.addEventListener("click", unlock, { capture: true, passive: true });
+  document.addEventListener("touchstart", unlock, { capture: true, passive: true, once: true });
+  document.addEventListener("pointerdown", unlock, { capture: true, passive: true, once: true });
+  document.addEventListener("click", unlock, { capture: true, passive: true, once: true });
+
+  if (!lifecycleGuardsInstalled) {
+    lifecycleGuardsInstalled = true;
+    const onForeground = () => {
+      if (document.hidden) return;
+      audioUnlocked = false;
+      configureAudioSession();
+      if (state.audioCtx && state.audioCtx.state !== "running") {
+        try {
+          const p = state.audioCtx.resume();
+          if (p && typeof p.catch === "function") p.catch(() => { });
+        } catch (e) { }
+      }
+    };
+    document.addEventListener("visibilitychange", onForeground);
+    window.addEventListener("pageshow", onForeground);
+  }
 }
 
 // חוסם שליטה בשיר דרך ה-Dynamic Island / מסך הנעילה / מרכז הבקרה
@@ -262,6 +309,8 @@ export function stopAudioVisuals(finalPct = null) {
   snippetStartCtxTime = null;
   clearTimeout(state.uiTimer);
   state.uiTimer = null;
+  clearTimeout(audioHealthTimer);
+  audioHealthTimer = null;
   clearTimeout(state.playStartGuardTimer);
   state.playStartGuardTimer = null;
   cancelAnimationFrame(state.rafWatchId);
@@ -300,6 +349,7 @@ export function stopAudioVisuals(finalPct = null) {
 
   dom.playIcon.innerHTML = PLAY_SVG;
   if (dom.playBtn) dom.playBtn.classList.remove("is-playing");
+  if (dom.durationBadge) dom.durationBadge.classList.remove("is-playing");
   dom.equalizer.classList.remove("playing");
   dom.discWrapper.classList.remove("spinning");
 }
@@ -308,6 +358,7 @@ function setPlayingVisuals() {
   state.isPlayingSnippet = true;
   dom.playIcon.innerHTML = PAUSE_SVG;
   if (dom.playBtn) dom.playBtn.classList.add("is-playing");
+  if (dom.durationBadge) dom.durationBadge.classList.add("is-playing");
   dom.equalizer.classList.add("playing");
   dom.discWrapper.classList.add("spinning");
 }
@@ -362,13 +413,33 @@ function startBufferSnippet(ctx, buffer, duration, targetPct) {
   activeDurationSec = duration;
   activeTargetPct = targetPct;
 
-  const when = ctx.currentTime + 0.005;
+  const clockBefore = ctx.currentTime;
+  const when = clockBefore + 0.005;
   snippetStartCtxTime = when;
   gainNode.gain.setValueAtTime(1, when);
   gainNode.gain.setValueAtTime(0, when + duration);
 
   source.start(when, START_OFFSET);
   startProgressLoop(duration, true);
+
+  // כלב שמירה ל-iOS Safari: אם שעון ה-AudioContext קפא (באג ידוע אחרי נעילת מסך/מעבר אפליקציה),
+  // משחזרים AudioContext חדש ועוברים מיד לגיבוי <audio> כדי שלא יידרש לרענן את האתר!
+  const myToken = playToken;
+  clearTimeout(audioHealthTimer);
+  audioHealthTimer = setTimeout(() => {
+    if (myToken !== playToken || !state.isPlayingSnippet) return;
+    if (ctx.state !== "running" || ctx.currentTime <= clockBefore + 0.001) {
+      try { source.stop(); } catch (e) { }
+      try { source.disconnect(); } catch (e) { }
+      state.activeSource = null;
+      clearTimeout(state.uiTimer);
+      state.uiTimer = null;
+      recreateAudioContext();
+      if (state.currentSong?.previewUrl) {
+        playViaMediaElement(activeDurationSec, activeTargetPct);
+      }
+    }
+  }, 240);
 
   state.uiTimer = setTimeout(() => {
     stopAudioVisuals(activeTargetPct);

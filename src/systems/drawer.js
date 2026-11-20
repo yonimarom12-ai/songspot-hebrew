@@ -1,12 +1,13 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261119n";
-import { dom } from "../dom.js?v=20261119n";
-import { state } from "../state.js?v=20261119n";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261120b";
+import { dom } from "../dom.js?v=20261120b";
+import { state } from "../state.js?v=20261120b";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261119n";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261119n";
+} from "./feedback.js?v=20261120b";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261120b";
+import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261120b";
 
 let settingsScreenHandler = null;
 
@@ -88,7 +89,18 @@ export function initDrawerListeners() {
     state.hintsEnabled = !state.hintsEnabled;
     dom.hintsSettingToggle.classList.toggle("on", state.hintsEnabled);
     updateHintsPanelVisibility();
+    playClickSfx();
   });
+
+  const sfxToggle = document.getElementById("sfx-setting-toggle");
+  if (sfxToggle) {
+    sfxToggle.classList.toggle("on", state.sfxEnabled);
+    sfxToggle.addEventListener("click", () => {
+      setSfxEnabled(!state.sfxEnabled);
+      sfxToggle.classList.toggle("on", state.sfxEnabled);
+      if (state.sfxEnabled) playClickSfx();
+    });
+  }
 
   if (dom.easySearchStatusPill) dom.easySearchStatusPill.addEventListener("click", () => toggleDrawer(true));
   if (dom.redFeedbackStatusPill) dom.redFeedbackStatusPill.addEventListener("click", () => toggleDrawer(true));

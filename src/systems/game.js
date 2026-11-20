@@ -1,9 +1,9 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261119n";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261119n";
-import { dom } from "../dom.js?v=20261119n";
-import { state } from "../state.js?v=20261119n";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261119n";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261119n";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261120b";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261120b";
+import { dom } from "../dom.js?v=20261120b";
+import { state } from "../state.js?v=20261120b";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120b";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261120b";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -12,7 +12,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261119n";
+} from "../services/itunes.js?v=20261120b";
 import {
   preloadAudioBufferInBackground,
   updateTimelineMarkerForStage,
@@ -20,26 +20,27 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261119n";
-import { launchWinConfetti } from "./confetti.js?v=20261119n";
+} from "./audio.js?v=20261120b";
+import { launchWinConfetti } from "./confetti.js?v=20261120b";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261119n";
+} from "./feedback.js?v=20261120b";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261119n";
-import { updateStreakDisplay } from "./profile.js?v=20261119n";
+} from "./search.js?v=20261120b";
+import { updateStreakDisplay } from "./profile.js?v=20261120b";
 import {
   calculateRoundReward,
   awardPoints,
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261119n";
+} from "./economy.js?v=20261120b";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261120b";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -331,7 +332,9 @@ export function endRound(won) {
     dom.statusLabel.textContent = `זיהית נכון תוך ${solvedAtSec} שניות!`;
     dom.statusLabel.style.color = "var(--spotify-green)";
     launchWinConfetti();
+    playWinSfx();
     if (earnedPoints > 0) {
+      playCrystalSfx();
       launchCrystalRewardAnimation(earnedPoints);
     }
 
@@ -417,6 +420,7 @@ export function advanceAttempt() {
   clearSearchBarFeedback();
 
   if (state.currentAttempt < DURATIONS.length) {
+    playSkipSfx();
     dom.segments[state.currentAttempt].classList.add("active");
     updateTimelineMarkerForStage(state.currentAttempt);
     updateSkipButtonLabel();
@@ -456,6 +460,7 @@ export function handleGuess() {
   if (isExactMatch || isSubstantialSubstring) {
     endRound(true);
   } else {
+    playWrongSfx();
     dom.playerCard.classList.remove("shake");
     void dom.playerCard.offsetWidth;
     dom.playerCard.classList.add("shake");

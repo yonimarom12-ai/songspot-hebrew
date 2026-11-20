@@ -5,10 +5,10 @@ import {
   CUSTOM_BACKGROUND_PRICE,
   findAvatar,
   findBackground
-} from "../data/shop.js?v=20261119n";
-import { state } from "../state.js?v=20261119n";
-import { saveUserStats } from "../services/storage.js?v=20261119n";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261119n";
+} from "../data/shop.js?v=20261120b";
+import { state } from "../state.js?v=20261120b";
+import { saveUserStats } from "../services/storage.js?v=20261120b";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261120b";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -104,7 +104,9 @@ function applyAvatarToEl(el, avatar) {
 }
 
 function applyCosmeticsVisuals(bg, avatar) {
-  if (bg.id === "default") {
+  const isCustomBg = bg.id !== "default";
+  document.body.classList.toggle("has-custom-bg", isCustomBg);
+  if (!isCustomBg) {
     document.body.style.background = "";
   } else {
     document.body.style.background = bg.css;

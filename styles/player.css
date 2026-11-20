@@ -254,6 +254,45 @@
   padding: 6px 0 4px;
 }
 
+/* Subtle Reactive Waveform Wing Next to In-Game Play Button */
+.game-wave-wing {
+  min-width: 52px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.game-wave-wing span {
+  width: 3.5px;
+  border-radius: 999px;
+  background: var(--level-color);
+  opacity: 0.32;
+  transition: opacity 0.25s ease, background-color 0.25s ease;
+}
+
+.game-wave-wing span:nth-child(1) { height: 10px; }
+.game-wave-wing span:nth-child(2) { height: 22px; }
+.game-wave-wing span:nth-child(3) { height: 16px; }
+.game-wave-wing span:nth-child(4) { height: 28px; }
+
+.play-control-row.is-playing .game-wave-wing span {
+  opacity: 0.92;
+  box-shadow: 0 0 10px var(--level-glow);
+  animation: gameWingPulse 0.62s ease-in-out infinite alternate;
+}
+
+.play-control-row.is-playing .game-wave-wing span:nth-child(1) { animation-delay: 0s; }
+.play-control-row.is-playing .game-wave-wing span:nth-child(2) { animation-delay: 0.14s; }
+.play-control-row.is-playing .game-wave-wing span:nth-child(3) { animation-delay: 0.26s; }
+.play-control-row.is-playing .game-wave-wing span:nth-child(4) { animation-delay: 0.08s; }
+
+@keyframes gameWingPulse {
+  0% { transform: scaleY(0.45); }
+  100% { transform: scaleY(1.22); }
+}
+
 .play-fab {
   position: relative;
   width: 88px;

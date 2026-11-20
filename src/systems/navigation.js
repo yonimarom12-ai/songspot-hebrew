@@ -1,8 +1,10 @@
-import { state } from "../state.js?v=20261119n";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261119n";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261119n";
-import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261119n";
-import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261119n";
+import { state } from "../state.js?v=20261120b";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261120b";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261120b";
+import { toggleProfileModal, toggleShopModal, updateBottomNavActiveTab } from "./profile.js?v=20261120b";
+import { fetchRandomSong, setActiveDifficultyUI } from "./game.js?v=20261120b";
+import { playClickSfx } from "./sfx.js?v=20261120b";
+import { playClickSfx } from "./sfx.js?v=20261120a";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -75,6 +77,7 @@ let currentModeKey = null;
 let returnScreenFromSettings = "home";
 
 export function showScreen(screenName) {
+  if (currentScreen !== screenName) playClickSfx();
   currentScreen = screenName;
   Object.entries(SCREEN_IDS).forEach(([key, id]) => {
     const el = document.getElementById(id);

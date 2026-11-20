@@ -1,27 +1,30 @@
-import { dom } from "./dom.js?v=20261119n";
-import { initStorageState } from "./services/storage.js?v=20261119n";
-import { hydratePersistedCatalogs } from "./services/itunes.js?v=20261119n";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261119n";
-import { initHintListeners } from "./systems/feedback.js?v=20261119n";
-import { initSearchListeners } from "./systems/search.js?v=20261119n";
-import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261119n";
-import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261119n";
-import { updatePointsDisplay } from "./systems/economy.js?v=20261119n";
-import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261119n";
-import { initAuthListeners } from "./systems/auth.js?v=20261119n";
-import { initDrawerListeners } from "./systems/drawer.js?v=20261119n";
-import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261119n";
+import { dom } from "./dom.js?v=20261120b";
+import { initStorageState } from "./services/storage.js?v=20261120b";
+import { hydratePersistedCatalogs } from "./services/itunes.js?v=20261120b";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261120b";
+import { initHintListeners } from "./systems/feedback.js?v=20261120b";
+import { initSearchListeners } from "./systems/search.js?v=20261120b";
+import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261120b";
+import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261120b";
+import { updatePointsDisplay } from "./systems/economy.js?v=20261120b";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261120b";
+import { initAuthListeners } from "./systems/auth.js?v=20261120b";
+import { initDrawerListeners } from "./systems/drawer.js?v=20261120b";
+import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261120b";
+import { initSfxState } from "./systems/sfx.js?v=20261120b";
+import { initSfxState } from "./systems/sfx.js?v=20261120a";
 import {
   fetchRandomSong,
   goToNextSong,
   handleGuess,
   advanceAttempt,
   initDifficultyListeners
-} from "./systems/game.js?v=20261119n";
+} from "./systems/game.js?v=20261120b";
 
 function bootApp() {
   // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
   initStorageState();
+  initSfxState();
   hydratePersistedCatalogs();
 
   // Unlock mobile Web Audio on first touch/tap

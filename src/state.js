@@ -26,6 +26,7 @@ export const state = {
   hintsEnabled: false,
   easySearchFiftyActive: false,
   redFeedbackEnabled: false,
+  sfxEnabled: true,
   currentRoundEasyMask: new Map(),
 
   currentAttempt: 0,
