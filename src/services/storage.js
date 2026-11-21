@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261122g";
+import { state } from "../state.js?v=20261122i";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -51,7 +51,7 @@ export function getDefaultStats() {
     powerups: { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 },
     dailyQuests: null,
     redeemedCodes: [],
-    favorites: { song: "", album: "", artist: "" }
+    favorites: { song: "", album: "", artist: "", songImg: "", albumImg: "", artistImg: "" }
   };
 }
 
@@ -89,7 +89,10 @@ export function normalizeStatsObj(parsed) {
     favorites: {
       song: typeof parsed.favorites?.song === "string" ? parsed.favorites.song : "",
       album: typeof parsed.favorites?.album === "string" ? parsed.favorites.album : "",
-      artist: typeof parsed.favorites?.artist === "string" ? parsed.favorites.artist : ""
+      artist: typeof parsed.favorites?.artist === "string" ? parsed.favorites.artist : "",
+      songImg: typeof parsed.favorites?.songImg === "string" ? parsed.favorites.songImg : "",
+      albumImg: typeof parsed.favorites?.albumImg === "string" ? parsed.favorites.albumImg : "",
+      artistImg: typeof parsed.favorites?.artistImg === "string" ? parsed.favorites.artistImg : ""
     }
   };
 }

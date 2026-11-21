@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261122g";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122g";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122g";
-import { state } from "../state.js?v=20261122g";
-import { saveUserStats } from "../services/storage.js?v=20261122g";
-import { fetchItunesData } from "../services/itunes.js?v=20261122g";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122g";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122g";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122g";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261122g";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122g";
+import { ARTISTS_DB } from "../data/artists.js?v=20261122i";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122i";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122i";
+import { state } from "../state.js?v=20261122i";
+import { saveUserStats } from "../services/storage.js?v=20261122i";
+import { fetchItunesData } from "../services/itunes.js?v=20261122i";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122i";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122i";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122i";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261122i";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122i";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -179,8 +179,14 @@ const FAV_FIELD_CONFIG = {
 };
 
 const pendingFavoriteSelection = { song: "", album: "", artist: "" };
+const pendingFavoriteImages = { song: "", album: "", artist: "" };
 const favSearchTimers = { song: null, album: null, artist: null };
 let favSavedTimer = null;
+
+function upgradeArtUrl(url) {
+  if (!url) return "";
+  return String(url).replace("100x100bb", "200x200bb").replace("60x60bb", "200x200bb");
+}
 
 function closeFavDropdown(field) {
   const list = document.getElementById(FAV_FIELD_CONFIG[field].listId);
@@ -225,21 +231,34 @@ function renderFavSuggestions(field, items, queryAtCall) {
     row.type = "button";
     row.className = "fav-suggestion-row";
 
+    if (item.artwork) {
+      const thumb = document.createElement("img");
+      thumb.className = `fav-suggestion-thumb${field === "artist" ? " is-round" : ""}`;
+      thumb.src = item.artwork;
+      thumb.alt = "";
+      row.appendChild(thumb);
+    }
+
+    const textWrap = document.createElement("span");
+    textWrap.className = "fav-suggestion-text";
+
     const mainSpan = document.createElement("span");
     mainSpan.className = "fav-suggestion-title";
     mainSpan.textContent = item.primary;
-    row.appendChild(mainSpan);
+    textWrap.appendChild(mainSpan);
 
     if (item.secondary) {
       const subSpan = document.createElement("span");
       subSpan.className = "fav-suggestion-sub";
       subSpan.textContent = item.secondary;
-      row.appendChild(subSpan);
+      textWrap.appendChild(subSpan);
     }
+    row.appendChild(textWrap);
 
     row.addEventListener("mousedown", (e) => e.preventDefault());
     row.addEventListener("click", () => {
       pendingFavoriteSelection[field] = item.displayValue;
+      pendingFavoriteImages[field] = item.artwork || "";
       input.value = item.displayValue;
       syncFavInputVisual(field);
       setFavFormError("");
@@ -263,10 +282,11 @@ function getLocalFavoriteMatches(field, normalizedQuery) {
         const key = normalizeHebrew(a.name);
         if (!seen.has(key)) {
           seen.add(key);
-          results.push({ primary: a.name, secondary: "", displayValue: a.name });
+          const sampleArt = state.artistCatalogCache?.[a.name]?.[0]?.artwork || "";
+          results.push({ primary: a.name, secondary: "אמן ישראלי", displayValue: a.name, artwork: sampleArt });
         }
       }
-      if (results.length >= 6) break;
+      if (results.length >= 10) break;
     }
   } else if (field === "song") {
     for (const s of state.discoveredSongsMap.values()) {
@@ -278,10 +298,10 @@ function getLocalFavoriteMatches(field, normalizedQuery) {
         const key = normalizeHebrew(displayValue);
         if (!seen.has(key)) {
           seen.add(key);
-          results.push({ primary: s.title, secondary: s.artist, displayValue });
+          results.push({ primary: s.title, secondary: s.artist, displayValue, artwork: s.artwork || "" });
         }
       }
-      if (results.length >= 6) break;
+      if (results.length >= 10) break;
     }
   }
   return results;
@@ -297,6 +317,7 @@ function triggerFavoriteSearch(field) {
 
   if (val !== pendingFavoriteSelection[field]) {
     pendingFavoriteSelection[field] = "";
+    pendingFavoriteImages[field] = "";
   }
   syncFavInputVisual(field);
 
@@ -313,67 +334,126 @@ function triggerFavoriteSearch(field) {
 
   if (val.length < 2) return;
 
-  const entityMap = { song: "song", album: "album", artist: "musicArtist" };
   favSearchTimers[field] = setTimeout(async () => {
     try {
-      const url = `https://itunes.apple.com/search?country=IL&media=music&entity=${entityMap[field]}&limit=10&term=${encodeURIComponent(val)}`;
-      const data = await fetchItunesData(url, 4000);
-      if (input.value.trim() !== val) return;
-
+      const enc = encodeURIComponent(val);
       const combined = [...localMatches];
       const seen = new Set(combined.map(c => normalizeHebrew(c.displayValue)));
 
-      if (data?.results) {
-        for (const r of data.results) {
-          let item = null;
-          if (field === "song") {
-            const cleanTitle = cleanTrackTitle(r.trackName || "");
-            const artistName = (r.artistName || "").trim();
-            if (!cleanTitle || !artistName) continue;
-            item = { primary: cleanTitle, secondary: artistName, displayValue: `${cleanTitle} - ${artistName}` };
-          } else if (field === "album") {
-            const albumName = (r.collectionName || "").trim();
-            const artistName = (r.artistName || "").trim();
-            if (!albumName) continue;
-            item = {
-              primary: albumName,
-              secondary: artistName,
-              displayValue: artistName ? `${albumName} - ${artistName}` : albumName
-            };
-          } else if (field === "artist") {
-            const artistName = (r.artistName || "").trim();
-            if (!artistName) continue;
-            item = { primary: artistName, secondary: r.primaryGenreName || "", displayValue: artistName };
-          }
+      const pushUnique = (item) => {
+        if (!item) return;
+        const key = normalizeHebrew(item.displayValue);
+        if (!seen.has(key)) {
+          seen.add(key);
+          combined.push(item);
+        }
+      };
 
-          if (!item) continue;
-          const key = normalizeHebrew(item.displayValue);
-          if (!seen.has(key)) {
-            seen.add(key);
-            combined.push(item);
+      if (field === "song") {
+        const data = await fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=25&term=${enc}`, 6500);
+        if (input.value.trim() !== val) return;
+        for (const r of (data?.results || [])) {
+          const cleanTitle = cleanTrackTitle(r.trackName || "");
+          const artistName = (r.artistName || "").trim();
+          if (!cleanTitle || !artistName) continue;
+          pushUnique({
+            primary: cleanTitle,
+            secondary: artistName,
+            displayValue: `${cleanTitle} - ${artistName}`,
+            artwork: upgradeArtUrl(r.artworkUrl100)
+          });
+          if (combined.length >= 14) break;
+        }
+      } else if (field === "album") {
+        // חיפוש אלבומים כפול (אלבומים + אוספים משירים) כדי למצוא גם אלבומים ישראליים ולועזיים עם עטיפה!
+        const [albRes, songRes] = await Promise.allSettled([
+          fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=album&limit=25&term=${enc}`, 6500),
+          fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=25&term=${enc}`, 6500)
+        ]);
+        if (input.value.trim() !== val) return;
+        const rawList = [
+          ...(albRes.status === "fulfilled" ? (albRes.value?.results || []) : []),
+          ...(songRes.status === "fulfilled" ? (songRes.value?.results || []) : [])
+        ];
+        for (const r of rawList) {
+          const albumName = (r.collectionName || "").trim();
+          const artistName = (r.artistName || "").trim();
+          if (!albumName) continue;
+          pushUnique({
+            primary: albumName,
+            secondary: artistName,
+            displayValue: artistName ? `${albumName} - ${artistName}` : albumName,
+            artwork: upgradeArtUrl(r.artworkUrl100)
+          });
+          if (combined.length >= 14) break;
+        }
+      } else if (field === "artist") {
+        // חיפוש אמנים + שירים כדי להביא גם אמנים מכל העולם וגם תמונה לכל אמן!
+        const [songRes, artRes] = await Promise.allSettled([
+          fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=25&term=${enc}`, 6500),
+          fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=musicArtist&limit=15&term=${enc}`, 6500)
+        ]);
+        if (input.value.trim() !== val) return;
+        const songList = songRes.status === "fulfilled" ? (songRes.value?.results || []) : [];
+        const artistArtMap = new Map();
+        for (const r of songList) {
+          const nm = (r.artistName || "").trim();
+          if (!nm) continue;
+          const k = normalizeHebrew(nm);
+          if (!artistArtMap.has(k) && r.artworkUrl100) {
+            artistArtMap.set(k, upgradeArtUrl(r.artworkUrl100));
           }
-          if (combined.length >= 8) break;
+          pushUnique({
+            primary: nm,
+            secondary: r.primaryGenreName || "",
+            displayValue: nm,
+            artwork: artistArtMap.get(k) || ""
+          });
+          if (combined.length >= 14) break;
+        }
+        const artList = artRes.status === "fulfilled" ? (artRes.value?.results || []) : [];
+        for (const r of artList) {
+          const nm = (r.artistName || "").trim();
+          if (!nm) continue;
+          pushUnique({
+            primary: nm,
+            secondary: r.primaryGenreName || "",
+            displayValue: nm,
+            artwork: artistArtMap.get(normalizeHebrew(nm)) || ""
+          });
+          if (combined.length >= 14) break;
         }
       }
 
-      renderFavSuggestions(field, combined.slice(0, 8), val);
+      renderFavSuggestions(field, combined.slice(0, 14), val);
     } catch (e) { }
-  }, 240);
+  }, 220);
 }
 
 function renderProfileFavorites() {
-  const favs = state.userStats?.favorites || { song: "", album: "", artist: "" };
-  const pairs = [
-    ["fav-song-display", favs.song],
-    ["fav-album-display", favs.album],
-    ["fav-artist-display", favs.artist]
+  const favs = state.userStats?.favorites || {};
+  const rows = [
+    { textId: "fav-song-display", imgId: "fav-song-img", val: favs.song, img: favs.songImg },
+    { textId: "fav-album-display", imgId: "fav-album-img", val: favs.album, img: favs.albumImg },
+    { textId: "fav-artist-display", imgId: "fav-artist-img", val: favs.artist, img: favs.artistImg }
   ];
-  pairs.forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
+  rows.forEach(({ textId, imgId, val, img }) => {
+    const el = document.getElementById(textId);
+    const imgEl = document.getElementById(imgId);
     const trimmed = (val || "").trim();
-    el.textContent = trimmed || "לא נבחר עדיין";
-    el.classList.toggle("is-empty", !trimmed);
+    if (el) {
+      el.textContent = trimmed || "לא נבחר עדיין";
+      el.classList.toggle("is-empty", !trimmed);
+    }
+    if (imgEl) {
+      if (trimmed && img) {
+        imgEl.src = img;
+        imgEl.style.display = "block";
+      } else {
+        imgEl.removeAttribute("src");
+        imgEl.style.display = "none";
+      }
+    }
   });
 }
 
@@ -392,6 +472,7 @@ function setFavoritesEditMode(isEditing) {
     Object.keys(FAV_FIELD_CONFIG).forEach(field => {
       const existingVal = (favs[field] || "").trim();
       pendingFavoriteSelection[field] = existingVal;
+      pendingFavoriteImages[field] = favs[`${field}Img`] || "";
       const input = document.getElementById(FAV_FIELD_CONFIG[field].inputId);
       if (input) input.value = existingVal;
       syncFavInputVisual(field);
@@ -618,7 +699,10 @@ export function initProfileListeners() {
       state.userStats.favorites = {
         song: pendingFavoriteSelection.song || "",
         album: pendingFavoriteSelection.album || "",
-        artist: pendingFavoriteSelection.artist || ""
+        artist: pendingFavoriteSelection.artist || "",
+        songImg: pendingFavoriteSelection.song ? (pendingFavoriteImages.song || "") : "",
+        albumImg: pendingFavoriteSelection.album ? (pendingFavoriteImages.album || "") : "",
+        artistImg: pendingFavoriteSelection.artist ? (pendingFavoriteImages.artist || "") : ""
       };
       saveUserStats();
       renderProfileFavorites();

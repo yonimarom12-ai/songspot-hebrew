@@ -1,18 +1,18 @@
-import { state } from "../state.js?v=20261122g";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122g";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122g";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122g";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122g";
-import { showGameToast } from "../utils/toast.js?v=20261122g";
-import { stopTimedRun } from "./timed.js?v=20261122g";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122g";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122g";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122g";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122g";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122g";
-import { playClickSfx } from "./sfx.js?v=20261122g";
-import { vibrateTap } from "../utils/toast.js?v=20261122g";
-import { isOnboardingOpen } from "./onboarding.js?v=20261122g";
+import { state } from "../state.js?v=20261122i";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122i";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122i";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122i";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122i";
+import { showGameToast } from "../utils/toast.js?v=20261122i";
+import { stopTimedRun } from "./timed.js?v=20261122i";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122i";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122i";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122i";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122i";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122i";
+import { playClickSfx } from "./sfx.js?v=20261122i";
+import { vibrateTap } from "../utils/toast.js?v=20261122i";
+import { isOnboardingOpen } from "./onboarding.js?v=20261122i";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -669,13 +669,27 @@ export function initNavigationListeners() {
     exitToLobbyBtn.addEventListener("click", () => showScreen("home"));
   }
 
-  // החלקה אופקית (Swipe ימינה/שמאלה) למעבר מהיר בין 5 לשוניות הסרגל התחתון
+  // החלקה אופקית (Swipe ימינה/שמאלה) + אנימציית החלקה כיוונית חלקה בין 5 הלשוניות
   // סדר הלשוניות מימין לשמאל ב-RTL: פרופיל -> חנות -> בית -> משחקים -> דירוג
   const SWIPE_TABS = ["profile", "shop", "home", "modes-hub", "leaderboard"];
+  let lastTabIndex = 2; // home
   let touchStartX = 0;
   let touchStartY = 0;
   let touchStartTime = 0;
   let swipeTracking = false;
+
+  function triggerTabSlideAnimation(tabName, dir) {
+    const targetEl = tabName === "profile"
+      ? document.querySelector("#profile-modal-backdrop .profile-modal")
+      : tabName === "shop"
+        ? document.querySelector("#shop-modal-backdrop .profile-modal")
+        : document.getElementById(SCREEN_IDS[tabName]);
+    if (!targetEl) return;
+    targetEl.classList.remove("tab-slide-from-left", "tab-slide-from-right");
+    void targetEl.offsetWidth;
+    targetEl.classList.add(dir > 0 ? "tab-slide-from-left" : "tab-slide-from-right");
+    setTimeout(() => targetEl.classList.remove("tab-slide-from-left", "tab-slide-from-right"), 300);
+  }
 
   function getActiveMainTab() {
     if (document.getElementById("profile-modal-backdrop")?.classList.contains("open")) return "profile";
@@ -687,6 +701,9 @@ export function initNavigationListeners() {
   }
 
   function navigateToMainTab(tabName) {
+    const nextIdx = SWIPE_TABS.indexOf(tabName);
+    const dir = nextIdx >= lastTabIndex ? 1 : -1;
+    lastTabIndex = nextIdx >= 0 ? nextIdx : lastTabIndex;
     vibrateTap();
     if (tabName === "profile") {
       toggleProfileModal(true);
@@ -706,7 +723,28 @@ export function initNavigationListeners() {
       showScreen("leaderboard");
       loadAndRenderLeaderboardPage();
     }
+    triggerTabSlideAnimation(tabName, dir);
   }
+
+  // מחבר את אנימציית ההחלקה גם ללחיצה ישירה על כפתורי הסרגל התחתון
+  const bottomTabPairs = [
+    ["profile-btn", "profile"],
+    ["nav-shop-btn", "shop"],
+    ["nav-game-btn", "home"],
+    ["nav-modes-btn", "modes-hub"],
+    ["nav-leaderboard-btn", "leaderboard"]
+  ];
+  bottomTabPairs.forEach(([id, tabName]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("click", () => {
+      const newIdx = SWIPE_TABS.indexOf(tabName);
+      if (newIdx < 0 || newIdx === lastTabIndex) return;
+      const dir = newIdx > lastTabIndex ? 1 : -1;
+      lastTabIndex = newIdx;
+      triggerTabSlideAnimation(tabName, dir);
+    });
+  });
 
   document.addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1 || isOnboardingOpen()) { swipeTracking = false; return; }

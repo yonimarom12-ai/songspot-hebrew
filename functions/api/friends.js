@@ -68,7 +68,10 @@ function mapPlayerRow(row) {
     favorites: {
       song: stats.favorites?.song || "",
       album: stats.favorites?.album || "",
-      artist: stats.favorites?.artist || ""
+      artist: stats.favorites?.artist || "",
+      songImg: stats.favorites?.songImg || "",
+      albumImg: stats.favorites?.albumImg || "",
+      artistImg: stats.favorites?.artistImg || ""
     },
     updatedAt: row.updated_at || ""
   };

@@ -2909,3 +2909,102 @@ body.hide-bottom-nav .bottom-nav {
   z-index: 570 !important;
   box-shadow: 0 0 0 3px #f472b6, 0 0 28px rgba(236, 72, 153, 0.85) !important;
 }
+
+/* ===== הדגמה מונפשת "הוסף למסך הבית" במדריך ===== */
+.ob-install-demo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 2px 0;
+}
+
+.ob-demo-step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(12, 8, 28, 0.88);
+  border: 1px solid rgba(192, 132, 252, 0.28);
+  border-radius: 13px;
+  padding: 9px 11px;
+  font-size: 12px;
+  color: #e9d5ff;
+  text-align: right;
+  animation: obStepPulse 4.5s ease-in-out infinite;
+}
+
+.ob-demo-step.ob-d1 { animation-delay: 0s; }
+.ob-demo-step.ob-d2 { animation-delay: 1.5s; }
+.ob-demo-step.ob-d3 { animation-delay: 3s; }
+
+@keyframes obStepPulse {
+  0%, 30%, 100% {
+    border-color: rgba(192, 132, 252, 0.28);
+    transform: scale(1);
+    background: rgba(12, 8, 28, 0.88);
+  }
+  12%, 22% {
+    border-color: #38d9ff;
+    transform: scale(1.03);
+    background: rgba(56, 217, 255, 0.16);
+  }
+}
+
+.ob-demo-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ob-demo-app-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+  color: #86efac;
+}
+
+.ob-demo-app-row img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* ===== אנימציית החלקה כיוונית חלקה בין 5 מסכי הסרגל התחתון ===== */
+.tab-slide-from-left {
+  animation: tabSlideFromLeft 0.26s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.tab-slide-from-right {
+  animation: tabSlideFromRight 0.26s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+@keyframes tabSlideFromLeft {
+  from {
+    opacity: 0.45;
+    transform: translateX(-56px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tabSlideFromRight {
+  from {
+    opacity: 0.45;
+    transform: translateX(56px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -36,15 +36,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122g">
-  <link rel="stylesheet" href="styles/home.css?v=20261122g">
-  <link rel="stylesheet" href="styles/header.css?v=20261122g">
-  <link rel="stylesheet" href="styles/player.css?v=20261122g">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122g">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122g">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122g">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122g">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122g">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122i">
+  <link rel="stylesheet" href="styles/home.css?v=20261122i">
+  <link rel="stylesheet" href="styles/header.css?v=20261122i">
+  <link rel="stylesheet" href="styles/player.css?v=20261122i">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122i">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122i">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122i">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122i">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122i">
 </head>
 
 <body>
@@ -1002,16 +1002,25 @@
 
                 <div class="favorites-view" id="profile-favorites-view">
                   <div class="fav-row">
-                    <span class="fav-label">🎵 שיר מועדף</span>
-                    <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
+                    <img class="fav-display-thumb" id="fav-song-img" alt="" style="display: none;" />
+                    <div class="fav-row-text">
+                      <span class="fav-label">🎵 שיר מועדף</span>
+                      <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
+                    </div>
                   </div>
                   <div class="fav-row">
-                    <span class="fav-label">💿 אלבום מועדף</span>
-                    <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
+                    <img class="fav-display-thumb" id="fav-album-img" alt="" style="display: none;" />
+                    <div class="fav-row-text">
+                      <span class="fav-label">💿 אלבום מועדף</span>
+                      <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
+                    </div>
                   </div>
                   <div class="fav-row">
-                    <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
-                    <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
+                    <img class="fav-display-thumb is-round" id="fav-artist-img" alt="" style="display: none;" />
+                    <div class="fav-row-text">
+                      <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
+                      <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
+                    </div>
                   </div>
                 </div>
 
@@ -1260,6 +1269,16 @@
       <div class="ob-emoji" id="ob-emoji">🎵</div>
       <h3 class="ob-title" id="ob-title"></h3>
       <p class="ob-desc" id="ob-desc"></p>
+      <!-- הדגמה חיה מונפשת של "הוסף למסך הבית" -->
+      <div class="ob-install-demo" id="ob-install-demo" style="display: none;" aria-hidden="true">
+        <div class="ob-demo-step ob-d1"><span class="ob-demo-badge">1</span><span>לחצו <strong>⬆️ שיתוף</strong> (אייפון) או <strong>⋮</strong> (אנדרואיד)</span></div>
+        <div class="ob-demo-step ob-d2"><span class="ob-demo-badge">2</span><span>בחרו <strong>➕ הוסף למסך הבית</strong></span></div>
+        <div class="ob-demo-step ob-d3">
+          <span class="ob-demo-badge">3</span>
+          <span class="ob-demo-app-row"><img src="assets/icon-quickplay.png" alt="" /> האפליקציה על המסך שלך!</span>
+        </div>
+      </div>
+      <button type="button" class="share-result-btn" id="ob-install-now-btn" style="display: none;">📲 התקן אפליקציה בלחיצה</button>
       <div class="ob-dots" id="ob-dots"></div>
       <button type="button" class="setup-confirm-btn ob-next-btn" id="ob-next-btn">הבא ←</button>
     </div>
@@ -1313,7 +1332,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122g"></script>
+  <script type="module" src="src/main.js?v=20261122i"></script>
 </body>
 
 </html>

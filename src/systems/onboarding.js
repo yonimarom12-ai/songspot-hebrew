@@ -1,7 +1,16 @@
-import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122g";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122g";
+import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122i";
+import { isIOS } from "../state.js?v=20261122i";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122i";
 
 const ONBOARDING_KEY = "songspot_onboarding_done_v1";
+let deferredInstallPrompt = null;
+
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+  });
+}
 
 const TOUR_STEPS = [
   {
@@ -19,7 +28,7 @@ const TOUR_STEPS = [
   {
     emoji: "🎮",
     title: "מצבי משחק והחלקה מהירה",
-    desc: "בלשונית ״משחקים״ מחכים לכם מרתון 10 שאלות, הפוך על הפוך, ציר זמן, 60 שניות ואתגר יומי. טיפ: אפשר גם פשוט להחליק ימינה ושמאלה במסך הבית!",
+    desc: "בלשונית ״משחקים״ מחכים לכם מרתון 10 שאלות, הפוך על הפוך, ציר זמן, 60 שניות ואתגר יומי. טיפ: אפשר גם פשוט להחליק ימינה ושמאלה!",
     targetId: "nav-modes-btn"
   },
   {
@@ -33,6 +42,15 @@ const TOUR_STEPS = [
     title: "חברים, פרופיל ודירוג עולמי",
     desc: "הירשמו בפרופיל כדי לשמור התקדמות בענן, לקבל Player ID אישי, להוסיף חברים ולהתחרות בדירוג העולמי!",
     targetId: "home-friends-btn"
+  },
+  {
+    emoji: "📲",
+    title: "הוסיפו למסך הבית כאפליקציה!",
+    desc: isIOS
+      ? "ב-Safari לחצו על כפתור השיתוף (⬆️) למטה ← בחרו ״הוסף למסך הבית״ ← ״הוסף״, ותשחקו במסך מלא!"
+      : "ב-Chrome לחצו על תפריט 3 הנקודות (⋮) למעלה ← בחרו ״הוסף למסך הבית״ / ״התקן אפליקציה״, ותשחקו במסך מלא!",
+    targetId: null,
+    showInstallDemo: true
   }
 ];
 
@@ -79,11 +97,20 @@ function renderStep() {
   const dotsEl = document.getElementById("ob-dots");
   const nextBtn = document.getElementById("ob-next-btn");
   const stepLabel = document.getElementById("ob-step-counter");
+  const demoBox = document.getElementById("ob-install-demo");
+  const installNowBtn = document.getElementById("ob-install-now-btn");
 
   if (emojiEl) emojiEl.textContent = step.emoji;
   if (titleEl) titleEl.textContent = step.title;
   if (descEl) descEl.textContent = step.desc;
   if (stepLabel) stepLabel.textContent = `${stepIndex + 1} / ${TOUR_STEPS.length}`;
+  if (demoBox) {
+    demoBox.style.display = step.showInstallDemo ? "flex" : "none";
+    demoBox.classList.toggle("is-android", !isIOS);
+  }
+  if (installNowBtn) {
+    installNowBtn.style.display = (step.showInstallDemo && deferredInstallPrompt) ? "block" : "none";
+  }
   if (nextBtn) {
     nextBtn.textContent = stepIndex === TOUR_STEPS.length - 1 ? "בואו נשחק! 🎵" : "הבא ←";
   }
@@ -104,6 +131,19 @@ function bindListenersOnce() {
 
   const skipBtn = document.getElementById("ob-skip-btn");
   const nextBtn = document.getElementById("ob-next-btn");
+  const installNowBtn = document.getElementById("ob-install-now-btn");
+
+  if (installNowBtn) {
+    installNowBtn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      try {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+      } catch (e) { }
+      deferredInstallPrompt = null;
+      installNowBtn.style.display = "none";
+    });
+  }
 
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {

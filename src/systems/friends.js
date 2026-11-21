@@ -1,8 +1,8 @@
-import { state } from "../state.js?v=20261122g";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261122g";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122g";
-import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261122g";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122g";
+import { state } from "../state.js?v=20261122i";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261122i";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122i";
+import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261122i";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122i";
 
 const LOCAL_FRIENDS_KEY = "songspot_local_friends_v1";
 const LOCAL_REQS_KEY = "songspot_local_friend_reqs_v1";
@@ -117,9 +117,9 @@ function openFriendProfileView(friend) {
   if (favsEl) {
     favsEl.innerHTML = "";
     const favItems = [
-      { label: "🎵 שיר מועדף", val: friend.favorites?.song },
-      { label: "💿 אלבום מועדף", val: friend.favorites?.album },
-      { label: "🎤 זמר/ת מועדף/ת", val: friend.favorites?.artist }
+      { label: "🎵 שיר מועדף", val: friend.favorites?.song, img: friend.favorites?.songImg, round: false },
+      { label: "💿 אלבום מועדף", val: friend.favorites?.album, img: friend.favorites?.albumImg, round: false },
+      { label: "🎤 זמר/ת מועדף/ת", val: friend.favorites?.artist, img: friend.favorites?.artistImg, round: true }
     ].filter(x => x.val);
 
     if (favItems.length === 0) {
@@ -131,13 +131,23 @@ function openFriendProfileView(friend) {
       favItems.forEach(item => {
         const row = document.createElement("div");
         row.className = "fp-fav-row";
+        if (item.img) {
+          const im = document.createElement("img");
+          im.className = `fav-display-thumb${item.round ? " is-round" : ""}`;
+          im.src = item.img;
+          im.alt = "";
+          row.appendChild(im);
+        }
+        const wrap = document.createElement("div");
+        wrap.className = "fav-row-text";
         const l = document.createElement("span");
         l.className = "fp-fav-label";
         l.textContent = item.label;
         const v = document.createElement("strong");
         v.className = "fp-fav-val";
         v.textContent = item.val;
-        row.append(l, v);
+        wrap.append(l, v);
+        row.appendChild(wrap);
         favsEl.appendChild(row);
       });
     }
