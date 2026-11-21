@@ -1,12 +1,12 @@
-import { state } from "../state.js?v=20261121u";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121u";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121u";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121u";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121u";
-import { stopTimedRun } from "./timed.js?v=20261121u";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121u";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121u";
-import { playClickSfx } from "./sfx.js?v=20261121u";
+import { state } from "../state.js?v=20261121v";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121v";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121v";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121v";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121v";
+import { stopTimedRun } from "./timed.js?v=20261121v";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121v";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121v";
+import { playClickSfx } from "./sfx.js?v=20261121v";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -82,6 +82,35 @@ const HOME_MODE_CONFIG = {
   "1v1": { title: "1 נגד 1", sub: "בקרוב · אתגרו חבר", themeClass: "mode-theme-1v1" }
 };
 
+function renderHomeModeStatsStrip() {
+  const strip = document.getElementById("home-mode-stats-strip");
+  if (!strip) return;
+  const s = state.userStats || {};
+
+  if (selectedHomeMode === "marathon") {
+    const best = s.bestMarathonScore || 0;
+    strip.innerHTML = best > 0
+      ? `<span>🏆 שיא אישי: <strong>${best.toLocaleString("he-IL")} נק'</strong></span>`
+      : `<span>🏆 שיא אישי: <strong>טרם נקבע</strong></span>`;
+  } else if (selectedHomeMode === "timed") {
+    const best = s.bestTimedScore || 0;
+    strip.innerHTML = `<span>⏱️ שיא 60ש': <strong>${best} ${best === 1 ? "שיר" : "שירים"}</strong></span>`;
+  } else if (selectedHomeMode === "daily") {
+    const hardWins = s.byLevel?.hard || 0;
+    strip.innerHTML = `<span>📅 רמת קשה · זיהויים: <strong>${hardWins}</strong></span>`;
+  } else if (selectedHomeMode === "weekly") {
+    const impWins = s.byLevel?.impossible || 0;
+    strip.innerHTML = `<span>👑 בונוס ×4 · בלתי אפשרי: <strong>${impWins}</strong></span>`;
+  } else if (selectedHomeMode === "1v1") {
+    strip.innerHTML = `<span>🚧 מצב אונליין מול חברים · <strong>בקרוב</strong></span>`;
+  } else {
+    const won = s.totalWon || 0;
+    const heard = s.totalHeard || 0;
+    const rate = heard > 0 ? Math.round((won / heard) * 100) : 0;
+    strip.innerHTML = `<span>🎵 זיהויים: <strong>${won}</strong></span><span class="hm-stat-sep">·</span><span>🎯 דיוק: <strong>${rate}%</strong></span>`;
+  }
+}
+
 function updateHomeSelectedModeUI() {
   const cfg = HOME_MODE_CONFIG[selectedHomeMode] || HOME_MODE_CONFIG.quickplay;
   const btn = document.getElementById("home-quickplay-btn");
@@ -98,6 +127,8 @@ function updateHomeSelectedModeUI() {
     const isSel = card.dataset.openMode === selectedHomeMode;
     card.classList.toggle("is-selected", isSel);
   });
+
+  renderHomeModeStatsStrip();
 }
 
 function selectHomeMode(modeKey) {
@@ -159,6 +190,7 @@ export function showScreen(screenName) {
 
   if (screenName === "home") {
     updateBottomNavActiveTab("game");
+    renderHomeModeStatsStrip();
   } else if (screenName === "modes-hub") {
     updateBottomNavActiveTab("modes");
   } else if (screenName === "leaderboard") {
