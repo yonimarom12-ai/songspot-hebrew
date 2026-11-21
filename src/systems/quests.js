@@ -1,8 +1,8 @@
-import { state } from "../state.js?v=20261121h";
-import { saveUserStats } from "../services/storage.js?v=20261121h";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121h";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261121h";
-import { playCrystalSfx } from "./sfx.js?v=20261121h";
+import { state } from "../state.js?v=20261121i";
+import { saveUserStats } from "../services/storage.js?v=20261121i";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121i";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261121i";
+import { playCrystalSfx } from "./sfx.js?v=20261121i";
 
 function getTodayKey() {
   const d = new Date();

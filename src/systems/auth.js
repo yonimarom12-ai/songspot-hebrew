@@ -1,11 +1,11 @@
-import { dom } from "../dom.js?v=20261121h";
-import { state } from "../state.js?v=20261121h";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261121h";
-import { cloudAuthRequest, syncAccountToCloud } from "../services/cloud.js?v=20261121h";
-import { stopGalleryPreview } from "./gallery.js?v=20261121h";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261121h";
-import { updatePointsDisplay } from "./economy.js?v=20261121h";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261121h";
+import { dom } from "../dom.js?v=20261121i";
+import { state } from "../state.js?v=20261121i";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261121i";
+import { cloudAuthRequest, syncAccountToCloud } from "../services/cloud.js?v=20261121i";
+import { stopGalleryPreview } from "./gallery.js?v=20261121i";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261121i";
+import { updatePointsDisplay } from "./economy.js?v=20261121i";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261121i";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -169,25 +169,47 @@ export function initAuthListeners() {
 
     const cloudRes = await cloudAuthRequest("login", { username, password });
     if (cloudRes && !cloudRes.fallback) {
-      if (!cloudRes.ok) {
-        setAuthMessage(cloudRes.error || "שם משתמש או סיסמא שגויים.");
+      if (cloudRes.ok) {
+        state.currentUser = cloudRes.username;
+        safeStorageSet("songspot_current_user_v1", state.currentUser);
+        const accounts = loadAccountsMap();
+        const localStats = accounts[state.currentUser]?.stats || {};
+        state.userStats = normalizeStatsObj({ ...localStats, ...(cloudRes.stats || {}) });
+        accounts[state.currentUser] = {
+          username: state.currentUser,
+          email: accounts[state.currentUser]?.email || "",
+          password,
+          stats: state.userStats
+        };
+        saveAccountsMap(accounts);
+        dom.loginForm.reset();
+        setAuthMessage("");
+        syncAuthUI();
         return;
       }
-      state.currentUser = cloudRes.username;
-      safeStorageSet("songspot_current_user_v1", state.currentUser);
-      const accounts = loadAccountsMap();
-      const localStats = accounts[state.currentUser]?.stats || {};
-      state.userStats = normalizeStatsObj({ ...localStats, ...(cloudRes.stats || {}) });
-      accounts[state.currentUser] = {
-        username: state.currentUser,
-        email: accounts[state.currentUser]?.email || "",
-        password,
-        stats: state.userStats
-      };
-      saveAccountsMap(accounts);
-      dom.loginForm.reset();
-      setAuthMessage("");
-      syncAuthUI();
+
+      // משתמש ותיק שנוצר מקומית לפני חיבור D1 — נבדוק התאמה מקומית ונעביר אותו אוטומטית לענן!
+      const localAccounts = loadAccountsMap();
+      const localKey = findExistingAccountKey(localAccounts, username);
+      const localAcc = localKey ? localAccounts[localKey] : null;
+      if (localAcc && localAcc.password === password) {
+        const migratedStats = normalizeStatsObj(localAcc.stats);
+        await cloudAuthRequest("register", {
+          username: localAcc.username,
+          email: localAcc.email || "",
+          password,
+          stats: migratedStats
+        });
+        state.currentUser = localAcc.username;
+        safeStorageSet("songspot_current_user_v1", state.currentUser);
+        state.userStats = migratedStats;
+        dom.loginForm.reset();
+        setAuthMessage("התחברת והחשבון סונכרן אוטומטית לענן!", "success");
+        syncAuthUI();
+        return;
+      }
+
+      setAuthMessage(cloudRes.error || "שם משתמש או סיסמא שגויים.");
       return;
     }
 

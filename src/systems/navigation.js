@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261121h";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121h";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121h";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121h";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121h";
-import { stopTimedRun } from "./timed.js?v=20261121h";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121h";
-import { playClickSfx } from "./sfx.js?v=20261121h";
+import { state } from "../state.js?v=20261121i";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121i";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121i";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121i";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121i";
+import { stopTimedRun } from "./timed.js?v=20261121i";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121i";
+import { playClickSfx } from "./sfx.js?v=20261121i";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -171,8 +171,8 @@ function openModeScreen(modeKey) {
   showScreen("mode");
 
   if (modeKey === "leaderboard" && lbWrap) {
-    const syncFirst = state.currentUser
-      ? syncAccountToCloud(state.currentUser, state.stats).catch(() => false)
+    const syncFirst = state.currentUser && state.userStats
+      ? syncAccountToCloud(state.currentUser, state.userStats).catch(() => false)
       : Promise.resolve(false);
     syncFirst.then(() => fetchGlobalLeaderboard(25)).then(({ source, rows }) => {
       if (currentModeKey !== "leaderboard") return;

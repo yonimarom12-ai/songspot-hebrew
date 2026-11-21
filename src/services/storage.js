@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261121h";
+import { state } from "../state.js?v=20261121i";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -111,7 +111,16 @@ export function saveUserStats() {
       const accounts = loadAccountsMap();
       if (accounts[state.currentUser]) {
         accounts[state.currentUser].stats = state.userStats;
-        return saveAccountsMap(accounts);
+        const ok = saveAccountsMap(accounts);
+        // סנכרון שקט ברקע לענן (D1) כדי שגם משתמשים ותיקים יופיעו בדירוג העולמי
+        if (typeof window !== "undefined" && window.location.protocol.startsWith("http")) {
+          fetch("/api/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: state.currentUser, stats: state.userStats })
+          }).catch(() => {});
+        }
+        return ok;
       }
     }
     return safeStorageSet("songspot_guest_stats_v2", JSON.stringify(state.userStats));
@@ -142,4 +151,12 @@ export function initStorageState() {
   state.currentUser = safeStorageGet("songspot_current_user_v1") || null;
   state.userStats = loadUserStats();
   state.playedTrackIds = loadPlayedIds();
+  // סנכרון אוטומטי בטעינת האתר עבור משתמשים ותיקים שכבר מחוברים מקומית
+  if (state.currentUser && typeof window !== "undefined" && window.location.protocol.startsWith("http")) {
+    fetch("/api/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: state.currentUser, stats: state.userStats })
+    }).catch(() => {});
+  }
 }

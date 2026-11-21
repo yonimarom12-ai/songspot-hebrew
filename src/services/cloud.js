@@ -1,4 +1,4 @@
-import { loadAccountsMap } from "./storage.js?v=20261121h";
+import { loadAccountsMap } from "./storage.js?v=20261121i";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
 // עם גיבוי מקומי אוטומטי אם בסיס הנתונים D1 עדיין לא חובר ב-Cloudflare Dashboard
@@ -28,21 +28,27 @@ export async function cloudAuthRequest(action, { username, password, email = "",
 }
 
 export async function syncAccountToCloud(username, stats) {
-  if (!cloudAvailable || !username || !stats) return false;
+  if (!isHttp || !username || !stats) return false;
   try {
     const res = await fetch("/api/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, stats })
     });
-    if (res.status === 404 || res.status === 503) {
-      cloudAvailable = false;
-      return false;
-    }
     return res.ok;
   } catch (e) {
     return false;
   }
+}
+
+let syncDebounceTimer = null;
+export function scheduleCloudSync(username, stats) {
+  if (!isHttp || !username || !stats) return;
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(() => {
+    syncDebounceTimer = null;
+    syncAccountToCloud(username, stats).catch(() => {});
+  }, 1200);
 }
 
 export async function loadAccountFromCloud() {
