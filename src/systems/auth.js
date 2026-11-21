@@ -1,11 +1,11 @@
-import { dom } from "../dom.js?v=20261122e";
-import { state } from "../state.js?v=20261122e";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261122e";
-import { cloudAuthRequest } from "../services/cloud.js?v=20261122e";
-import { stopGalleryPreview } from "./gallery.js?v=20261122e";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261122e";
-import { updatePointsDisplay } from "./economy.js?v=20261122e";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261122e";
+import { dom } from "../dom.js?v=20261122f";
+import { state } from "../state.js?v=20261122f";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261122f";
+import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261122f";
+import { stopGalleryPreview } from "./gallery.js?v=20261122f";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261122f";
+import { updatePointsDisplay } from "./economy.js?v=20261122f";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261122f";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -310,6 +310,7 @@ export function initAuthListeners() {
     stopGalleryPreview();
     state.currentUser = null;
     safeStorageRemove("songspot_current_user_v1");
+    setSessionToken("");
     state.userStats = loadUserStats();
     syncAuthUI();
   });

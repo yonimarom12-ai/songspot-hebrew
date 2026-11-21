@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261122e";
+import { state } from "../state.js?v=20261122f";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -123,6 +123,13 @@ export function loadUserStats() {
 
 let bgSyncTimer = null;
 
+function getBgSyncHeaders() {
+  const token = safeStorageGet("songspot_session_token_v1") || "";
+  return token
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+    : { "Content-Type": "application/json" };
+}
+
 function scheduleBgCloudSync(username, stats) {
   if (!username || !stats || typeof window === "undefined" || !window.location.protocol.startsWith("http")) return;
   if (bgSyncTimer) clearTimeout(bgSyncTimer);
@@ -130,7 +137,7 @@ function scheduleBgCloudSync(username, stats) {
     bgSyncTimer = null;
     fetch("/api/sync", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getBgSyncHeaders(),
       body: JSON.stringify({ username, stats })
     }).catch(() => {});
   }, 900);
@@ -176,11 +183,32 @@ export function initStorageState() {
   state.currentUser = safeStorageGet("songspot_current_user_v1") || null;
   state.userStats = loadUserStats();
   state.playedTrackIds = loadPlayedIds();
-  // סנכרון אוטומטי בטעינת האתר עבור משתמשים ותיקים שכבר מחוברים מקומית
+  // סנכרון אוטומטי והשגת Session Token חתום למשתמשים ותיקים שכבר מחוברים מקומית
   if (state.currentUser && typeof window !== "undefined" && window.location.protocol.startsWith("http")) {
+    const existingToken = safeStorageGet("songspot_session_token_v1");
+    if (!existingToken) {
+      const accounts = loadAccountsMap();
+      const acc = accounts[state.currentUser];
+      if (acc?.password) {
+        fetch("/api/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "login", username: acc.username, password: acc.password })
+        })
+          .then(r => (r.ok ? r.json() : null))
+          .then(data => {
+            if (data?.token) {
+              safeStorageSet("songspot_session_token_v1", data.token);
+              scheduleBgCloudSync(state.currentUser, state.userStats);
+            }
+          })
+          .catch(() => {});
+        return;
+      }
+    }
     fetch("/api/sync", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getBgSyncHeaders(),
       body: JSON.stringify({ username: state.currentUser, stats: state.userStats })
     }).catch(() => {});
   }

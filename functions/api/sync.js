@@ -1,4 +1,6 @@
-// Cloudflare Pages Function: סנכרון סטטיסטיקות, קריסטלים, מועדפים וערכות נושא בענן (D1)
+// Cloudflare Pages Function: סנכרון מאובטח של סטטיסטיקות, קריסטלים, מועדפים וערכות נושא בענן (D1)
+import { extractBearerToken, verifySessionToken } from "./_session.js";
+
 const TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS players (
   username TEXT PRIMARY KEY,
@@ -39,8 +41,32 @@ export async function onRequestPost(context) {
     customBackgroundData: ""
   };
 
+  const usernameLower = username.toLowerCase();
+  const token = extractBearerToken(request);
+
   try {
     await env.DB.prepare(TABLE_SQL).run();
+
+    // אימות Session Token חתום עבור משתמשים רשומים (מונע זיוף ניקוד/קריסטלים ע"י צד שלישי)
+    const existing = await env.DB
+      .prepare("SELECT password_hash FROM players WHERE username_lower = ?")
+      .bind(usernameLower)
+      .first();
+
+    if (token) {
+      const valid = await verifySessionToken(token, usernameLower, env);
+      if (!valid) {
+        return Response.json({ error: "Invalid or expired session token" }, { status: 401 });
+      }
+    } else if (existing && existing.password_hash) {
+      return Response.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const safeWon = Math.min(50000, Math.max(0, Math.round(Number(stats.totalWon) || 0)));
+    const safeStreak = Math.min(5000, Math.max(0, Math.round(Number(stats.bestStreak) || 0)));
+    const safePoints = Math.min(1000000, Math.max(0, Number(stats.points) || 0));
+    const safeTimed = Math.min(500, Math.max(0, Math.round(Number(stats.bestTimedScore) || 0)));
+
     await env.DB
       .prepare(
         `INSERT INTO players (username, username_lower, total_won, best_streak, points, best_timed, avatar_id, stats_json, updated_at)
@@ -56,11 +82,11 @@ export async function onRequestPost(context) {
       )
       .bind(
         username,
-        username.toLowerCase(),
-        Number(stats.totalWon) || 0,
-        Number(stats.bestStreak) || 0,
-        Number(stats.points) || 0,
-        Number(stats.bestTimedScore) || 0,
+        usernameLower,
+        safeWon,
+        safeStreak,
+        safePoints,
+        safeTimed,
         String(stats.equippedAvatar || "default"),
         JSON.stringify(compactStats),
         new Date().toISOString()

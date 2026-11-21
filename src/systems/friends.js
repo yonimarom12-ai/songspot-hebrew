@@ -1,8 +1,8 @@
-import { state } from "../state.js?v=20261122e";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261122e";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122e";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122e";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122e";
+import { state } from "../state.js?v=20261122f";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261122f";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122f";
+import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261122f";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122f";
 
 const LOCAL_FRIENDS_KEY = "songspot_local_friends_v1";
 const LOCAL_REQS_KEY = "songspot_local_friend_reqs_v1";
@@ -400,7 +400,7 @@ async function handleSendRequestSubmit(e) {
     try {
       const res = await fetch("/api/friends", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ action: "request", username: state.currentUser, target: raw })
       });
       const data = await res.json().catch(() => ({}));
@@ -456,7 +456,7 @@ async function respondToRequest(action, fromLower) {
     try {
       await fetch("/api/friends", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ action, username: state.currentUser, fromLower })
       });
     } catch (e) { }
@@ -483,7 +483,7 @@ async function cancelOutgoingRequest(toLower) {
     try {
       await fetch("/api/friends", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ action: "cancel", username: state.currentUser, toLower })
       });
     } catch (e) { }
@@ -503,7 +503,7 @@ async function handleRemoveActiveFriend() {
     try {
       await fetch("/api/friends", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ action: "remove", username: state.currentUser, targetLower })
       });
     } catch (e) { }

@@ -1,4 +1,6 @@
-// Cloudflare Pages Function: מערכת חברים עם בקשות חברות (שליחה, אישור, דחייה, ביטול והסרה) ב-Cloudflare D1
+// Cloudflare Pages Function: מערכת חברים מאובטחת עם בקשות חברות ב-Cloudflare D1
+import { extractBearerToken, verifySessionToken } from "./_session.js";
+
 const PLAYERS_SQL = `
 CREATE TABLE IF NOT EXISTS players (
   username TEXT PRIMARY KEY,
@@ -162,6 +164,21 @@ export async function onRequestPost(context) {
 
   try {
     await ensureTables(env.DB);
+
+    // אימות Session Token חתום לפעולות שינוי בחברים
+    const token = extractBearerToken(request);
+    const meRow = await env.DB
+      .prepare("SELECT password_hash FROM players WHERE username_lower = ?")
+      .bind(userLower)
+      .first();
+    if (token) {
+      const valid = await verifySessionToken(token, userLower, env);
+      if (!valid) {
+        return Response.json({ error: "פג תוקף ההתחברות — התחבר מחדש בפרופיל." }, { status: 401 });
+      }
+    } else if (meRow && meRow.password_hash) {
+      return Response.json({ error: "נדרשת התחברות מחדש בפרופיל לפעולה זו." }, { status: 401 });
+    }
 
     if (action === "request" || action === "add") {
       const rawTarget = String(body?.target || "").trim();

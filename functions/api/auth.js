@@ -1,4 +1,6 @@
-// Cloudflare Pages Function: הרשמה והתחברות מאובטחת מול Cloudflare D1
+// Cloudflare Pages Function: הרשמה והתחברות מאובטחת מול Cloudflare D1 + חתימת Session Token
+import { createSessionToken } from "./_session.js";
+
 const TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS players (
   username TEXT PRIMARY KEY,
@@ -81,7 +83,8 @@ export async function onRequestPost(context) {
         )
         .run();
 
-      return Response.json({ ok: true, username, stats });
+      const token = await createSessionToken(usernameLower, env);
+      return Response.json({ ok: true, username, stats, token });
     }
 
     if (action === "login") {
@@ -96,7 +99,8 @@ export async function onRequestPost(context) {
 
       let parsedStats = {};
       try { parsedStats = JSON.parse(row.stats_json || "{}"); } catch (e) { }
-      return Response.json({ ok: true, username: row.username, stats: parsedStats });
+      const token = await createSessionToken(usernameLower, env);
+      return Response.json({ ok: true, username: row.username, stats: parsedStats, token });
     }
 
     return Response.json({ error: "Unknown action" }, { status: 400 });

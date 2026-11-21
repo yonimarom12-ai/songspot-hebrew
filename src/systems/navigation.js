@@ -1,16 +1,16 @@
-import { state } from "../state.js?v=20261122e";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122e";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122e";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122e";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122e";
-import { showGameToast } from "../utils/toast.js?v=20261122e";
-import { stopTimedRun } from "./timed.js?v=20261122e";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122e";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122e";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122e";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122e";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122e";
-import { playClickSfx } from "./sfx.js?v=20261122e";
+import { state } from "../state.js?v=20261122f";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122f";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122f";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122f";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122f";
+import { showGameToast } from "../utils/toast.js?v=20261122f";
+import { stopTimedRun } from "./timed.js?v=20261122f";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122f";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122f";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122f";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122f";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122f";
+import { playClickSfx } from "./sfx.js?v=20261122f";
 
 const SCREEN_IDS = {
   home: "screen-home",

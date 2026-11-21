@@ -1,8 +1,25 @@
-import { loadAccountsMap } from "./storage.js?v=20261122e";
+import { loadAccountsMap, safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261122f";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
-// עם גיבוי מקומי אוטומטי אם רץ מקומית או ללא חיבור ענן
+// עם אימות Session Token חתום ב-HMAC-SHA256 וגיבוי מקומי אוטומטי
 const isHttp = typeof window !== "undefined" && window.location.protocol.startsWith("http");
+const SESSION_TOKEN_KEY = "songspot_session_token_v1";
+
+export function getSessionToken() {
+  return safeStorageGet(SESSION_TOKEN_KEY) || "";
+}
+
+export function setSessionToken(token) {
+  if (token) safeStorageSet(SESSION_TOKEN_KEY, token);
+  else safeStorageRemove(SESSION_TOKEN_KEY);
+}
+
+export function getAuthHeaders() {
+  const token = getSessionToken();
+  return token
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+    : { "Content-Type": "application/json" };
+}
 
 export async function cloudAuthRequest(action, { username, password, email = "", stats = null }) {
   if (!isHttp) return { fallback: true };
@@ -19,7 +36,8 @@ export async function cloudAuthRequest(action, { username, password, email = "",
     if (!res.ok) {
       return { ok: false, error: data.error || "שגיאה באימות החשבון" };
     }
-    return { ok: true, username: data.username, stats: data.stats || null };
+    if (data.token) setSessionToken(data.token);
+    return { ok: true, username: data.username, stats: data.stats || null, token: data.token || "" };
   } catch (e) {
     return { fallback: true };
   }
@@ -30,7 +48,7 @@ export async function syncAccountToCloud(username, stats) {
   try {
     const res = await fetch("/api/sync", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ username, stats })
     });
     return res.ok;
