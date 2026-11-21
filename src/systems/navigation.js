@@ -1,18 +1,18 @@
-import { state } from "../state.js?v=20261122i";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122i";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122i";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122i";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122i";
-import { showGameToast } from "../utils/toast.js?v=20261122i";
-import { stopTimedRun } from "./timed.js?v=20261122i";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122i";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122i";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122i";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122i";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122i";
-import { playClickSfx } from "./sfx.js?v=20261122i";
-import { vibrateTap } from "../utils/toast.js?v=20261122i";
-import { isOnboardingOpen } from "./onboarding.js?v=20261122i";
+import { state } from "../state.js?v=20261122k";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122k";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122k";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122k";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122k";
+import { showGameToast } from "../utils/toast.js?v=20261122k";
+import { stopTimedRun } from "./timed.js?v=20261122k";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122k";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122k";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122k";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122k";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122k";
+import { playClickSfx } from "./sfx.js?v=20261122k";
+import { vibrateTap } from "../utils/toast.js?v=20261122k";
+import { isOnboardingOpen } from "./onboarding.js?v=20261122k";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -515,16 +515,14 @@ export function initNavigationListeners() {
     settingsBackBtn.addEventListener("click", () => toggleDrawer(false));
   }
 
-  // כפתורי לובי עליונים (פרופיל נגיש רק מהסרגל התחתון)
+  // כפתורי לובי עליונים (קריסטלים לתצוגה בלבד; פרופיל וחנות נגישים מהסרגל התחתון ומהחלקה)
   const homeStreakBtn = document.getElementById("home-streak-btn");
-  const homePointsBtn = document.getElementById("home-points-btn");
   const homeQuestsBtn = document.getElementById("home-quests-btn");
   const homeSettingsBtn = document.getElementById("home-settings-btn");
   const homeFriendsBtn = document.getElementById("home-friends-btn");
   const friendsBackBtn = document.getElementById("friends-back-btn");
 
   if (homeStreakBtn) homeStreakBtn.addEventListener("click", () => toggleStreakModal(true));
-  if (homePointsBtn) homePointsBtn.addEventListener("click", () => toggleShopModal(true));
   if (homeQuestsBtn) homeQuestsBtn.addEventListener("click", () => toggleQuestsModal(true));
   if (homeSettingsBtn) homeSettingsBtn.addEventListener("click", () => toggleDrawer(true));
   if (homeFriendsBtn) {

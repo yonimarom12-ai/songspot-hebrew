@@ -59,6 +59,10 @@ body.has-custom-bg .home-stage-glow {
   gap: 7px;
 }
 
+#home-points-btn {
+  cursor: default;
+}
+
 .home-friends-pill-btn {
   display: inline-flex;
   align-items: center;
