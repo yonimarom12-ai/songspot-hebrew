@@ -1,11 +1,11 @@
-import { dom } from "../dom.js?v=20261121a";
-import { state } from "../state.js?v=20261121a";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261121a";
-import { syncAccountToCloud, loadAccountFromCloud } from "../services/cloud.js?v=20261121a";
-import { stopGalleryPreview } from "./gallery.js?v=20261121a";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261121a";
-import { updatePointsDisplay } from "./economy.js?v=20261121a";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261121a";
+import { dom } from "../dom.js?v=20261121b";
+import { state } from "../state.js?v=20261121b";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261121b";
+import { cloudAuthRequest, syncAccountToCloud } from "../services/cloud.js?v=20261121b";
+import { stopGalleryPreview } from "./gallery.js?v=20261121b";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261121b";
+import { updatePointsDisplay } from "./economy.js?v=20261121b";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261121b";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -94,7 +94,7 @@ export function initAuthListeners() {
     });
   });
 
-  dom.registerForm.addEventListener("submit", (e) => {
+  dom.registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const rawUsername = dom.regUsernameInput.value;
     const username = rawUsername.trim();
@@ -120,19 +120,32 @@ export function initAuthListeners() {
       return;
     }
 
+    // שומר את החשבון ומעביר אליו את הסטטיסטיקות הנוכחיות שנצברו כ"אורח" (ללא קריסטלים מאורח)
+    const initialStats = normalizeStatsObj({
+      ...state.userStats,
+      points: 0,
+      totalPointsEarned: 0
+    });
+
+    const cloudRes = await cloudAuthRequest("register", {
+      username,
+      email,
+      password,
+      stats: initialStats
+    });
+    if (cloudRes && !cloudRes.fallback && !cloudRes.ok) {
+      setAuthMessage(cloudRes.error || "שגיאה בהרשמה בענן");
+      return;
+    }
+
     const accounts = loadAccountsMap();
-    if (findExistingAccountKey(accounts, username)) {
+    if (cloudRes?.fallback && findExistingAccountKey(accounts, username)) {
       updateLiveUsernameFeedback();
       setAuthMessage("שם המשתמש כבר תפוס, אנא בחר שם אחר.");
       return;
     }
 
-    // שומר את החשבון ומעביר אליו את הסטטיסטיקות הנוכחיות שנצברו כ"אורח" (ללא קריסטלים מאורח)
-    state.userStats = {
-      ...state.userStats,
-      points: 0,
-      totalPointsEarned: 0
-    };
+    state.userStats = initialStats;
     accounts[username] = {
       username,
       email,
@@ -142,20 +155,43 @@ export function initAuthListeners() {
     saveAccountsMap(accounts);
     state.currentUser = username;
     safeStorageSet("songspot_current_user_v1", username);
-    syncAccountToCloud(username, state.userStats);
 
     dom.registerForm.reset();
     updateLiveUsernameFeedback();
-    setAuthMessage("נרשמת והתחברת בהצלחה!", "success");
+    setAuthMessage(cloudRes?.ok ? "נרשמת והחשבון נשמר בענן!" : "נרשמת והתחברת בהצלחה!", "success");
     syncAuthUI();
   });
 
-  dom.loginForm.addEventListener("submit", (e) => {
+  dom.loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("login-username").value.trim();
     const password = document.getElementById("login-password").value;
-    const accounts = loadAccountsMap();
 
+    const cloudRes = await cloudAuthRequest("login", { username, password });
+    if (cloudRes && !cloudRes.fallback) {
+      if (!cloudRes.ok) {
+        setAuthMessage(cloudRes.error || "שם משתמש או סיסמא שגויים.");
+        return;
+      }
+      state.currentUser = cloudRes.username;
+      safeStorageSet("songspot_current_user_v1", state.currentUser);
+      const accounts = loadAccountsMap();
+      const localStats = accounts[state.currentUser]?.stats || {};
+      state.userStats = normalizeStatsObj({ ...localStats, ...(cloudRes.stats || {}) });
+      accounts[state.currentUser] = {
+        username: state.currentUser,
+        email: accounts[state.currentUser]?.email || "",
+        password,
+        stats: state.userStats
+      };
+      saveAccountsMap(accounts);
+      dom.loginForm.reset();
+      setAuthMessage("");
+      syncAuthUI();
+      return;
+    }
+
+    const accounts = loadAccountsMap();
     const matchedKey = findExistingAccountKey(accounts, username);
     const acc = matchedKey ? accounts[matchedKey] : null;
     if (!acc || acc.password !== password) {
@@ -169,16 +205,6 @@ export function initAuthListeners() {
     dom.loginForm.reset();
     setAuthMessage("");
     syncAuthUI();
-
-    // סנכרון אוטומטי מהענן (אם Supabase מוגדר)
-    loadAccountFromCloud(state.currentUser).then(cloudStats => {
-      if (cloudStats && state.currentUser === acc.username) {
-        if ((cloudStats.totalWon || 0) >= (state.userStats.totalWon || 0)) {
-          state.userStats = normalizeStatsObj({ ...state.userStats, ...cloudStats });
-          syncAuthUI();
-        }
-      }
-    });
   });
 
   dom.sendResetCodeBtn.addEventListener("click", () => {

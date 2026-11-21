@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121a";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121a";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121a";
-import { state } from "../state.js?v=20261121a";
-import { saveUserStats } from "../services/storage.js?v=20261121a";
-import { fetchItunesData } from "../services/itunes.js?v=20261121a";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121a";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121a";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121a";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261121a";
-import { renderQuestsAndBadgesModal } from "./quests.js?v=20261121a";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121b";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121b";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121b";
+import { state } from "../state.js?v=20261121b";
+import { saveUserStats } from "../services/storage.js?v=20261121b";
+import { fetchItunesData } from "../services/itunes.js?v=20261121b";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121b";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121b";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121b";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261121b";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121b";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -418,12 +418,20 @@ export function showProfileSubView(viewName = "main") {
   const views = {
     main: "profile-view-main",
     stats: "profile-view-stats",
-    gallery: "profile-view-gallery"
+    gallery: "profile-view-gallery",
+    badges: "profile-view-badges"
   };
   Object.entries(views).forEach(([key, id]) => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle("active", key === viewName);
   });
+}
+
+export function toggleQuestsModal(isOpen) {
+  const backdrop = document.getElementById("quests-modal-backdrop");
+  if (!backdrop) return;
+  if (isOpen) renderQuestsModal();
+  backdrop.classList.toggle("open", isOpen);
 }
 
 export function toggleStreakModal(isOpen) {
@@ -508,10 +516,21 @@ export function initProfileListeners() {
     });
   }
 
+  const questsCloseBtn = document.getElementById("quests-close-btn");
+  const questsBackdrop = document.getElementById("quests-modal-backdrop");
+  if (questsCloseBtn) questsCloseBtn.addEventListener("click", () => toggleQuestsModal(false));
+  if (questsBackdrop) {
+    questsBackdrop.addEventListener("click", (e) => {
+      if (e.target === questsBackdrop) toggleQuestsModal(false);
+    });
+  }
+
   const openStatsBtn = document.getElementById("open-profile-stats-btn");
   const openGalleryBtn = document.getElementById("open-profile-gallery-btn");
+  const openBadgesBtn = document.getElementById("open-profile-badges-btn");
   if (openStatsBtn) openStatsBtn.addEventListener("click", () => showProfileSubView("stats"));
   if (openGalleryBtn) openGalleryBtn.addEventListener("click", () => showProfileSubView("gallery"));
+  if (openBadgesBtn) openBadgesBtn.addEventListener("click", () => showProfileSubView("badges"));
   document.querySelectorAll("[data-profile-back]").forEach(btn => {
     btn.addEventListener("click", () => showProfileSubView("main"));
   });

@@ -8,14 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121a">
-  <link rel="stylesheet" href="styles/home.css?v=20261121a">
-  <link rel="stylesheet" href="styles/header.css?v=20261121a">
-  <link rel="stylesheet" href="styles/player.css?v=20261121a">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121a">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121a">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121a">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121a">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121b">
+  <link rel="stylesheet" href="styles/home.css?v=20261121b">
+  <link rel="stylesheet" href="styles/header.css?v=20261121b">
+  <link rel="stylesheet" href="styles/player.css?v=20261121b">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121b">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121b">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121b">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121b">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121b">
 </head>
 
 <body>
@@ -27,7 +28,6 @@
     <div class="app-shell home-shell">
       <header class="home-top-bar">
         <div class="home-top-right">
-          <button type="button" class="home-avatar-btn" id="home-avatar-btn" aria-label="פתח פרופיל">🎧</button>
           <div class="home-status-pill">
             <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
               <span>🔥</span><span id="home-streak-count">0</span>
@@ -38,12 +38,18 @@
             </button>
           </div>
         </div>
-        <button type="button" class="home-gear-btn" id="home-settings-btn" aria-label="הגדרות">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
-          </svg>
-        </button>
+        <div class="home-top-left">
+          <button type="button" class="home-gear-btn home-quests-btn" id="home-quests-btn" aria-label="משימות יומיות" title="משימות יומיות">
+            <span>🎯</span>
+            <span class="home-quests-dot" id="home-quests-dot"></span>
+          </button>
+          <button type="button" class="home-gear-btn" id="home-settings-btn" aria-label="הגדרות" title="הגדרות">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       <div class="home-center-stage">
@@ -741,20 +747,11 @@
                 <div class="fav-saved-msg" id="fav-saved-msg"></div>
               </div>
 
-              <div class="stats-section">
-                <h3 class="stats-sec-title">🎯 משימות יומיות</h3>
-                <div class="quests-list" id="profile-quests-list"></div>
-              </div>
-
-              <div class="stats-section">
-                <h3 class="stats-sec-title">🏅 הישגים ותגים</h3>
-                <div class="badges-grid" id="profile-badges-grid"></div>
-              </div>
-
-              <!-- שני כפתורים בתחתית הפרופיל: סטטיסטיקות + גלריית שירים -->
-              <div class="profile-subnav-row">
+              <!-- שלושה כפתורים בתחתית הפרופיל: סטטיסטיקות, גלריה והישגים -->
+              <div class="profile-subnav-row three-cols">
                 <button type="button" class="profile-subnav-btn" id="open-profile-stats-btn">📊 סטטיסטיקות</button>
-                <button type="button" class="profile-subnav-btn" id="open-profile-gallery-btn">🎵 גלריית שירים</button>
+                <button type="button" class="profile-subnav-btn" id="open-profile-gallery-btn">🎵 גלריה</button>
+                <button type="button" class="profile-subnav-btn" id="open-profile-badges-btn">🏅 הישגים</button>
               </div>
             </div>
 
@@ -804,6 +801,19 @@
                 <div class="gallery-grid" id="won-gallery-grid"></div>
               </div>
             </div>
+
+            <!-- תת-תצוגה: הישגים ותגים -->
+            <div class="profile-subview" id="profile-view-badges">
+              <button type="button" class="profile-subview-back" data-profile-back="main">→ חזור לפרופיל</button>
+
+              <div class="stats-section">
+                <h3 class="stats-sec-title">
+                  <span>🏅 הישגים ותגים</span>
+                  <span class="stats-sec-sub" id="badges-summary-count">0 / 16 הושגו</span>
+                </h3>
+                <div class="badges-list" id="profile-badges-grid"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -837,6 +847,20 @@
     </div>
   </div>
 
+  <!-- חלון משימות יומיות (נפתח ממסך הבית ליד ההגדרות) -->
+  <div class="modal-backdrop" id="quests-modal-backdrop">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-label="משימות יומיות">
+      <div class="modal-header">
+        <h2 class="modal-title">🎯 משימות יומיות</h2>
+        <button class="drawer-close-btn" id="quests-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="quests-guest-hint" id="quests-guest-hint" style="display: none;">🔒 התחבר בפרופיל כדי לאסוף קריסטלים מהמשימות היומיות</p>
+        <div class="quests-list" id="quests-modal-list"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- חלון חנות הקריסטלים -->
   <div class="modal-backdrop" id="shop-modal-backdrop">
     <div class="profile-modal" role="dialog" aria-label="חנות הקריסטלים">
@@ -853,8 +877,9 @@
         </div>
 
         <div class="shop-tabs">
-          <button type="button" class="shop-tab active" data-shop-tab="avatars">תמונות פרופיל</button>
-          <button type="button" class="shop-tab" data-shop-tab="backgrounds">רקעים למסך</button>
+          <button type="button" class="shop-tab active" data-shop-tab="avatars">פרופיל</button>
+          <button type="button" class="shop-tab" data-shop-tab="backgrounds">רקעים</button>
+          <button type="button" class="shop-tab" data-shop-tab="themes">ערכות נושא</button>
         </div>
 
         <div class="shop-preview-panel" id="shop-preview-panel" style="display: none;"></div>
@@ -928,7 +953,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121a"></script>
+  <script type="module" src="src/main.js?v=20261121b"></script>
 </body>
 
 </html>

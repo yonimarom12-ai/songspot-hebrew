@@ -1,14 +1,17 @@
 import {
   SHOP_AVATARS,
   SHOP_BACKGROUNDS,
+  SHOP_THEMES,
   CUSTOM_AVATAR_PRICE,
   CUSTOM_BACKGROUND_PRICE,
   findAvatar,
-  findBackground
-} from "../data/shop.js?v=20261121a";
-import { state } from "../state.js?v=20261121a";
-import { saveUserStats } from "../services/storage.js?v=20261121a";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121a";
+  findBackground,
+  findTheme
+} from "../data/shop.js?v=20261121b";
+import { state } from "../state.js?v=20261121b";
+import { saveUserStats } from "../services/storage.js?v=20261121b";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121b";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121b";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -31,9 +34,9 @@ function isOwned(type, item) {
 
 function getEquipped(type) {
   if (!state.userStats) return "default";
-  return type === "avatar"
-    ? (state.userStats.equippedAvatar || "default")
-    : (state.userStats.equippedBackground || "default");
+  if (type === "avatar") return state.userStats.equippedAvatar || "default";
+  if (type === "theme") return state.userStats.equippedTheme || "default";
+  return state.userStats.equippedBackground || "default";
 }
 
 function getCustomData(type) {
@@ -103,7 +106,14 @@ function applyAvatarToEl(el, avatar) {
   }
 }
 
-function applyCosmeticsVisuals(bg, avatar) {
+function applyCosmeticsVisuals(bg, avatar, theme) {
+  const activeTheme = theme || findTheme(getEquipped("theme"));
+  if (activeTheme.id === "default") {
+    delete document.body.dataset.theme;
+  } else {
+    document.body.dataset.theme = activeTheme.id;
+  }
+
   const isCustomBg = bg.id !== "default";
   document.body.classList.toggle("has-custom-bg", isCustomBg);
   if (!isCustomBg) {
@@ -123,25 +133,25 @@ function applyCosmeticsVisuals(bg, avatar) {
 
   const modalAvatar = document.getElementById("profile-modal-avatar");
   applyAvatarToEl(modalAvatar, avatar);
-
-  const homeAvatar = document.getElementById("home-avatar-btn");
-  applyAvatarToEl(homeAvatar, avatar);
 }
 
-// מחיל את הרקע ותמונת הפרופיל שנרכשו והופעלו בפועל
+// מחיל את הרקע, ערכת הנושא ותמונת הפרופיל שנרכשו והופעלו בפועל
 export function applyEquippedCosmetics() {
-  applyCosmeticsVisuals(resolveEquippedBg(), resolveEquippedAvatar());
+  applyCosmeticsVisuals(resolveEquippedBg(), resolveEquippedAvatar(), findTheme(getEquipped("theme")));
 }
 
 // מחיל זמנית את הפריט שבתצוגה מקדימה (בלי לשמור ובלי לשלם)
 function applyPreviewVisuals() {
   const bg = previewSelection?.type === "background"
     ? previewSelection.item
-    : resolveEquippedBg();
+    : (previewSelection?.type === "theme" ? findBackground("default") : resolveEquippedBg());
   const avatar = previewSelection?.type === "avatar"
     ? previewSelection.item
     : resolveEquippedAvatar();
-  applyCosmeticsVisuals(bg, avatar);
+  const theme = previewSelection?.type === "theme"
+    ? previewSelection.item
+    : findTheme(getEquipped("theme"));
+  applyCosmeticsVisuals(bg, avatar, theme);
 }
 
 function hidePeekBanner() {
@@ -261,9 +271,16 @@ function purchaseOrEquip(type, item) {
   }
 
   if (type === "avatar") state.userStats.equippedAvatar = item.id;
-  else state.userStats.equippedBackground = item.id;
+  else if (type === "theme") {
+    state.userStats.equippedTheme = item.id;
+    // כשמפעילים ערכת נושא, מאפסים רקע ידני לברירת מחדל כדי שערכת הנושא תיראה במלואה
+    if (item.id !== "default") state.userStats.equippedBackground = "default";
+  } else state.userStats.equippedBackground = item.id;
 
   const savedOk = saveUserStats();
+  if (savedOk && state.currentUser) {
+    syncAccountToCloud(state.currentUser, state.userStats);
+  }
   if (!savedOk && item.id === "custom") {
     // אם אין מקום ב-localStorage לתמונה, משחזרים מצב קודם בלי לאבד נתונים
     if (type === "avatar") {
@@ -406,7 +423,7 @@ function renderPreviewPanel() {
 
   const stage = document.createElement("div");
   stage.className = "shop-preview-stage";
-  stage.style.background = currentBg.css;
+  stage.style.background = type === "theme" ? item.previewBg : currentBg.css;
 
   const mockProfile = document.createElement("div");
   mockProfile.className = "shop-preview-mock-user";
@@ -423,6 +440,9 @@ function renderPreviewPanel() {
 
   const mockPlay = document.createElement("div");
   mockPlay.className = "shop-preview-mock-play";
+  if (type === "theme" && item.accent) {
+    mockPlay.style.background = item.accent;
+  }
   mockPlay.textContent = "▶";
 
   stage.append(mockProfile, mockPlay);
@@ -579,6 +599,13 @@ function buildCard(type, item) {
     preview.className = "shop-avatar-preview";
     preview.style.background = item.bg;
     preview.textContent = item.emoji;
+  } else if (type === "theme") {
+    preview.className = "shop-bg-preview shop-theme-preview";
+    preview.style.background = item.previewBg;
+    const dot = document.createElement("span");
+    dot.className = "shop-theme-accent-dot";
+    dot.style.background = item.accent;
+    preview.appendChild(dot);
   } else {
     preview.className = "shop-bg-preview";
     preview.style.background = item.css;
@@ -587,6 +614,15 @@ function buildCard(type, item) {
   const name = document.createElement("span");
   name.className = "shop-item-name";
   name.textContent = item.name;
+
+  if (type === "theme" && item.desc) {
+    const desc = document.createElement("span");
+    desc.className = "shop-theme-desc";
+    desc.textContent = item.desc;
+    card.append(preview, name, desc);
+  } else {
+    card.append(preview, name);
+  }
 
   const action = document.createElement("span");
   action.className = "shop-item-action";
@@ -603,7 +639,7 @@ function buildCard(type, item) {
     action.textContent = `💎 ${formatPoints(item.price)}`;
   }
 
-  card.append(preview, name, action);
+  card.appendChild(action);
   card.addEventListener("click", () => selectForPreview(type, item));
   return card;
 }
@@ -622,6 +658,11 @@ export function renderShop() {
   if (!grid) return;
   grid.innerHTML = "";
   grid.className = `shop-grid ${activeShopTab === "avatars" ? "avatars" : "backgrounds"}`;
+
+  if (activeShopTab === "themes") {
+    SHOP_THEMES.forEach(item => grid.appendChild(buildCard("theme", item)));
+    return;
+  }
 
   const type = activeShopTab === "avatars" ? "avatar" : "background";
   grid.appendChild(buildCustomUploadCard(type));

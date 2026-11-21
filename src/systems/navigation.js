@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261121a";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121a";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121a";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, updateBottomNavActiveTab } from "./profile.js?v=20261121a";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121a";
-import { stopTimedRun } from "./timed.js?v=20261121a";
-import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121a";
-import { playClickSfx } from "./sfx.js?v=20261121a";
+import { state } from "../state.js?v=20261121b";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121b";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121b";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121b";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121b";
+import { stopTimedRun } from "./timed.js?v=20261121b";
+import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121b";
+import { playClickSfx } from "./sfx.js?v=20261121b";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -163,8 +163,8 @@ function openModeScreen(modeKey) {
       if (currentModeKey !== "leaderboard") return;
       if (status) {
         status.textContent = source === "cloud"
-          ? "☁️ דירוג עולמי חי מהענן"
-          : "📱 דירוג מקומי · הוסף Supabase ב-cloud.js לסנכרון עולמי";
+          ? "☁️ דירוג עולמי חי (Cloudflare D1)"
+          : "📱 דירוג מקומי · חבר D1 ב-Cloudflare לסנכרון עולמי";
       }
       lbWrap.innerHTML = "";
       if (!rows || rows.length === 0) {
@@ -219,16 +219,16 @@ export function initNavigationListeners() {
     settingsBackBtn.addEventListener("click", () => toggleDrawer(false));
   }
 
-  // כפתורי לובי עליונים
-  const homeAvatarBtn = document.getElementById("home-avatar-btn");
+  // כפתורי לובי עליונים (פרופיל נגיש רק מהסרגל התחתון)
   const homeStreakBtn = document.getElementById("home-streak-btn");
   const homePointsBtn = document.getElementById("home-points-btn");
+  const homeQuestsBtn = document.getElementById("home-quests-btn");
   const homeSettingsBtn = document.getElementById("home-settings-btn");
   const homeShopCardBtn = document.getElementById("home-shop-card-btn");
 
-  if (homeAvatarBtn) homeAvatarBtn.addEventListener("click", () => toggleProfileModal(true));
   if (homeStreakBtn) homeStreakBtn.addEventListener("click", () => toggleStreakModal(true));
   if (homePointsBtn) homePointsBtn.addEventListener("click", () => toggleShopModal(true));
+  if (homeQuestsBtn) homeQuestsBtn.addEventListener("click", () => toggleQuestsModal(true));
   if (homeSettingsBtn) homeSettingsBtn.addEventListener("click", () => toggleDrawer(true));
   if (homeShopCardBtn) homeShopCardBtn.addEventListener("click", () => toggleShopModal(true));
 

@@ -1456,25 +1456,150 @@
 .profile-subnav-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
   padding-top: 4px;
+}
+
+.profile-subnav-row.three-cols {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .profile-subnav-btn {
   border: 1px solid rgba(192, 132, 252, 0.38);
   border-radius: 14px;
-  padding: 12px 10px;
+  padding: 11px 6px;
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(31, 21, 62, 0.92));
   color: #ffffff;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
+  white-space: nowrap;
   transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+/* Detailed Achievements List (How to unlock each badge) */
+.badges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badge-row-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-row-card.unlocked {
+  border-color: rgba(250, 204, 21, 0.55);
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.12), rgba(124, 58, 237, 0.12));
+}
+
+.badge-row-card.locked {
+  opacity: 0.72;
+}
+
+.badge-row-card.locked .badge-row-icon {
+  filter: grayscale(0.85);
+}
+
+.badge-row-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.badge-row-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.badge-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge-row-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.badge-tier-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-sub);
+}
+
+.badge-tier-pill.tier-מתקדם { background: rgba(56, 217, 255, 0.18); color: #8bf0ff; }
+.badge-tier-pill.tier-קשה { background: rgba(255, 140, 26, 0.22); color: #fdba74; }
+.badge-tier-pill.tier-אגדי { background: linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(236, 72, 153, 0.3)); color: #fde047; }
+
+.badge-row-desc {
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.3;
+}
+
+.badge-row-status {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-sub);
+  direction: ltr;
+  flex-shrink: 0;
+}
+
+.badge-row-status.done {
+  color: var(--spotify-green);
+}
+
+.quests-guest-hint {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fde047;
+  text-align: center;
+}
+
+/* Shop Theme Card Extras */
+.shop-theme-preview {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 6px;
+}
+
+.shop-theme-accent-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+.shop-theme-desc {
+  font-size: 10px;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.25;
 }
 
 .profile-subnav-btn:hover {

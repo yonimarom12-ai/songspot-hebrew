@@ -32,10 +32,65 @@ export const SHOP_BACKGROUNDS = [
   { id: "gold", name: "זהב יוקרתי", css: "radial-gradient(circle at 50% 0%,rgba(255,200,60,0.25),transparent 55%), linear-gradient(180deg,#1a1300 0%,#000000 80%)", price: 350 }
 ];
 
+export const SHOP_THEMES = [
+  {
+    id: "default",
+    name: "במת הופעות",
+    desc: "סגול ניאון + במת קונצרט",
+    previewBg: "linear-gradient(135deg,#1f0d47 0%,#7c3aed 55%,#ec4899 100%)",
+    accent: "#c084fc",
+    price: 0
+  },
+  {
+    id: "spotify",
+    name: "קלאסי ספוטיפיי",
+    desc: "שחור נקי + ירוק קלאסי",
+    previewBg: "linear-gradient(135deg,#000000 0%,#121212 58%,#1db954 100%)",
+    accent: "#1ed760",
+    price: 350
+  },
+  {
+    id: "cyberpunk",
+    name: "סייברפאנק",
+    desc: "ציאן חשמלי + מג'נטה",
+    previewBg: "linear-gradient(135deg,#040714 0%,#00d4ff 55%,#ff007f 100%)",
+    accent: "#00f5ff",
+    price: 450
+  },
+  {
+    id: "sunset",
+    name: "שקיעת מיאמי",
+    desc: "אלמוגים חמים + ורוד",
+    previewBg: "linear-gradient(135deg,#150716 0%,#ff6b35 55%,#ff2e93 100%)",
+    accent: "#ff9f68",
+    price: 550
+  },
+  {
+    id: "emerald",
+    name: "אמרלד לוקס",
+    desc: "יער עמוק + נגיעות זהב",
+    previewBg: "linear-gradient(135deg,#04130d 0%,#10b981 60%,#facc15 100%)",
+    accent: "#34d399",
+    price: 650
+  },
+  {
+    id: "royal_gold",
+    name: "זהב מלכותי",
+    desc: "אובסידיאן + זהב יוקרתי",
+    previewBg: "linear-gradient(135deg,#090806 0%,#ca8a04 55%,#fde047 100%)",
+    accent: "#fde047",
+    price: 900
+  }
+];
+
 export function findAvatar(id) {
   return SHOP_AVATARS.find(a => a.id === id) || SHOP_AVATARS[0];
 }
 
 export function findBackground(id) {
   return SHOP_BACKGROUNDS.find(b => b.id === id) || SHOP_BACKGROUNDS[0];
+}
+
+export function findTheme(id) {
+  return SHOP_THEMES.find(t => t.id === id) || SHOP_THEMES[0];
 }

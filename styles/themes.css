@@ -1,0 +1,223 @@
+/* ===== Full-App Shop Themes (body[data-theme="..."]) ===== */
+
+/* 1. קלאסי סטייל ספוטיפיי (שחור נקי + ירוק ספוטיפיי) */
+body[data-theme="spotify"] {
+  --bg-pure: #000000;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(29, 185, 84, 0.22) 0%, #000000 65%);
+  --surface: #121212;
+  --surface-elevated: #181818;
+  --surface-hover: #262626;
+  --border: #2a2a2a;
+  --accent-purple: #1db954;
+  --accent-purple-bright: #1ed760;
+  --accent-pink: #1db954;
+  --text-sub: #b3b3b3;
+  --text-muted: #727272;
+}
+
+body[data-theme="spotify"] .home-stage-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(29, 185, 84, 0.24) 0%, rgba(0, 0, 0, 0.96) 65%);
+}
+
+body[data-theme="spotify"] .home-title {
+  background: linear-gradient(180deg, #ffffff 20%, #86efac 75%, #1db954 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 4px 16px rgba(29, 185, 84, 0.45));
+}
+
+body[data-theme="spotify"] .home-eq-logo span,
+body[data-theme="spotify"] .hero-wave-bars span {
+  background: linear-gradient(180deg, #4ade80 0%, #1db954 100%);
+  box-shadow: 0 0 10px rgba(29, 185, 84, 0.65);
+}
+
+body[data-theme="spotify"] .home-quickplay-btn,
+body[data-theme="spotify"] .setup-confirm-btn,
+body[data-theme="spotify"] .btn-next {
+  background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+  border-color: rgba(134, 239, 172, 0.65);
+  color: #000000;
+  box-shadow: 0 10px 28px rgba(29, 185, 84, 0.42);
+}
+
+body[data-theme="spotify"] .quickplay-sub {
+  color: rgba(0, 0, 0, 0.78);
+}
+
+body[data-theme="spotify"] .quickplay-play-icon {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+body[data-theme="spotify"] .quickplay-play-icon svg {
+  fill: #000000;
+}
+
+body[data-theme="spotify"] .bottom-nav {
+  background: rgba(10, 10, 10, 0.95);
+  border-top-color: #242424;
+}
+
+body[data-theme="spotify"] .bottom-nav-item.nav-main-game.active .nav-main-icon-wrap {
+  background: #1db954;
+  border-color: #1ed760;
+}
+
+body[data-theme="spotify"] .bottom-nav-item.nav-main-game.active svg {
+  fill: #000000;
+}
+
+/* 2. סייברפאנק 2077 (ציאן חשמלי + מג'נטה ניאון) */
+body[data-theme="cyberpunk"] {
+  --bg-pure: #040714;
+  --bg-stage: radial-gradient(circle at 20% 0%, rgba(0, 245, 255, 0.25), transparent 50%), radial-gradient(circle at 85% 90%, rgba(255, 0, 127, 0.24), transparent 55%), #040714;
+  --surface: rgba(8, 16, 36, 0.9);
+  --surface-elevated: rgba(12, 24, 52, 0.92);
+  --border: rgba(0, 245, 255, 0.34);
+  --accent-purple: #00f5ff;
+  --accent-purple-bright: #38f9ff;
+  --accent-pink: #ff007f;
+}
+
+body[data-theme="cyberpunk"] .home-stage-glow {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(0, 245, 255, 0.3), transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(255, 0, 127, 0.28), transparent 55%),
+    linear-gradient(180deg, rgba(4, 7, 20, 0.25) 0%, #040714 85%);
+}
+
+body[data-theme="cyberpunk"] .home-title {
+  background: linear-gradient(180deg, #ffffff 10%, #67e8f9 55%, #ff2a9d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(0, 245, 255, 0.6));
+}
+
+body[data-theme="cyberpunk"] .home-quickplay-btn,
+body[data-theme="cyberpunk"] .setup-confirm-btn,
+body[data-theme="cyberpunk"] .btn-next {
+  background: linear-gradient(135deg, #00d4ff 0%, #ff007f 100%);
+  border-color: rgba(103, 232, 249, 0.78);
+  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.45);
+}
+
+body[data-theme="cyberpunk"] .bottom-nav {
+  background: rgba(4, 9, 26, 0.94);
+  border-top-color: rgba(0, 245, 255, 0.28);
+}
+
+/* 3. שקיעת מיאמי (כתום אלמוגים + ורוד חם + זהב) */
+body[data-theme="sunset"] {
+  --bg-pure: #150716;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(255, 107, 53, 0.35), rgba(255, 46, 147, 0.2) 40%, #150716 78%);
+  --surface: rgba(34, 12, 34, 0.88);
+  --surface-elevated: rgba(48, 18, 44, 0.92);
+  --border: rgba(255, 138, 91, 0.32);
+  --accent-purple: #ff6b35;
+  --accent-purple-bright: #ff9f68;
+  --accent-pink: #ff2e93;
+}
+
+body[data-theme="sunset"] .home-stage-glow {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 107, 53, 0.42), rgba(255, 46, 147, 0.22) 45%, #150716 82%);
+}
+
+body[data-theme="sunset"] .home-title {
+  background: linear-gradient(180deg, #fff5d6 10%, #ff9f68 55%, #ff2e93 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 4px 18px rgba(255, 107, 53, 0.6));
+}
+
+body[data-theme="sunset"] .home-quickplay-btn,
+body[data-theme="sunset"] .setup-confirm-btn,
+body[data-theme="sunset"] .btn-next {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff2e93 100%);
+  border-color: rgba(255, 209, 102, 0.65);
+  box-shadow: 0 10px 30px rgba(255, 65, 108, 0.48);
+}
+
+/* 4. אמרלד לוקס (ירוק יער עמוק + שמפניה זהב) */
+body[data-theme="emerald"] {
+  --bg-pure: #04130d;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.3), rgba(6, 78, 59, 0.25) 42%, #04130d 78%);
+  --surface: rgba(8, 30, 22, 0.9);
+  --surface-elevated: rgba(12, 44, 32, 0.92);
+  --border: rgba(52, 211, 153, 0.3);
+  --accent-purple: #10b981;
+  --accent-purple-bright: #34d399;
+  --accent-pink: #facc15;
+}
+
+body[data-theme="emerald"] .home-stage-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.36), #04130d 78%);
+}
+
+body[data-theme="emerald"] .home-title {
+  background: linear-gradient(180deg, #ecfdf5 10%, #6ee7b7 55%, #facc15 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+body[data-theme="emerald"] .home-quickplay-btn,
+body[data-theme="emerald"] .setup-confirm-btn,
+body[data-theme="emerald"] .btn-next {
+  background: linear-gradient(135deg, #059669 0%, #10b981 55%, #eab308 100%);
+  border-color: rgba(167, 243, 208, 0.6);
+  color: #03150e;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+}
+
+body[data-theme="emerald"] .quickplay-sub {
+  color: rgba(3, 21, 14, 0.78);
+}
+
+/* 5. זהב מלכותי (שחור אובסידיאן + זהב יוקרתי) */
+body[data-theme="royal_gold"] {
+  --bg-pure: #090806;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(245, 197, 24, 0.28), rgba(120, 82, 0, 0.18) 42%, #090806 78%);
+  --surface: rgba(24, 20, 12, 0.92);
+  --surface-elevated: rgba(36, 29, 16, 0.94);
+  --border: rgba(250, 204, 21, 0.36);
+  --accent-purple: #eab308;
+  --accent-purple-bright: #fde047;
+  --accent-pink: #f59e0b;
+}
+
+body[data-theme="royal_gold"] .home-stage-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(245, 197, 24, 0.32), #090806 78%);
+}
+
+body[data-theme="royal_gold"] .home-title {
+  background: linear-gradient(180deg, #fffbeb 10%, #fde047 55%, #d97706 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 4px 18px rgba(245, 197, 24, 0.55));
+}
+
+body[data-theme="royal_gold"] .home-quickplay-btn,
+body[data-theme="royal_gold"] .setup-confirm-btn,
+body[data-theme="royal_gold"] .btn-next {
+  background: linear-gradient(135deg, #f59e0b 0%, #fde047 52%, #ca8a04 100%);
+  border-color: rgba(254, 240, 138, 0.8);
+  color: #140f00;
+  box-shadow: 0 10px 30px rgba(234, 179, 8, 0.45);
+}
+
+body[data-theme="royal_gold"] .quickplay-sub {
+  color: rgba(20, 15, 0, 0.78);
+}
+
+body[data-theme="royal_gold"] .quickplay-play-icon {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+body[data-theme="royal_gold"] .quickplay-play-icon svg {
+  fill: #140f00;
+}
+
+body[data-theme="royal_gold"] .bottom-nav {
+  background: rgba(14, 11, 6, 0.95);
+  border-top-color: rgba(250, 204, 21, 0.3);
+}

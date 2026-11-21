@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261121a";
+import { state } from "../state.js?v=20261121b";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -39,6 +39,7 @@ export function getDefaultStats() {
     ownedItems: [],
     equippedAvatar: "default",
     equippedBackground: "default",
+    equippedTheme: "default",
     customAvatarData: "",
     customBackgroundData: "",
     bestTimedScore: 0,

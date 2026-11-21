@@ -1,88 +1,70 @@
-import { loadAccountsMap } from "./storage.js?v=20261121a";
+import { loadAccountsMap } from "./storage.js?v=20261121b";
 
-// הגדרות ענן (Supabase) — כדי להפעיל שמירה בענן ודירוג עולמי אמיתי, הדבק כאן את ה-URL וה-Anon Key מהפרויקט החינמי שלך ב-Supabase
-export const CLOUD_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: ""
-};
+// לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
+// עם גיבוי מקומי אוטומטי אם בסיס הנתונים D1 עדיין לא חובר ב-Cloudflare Dashboard
+const isHttp = typeof window !== "undefined" && window.location.protocol.startsWith("http");
+let cloudAvailable = isHttp;
 
-export function isCloudConfigured() {
-  return Boolean(CLOUD_CONFIG.supabaseUrl && CLOUD_CONFIG.supabaseAnonKey);
-}
-
-function getHeaders(extra = {}) {
-  return {
-    apikey: CLOUD_CONFIG.supabaseAnonKey,
-    Authorization: `Bearer ${CLOUD_CONFIG.supabaseAnonKey}`,
-    "Content-Type": "application/json",
-    ...extra
-  };
+export async function cloudAuthRequest(action, { username, password, email = "", stats = null }) {
+  if (!cloudAvailable) return { fallback: true };
+  try {
+    const res = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, username, password, email, stats })
+    });
+    if (res.status === 404 || res.status === 405 || res.status === 503) {
+      cloudAvailable = false;
+      return { fallback: true };
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, error: data.error || "שגיאה באימות החשבון" };
+    }
+    return { ok: true, username: data.username, stats: data.stats || null };
+  } catch (e) {
+    return { fallback: true };
+  }
 }
 
 export async function syncAccountToCloud(username, stats) {
-  if (!isCloudConfigured() || !username || !stats) return false;
+  if (!cloudAvailable || !username || !stats) return false;
   try {
-    const payload = {
-      username,
-      total_won: stats.totalWon || 0,
-      best_streak: stats.bestStreak || 0,
-      points: stats.points || 0,
-      best_timed: stats.bestTimedScore || 0,
-      avatar_id: stats.equippedAvatar || "default",
-      stats_json: {
-        ...stats,
-        // לא מעלים Base64 כבד בטבלת דירוג
-        customAvatarData: "",
-        customBackgroundData: ""
-      },
-      updated_at: new Date().toISOString()
-    };
-    const res = await fetch(`${CLOUD_CONFIG.supabaseUrl}/rest/v1/players?on_conflict=username`, {
+    const res = await fetch("/api/sync", {
       method: "POST",
-      headers: getHeaders({ Prefer: "resolution=merge-duplicates" }),
-      body: JSON.stringify(payload)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, stats })
     });
+    if (res.status === 404 || res.status === 503) {
+      cloudAvailable = false;
+      return false;
+    }
     return res.ok;
   } catch (e) {
     return false;
   }
 }
 
-export async function loadAccountFromCloud(username) {
-  if (!isCloudConfigured() || !username) return null;
-  try {
-    const url = `${CLOUD_CONFIG.supabaseUrl}/rest/v1/players?username=eq.${encodeURIComponent(username)}&select=stats_json&limit=1`;
-    const res = await fetch(url, { headers: getHeaders() });
-    if (!res.ok) return null;
-    const rows = await res.json();
-    return rows?.[0]?.stats_json || null;
-  } catch (e) {
-    return null;
-  }
+export async function loadAccountFromCloud() {
+  return null;
 }
 
 export async function fetchGlobalLeaderboard(limit = 25) {
-  if (isCloudConfigured()) {
+  if (cloudAvailable) {
     try {
-      const url = `${CLOUD_CONFIG.supabaseUrl}/rest/v1/players?select=username,total_won,best_streak,points,best_timed&order=total_won.desc,best_streak.desc,points.desc&limit=${limit}`;
-      const res = await fetch(url, { headers: getHeaders() });
+      const res = await fetch(`/api/leaderboard?limit=${limit}`);
       if (res.ok) {
-        const rows = await res.json();
-        return {
-          source: "cloud",
-          rows: rows.map(r => ({
-            username: r.username,
-            totalWon: r.total_won || 0,
-            bestStreak: r.best_streak || 0,
-            points: r.points || 0,
-            bestTimed: r.best_timed || 0
-          }))
-        };
+        const data = await res.json();
+        if (data.configured && Array.isArray(data.rows)) {
+          return { source: "cloud", rows: data.rows };
+        }
+      } else if (res.status === 404 || res.status === 503) {
+        cloudAvailable = false;
       }
     } catch (e) { }
   }
 
-  // גיבוי מקומי חכם: מציג את כל החשבונות הקיימים במכשיר מדורגים לפי ביצועים
+  // גיבוי מקומי: מציג את כל החשבונות הקיימים במכשיר מדורגים לפי ביצועים
   const accounts = loadAccountsMap();
   const localRows = Object.values(accounts)
     .map(acc => ({
