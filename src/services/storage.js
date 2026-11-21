@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261122d";
+import { state } from "../state.js?v=20261122e";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -46,6 +46,8 @@ export function getDefaultStats() {
     bestMarathonScore: 0,
     bestReverseStreak: 0,
     bestTimelineScore: 0,
+    completedDailyDate: "",
+    completedWeeklyKey: "",
     powerups: { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 },
     dailyQuests: null,
     redeemedCodes: [],
@@ -75,6 +77,8 @@ export function normalizeStatsObj(parsed) {
     bestMarathonScore: Number.isFinite(Number(parsed.bestMarathonScore)) ? Math.max(0, Math.round(Number(parsed.bestMarathonScore))) : 0,
     bestReverseStreak: Number.isFinite(Number(parsed.bestReverseStreak)) ? Math.max(0, Math.round(Number(parsed.bestReverseStreak))) : 0,
     bestTimelineScore: Number.isFinite(Number(parsed.bestTimelineScore)) ? Math.max(0, Math.round(Number(parsed.bestTimelineScore))) : 0,
+    completedDailyDate: typeof parsed.completedDailyDate === "string" ? parsed.completedDailyDate : "",
+    completedWeeklyKey: typeof parsed.completedWeeklyKey === "string" ? parsed.completedWeeklyKey : "",
     powerups: {
       streakFreeze: Math.max(0, Number(parsed.powerups?.streakFreeze) || 0),
       fiftyFifty: Math.max(0, Number(parsed.powerups?.fiftyFifty) || 0),

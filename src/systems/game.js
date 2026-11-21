@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122d";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122d";
-import { dom } from "../dom.js?v=20261122d";
-import { state } from "../state.js?v=20261122d";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122d";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122d";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122d";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122e";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122e";
+import { dom } from "../dom.js?v=20261122e";
+import { state } from "../state.js?v=20261122e";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122e";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122e";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122e";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261122d";
+} from "../services/itunes.js?v=20261122e";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261122d";
-import { launchWinConfetti } from "./confetti.js?v=20261122d";
+} from "./audio.js?v=20261122e";
+import { launchWinConfetti } from "./confetti.js?v=20261122e";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261122d";
+} from "./feedback.js?v=20261122e";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261122d";
-import { updateStreakDisplay } from "./profile.js?v=20261122d";
+} from "./search.js?v=20261122e";
+import { updateStreakDisplay } from "./profile.js?v=20261122e";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261122d";
-import { recordQuestProgress } from "./quests.js?v=20261122d";
+} from "./economy.js?v=20261122e";
+import { recordQuestProgress } from "./quests.js?v=20261122e";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -52,9 +52,9 @@ import {
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong
-} from "./timed.js?v=20261122d";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122d";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122d";
+} from "./timed.js?v=20261122e";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122e";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122e";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -411,6 +411,20 @@ export function endRound(won) {
     : 0;
   recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints);
 
+  // מסמן השלמת אתגר יומי / שיר שבועי (ניסיון אחד בלבד ליום/שבוע!)
+  if (state.activeSpecialChallenge) {
+    if (state.activeSpecialChallenge.kind === "daily") {
+      state.userStats.completedDailyDate = state.activeSpecialChallenge.key;
+    } else if (state.activeSpecialChallenge.kind === "weekly") {
+      state.userStats.completedWeeklyKey = state.activeSpecialChallenge.key;
+    }
+    state.lastCompletedSpecialKind = state.activeSpecialChallenge.kind;
+    state.activeSpecialChallenge = null;
+    saveUserStats();
+  } else {
+    state.lastCompletedSpecialKind = null;
+  }
+
   if (isTimedModeActive()) {
     pauseTimedClock();
     if (won) handleTimedWin(earnedPoints);
@@ -626,6 +640,56 @@ export function startTimedGameSession() {
   fetchRandomSong();
 }
 
+export function getTodayDateKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function getCurrentWeekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const days = Math.floor((d - jan1) / 86400000);
+  const week = Math.ceil((days + jan1.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+function hashSeedString(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+// מפעיל אתגר יומי או שיר שבועי דטרמיניסטי — אותו שיר בדיוק לכל השחקנים לפי תאריך!
+export async function startDeterministicChallenge(kind) {
+  await ensureSeedCatalogLoaded();
+  const key = kind === "weekly" ? getCurrentWeekKey() : getTodayDateKey();
+  const songs = Array.from(state.discoveredSongsMap.values())
+    .filter(s => s && s.trackId && s.previewUrl && s.title && s.artist)
+    .sort((a, b) => Number(a.trackId) - Number(b.trackId));
+
+  if (songs.length === 0) {
+    state.activeSpecialChallenge = null;
+    setActiveDifficultyUI(kind === "weekly" ? "impossible" : "hard");
+    fetchRandomSong();
+    return;
+  }
+
+  const idx = hashSeedString(`${kind}:${key}`) % songs.length;
+  const chosenSong = songs[idx];
+
+  state.activeSpecialChallenge = { kind, key };
+  state.pendingNextDifficulty = null;
+  setActiveDifficultyUI(kind === "weekly" ? "impossible" : "hard");
+  state.preloadedNextSong = {
+    difficulty: state.currentDifficulty,
+    song: chosenSong
+  };
+  fetchRandomSong();
+}
+
 export function goToNextSong() {
   if (dom.nextBtn?.dataset.restartTimed === "1") {
     delete dom.nextBtn.dataset.restartTimed;
@@ -664,7 +728,12 @@ export function initDifficultyListeners() {
       const line = won
         ? `זיהיתי תוך ${sec} שניות! 🔥 (רמת ${diffLabel})`
         : `לא הצלחתי הפעם 😅 (רמת ${diffLabel})`;
-      const text = `🎵 נחש את השיר\n${squares}\n${line}\nתצליחו לזהות מהר יותר? 👇\nhttps://guessthesonghebrew.pages.dev`;
+      const specialTag = state.lastCompletedSpecialKind === "daily"
+        ? ` · אתגר יומי (${getTodayDateKey()})`
+        : state.lastCompletedSpecialKind === "weekly"
+          ? ` · השיר השבועי (${getCurrentWeekKey()})`
+          : "";
+      const text = `🎵 נחש את השיר${specialTag}\n${squares}\n${line}\nתצליחו לזהות מהר יותר? 👇\nhttps://guessthesonghebrew.pages.dev`;
       if (navigator.share) {
         try {
           await navigator.share({ text });

@@ -1,15 +1,16 @@
-import { state } from "../state.js?v=20261122d";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122d";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122d";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122d";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261122d";
-import { stopTimedRun } from "./timed.js?v=20261122d";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122d";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122d";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122d";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122d";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122d";
-import { playClickSfx } from "./sfx.js?v=20261122d";
+import { state } from "../state.js?v=20261122e";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122e";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122e";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122e";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122e";
+import { showGameToast } from "../utils/toast.js?v=20261122e";
+import { stopTimedRun } from "./timed.js?v=20261122e";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122e";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122e";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122e";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122e";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122e";
+import { playClickSfx } from "./sfx.js?v=20261122e";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -110,11 +111,15 @@ function renderHomeModeStatsStrip() {
     const best = s.bestTimedScore || 0;
     strip.innerHTML = `<span><img class="icon-3d-mini" src="assets/icon-timed.png" alt="" /> שיא 60ש': <strong>${best} ${best === 1 ? "שיר" : "שירים"}</strong></span>`;
   } else if (selectedHomeMode === "daily") {
-    const hardWins = s.byLevel?.hard || 0;
-    strip.innerHTML = `<span><img class="icon-3d-mini" src="assets/icon-daily.png" alt="" /> רמת קשה · זיהויים: <strong>${hardWins}</strong></span>`;
+    const doneToday = s.completedDailyDate === getTodayDateKey();
+    strip.innerHTML = doneToday
+      ? `<span><img class="icon-3d-mini" src="assets/icon-daily.png" alt="" /> <strong>✅ הושלם להיום!</strong> חזור מחר</span>`
+      : `<span><img class="icon-3d-mini" src="assets/icon-daily.png" alt="" /> שיר יומי זהה לכולם · <strong>ניסיון אחד!</strong></span>`;
   } else if (selectedHomeMode === "weekly") {
-    const impWins = s.byLevel?.impossible || 0;
-    strip.innerHTML = `<span>👑 בונוס ×4 · בלתי אפשרי: <strong>${impWins}</strong></span>`;
+    const doneWeek = s.completedWeeklyKey === getCurrentWeekKey();
+    strip.innerHTML = doneWeek
+      ? `<span>👑 <strong>✅ השיר השבועי הושלם!</strong> חזור בשבוע הבא</span>`
+      : `<span>👑 בונוס ×4 · שיר שבועי זהה לכולם · <strong>ניסיון אחד!</strong></span>`;
   } else if (selectedHomeMode === "1v1") {
     strip.innerHTML = `<span>🚧 מצב אונליין מול חברים · <strong>בקרוב</strong></span>`;
   } else {
@@ -176,9 +181,19 @@ function launchSelectedMode(modeKey) {
     showScreen("game");
     startTimedGameSession();
   } else if (modeKey === "daily") {
-    startGameDirectly("hard");
+    if (state.userStats?.completedDailyDate === getTodayDateKey()) {
+      showGameToast("✅ כבר שיחקת את האתגר היומי של היום! חזור מחר לשיר חדש 📅", "quest");
+      return;
+    }
+    showScreen("game");
+    startDeterministicChallenge("daily");
   } else if (modeKey === "weekly") {
-    startGameDirectly("impossible");
+    if (state.userStats?.completedWeeklyKey === getCurrentWeekKey()) {
+      showGameToast("👑 כבר שיחקת את השיר השבועי! חזור בשבוע הבא לשיר חדש", "quest");
+      return;
+    }
+    showScreen("game");
+    startDeterministicChallenge("weekly");
   } else if (modeKey === "1v1") {
     openModeScreen("1v1");
   } else {
