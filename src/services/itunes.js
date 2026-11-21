@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261120f";
-import { DIFFICULTIES } from "../data/config.js?v=20261120f";
-import { state, isIOS } from "../state.js?v=20261120f";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261120f";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261120f";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121a";
+import { DIFFICULTIES } from "../data/config.js?v=20261121a";
+import { state, isIOS } from "../state.js?v=20261121a";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121a";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121a";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -145,6 +145,35 @@ function raceTransports(names, url, timeoutMs) {
 
 // מונע שליחה כפולה של אותה בקשה במקביל
 const inFlightRequests = new Map();
+// זוכר אם ה-Edge Proxy של Cloudflare (/api/itunes) זמין בדומיין הנוכחי
+let edgeProxyAvailable = typeof window !== "undefined" && window.location.protocol.startsWith("http");
+
+async function tryCloudflareEdgeProxy(itunesUrl, timeoutMs) {
+  if (!edgeProxyAvailable) return null;
+  try {
+    const parsed = new URL(itunesUrl);
+    if (parsed.hostname !== "itunes.apple.com" || parsed.pathname !== "/search") return null;
+    const proxyUrl = `/api/itunes${parsed.search}`;
+    const hasAbort = typeof AbortController !== "undefined";
+    const controller = hasAbort ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), Math.min(timeoutMs, 3500)) : null;
+    try {
+      const res = await fetch(proxyUrl, controller ? { signal: controller.signal } : undefined);
+      if (res.status === 404 || res.status === 405) {
+        // עדיין רץ על GitHub Pages בלי Functions -> מדלגים ישר לערוצים הרגילים בהמשך הסשן
+        edgeProxyAvailable = false;
+        return null;
+      }
+      if (!res.ok) return null;
+      const data = await res.json();
+      return isValidPayload(data) ? data : null;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  } catch (e) {
+    return null;
+  }
+}
 
 export async function fetchItunesData(url, timeoutMs = 5500) {
   if (inFlightRequests.has(url)) {
@@ -152,6 +181,10 @@ export async function fetchItunesData(url, timeoutMs = 5500) {
   }
 
   const reqPromise = (async () => {
+    // 0. ב-Cloudflare Pages: עובר דרך ה-Proxy הפרטי (/api/itunes) באותו דומיין -> 0 בעיות CORS ב-Safari!
+    const edgeData = await tryCloudflareEdgeProxy(url, timeoutMs);
+    if (edgeData) return edgeData;
+
     // 1. אם כבר נמצא ערוץ מהיר שעובד במכשיר הזה — מנסים אותו ראשון עם timeout קצר
     if (preferredTransport && TRANSPORTS[preferredTransport]) {
       try {

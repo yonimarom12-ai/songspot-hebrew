@@ -1,24 +1,24 @@
-import { dom } from "./dom.js?v=20261120f";
-import { initStorageState } from "./services/storage.js?v=20261120f";
-import { hydratePersistedCatalogs } from "./services/itunes.js?v=20261120f";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261120f";
-import { initHintListeners } from "./systems/feedback.js?v=20261120f";
-import { initSearchListeners } from "./systems/search.js?v=20261120f";
-import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261120f";
-import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261120f";
-import { updatePointsDisplay } from "./systems/economy.js?v=20261120f";
-import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261120f";
-import { initAuthListeners } from "./systems/auth.js?v=20261120f";
-import { initDrawerListeners } from "./systems/drawer.js?v=20261120f";
-import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261120f";
-import { initSfxState } from "./systems/sfx.js?v=20261120f";
+import { dom } from "./dom.js?v=20261121a";
+import { initStorageState } from "./services/storage.js?v=20261121a";
+import { hydratePersistedCatalogs } from "./services/itunes.js?v=20261121a";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261121a";
+import { initHintListeners } from "./systems/feedback.js?v=20261121a";
+import { initSearchListeners } from "./systems/search.js?v=20261121a";
+import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261121a";
+import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261121a";
+import { updatePointsDisplay } from "./systems/economy.js?v=20261121a";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261121a";
+import { initAuthListeners } from "./systems/auth.js?v=20261121a";
+import { initDrawerListeners } from "./systems/drawer.js?v=20261121a";
+import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261121a";
+import { initSfxState } from "./systems/sfx.js?v=20261121a";
 import {
   fetchRandomSong,
   goToNextSong,
   handleGuess,
   advanceAttempt,
   initDifficultyListeners
-} from "./systems/game.js?v=20261120f";
+} from "./systems/game.js?v=20261121a";
 
 function bootApp() {
   // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
