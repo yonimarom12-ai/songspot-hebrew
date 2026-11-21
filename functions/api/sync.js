@@ -1,4 +1,19 @@
 // Cloudflare Pages Function: סנכרון סטטיסטיקות, קריסטלים, מועדפים וערכות נושא בענן (D1)
+const TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS players (
+  username TEXT PRIMARY KEY,
+  username_lower TEXT UNIQUE NOT NULL,
+  email TEXT DEFAULT '',
+  password_hash TEXT NOT NULL DEFAULT '',
+  total_won INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  points REAL DEFAULT 0,
+  best_timed INTEGER DEFAULT 0,
+  avatar_id TEXT DEFAULT 'default',
+  stats_json TEXT DEFAULT '{}',
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);`;
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   if (!env.DB) {
@@ -20,27 +35,35 @@ export async function onRequestPost(context) {
 
   const compactStats = {
     ...stats,
-    // לא שומרים Base64 כבד בטבלה הראשית כדי לשמור על מהירות סנכרון
     customAvatarData: "",
     customBackgroundData: ""
   };
 
   try {
+    await env.DB.prepare(TABLE_SQL).run();
     await env.DB
       .prepare(
-        `UPDATE players
-         SET total_won = ?, best_streak = ?, points = ?, best_timed = ?, avatar_id = ?, stats_json = ?, updated_at = ?
-         WHERE username_lower = ?`
+        `INSERT INTO players (username, username_lower, total_won, best_streak, points, best_timed, avatar_id, stats_json, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(username_lower) DO UPDATE SET
+           total_won = excluded.total_won,
+           best_streak = excluded.best_streak,
+           points = excluded.points,
+           best_timed = excluded.best_timed,
+           avatar_id = excluded.avatar_id,
+           stats_json = excluded.stats_json,
+           updated_at = excluded.updated_at`
       )
       .bind(
+        username,
+        username.toLowerCase(),
         Number(stats.totalWon) || 0,
         Number(stats.bestStreak) || 0,
         Number(stats.points) || 0,
         Number(stats.bestTimedScore) || 0,
         String(stats.equippedAvatar || "default"),
         JSON.stringify(compactStats),
-        new Date().toISOString(),
-        username.toLowerCase()
+        new Date().toISOString()
       )
       .run();
 

@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261121e";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121e";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121e";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121e";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121e";
-import { stopTimedRun } from "./timed.js?v=20261121e";
-import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121e";
-import { playClickSfx } from "./sfx.js?v=20261121e";
+import { state } from "../state.js?v=20261121f";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121f";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121f";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121f";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121f";
+import { stopTimedRun } from "./timed.js?v=20261121f";
+import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121f";
+import { playClickSfx } from "./sfx.js?v=20261121f";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -163,8 +163,8 @@ function openModeScreen(modeKey) {
       if (currentModeKey !== "leaderboard") return;
       if (status) {
         status.textContent = source === "cloud"
-          ? "☁️ דירוג עולמי חי (Cloudflare D1)"
-          : "📱 דירוג מקומי · חבר D1 ב-Cloudflare לסנכרון עולמי";
+          ? "☁️ דירוג עולמי חי"
+          : "🏆 דירוג מקומי";
       }
       lbWrap.innerHTML = "";
       if (!rows || rows.length === 0) {
@@ -224,13 +224,11 @@ export function initNavigationListeners() {
   const homePointsBtn = document.getElementById("home-points-btn");
   const homeQuestsBtn = document.getElementById("home-quests-btn");
   const homeSettingsBtn = document.getElementById("home-settings-btn");
-  const homeShopCardBtn = document.getElementById("home-shop-card-btn");
 
   if (homeStreakBtn) homeStreakBtn.addEventListener("click", () => toggleStreakModal(true));
   if (homePointsBtn) homePointsBtn.addEventListener("click", () => toggleShopModal(true));
   if (homeQuestsBtn) homeQuestsBtn.addEventListener("click", () => toggleQuestsModal(true));
   if (homeSettingsBtn) homeSettingsBtn.addEventListener("click", () => toggleDrawer(true));
-  if (homeShopCardBtn) homeShopCardBtn.addEventListener("click", () => toggleShopModal(true));
 
   // כפתור "משחק מהיר" -> שלב 1: בחירת ז'אנרים
   const quickplayBtn = document.getElementById("home-quickplay-btn");

@@ -1,4 +1,19 @@
 // Cloudflare Pages Function: דירוג עולמי חי מתוך Cloudflare D1
+const TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS players (
+  username TEXT PRIMARY KEY,
+  username_lower TEXT UNIQUE NOT NULL,
+  email TEXT DEFAULT '',
+  password_hash TEXT NOT NULL DEFAULT '',
+  total_won INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  points REAL DEFAULT 0,
+  best_timed INTEGER DEFAULT 0,
+  avatar_id TEXT DEFAULT 'default',
+  stats_json TEXT DEFAULT '{}',
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);`;
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!env.DB) {
@@ -10,6 +25,7 @@ export async function onRequestGet(context) {
   const limit = Number.isFinite(rawLimit) ? Math.min(50, Math.max(1, Math.round(rawLimit))) : 25;
 
   try {
+    await env.DB.prepare(TABLE_SQL).run();
     const { results } = await env.DB
       .prepare(
         `SELECT username, total_won, best_streak, points, best_timed, avatar_id

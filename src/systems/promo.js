@@ -1,10 +1,10 @@
-import { state } from "../state.js?v=20261121e";
-import { saveUserStats } from "../services/storage.js?v=20261121e";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121e";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation, formatPoints } from "./economy.js?v=20261121e";
-import { applyEquippedCosmetics } from "./shop.js?v=20261121e";
-import { launchWinConfetti } from "./confetti.js?v=20261121e";
-import { playCrystalSfx, playWinSfx, playWrongSfx } from "./sfx.js?v=20261121e";
+import { state } from "../state.js?v=20261121f";
+import { saveUserStats } from "../services/storage.js?v=20261121f";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121f";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation, formatPoints } from "./economy.js?v=20261121f";
+import { applyEquippedCosmetics } from "./shop.js?v=20261121f";
+import { launchWinConfetti } from "./confetti.js?v=20261121f";
+import { playCrystalSfx, playWinSfx, playWrongSfx } from "./sfx.js?v=20261121f";
 
 // טבלת קודים סודיים מוצפנים (SHA-256) כדי שלא יהיה ניתן לקרוא את הקודים ישירות מהקוד
 const PROMO_CATALOG = [
@@ -46,6 +46,12 @@ const PROMO_CATALOG = [
     hash: "f0e6a50bad0b830feb9c98f43fdb066520512960897e0c5aa8088945fdb06921",
     crystals: 2500,
     label: "+2,500 קריסטלים VIP 💎"
+  },
+  {
+    id: "test10k",
+    hash: "eaeb1f3a1a200133157c049bc07224a181e0e331f0f0786bb40e3b861f81afef",
+    crystals: 10000,
+    label: "+10,000 קריסטלים לבדיקות 💎"
   }
 ];
 

@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121e">
-  <link rel="stylesheet" href="styles/home.css?v=20261121e">
-  <link rel="stylesheet" href="styles/header.css?v=20261121e">
-  <link rel="stylesheet" href="styles/player.css?v=20261121e">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121e">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121e">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121e">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121e">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121e">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121f">
+  <link rel="stylesheet" href="styles/home.css?v=20261121f">
+  <link rel="stylesheet" href="styles/header.css?v=20261121f">
+  <link rel="stylesheet" href="styles/player.css?v=20261121f">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121f">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121f">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121f">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121f">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121f">
 </head>
 
 <body>
@@ -30,11 +30,11 @@
         <div class="home-top-right">
           <div class="home-status-pill">
             <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
-              <span>🔥</span><span id="home-streak-count">0</span>
+              <img class="icon-3d-inline icon-3d-flame" src="assets/icon-flame.jpg" alt="" aria-hidden="true" /><span id="home-streak-count">0</span>
             </button>
             <span class="home-stat-divider"></span>
             <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים">
-              <span>💎</span><span id="home-points-count">0</span>
+              <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.jpg" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
             </button>
           </div>
         </div>
@@ -181,7 +181,7 @@
           <span class="mode-card-arrow">‹</span>
         </button>
 
-        <button type="button" class="mode-card theme-cyan" data-open-mode="daily">
+        <button type="button" class="mode-card theme-cyan full-span" data-open-mode="daily">
           <span class="mode-card-svg" aria-hidden="true">
             <svg viewBox="0 0 48 48" width="38" height="38">
               <defs>
@@ -201,32 +201,24 @@
           <span class="mode-card-sub">שיר חדש בכל יום</span>
           <span class="mode-card-arrow">‹</span>
         </button>
-
-        <button type="button" class="mode-card theme-violet" id="home-shop-card-btn">
-          <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 40 44" width="34" height="38">
-              <defs>
-                <linearGradient id="shopGem" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#e9d5ff" />
-                  <stop offset="45%" stop-color="#c084fc" />
-                  <stop offset="100%" stop-color="#38bdf8" />
-                </linearGradient>
-              </defs>
-              <polygon points="20,2 36,15 20,42 4,15" fill="url(#shopGem)" />
-              <polygon points="20,2 36,15 20,18 4,15" fill="#ffffff" opacity="0.32" />
-              <polygon points="20,8 27,15.5 20,33 13,15.5" fill="#ffffff" opacity="0.22" />
-            </svg>
-          </span>
-          <span class="mode-card-title">חנות</span>
-          <span class="mode-card-sub">רקעים ותמונות פרופיל</span>
-          <span class="mode-card-arrow">‹</span>
-        </button>
       </div>
 
       <button type="button" class="home-weekly-banner" data-open-mode="weekly">
-        <span class="weekly-thumb">👑</span>
+        <span class="weekly-thumb" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="30" height="30">
+            <defs>
+              <linearGradient id="weeklyCrown" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fef08a" />
+                <stop offset="50%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#b45309" />
+              </linearGradient>
+            </defs>
+            <path d="M6 34L10 14l9 8 5-12 5 12 9-8 4 20H6z" fill="url(#weeklyCrown)" stroke="#fff7cc" stroke-width="1.5" stroke-linejoin="round" />
+            <rect x="8" y="36" width="32" height="4" rx="2" fill="#fde047" />
+          </svg>
+        </span>
         <span class="weekly-meta">
-          <span class="weekly-title">השיר השבועי 👑</span>
+          <span class="weekly-title">השיר השבועי</span>
           <span class="weekly-sub">תוכלו לגלות אותו עכשיו!</span>
         </span>
         <span style="font-size: 18px; opacity: 0.75;">‹</span>
@@ -976,7 +968,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121e"></script>
+  <script type="module" src="src/main.js?v=20261121f"></script>
 </body>
 
 </html>

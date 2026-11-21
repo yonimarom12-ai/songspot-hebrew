@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121e";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121e";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121e";
-import { state } from "../state.js?v=20261121e";
-import { saveUserStats } from "../services/storage.js?v=20261121e";
-import { fetchItunesData } from "../services/itunes.js?v=20261121e";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121e";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121e";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121e";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261121e";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121e";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121f";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121f";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121f";
+import { state } from "../state.js?v=20261121f";
+import { saveUserStats } from "../services/storage.js?v=20261121f";
+import { fetchItunesData } from "../services/itunes.js?v=20261121f";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121f";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121f";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121f";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261121f";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121f";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;

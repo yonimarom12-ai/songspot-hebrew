@@ -135,6 +135,20 @@ body.has-custom-bg .home-stage-glow {
   padding: 0;
 }
 
+.icon-3d-inline {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.45));
+  transition: filter 0.25s ease;
+}
+
+.mode-card.full-span {
+  grid-column: span 2;
+  min-height: 92px;
+}
+
 .home-stat-divider {
   width: 1px;
   height: 16px;

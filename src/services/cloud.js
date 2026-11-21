@@ -1,4 +1,4 @@
-import { loadAccountsMap } from "./storage.js?v=20261121e";
+import { loadAccountsMap } from "./storage.js?v=20261121f";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
 // עם גיבוי מקומי אוטומטי אם בסיס הנתונים D1 עדיין לא חובר ב-Cloudflare Dashboard
