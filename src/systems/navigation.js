@@ -1,12 +1,12 @@
-import { state } from "../state.js?v=20261121r";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121r";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121r";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121r";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121r";
-import { stopTimedRun } from "./timed.js?v=20261121r";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121r";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121r";
-import { playClickSfx } from "./sfx.js?v=20261121r";
+import { state } from "../state.js?v=20261121t";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121t";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121t";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121t";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121t";
+import { stopTimedRun } from "./timed.js?v=20261121t";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121t";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121t";
+import { playClickSfx } from "./sfx.js?v=20261121t";
 
 const SCREEN_IDS = {
   home: "screen-home",

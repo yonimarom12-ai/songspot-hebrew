@@ -1,11 +1,11 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121r";
-import { state } from "../state.js?v=20261121r";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261121r";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121r";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121r";
-import { saveUserStats } from "../services/storage.js?v=20261121r";
-import { launchWinConfetti } from "./confetti.js?v=20261121r";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121r";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261121t";
+import { state } from "../state.js?v=20261121t";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261121t";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121t";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121t";
+import { saveUserStats } from "../services/storage.js?v=20261121t";
+import { launchWinConfetti } from "./confetti.js?v=20261121t";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121t";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -16,6 +16,7 @@ let activeSessionId = 0;
 let questions = [];
 let currentIndex = 0;
 let totalScore = 0;
+let marathonStreak = 0;
 let historyResults = [];
 let questionAnswered = false;
 let questionStartPerf = 0;
@@ -167,15 +168,56 @@ function buildQuestionsDeck(pool) {
   });
 }
 
-function calcYearScore(guessYear, actualYear) {
+function getSongDifficultyMeta(song) {
+  const artistObj = ARTIST_BY_NAME[song.artist];
+  const tier = artistObj?.tier || "established";
+  const catalog = state.artistCatalogCache?.[song.artist] || [];
+  const idx = catalog.findIndex(t => t.trackId === song.trackId);
+  const pos = idx >= 0 ? idx : 8;
+
+  if (tier === "indie_deep" || pos >= 18) {
+    return { mult: 1.75, label: "קשה מאוד" };
+  }
+  if (tier === "established" && pos >= 10) {
+    return { mult: 1.45, label: "קשה" };
+  }
+  if (tier === "established" || pos >= 8) {
+    return { mult: 1.22, label: "בינוני" };
+  }
+  return { mult: 1.0, label: "קל" };
+}
+
+// מחשב ניקוד דינמי: בסיס * קושי השיר * מהירות * רצף * גורם מזל (ללא תקרה קבועה של 10,000!)
+function applyDynamicFactors(basePoints, song, remainingRatio, currentStreak) {
+  if (basePoints <= 0) return { points: 0, lucky: false, diffLabel: "" };
+  const { mult: diffMult, label: diffLabel } = getSongDifficultyMeta(song);
+  // מהירות: בין ×0.75 (בשנייה האחרונה) ל-×1.45 (תשובה מיידית)
+  const speedMult = 0.75 + Math.pow(Math.max(0, Math.min(1, remainingRatio)), 0.85) * 0.7;
+  // בונוס רצף במרתון: +7% לכל פגיעה רצופה (עד +35%)
+  const streakMult = 1 + Math.min(5, Math.max(0, currentStreak - 1)) * 0.07;
+  // גורם מזל: תנודה טבעית ±14%, ועם סיכוי של 12% ל"מזל גדול!" (×1.20–×1.32)
+  const isLuckyRoll = Math.random() < 0.12;
+  const luckMult = isLuckyRoll
+    ? (1.20 + Math.random() * 0.12)
+    : (0.86 + Math.random() * 0.28);
+
+  const finalPts = Math.max(50, Math.round(basePoints * diffMult * speedMult * streakMult * luckMult));
+  return { points: finalPts, lucky: isLuckyRoll, diffLabel };
+}
+
+function calcYearScore(guessYear, actualYear, song, remainingRatio, currentStreak) {
   const diff = Math.abs(guessYear - actualYear);
-  if (diff === 0) return { points: 1000, label: "🎯 בול בשנה!" };
-  if (diff === 1) return { points: 850, label: "🔥 מרחק שנה אחת!" };
-  if (diff === 2) return { points: 700, label: "✨ קרוב מאוד!" };
-  if (diff <= 4) return { points: 500, label: "👍 יפה מאוד!" };
-  if (diff <= 7) return { points: 300, label: "👌 באזור" };
-  if (diff <= 10) return { points: 150, label: "🤏 קצת רחוק" };
-  return { points: 0, label: "❄️ רחוק מדי" };
+  let base = 0;
+  let label = "❄️ רחוק מדי";
+  if (diff === 0) { base = 1100; label = "🎯 בול בשנה!"; }
+  else if (diff === 1) { base = 900; label = "🔥 מרחק שנה אחת!"; }
+  else if (diff === 2) { base = 740; label = "✨ קרוב מאוד!"; }
+  else if (diff <= 4) { base = 540; label = "👍 יפה מאוד!"; }
+  else if (diff <= 7) { base = 320; label = "👌 באזור"; }
+  else if (diff <= 10) { base = 160; label = "🤏 קצת רחוק"; }
+
+  const dyn = applyDynamicFactors(base, song, remainingRatio, currentStreak);
+  return { points: dyn.points, label: dyn.lucky ? `${label} ⚡ מזל!` : label, diffLabel: dyn.diffLabel };
 }
 
 function playSongSnippet(previewUrl) {
@@ -264,6 +306,7 @@ function showFeedbackAndScheduleNext(sessionId, { isGood, titleText, subText, po
 function handleTimeout(sessionId) {
   if (questionAnswered || sessionId !== activeSessionId) return;
   questionAnswered = true;
+  marathonStreak = 0;
   clearQuestionTimers();
   playWrongSfx();
 
@@ -321,7 +364,8 @@ function handleSongChoiceClick(btn, opt, sessionId) {
   });
 
   if (opt.isCorrect) {
-    const pts = Math.round(500 + 500 * remainingRatio);
+    marathonStreak++;
+    const { points: pts, lucky, diffLabel } = applyDynamicFactors(820, q.song, remainingRatio, marathonStreak);
     totalScore += pts;
     updateHeaderHUD();
     playWinSfx();
@@ -332,13 +376,15 @@ function handleSongChoiceClick(btn, opt, sessionId) {
       correctText: `${q.song.title} — ${q.song.artist}`,
       isGood: true
     });
+    const bonusTag = [diffLabel ? `קושי: ${diffLabel}` : "", marathonStreak >= 2 ? `רצף ×${marathonStreak}` : "", lucky ? "⚡ בונוס מזל!" : ""].filter(Boolean).join(" · ");
     showFeedbackAndScheduleNext(sessionId, {
       isGood: true,
-      titleText: "🎉 תשובה נכונה!",
-      subText: `${q.song.title} · ${q.song.artist}`,
+      titleText: lucky ? "⚡ תשובה נכונה + מזל!" : "🎉 תשובה נכונה!",
+      subText: `${q.song.title} · ${q.song.artist}${bonusTag ? ` (${bonusTag})` : ""}`,
       pointsEarned: pts
     });
   } else {
+    marathonStreak = 0;
     btn.classList.add("is-wrong");
     playWrongSfx();
     historyResults.push({
@@ -363,6 +409,8 @@ function handleYearLockIn(sessionId) {
   if (!q || q.type !== "year") return;
 
   questionAnswered = true;
+  const elapsed = performance.now() - questionStartPerf;
+  const remainingRatio = Math.max(0, 1 - elapsed / QUESTION_DURATION_MS);
   clearQuestionTimers();
 
   const slider = document.getElementById("marathon-year-slider");
@@ -371,8 +419,11 @@ function handleYearLockIn(sessionId) {
   if (slider) slider.disabled = true;
   if (lockBtn) lockBtn.disabled = true;
 
-  const { points, label } = calcYearScore(guessYear, q.correctYear);
   const diff = Math.abs(guessYear - q.correctYear);
+  if (diff <= 4) marathonStreak++;
+  else marathonStreak = 0;
+
+  const { points, label, diffLabel } = calcYearScore(guessYear, q.correctYear, q.song, remainingRatio, marathonStreak);
   totalScore += points;
   updateHeaderHUD();
 
@@ -381,7 +432,7 @@ function handleYearLockIn(sessionId) {
   else playWrongSfx();
 
   const diffText = diff === 0
-    ? `בדיוק בשנת ${q.correctYear}!`
+    ? `בדיוק בשנת ${q.correctYear}!${diffLabel ? ` (קושי: ${diffLabel})` : ""}`
     : `יצא בשנת ${q.correctYear} (ניחשת ${guessYear} · הפרש ${diff} ${diff === 1 ? "שנה" : "שנים"})`;
 
   historyResults.push({
@@ -503,14 +554,18 @@ function renderMarathonSummary() {
   if (playView) playView.style.display = "none";
   if (summaryView) summaryView.style.display = "flex";
 
-  const maxScore = questions.length * 1000;
-  const goodCount = historyResults.filter(r => r.points >= 500).length;
-  const crystalsEarned = Math.max(0, Math.round(totalScore / 200));
+  const goodCount = historyResults.filter(r => r.points >= 450).length;
+  const crystalsEarned = Math.max(0, Math.round(totalScore / 220));
+  const prevBest = state.userStats?.bestMarathonScore || 0;
+  const isNewRecord = totalScore > 0 && totalScore > prevBest;
+  if (isNewRecord && state.userStats) {
+    state.userStats.bestMarathonScore = totalScore;
+  }
 
   let rankTitle = "🎧 חימום טוב!";
-  if (totalScore >= maxScore * 0.8) rankTitle = "👑 אגדת מוזיקה!";
-  else if (totalScore >= maxScore * 0.6) rankTitle = "🔥 אלוף מרתון!";
-  else if (totalScore >= maxScore * 0.4) rankTitle = "🎵 אוזן חדה!";
+  if (totalScore >= 12000) rankTitle = "👑 אגדת מרתון!";
+  else if (totalScore >= 8500) rankTitle = "🔥 אלוף מרתון!";
+  else if (totalScore >= 5000) rankTitle = "🎵 אוזן חדה!";
 
   const rankEl = document.getElementById("marathon-sum-rank");
   const scoreEl = document.getElementById("marathon-sum-score");
@@ -518,8 +573,11 @@ function renderMarathonSummary() {
   const cryEl = document.getElementById("marathon-sum-crystals");
   const listEl = document.getElementById("marathon-summary-list");
 
-  if (rankEl) rankEl.textContent = rankTitle;
-  if (scoreEl) scoreEl.textContent = `${totalScore.toLocaleString("he-IL")} / ${maxScore.toLocaleString("he-IL")}`;
+  if (rankEl) rankEl.textContent = isNewRecord ? `🏆 שיא אישי חדש! · ${rankTitle}` : rankTitle;
+  if (scoreEl) {
+    const bestLabel = isNewRecord ? totalScore : prevBest;
+    scoreEl.innerHTML = `${totalScore.toLocaleString("he-IL")} נק' <span class="marathon-best-sub">שיא אישי: ${bestLabel.toLocaleString("he-IL")}</span>`;
+  }
   if (accEl) accEl.textContent = `${goodCount} / ${questions.length}`;
   if (cryEl) {
     cryEl.innerHTML = `+${crystalsEarned} <img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
@@ -530,8 +588,10 @@ function renderMarathonSummary() {
     updatePointsDisplay();
     saveUserStats();
     playCrystalSfx();
+  } else if (isNewRecord) {
+    saveUserStats();
   }
-  if (totalScore >= maxScore * 0.5) {
+  if (isNewRecord || totalScore >= 5500) {
     launchWinConfetti();
   }
 
@@ -687,6 +747,7 @@ export async function startMarathonSession(onExit) {
   questions = [];
   currentIndex = 0;
   totalScore = 0;
+  marathonStreak = 0;
   historyResults = [];
   questionAnswered = false;
 

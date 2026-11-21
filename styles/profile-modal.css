@@ -191,6 +191,46 @@
   color: var(--text-sub);
 }
 
+.kpi-records-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.kpi-record-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.kpi-record-card.is-marathon {
+  border-color: rgba(244, 114, 182, 0.45);
+  background: linear-gradient(145deg, rgba(219, 39, 119, 0.16), rgba(31, 21, 62, 0.9));
+}
+
+.kpi-record-card.is-timed {
+  border-color: rgba(74, 222, 128, 0.42);
+  background: linear-gradient(145deg, rgba(22, 163, 74, 0.16), rgba(31, 21, 62, 0.9));
+}
+
+.kpi-record-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.kpi-record-val {
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+}
+
 .stats-section {
   display: flex;
   flex-direction: column;

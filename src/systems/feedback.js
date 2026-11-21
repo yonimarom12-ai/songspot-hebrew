@@ -1,7 +1,7 @@
-import { DURATIONS } from "../data/config.js?v=20261121r";
-import { dom } from "../dom.js?v=20261121r";
-import { state } from "../state.js?v=20261121r";
-import { normalizeHebrew } from "../utils/text.js?v=20261121r";
+import { DURATIONS } from "../data/config.js?v=20261121t";
+import { dom } from "../dom.js?v=20261121t";
+import { state } from "../state.js?v=20261121t";
+import { normalizeHebrew } from "../utils/text.js?v=20261121t";
 
 export function evaluateTargetMatch(normTyped, normTarget) {
   if (!normTyped || !normTarget) return { matchedChars: 0, wrongChars: 0, accuracy: 1 };

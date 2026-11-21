@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121r";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121r";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121r";
-import { state } from "../state.js?v=20261121r";
-import { saveUserStats } from "../services/storage.js?v=20261121r";
-import { fetchItunesData } from "../services/itunes.js?v=20261121r";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121r";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121r";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121r";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261121r";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121r";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121t";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121t";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121t";
+import { state } from "../state.js?v=20261121t";
+import { saveUserStats } from "../services/storage.js?v=20261121t";
+import { fetchItunesData } from "../services/itunes.js?v=20261121t";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121t";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121t";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121t";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261121t";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121t";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -57,7 +57,20 @@ export function renderProfileStatsModal() {
   document.getElementById("stat-heard").textContent = heard;
   document.getElementById("stat-won").textContent = won;
   document.getElementById("stat-rate").textContent = `${rate}%`;
-  document.getElementById("stat-best-streak").textContent = `${state.userStats.bestStreak || 0}🔥`;
+  const bestStreakEl = document.getElementById("stat-best-streak");
+  if (bestStreakEl) {
+    bestStreakEl.innerHTML = `${state.userStats.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" />`;
+  }
+  const bestMarathonEl = document.getElementById("stat-best-marathon");
+  if (bestMarathonEl) {
+    const bm = state.userStats.bestMarathonScore || 0;
+    bestMarathonEl.textContent = `${bm.toLocaleString("he-IL")} נק'`;
+  }
+  const bestTimedEl = document.getElementById("stat-best-timed");
+  if (bestTimedEl) {
+    const bt = state.userStats.bestTimedScore || 0;
+    bestTimedEl.textContent = `${bt} ${bt === 1 ? "שיר" : "שירים"}`;
+  }
   if (dom.statPoints) dom.statPoints.textContent = formatPoints(getPointsBalance());
   if (dom.statTotalPoints) dom.statTotalPoints.textContent = formatPoints(state.userStats.totalPointsEarned || getPointsBalance());
 
