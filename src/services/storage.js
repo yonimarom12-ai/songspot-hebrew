@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261121y";
+import { state } from "../state.js?v=20261122b";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -44,6 +44,9 @@ export function getDefaultStats() {
     customBackgroundData: "",
     bestTimedScore: 0,
     bestMarathonScore: 0,
+    bestReverseStreak: 0,
+    bestTimelineScore: 0,
+    powerups: { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 },
     dailyQuests: null,
     redeemedCodes: [],
     favorites: { song: "", album: "", artist: "" }
@@ -70,6 +73,13 @@ export function normalizeStatsObj(parsed) {
     customBackgroundData: typeof parsed.customBackgroundData === "string" ? parsed.customBackgroundData : "",
     bestTimedScore: Number.isFinite(Number(parsed.bestTimedScore)) ? Math.max(0, Number(parsed.bestTimedScore)) : 0,
     bestMarathonScore: Number.isFinite(Number(parsed.bestMarathonScore)) ? Math.max(0, Math.round(Number(parsed.bestMarathonScore))) : 0,
+    bestReverseStreak: Number.isFinite(Number(parsed.bestReverseStreak)) ? Math.max(0, Math.round(Number(parsed.bestReverseStreak))) : 0,
+    bestTimelineScore: Number.isFinite(Number(parsed.bestTimelineScore)) ? Math.max(0, Math.round(Number(parsed.bestTimelineScore))) : 0,
+    powerups: {
+      streakFreeze: Math.max(0, Number(parsed.powerups?.streakFreeze) || 0),
+      fiftyFifty: Math.max(0, Number(parsed.powerups?.fiftyFifty) || 0),
+      extraTime: Math.max(0, Number(parsed.powerups?.extraTime) || 0)
+    },
     dailyQuests: parsed.dailyQuests && typeof parsed.dailyQuests === "object" ? parsed.dailyQuests : null,
     redeemedCodes: Array.isArray(parsed.redeemedCodes) ? parsed.redeemedCodes : [],
     favorites: {
@@ -107,6 +117,21 @@ export function loadUserStats() {
   }
 }
 
+let bgSyncTimer = null;
+
+function scheduleBgCloudSync(username, stats) {
+  if (!username || !stats || typeof window === "undefined" || !window.location.protocol.startsWith("http")) return;
+  if (bgSyncTimer) clearTimeout(bgSyncTimer);
+  bgSyncTimer = setTimeout(() => {
+    bgSyncTimer = null;
+    fetch("/api/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, stats })
+    }).catch(() => {});
+  }, 900);
+}
+
 export function saveUserStats() {
   try {
     if (state.currentUser) {
@@ -114,14 +139,8 @@ export function saveUserStats() {
       if (accounts[state.currentUser]) {
         accounts[state.currentUser].stats = state.userStats;
         const ok = saveAccountsMap(accounts);
-        // סנכרון שקט ברקע לענן (D1) כדי שגם משתמשים ותיקים יופיעו בדירוג העולמי
-        if (typeof window !== "undefined" && window.location.protocol.startsWith("http")) {
-          fetch("/api/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: state.currentUser, stats: state.userStats })
-          }).catch(() => {});
-        }
+        // סנכרון שקט ומרוכז (debounced) ברקע לענן (D1) — מונע כתיבות כפולות מיותרות
+        scheduleBgCloudSync(state.currentUser, state.userStats);
         return ok;
       }
     }

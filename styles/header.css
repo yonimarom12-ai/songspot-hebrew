@@ -73,7 +73,6 @@
   transform: scale(1.1);
 }
 
-.streak-fire-svg,
 .streak-fire-img {
   width: 62px;
   height: 62px;
@@ -87,27 +86,7 @@
   animation: flamePulse 1.35s ease-in-out infinite alternate;
 }
 
-.streak-fire-badge.zero-streak .streak-fire-svg,
 .streak-fire-badge.zero-streak .streak-fire-img {
-  filter: grayscale(0.8) opacity(0.5);
-}
-
-.streak-fire-badge.active-streak .flame-outer {
-  animation: flamePulse 1.25s ease-in-out infinite alternate;
-  transform-origin: 50% 85%;
-}
-
-.streak-fire-badge.active-streak .flame-mid {
-  animation: flameFlicker 0.95s ease-in-out infinite alternate-reverse;
-  transform-origin: 50% 85%;
-}
-
-.streak-fire-badge.active-streak .flame-inner {
-  animation: flameFlicker 0.72s ease-in-out infinite alternate;
-  transform-origin: 50% 85%;
-}
-
-.streak-fire-badge.zero-streak .streak-fire-svg {
   filter: grayscale(0.8) opacity(0.5);
 }
 

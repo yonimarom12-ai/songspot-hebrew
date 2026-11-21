@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261121y";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121y";
-import { dom } from "../dom.js?v=20261121y";
-import { state } from "../state.js?v=20261121y";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261121y";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261121y";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121y";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122b";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122b";
+import { dom } from "../dom.js?v=20261122b";
+import { state } from "../state.js?v=20261122b";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122b";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122b";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122b";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261121y";
+} from "../services/itunes.js?v=20261122b";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261121y";
-import { launchWinConfetti } from "./confetti.js?v=20261121y";
+} from "./audio.js?v=20261122b";
+import { launchWinConfetti } from "./confetti.js?v=20261122b";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261121y";
+} from "./feedback.js?v=20261122b";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261121y";
-import { updateStreakDisplay } from "./profile.js?v=20261121y";
+} from "./search.js?v=20261122b";
+import { updateStreakDisplay } from "./profile.js?v=20261122b";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,18 +43,17 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261121y";
-import { recordQuestProgress } from "./quests.js?v=20261121y";
+} from "./economy.js?v=20261122b";
+import { recordQuestProgress } from "./quests.js?v=20261122b";
 import {
   isTimedModeActive,
   startTimedRun,
-  stopTimedRun,
   pauseTimedClock,
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong
-} from "./timed.js?v=20261121y";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261121y";
+} from "./timed.js?v=20261122b";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122b";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -364,7 +363,14 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
       }
     }
   } else {
-    state.userStats.currentStreak = 0;
+    // מגן רצף מהחנות: מציל אוטומטית את הרצף אם היה רצף פעיל!
+    if ((state.userStats.currentStreak || 0) > 0 && (state.userStats.powerups?.streakFreeze || 0) > 0) {
+      state.userStats.powerups.streakFreeze--;
+      state.lastRoundStreakSaved = true;
+    } else {
+      state.userStats.currentStreak = 0;
+      state.lastRoundStreakSaved = false;
+    }
   }
 
   recordQuestProgress({
@@ -630,4 +636,34 @@ export function initDifficultyListeners() {
       fetchRandomSong();
     });
   });
+
+  // שיתוף תוצאה בסגנון Wordle (ללא ספוילרים) ממסך חשיפת השיר
+  const revealShareBtn = document.getElementById("reveal-share-btn");
+  if (revealShareBtn) {
+    revealShareBtn.addEventListener("click", async () => {
+      const won = dom.resultBanner?.classList.contains("is-win");
+      const squares = DURATIONS.map((_, i) => {
+        if (won && i === state.currentAttempt) return "🟩";
+        if (i < state.currentAttempt || (!won && i <= state.currentAttempt)) return "🟥";
+        return "⬜";
+      }).join("");
+      const diffLabel = DIFFICULTIES[state.currentDifficulty]?.label || "";
+      const sec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
+      const line = won
+        ? `זיהיתי תוך ${sec} שניות! 🔥 (רמת ${diffLabel})`
+        : `לא הצלחתי הפעם 😅 (רמת ${diffLabel})`;
+      const text = `🎵 נחש את השיר\n${squares}\n${line}\nתצליחו לזהות מהר יותר? 👇\nhttps://guessthesonghebrew.pages.dev`;
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+          return;
+        } catch (e) { }
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text).catch(() => { });
+      }
+      revealShareBtn.textContent = "✓ הועתק! הדבק בוואטסאפ";
+      setTimeout(() => { revealShareBtn.textContent = "📤 שתף תוצאה"; }, 2200);
+    });
+  }
 }

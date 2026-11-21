@@ -1,12 +1,11 @@
-import { loadAccountsMap } from "./storage.js?v=20261121y";
+import { loadAccountsMap } from "./storage.js?v=20261122b";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
-// עם גיבוי מקומי אוטומטי אם בסיס הנתונים D1 עדיין לא חובר ב-Cloudflare Dashboard
+// עם גיבוי מקומי אוטומטי אם רץ מקומית או ללא חיבור ענן
 const isHttp = typeof window !== "undefined" && window.location.protocol.startsWith("http");
-let cloudAvailable = isHttp;
 
 export async function cloudAuthRequest(action, { username, password, email = "", stats = null }) {
-  if (!cloudAvailable) return { fallback: true };
+  if (!isHttp) return { fallback: true };
   try {
     const res = await fetch("/api/auth", {
       method: "POST",
@@ -14,7 +13,6 @@ export async function cloudAuthRequest(action, { username, password, email = "",
       body: JSON.stringify({ action, username, password, email, stats })
     });
     if (res.status === 404 || res.status === 405 || res.status === 503) {
-      cloudAvailable = false;
       return { fallback: true };
     }
     const data = await res.json().catch(() => ({}));
@@ -41,20 +39,6 @@ export async function syncAccountToCloud(username, stats) {
   }
 }
 
-let syncDebounceTimer = null;
-export function scheduleCloudSync(username, stats) {
-  if (!isHttp || !username || !stats) return;
-  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
-  syncDebounceTimer = setTimeout(() => {
-    syncDebounceTimer = null;
-    syncAccountToCloud(username, stats).catch(() => {});
-  }, 1200);
-}
-
-export async function loadAccountFromCloud() {
-  return null;
-}
-
 export async function fetchGlobalLeaderboard(limit = 25) {
   if (isHttp) {
     try {
@@ -62,7 +46,6 @@ export async function fetchGlobalLeaderboard(limit = 25) {
       if (res.ok) {
         const data = await res.json();
         if (data.configured && Array.isArray(data.rows)) {
-          cloudAvailable = true;
           return { source: "cloud", rows: data.rows };
         }
       }
@@ -77,7 +60,8 @@ export async function fetchGlobalLeaderboard(limit = 25) {
       totalWon: acc.stats?.totalWon || 0,
       bestStreak: acc.stats?.bestStreak || 0,
       points: acc.stats?.points || 0,
-      bestTimed: acc.stats?.bestTimedScore || 0
+      bestTimed: acc.stats?.bestTimedScore || 0,
+      bestMarathon: acc.stats?.bestMarathonScore || 0
     }))
     .sort((a, b) => (b.totalWon - a.totalWon) || (b.bestStreak - a.bestStreak) || (b.points - a.points))
     .slice(0, limit);

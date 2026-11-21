@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121y">
-  <link rel="stylesheet" href="styles/home.css?v=20261121y">
-  <link rel="stylesheet" href="styles/header.css?v=20261121y">
-  <link rel="stylesheet" href="styles/player.css?v=20261121y">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121y">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121y">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121y">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121y">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121y">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122b">
+  <link rel="stylesheet" href="styles/home.css?v=20261122b">
+  <link rel="stylesheet" href="styles/header.css?v=20261122b">
+  <link rel="stylesheet" href="styles/player.css?v=20261122b">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122b">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122b">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122b">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122b">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122b">
 </head>
 
 <body>
@@ -87,7 +87,10 @@
           </div>
         </div>
         <div class="home-mode-stats-strip" id="home-mode-stats-strip" aria-live="polite"></div>
-        <button type="button" class="home-change-mode-btn" id="home-change-mode-btn">החלף מצב משחק ⇄</button>
+        <div class="home-quick-actions-row">
+          <button type="button" class="home-change-mode-btn" id="home-change-mode-btn">החלף מצב ⇄</button>
+          <button type="button" class="home-change-mode-btn is-filter" id="home-filter-btn">🎛️ ז'אנר ועשור</button>
+        </div>
       </div>
     </div>
   </section>
@@ -163,7 +166,27 @@
           </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">מרתון</span>
-            <span class="mode-card-sub">10 שאלות · זיהוי שיר וניחוש שנה</span>
+            <span class="mode-card-sub">10 שאלות · זיהוי שיר, זמר ושנים</span>
+          </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-reverse" data-open-mode="reverse">
+          <span class="mode-card-svg" aria-hidden="true" style="font-size: 26px;">🔄</span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">הפוך על הפוך</span>
+            <span class="mode-card-sub">זהו להיטים שמתנגנים בהילוך אחורי!</span>
+          </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
+
+        <button type="button" class="mode-card theme-timeline" data-open-mode="timeline">
+          <span class="mode-card-svg" aria-hidden="true" style="font-size: 26px;">⏳</span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">ציר זמן</span>
+            <span class="mode-card-sub">מקמו שירים לפי סדר שנות היציאה!</span>
           </span>
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
@@ -271,14 +294,20 @@
         </div>
       </div>
 
+      <div class="lb-scope-tabs" id="lb-scope-tabs" role="tablist" aria-label="סינון טבלה">
+        <button type="button" class="lb-scope-tab active" data-lb-scope="global" role="tab">🌍 עולמי</button>
+        <button type="button" class="lb-scope-tab" data-lb-scope="friends" role="tab">👥 חברים בלבד</button>
+      </div>
+
       <div class="lb-sort-tabs" id="lb-sort-tabs" role="tablist" aria-label="מיון טבלה">
         <button type="button" class="lb-sort-tab active" data-lb-sort="totalWon" role="tab">🎵 זיהויים</button>
         <button type="button" class="lb-sort-tab" data-lb-sort="bestStreak" role="tab">
-          <img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> שיא רצף
+          <img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> רצף
         </button>
         <button type="button" class="lb-sort-tab" data-lb-sort="points" role="tab">
           <img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> קריסטלים
         </button>
+        <button type="button" class="lb-sort-tab" data-lb-sort="bestMarathon" role="tab">♾️ מרתון</button>
       </div>
 
       <div class="lb-podium" id="lb-podium"></div>
@@ -424,6 +453,12 @@
           <div class="marathon-timer-fill" id="marathon-timer-fill"></div>
         </div>
 
+        <!-- עזרי מרתון מהחנות (50/50 ו-+5 שניות) -->
+        <div class="marathon-powerups-row">
+          <button type="button" class="marathon-pu-btn" id="marathon-pu-5050" disabled>🎯 50/50 (0)</button>
+          <button type="button" class="marathon-pu-btn" id="marathon-pu-time" disabled>⏸️ +5ש' (0)</button>
+        </div>
+
         <div class="marathon-stage-card">
           <span class="marathon-q-type-badge" id="marathon-q-type-badge">🎵 זהה את השיר</span>
           <div class="marathon-disc-wrap">
@@ -484,8 +519,77 @@
         </div>
 
         <div class="marathon-sum-actions">
+          <button type="button" class="share-result-btn" id="marathon-share-btn">📤 שתף תוצאה (בלי ספוילרים)</button>
           <button type="button" class="setup-confirm-btn" id="marathon-replay-btn">שחק מרתון חדש ▶</button>
           <button type="button" class="setup-back-btn marathon-home-btn" id="marathon-home-btn">חזרה ללובי</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 1ו: מצב "הפוך על הפוך" (Reverse Audio Mode) ===== -->
+  <section class="app-screen" id="screen-reverse" aria-label="הפוך על הפוך">
+    <div class="home-stage-glow"></div>
+    <div class="app-shell marathon-shell">
+      <div class="marathon-top-bar">
+        <button type="button" class="setup-back-btn" id="reverse-exit-btn">→ יציאה</button>
+        <span class="marathon-q-pill">🔄 רצף: <strong id="reverse-streak-val">0</strong></span>
+        <span class="marathon-score-pill">🏆 שיא: <strong id="reverse-best-val">0</strong></span>
+      </div>
+
+      <div class="marathon-stage-card">
+        <span class="marathon-q-type-badge">🔄 הילוך אחורי (Reverse)</span>
+        <div class="marathon-disc-wrap">
+          <div class="marathon-disc-ring reverse-disc" id="reverse-disc">
+            <img class="marathon-cover-img" id="reverse-cover-img" alt="" />
+            <span style="font-size: 36px;">🔄</span>
+          </div>
+          <button type="button" class="marathon-replay-audio-btn" id="reverse-play-btn">🔊 השמע שוב בהילוך אחורי</button>
+        </div>
+        <h2 class="marathon-q-prompt" id="reverse-status-text">הופך את השיר להילוך אחורי...</h2>
+      </div>
+
+      <div class="marathon-choices-grid" id="reverse-choices-grid"></div>
+
+      <div class="reverse-feedback-box" id="reverse-feedback-box">
+        <strong id="reverse-fb-title"></strong>
+        <span id="reverse-fb-sub"></span>
+        <button type="button" class="setup-confirm-btn" id="reverse-next-btn">לשיר הבא בהילוך אחורי 🔄</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 1ז: מצב "ציר זמן" (Hitster-Style Timeline) ===== -->
+  <section class="app-screen" id="screen-timeline" aria-label="ציר זמן">
+    <div class="home-stage-glow"></div>
+    <div class="app-shell marathon-shell">
+      <div class="marathon-play-view" id="timeline-play-view">
+        <div class="marathon-top-bar">
+          <button type="button" class="setup-back-btn" id="timeline-exit-btn">→ יציאה</button>
+          <span class="marathon-q-pill" id="timeline-progress-pill">1 / 8 שירים</span>
+          <span class="marathon-score-pill" id="timeline-lives-pill">❤️❤️❤️</span>
+        </div>
+
+        <div class="tl-mystery-card">
+          <span class="marathon-q-type-badge">⏳ מקמו את השיר בציר הזמן</span>
+          <strong class="tl-mystery-title" id="timeline-mystery-title">טוען שיר...</strong>
+          <span class="tl-mystery-artist" id="timeline-mystery-artist"></span>
+          <button type="button" class="marathon-replay-audio-btn" id="timeline-replay-audio-btn">🔊 השמע שיר</button>
+        </div>
+
+        <div class="tl-feedback-banner" id="timeline-feedback-banner"></div>
+        <div class="tl-board" id="timeline-board"></div>
+      </div>
+
+      <div class="marathon-summary-view" id="timeline-summary-view" style="display: none;">
+        <div class="marathon-sum-hero">
+          <div class="marathon-sum-rank" id="tl-sum-title">👑 ציר זמן מושלם!</div>
+          <p class="lb-hero-sub" id="tl-sum-sub"></p>
+        </div>
+        <div class="marathon-sum-actions">
+          <button type="button" class="share-result-btn" id="tl-share-btn">📤 שתף תוצאה</button>
+          <button type="button" class="setup-confirm-btn" id="tl-replay-btn">שחק ציר זמן חדש ▶</button>
+          <button type="button" class="setup-back-btn marathon-home-btn" id="tl-home-btn">חזרה ללובי</button>
         </div>
       </div>
     </div>
@@ -1120,6 +1224,7 @@
           <button type="button" class="shop-tab active" data-shop-tab="avatars">פרופיל</button>
           <button type="button" class="shop-tab" data-shop-tab="backgrounds">רקעים</button>
           <button type="button" class="shop-tab" data-shop-tab="themes">ערכות נושא</button>
+          <button type="button" class="shop-tab" data-shop-tab="powerups">⚡ עזרים</button>
         </div>
 
         <div class="shop-preview-panel" id="shop-preview-panel" style="display: none;"></div>
@@ -1146,6 +1251,7 @@
         <a class="reveal-action-chip spotify" id="reveal-spotify-link" href="#" target="_blank" rel="noopener noreferrer">Spotify</a>
         <a class="reveal-action-chip apple" id="reveal-apple-link" href="#" target="_blank" rel="noopener noreferrer">Apple Music</a>
       </div>
+      <button type="button" class="share-result-btn reveal-share-btn" id="reveal-share-btn">📤 שתף תוצאה</button>
       <button class="btn btn-next" id="next-btn">לשיר הבא</button>
     </div>
   </div>
@@ -1201,7 +1307,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121y"></script>
+  <script type="module" src="src/main.js?v=20261122b"></script>
 </body>
 
 </html>

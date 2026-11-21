@@ -1,11 +1,11 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261121y";
-import { state } from "../state.js?v=20261121y";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261121y";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121y";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121y";
-import { saveUserStats } from "../services/storage.js?v=20261121y";
-import { launchWinConfetti } from "./confetti.js?v=20261121y";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121y";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122b";
+import { state } from "../state.js?v=20261122b";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122b";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122b";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122b";
+import { saveUserStats } from "../services/storage.js?v=20261122b";
+import { launchWinConfetti } from "./confetti.js?v=20261122b";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122b";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -123,14 +123,19 @@ function buildQuestionsDeck(pool) {
     }
   }
 
-  // מחלקים למיקס של ~6 שאלות 4 אופציות ו-~4 שאלות ניחוש שנה (רק לשירים שיש להם שנת יציאה תקינה)
+  // מחלקים למיקס מגוון של 4 סוגי שאלות: זיהוי שיר (4), ניחוש שנה (2-3), מי הזמר? (2), איזה שיר יצא קודם? (1-2)
   const yearEligibleIndices = chosen
     .map((s, idx) => ({ idx, ok: Number.isFinite(s.releaseYear) && s.releaseYear >= MIN_YEAR && s.releaseYear <= MAX_YEAR }))
     .filter(x => x.ok)
     .map(x => x.idx);
 
-  const yearTargetCount = Math.min(4, Math.floor(chosen.length * 0.4), yearEligibleIndices.length);
-  const yearIndexSet = new Set(shuffle(yearEligibleIndices).slice(0, yearTargetCount));
+  const shuffledYearIdx = shuffle(yearEligibleIndices);
+  const yearIndexSet = new Set(shuffledYearIdx.slice(0, Math.min(3, shuffledYearIdx.length)));
+  const remainingAfterYear = chosen.map((_, i) => i).filter(i => !yearIndexSet.has(i));
+  const shuffledRem = shuffle(remainingAfterYear);
+  const artistIndexSet = new Set(shuffledRem.slice(0, 2));
+  const olderCandidates = shuffledRem.slice(2).filter(i => Number.isFinite(chosen[i].releaseYear));
+  const olderIndexSet = new Set(olderCandidates.slice(0, 2));
 
   return chosen.map((song, idx) => {
     if (yearIndexSet.has(idx)) {
@@ -141,7 +146,44 @@ function buildQuestionsDeck(pool) {
       };
     }
 
-    // בוחרים 3 מסיחים (עדיפות לשירים מאמנים שונים כדי שלא יהיו בלבולים מיותרים)
+    if (olderIndexSet.has(idx) && Number.isFinite(song.releaseYear)) {
+      const rival = shuffle(
+        pool.filter(s => s.trackId !== song.trackId && Number.isFinite(s.releaseYear) && Math.abs(s.releaseYear - song.releaseYear) >= 3)
+      )[0];
+      if (rival) {
+        const songIsOlder = song.releaseYear < rival.releaseYear;
+        const olderSong = songIsOlder ? song : rival;
+        const newerSong = songIsOlder ? rival : song;
+        return {
+          type: "older",
+          song,
+          olderSong,
+          newerSong,
+          options: shuffle([
+            { title: olderSong.title, artist: olderSong.artist, isCorrect: true },
+            { title: newerSong.title, artist: newerSong.artist, isCorrect: false }
+          ])
+        };
+      }
+    }
+
+    if (artistIndexSet.has(idx)) {
+      const otherArtists = shuffle(
+        Array.from(new Set(pool.map(s => s.artist).filter(a => a && a !== song.artist)))
+      ).slice(0, 3);
+      if (otherArtists.length === 3) {
+        return {
+          type: "artist",
+          song,
+          options: shuffle([
+            { title: song.artist, artist: "זמר / להקה", isCorrect: true },
+            ...otherArtists.map(a => ({ title: a, artist: "זמר / להקה", isCorrect: false }))
+          ])
+        };
+      }
+    }
+
+    // ברירת מחדל: זיהוי שיר מתוך 4 אופציות
     const distractorCandidates = shuffle(
       pool.filter(s => s.trackId !== song.trackId && s.title !== song.title)
     );
@@ -242,11 +284,30 @@ function playSongSnippet(previewUrl) {
   } catch (e) { }
 }
 
+function updateMarathonPowerupButtons() {
+  const pu5050 = document.getElementById("marathon-pu-5050");
+  const puTime = document.getElementById("marathon-pu-time");
+  const q = questions[currentIndex];
+  const c5050 = state.userStats?.powerups?.fiftyFifty || 0;
+  const cTime = state.userStats?.powerups?.extraTime || 0;
+
+  if (pu5050) {
+    pu5050.textContent = `🎯 50/50 (${c5050})`;
+    const can5050 = !questionAnswered && c5050 > 0 && q && (q.type === "song" || q.type === "artist");
+    pu5050.disabled = !can5050;
+  }
+  if (puTime) {
+    puTime.textContent = `⏸️ +5ש' (${cTime})`;
+    puTime.disabled = questionAnswered || cTime <= 0;
+  }
+}
+
 function updateHeaderHUD() {
   const qNumEl = document.getElementById("marathon-q-counter");
   const scoreEl = document.getElementById("marathon-score-val");
   if (qNumEl) qNumEl.textContent = `שאלה ${Math.min(currentIndex + 1, questions.length)} מתוך ${questions.length}`;
   if (scoreEl) scoreEl.textContent = totalScore.toLocaleString("he-IL");
+  updateMarathonPowerupButtons();
 }
 
 function startQuestionTimerBar(sessionId) {
@@ -331,22 +392,25 @@ function handleTimeout(sessionId) {
   updateHeaderHUD();
 
   const q = questions[currentIndex];
-  if (q.type === "song") {
+  if (q.type !== "year") {
     document.querySelectorAll(".marathon-choice-btn").forEach(btn => {
       btn.disabled = true;
       if (btn.dataset.correct === "1") btn.classList.add("is-correct");
     });
+    const ansLabel = q.type === "older"
+      ? `${q.olderSong.title} (${q.olderSong.releaseYear}) קדם ל-${q.newerSong.title} (${q.newerSong.releaseYear})`
+      : `${q.song.title} · ${q.song.artist}`;
     historyResults.push({
       q,
       points: timeoutPenalty,
       userAnswerText: "נגמר הזמן",
-      correctText: `${q.song.title} — ${q.song.artist}`,
+      correctText: ansLabel,
       isGood: false
     });
     showFeedbackAndScheduleNext(sessionId, {
       isGood: false,
       titleText: "⏰ נגמר הזמן!",
-      subText: `השיר היה: ${q.song.title} · ${q.song.artist}`,
+      subText: ansLabel,
       pointsEarned: timeoutPenalty
     });
   } else {
@@ -504,9 +568,21 @@ function renderCurrentQuestion(sessionId) {
     coverImg.src = q.song.artwork || "";
   }
 
-  if (q.type === "song") {
-    if (typeBadge) typeBadge.textContent = "🎵 זהה את השיר";
-    if (promptEl) promptEl.textContent = "איזה שיר מתנגן עכשיו?";
+  if (q.type === "song" || q.type === "artist" || q.type === "older") {
+    if (typeBadge) {
+      typeBadge.textContent = q.type === "artist"
+        ? "🎤 מי הזמר/ת?"
+        : q.type === "older"
+          ? "⏳ איזה שיר יצא קודם?"
+          : "🎵 זהה את השיר";
+    }
+    if (promptEl) {
+      promptEl.textContent = q.type === "artist"
+        ? "מי שר/ה את השיר שמתנגן?"
+        : q.type === "older"
+          ? "איזה מבין השניים יצא קודם?"
+          : "איזה שיר מתנגן עכשיו?";
+    }
     if (songMetaEl) songMetaEl.style.display = "none";
     if (yearBox) yearBox.style.display = "none";
     if (choicesGrid) {
@@ -712,6 +788,37 @@ function bindMarathonListenersOnce() {
     });
   });
 
+  const pu5050 = document.getElementById("marathon-pu-5050");
+  if (pu5050) {
+    pu5050.addEventListener("click", () => {
+      if (questionAnswered || !(state.userStats?.powerups?.fiftyFifty > 0)) return;
+      const wrongBtns = Array.from(document.querySelectorAll(".marathon-choice-btn"))
+        .filter(b => b.dataset.correct !== "1" && !b.disabled);
+      if (wrongBtns.length < 2) return;
+      state.userStats.powerups.fiftyFifty--;
+      saveUserStats();
+      shuffle(wrongBtns).slice(0, 2).forEach(b => {
+        b.disabled = true;
+        b.style.opacity = "0.22";
+      });
+      playClickSfx();
+      updateMarathonPowerupButtons();
+      pu5050.disabled = true;
+    });
+  }
+
+  const puTime = document.getElementById("marathon-pu-time");
+  if (puTime) {
+    puTime.addEventListener("click", () => {
+      if (questionAnswered || !(state.userStats?.powerups?.extraTime > 0)) return;
+      state.userStats.powerups.extraTime--;
+      saveUserStats();
+      questionStartPerf = Math.min(performance.now(), questionStartPerf + 5000);
+      playCrystalSfx();
+      updateMarathonPowerupButtons();
+    });
+  }
+
   const lockBtn = document.getElementById("marathon-year-confirm-btn");
   if (lockBtn) {
     lockBtn.addEventListener("click", () => handleYearLockIn(activeSessionId));
@@ -748,6 +855,26 @@ function bindMarathonListenersOnce() {
     homeBtn.addEventListener("click", () => {
       stopMarathonSession();
       if (typeof exitCallback === "function") exitCallback();
+    });
+  }
+
+  const shareBtn = document.getElementById("marathon-share-btn");
+  if (shareBtn) {
+    shareBtn.addEventListener("click", async () => {
+      const grid = historyResults.map(r => (r.points >= 450 ? "🟩" : r.points > 0 ? "🟨" : "🟥")).join("");
+      const hits = historyResults.filter(r => r.points >= 450).length;
+      const text = `🎵 נחש את השיר · מרתון 10 שאלות\n${grid}\n🏆 ${totalScore.toLocaleString("he-IL")} נק' (${hits}/${historyResults.length})\nתצליחו לעקוף אותי? 👇\nhttps://guessthesonghebrew.pages.dev`;
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+          return;
+        } catch (e) { }
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text).catch(() => { });
+      }
+      shareBtn.textContent = "✓ התוצאה הועתקה לוואטסאפ!";
+      setTimeout(() => { shareBtn.textContent = "📤 שתף תוצאה (בלי ספוילרים)"; }, 2200);
     });
   }
 }

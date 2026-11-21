@@ -2,16 +2,17 @@ import {
   SHOP_AVATARS,
   SHOP_BACKGROUNDS,
   SHOP_THEMES,
+  SHOP_POWERUPS,
   CUSTOM_AVATAR_PRICE,
   CUSTOM_BACKGROUND_PRICE,
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261121y";
-import { state } from "../state.js?v=20261121y";
-import { saveUserStats } from "../services/storage.js?v=20261121y";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121y";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121y";
+} from "../data/shop.js?v=20261122b";
+import { state } from "../state.js?v=20261122b";
+import { saveUserStats } from "../services/storage.js?v=20261122b";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122b";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122b";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -658,6 +659,62 @@ function buildCard(type, item) {
   return card;
 }
 
+function buildPowerupCard(item) {
+  const count = state.userStats?.powerups?.[item.id] || 0;
+  const card = document.createElement("div");
+  card.className = "shop-item shop-powerup-card";
+
+  const head = document.createElement("div");
+  head.className = "shop-pu-head";
+  const em = document.createElement("span");
+  em.className = "shop-pu-emoji";
+  em.textContent = item.emoji;
+  const info = document.createElement("div");
+  info.className = "shop-pu-info";
+  const nm = document.createElement("strong");
+  nm.className = "shop-item-name";
+  nm.textContent = item.name;
+  const desc = document.createElement("span");
+  desc.className = "shop-vip-sub";
+  desc.textContent = item.desc;
+  info.append(nm, desc);
+  head.append(em, info);
+
+  const foot = document.createElement("div");
+  foot.className = "shop-pu-foot";
+  const qty = document.createElement("span");
+  qty.className = "shop-pu-qty";
+  qty.textContent = `ברשותך: ${count}`;
+
+  const buyBtn = document.createElement("button");
+  buyBtn.type = "button";
+  buyBtn.className = "shop-item-action shop-pu-buy-btn";
+  setCrystalLabel(buyBtn, "קנה ב-", item.price);
+  buyBtn.addEventListener("click", () => {
+    if (!state.currentUser) {
+      setShopMessage("יש להתחבר בפרופיל כדי לקנות עזרים.", "error");
+      return;
+    }
+    if (!canAfford(item.price)) {
+      setShopMessage("אין מספיק קריסטלים לקניית העזר הזה.", "error");
+      return;
+    }
+    if (!spendPoints(item.price)) return;
+    if (!state.userStats.powerups) {
+      state.userStats.powerups = { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 };
+    }
+    state.userStats.powerups[item.id] = (state.userStats.powerups[item.id] || 0) + 1;
+    saveUserStats();
+    syncAccountToCloud(state.currentUser, state.userStats);
+    setShopMessage(`✓ רכשת ${item.emoji} ${item.name}! (ברשותך: ${state.userStats.powerups[item.id]})`, "success");
+    renderShop();
+  });
+
+  foot.append(qty, buyBtn);
+  card.append(head, foot);
+  return card;
+}
+
 export function renderShop() {
   const balanceEl = document.getElementById("shop-points-balance");
   if (balanceEl) balanceEl.textContent = formatPoints(getPointsBalance());
@@ -672,6 +729,11 @@ export function renderShop() {
   if (!grid) return;
   grid.innerHTML = "";
   grid.className = `shop-grid ${activeShopTab === "avatars" ? "avatars" : "backgrounds"}`;
+
+  if (activeShopTab === "powerups") {
+    SHOP_POWERUPS.forEach(item => grid.appendChild(buildPowerupCard(item)));
+    return;
+  }
 
   if (activeShopTab === "themes") {
     SHOP_THEMES.forEach(item => grid.appendChild(buildCard("theme", item)));

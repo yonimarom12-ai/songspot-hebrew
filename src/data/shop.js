@@ -2,6 +2,30 @@
 export const CUSTOM_AVATAR_PRICE = 1500;
 export const CUSTOM_BACKGROUND_PRICE = 2000;
 
+export const SHOP_POWERUPS = [
+  {
+    id: "streakFreeze",
+    name: "מגן רצף",
+    emoji: "🛡️",
+    desc: "מציל אוטומטית את אש הרצף שלך בטעות אחת במשחק הרגיל!",
+    price: 60
+  },
+  {
+    id: "fiftyFifty",
+    name: "50/50 למרתון",
+    emoji: "🎯",
+    desc: "מוחק 2 תשובות שגויות בשאלת 4 אופציות במרתון!",
+    price: 45
+  },
+  {
+    id: "extraTime",
+    name: "+5 שניות למרתון",
+    emoji: "⏸️",
+    desc: "מוסיף 5 שניות בונוס לטיימר השאלה במרתון!",
+    price: 40
+  }
+];
+
 export const SHOP_AVATARS = [
   { id: "default", name: "אוזניות", emoji: "🎧", bg: "linear-gradient(135deg,#1db954,#0f6e31)", price: 0 },
   { id: "mic", name: "מיקרופון", emoji: "🎤", bg: "linear-gradient(135deg,#ff5f6d,#ffc371)", price: 40 },

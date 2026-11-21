@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121y";
-import { DIFFICULTIES } from "../data/config.js?v=20261121y";
-import { state, isIOS } from "../state.js?v=20261121y";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121y";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121y";
+import { ARTISTS_DB } from "../data/artists.js?v=20261122b";
+import { DIFFICULTIES } from "../data/config.js?v=20261122b";
+import { state, isIOS } from "../state.js?v=20261122b";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122b";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261122b";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -84,7 +84,6 @@ async function fetchViaAllOriginsGet(url, timeoutMs = 5500) {
 safeStorageRemove("songspot_itunes_transport_v1");
 safeStorageRemove("songspot_itunes_transport_v2");
 
-const TRANSPORT_KEY = "songspot_itunes_transport_v4";
 const TRANSPORTS = {
   fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 6000)),
   jsonp: (url, t) => fetchItunesJsonp(url, Math.min(t, 7000)),
@@ -94,23 +93,11 @@ const TRANSPORTS = {
   allorigins_get: (url, t) => fetchViaAllOriginsGet(url, Math.min(t, 7000))
 };
 
-let preferredTransport = safeStorageGet(TRANSPORT_KEY);
-if (!TRANSPORTS[preferredTransport]) {
-  preferredTransport = null;
-}
-
-function rememberTransport(name) {
-  if (TRANSPORTS[name] && preferredTransport !== name) {
-    preferredTransport = name;
-    safeStorageSet(TRANSPORT_KEY, name);
-  }
-}
-
 function isValidPayload(data) {
   return data && Array.isArray(data.results);
 }
 
-// מריץ כמה ערוצים במקביל ומחזיר מיד את הראשון שמחזיר תשובה תקינה (200-500ms גם ב-Safari!)
+// מריץ כמה ערוצים במקביל ומחזיר מיד את הראשון שמחזיר תשובה תקינה
 function raceTransports(names, url, timeoutMs) {
   return new Promise((resolve, reject) => {
     let pending = names.length;
@@ -124,7 +111,6 @@ function raceTransports(names, url, timeoutMs) {
           if (isValidPayload(data)) {
             if (!settled) {
               settled = true;
-              rememberTransport(name);
               resolve(data);
             }
           } else {

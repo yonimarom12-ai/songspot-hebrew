@@ -28,7 +28,7 @@ export async function onRequestGet(context) {
     await env.DB.prepare(TABLE_SQL).run();
     const { results } = await env.DB
       .prepare(
-        `SELECT username, total_won, best_streak, points, best_timed, avatar_id
+        `SELECT username, total_won, best_streak, points, best_timed, avatar_id, stats_json
          FROM players
          ORDER BY total_won DESC, best_streak DESC, points DESC
          LIMIT ?`
@@ -39,14 +39,19 @@ export async function onRequestGet(context) {
     return Response.json(
       {
         configured: true,
-        rows: (results || []).map(r => ({
-          username: r.username,
-          totalWon: r.total_won || 0,
-          bestStreak: r.best_streak || 0,
-          points: r.points || 0,
-          bestTimed: r.best_timed || 0,
-          avatarId: r.avatar_id || "default"
-        }))
+        rows: (results || []).map(r => {
+          let stats = {};
+          try { stats = JSON.parse(r.stats_json || "{}"); } catch (e) { }
+          return {
+            username: r.username,
+            totalWon: r.total_won || 0,
+            bestStreak: r.best_streak || 0,
+            points: r.points || 0,
+            bestTimed: r.best_timed || Number(stats.bestTimedScore) || 0,
+            bestMarathon: Number(stats.bestMarathonScore) || 0,
+            avatarId: r.avatar_id || "default"
+          };
+        })
       },
       {
         headers: { "Cache-Control": "public, max-age=15" }
