@@ -1,17 +1,19 @@
-import { state } from "../state.js?v=20261121x";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261121x";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261121x";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121x";
-import { playClickSfx } from "./sfx.js?v=20261121x";
+import { state } from "../state.js?v=20261121y";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261121y";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261121y";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121y";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261121y";
 
 const LOCAL_FRIENDS_KEY = "songspot_local_friends_v1";
+const LOCAL_REQS_KEY = "songspot_local_friend_reqs_v1";
 const isHttp = typeof window !== "undefined" && window.location.protocol.startsWith("http");
 
 let currentFriendsList = [];
+let incomingRequests = [];
+let outgoingRequests = [];
 let activeViewedFriend = null;
 let listenersBound = false;
 
-// אלגוריתם זהה לשרת (functions/api/friends.js) לחישוב Player ID יציב וייחודי בן 6 תווים
 export function getPlayerFriendCode(username) {
   const clean = String(username || "").trim().toLowerCase();
   if (!clean) return "";
@@ -39,16 +41,12 @@ function getAvatarEmoji(avatarId) {
   return found?.emoji || "🎧";
 }
 
-function loadLocalFriendsMap() {
+function loadJson(key, fallback) {
   try {
-    return JSON.parse(safeStorageGet(LOCAL_FRIENDS_KEY) || "{}");
+    return JSON.parse(safeStorageGet(key) || JSON.stringify(fallback));
   } catch (e) {
-    return {};
+    return fallback;
   }
-}
-
-function saveLocalFriendsMap(map) {
-  safeStorageSet(LOCAL_FRIENDS_KEY, JSON.stringify(map));
 }
 
 function setFriendsMsg(text, type = "") {
@@ -56,6 +54,13 @@ function setFriendsMsg(text, type = "") {
   if (!el) return;
   el.textContent = text;
   el.className = `friends-action-msg${type ? ` ${type}` : ""}`;
+}
+
+function updateHomeFriendsDot(count) {
+  const dot = document.getElementById("home-friends-dot");
+  if (!dot) return;
+  dot.classList.toggle("visible", count > 0);
+  dot.textContent = count > 0 ? String(count) : "";
 }
 
 function showFriendsSubView(view) {
@@ -141,12 +146,97 @@ function openFriendProfileView(friend) {
   showFriendsSubView("profile");
 }
 
+function renderIncomingAndOutgoing() {
+  const incWrap = document.getElementById("friends-incoming-wrap");
+  const incList = document.getElementById("friends-incoming-list");
+  const outWrap = document.getElementById("friends-outgoing-wrap");
+  const outList = document.getElementById("friends-outgoing-list");
+
+  updateHomeFriendsDot(incomingRequests.length);
+
+  if (incWrap && incList) {
+    incList.innerHTML = "";
+    incWrap.style.display = incomingRequests.length > 0 ? "flex" : "none";
+    incomingRequests.forEach(req => {
+      const row = document.createElement("div");
+      row.className = "friend-req-row";
+
+      const av = document.createElement("span");
+      av.className = "friend-row-avatar small";
+      av.textContent = getAvatarEmoji(req.avatarId);
+
+      const info = document.createElement("div");
+      info.className = "friend-row-info";
+      const nm = document.createElement("span");
+      nm.className = "friend-row-name";
+      nm.textContent = req.username;
+      const cd = document.createElement("span");
+      cd.className = "friend-row-code";
+      cd.textContent = `#${req.friendCode || getPlayerFriendCode(req.username)}`;
+      info.append(nm, cd);
+
+      const actions = document.createElement("div");
+      actions.className = "friend-req-actions";
+
+      const accBtn = document.createElement("button");
+      accBtn.type = "button";
+      accBtn.className = "freq-btn accept";
+      accBtn.textContent = "✓ אשר";
+      accBtn.addEventListener("click", () => respondToRequest("accept", req.usernameLower || req.username.toLowerCase()));
+
+      const decBtn = document.createElement("button");
+      decBtn.type = "button";
+      decBtn.className = "freq-btn decline";
+      decBtn.textContent = "✕";
+      decBtn.title = "דחה בקשה";
+      decBtn.addEventListener("click", () => respondToRequest("decline", req.usernameLower || req.username.toLowerCase()));
+
+      actions.append(accBtn, decBtn);
+      row.append(av, info, actions);
+      incList.appendChild(row);
+    });
+  }
+
+  if (outWrap && outList) {
+    outList.innerHTML = "";
+    outWrap.style.display = outgoingRequests.length > 0 ? "flex" : "none";
+    outgoingRequests.forEach(req => {
+      const row = document.createElement("div");
+      row.className = "friend-req-row is-outgoing";
+
+      const av = document.createElement("span");
+      av.className = "friend-row-avatar small";
+      av.textContent = getAvatarEmoji(req.avatarId);
+
+      const info = document.createElement("div");
+      info.className = "friend-row-info";
+      const nm = document.createElement("span");
+      nm.className = "friend-row-name";
+      nm.textContent = req.username;
+      const sub = document.createElement("span");
+      sub.className = "friend-req-pending-tag";
+      sub.textContent = "⏳ ממתין לאישור...";
+      info.append(nm, sub);
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "freq-btn decline";
+      cancelBtn.textContent = "בטל";
+      cancelBtn.addEventListener("click", () => cancelOutgoingRequest(req.usernameLower || req.username.toLowerCase()));
+
+      row.append(av, info, cancelBtn);
+      outList.appendChild(row);
+    });
+  }
+}
+
 function renderFriendsList() {
   const listEl = document.getElementById("friends-list");
   const countEl = document.getElementById("friends-count-badge");
   if (!listEl) return;
 
   if (countEl) countEl.textContent = String(currentFriendsList.length);
+  renderIncomingAndOutgoing();
   listEl.innerHTML = "";
 
   if (!state.currentUser) {
@@ -160,7 +250,7 @@ function renderFriendsList() {
   if (currentFriendsList.length === 0) {
     const empty = document.createElement("div");
     empty.className = "lb-empty";
-    empty.textContent = "עדיין אין לך חברים ברשימה — שתף את ה-ID שלך או הזן ID של חבר למעלה!";
+    empty.textContent = "עדיין אין לך חברים מאושרים — שלח בקשת חברות עם ID של חבר למעלה!";
     listEl.appendChild(empty);
     return;
   }
@@ -201,30 +291,48 @@ function renderFriendsList() {
   });
 }
 
-function getLocalFallbackFriends(username) {
-  const map = loadLocalFriendsMap();
-  const keys = map[username.toLowerCase()] || [];
+function mapLocalAccount(acc) {
+  const st = acc.stats || {};
+  return {
+    username: acc.username,
+    usernameLower: acc.username.toLowerCase(),
+    friendCode: getPlayerFriendCode(acc.username),
+    totalWon: st.totalWon || 0,
+    totalHeard: st.totalHeard || 0,
+    bestStreak: st.bestStreak || 0,
+    points: st.points || 0,
+    bestTimed: st.bestTimedScore || 0,
+    bestMarathon: st.bestMarathonScore || 0,
+    avatarId: st.equippedAvatar || "default",
+    favorites: st.favorites || {}
+  };
+}
+
+function loadLocalFallbackState(username) {
+  const meKey = username.toLowerCase();
   const accounts = loadAccountsMap();
-  return keys
-    .map(k => {
-      const acc = Object.values(accounts).find(a => a.username.toLowerCase() === k);
-      if (!acc) return null;
-      const st = acc.stats || {};
-      return {
-        username: acc.username,
-        usernameLower: acc.username.toLowerCase(),
-        friendCode: getPlayerFriendCode(acc.username),
-        totalWon: st.totalWon || 0,
-        totalHeard: st.totalHeard || 0,
-        bestStreak: st.bestStreak || 0,
-        points: st.points || 0,
-        bestTimed: st.bestTimedScore || 0,
-        bestMarathon: st.bestMarathonScore || 0,
-        avatarId: st.equippedAvatar || "default",
-        favorites: st.favorites || {}
-      };
-    })
-    .filter(Boolean);
+  const byLower = {};
+  Object.values(accounts).forEach(a => { byLower[a.username.toLowerCase()] = mapLocalAccount(a); });
+
+  const fMap = loadJson(LOCAL_FRIENDS_KEY, {});
+  const reqs = loadJson(LOCAL_REQS_KEY, []);
+
+  currentFriendsList = (fMap[meKey] || []).map(k => byLower[k]).filter(Boolean);
+  incomingRequests = reqs.filter(r => r.to === meKey).map(r => byLower[r.from]).filter(Boolean);
+  outgoingRequests = reqs.filter(r => r.from === meKey).map(r => byLower[r.to]).filter(Boolean);
+}
+
+export async function refreshIncomingFriendsBadge() {
+  if (!state.currentUser || !isHttp) return;
+  try {
+    const res = await fetch(`/api/friends?username=${encodeURIComponent(state.currentUser)}&_t=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.configured && Array.isArray(data.incoming)) {
+        updateHomeFriendsDot(data.incoming.length);
+      }
+    }
+  } catch (e) { }
 }
 
 export async function loadFriendsScreen() {
@@ -241,6 +349,8 @@ export async function loadFriendsScreen() {
     if (copyBtn) copyBtn.style.display = "none";
     if (addForm) addForm.style.display = "none";
     currentFriendsList = [];
+    incomingRequests = [];
+    outgoingRequests = [];
     renderFriendsList();
     return;
   }
@@ -250,7 +360,6 @@ export async function loadFriendsScreen() {
   if (copyBtn) copyBtn.style.display = "inline-flex";
   if (addForm) addForm.style.display = "flex";
 
-  // וידוא שהשחקן עצמו מסונכרן ב-D1 כדי שחברים יוכלו למצוא אותו לפי ה-ID
   if (state.userStats) {
     await syncAccountToCloud(state.currentUser, state.userStats).catch(() => false);
   }
@@ -260,8 +369,10 @@ export async function loadFriendsScreen() {
       const res = await fetch(`/api/friends?username=${encodeURIComponent(state.currentUser)}&_t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (data.configured && Array.isArray(data.friends)) {
-          currentFriendsList = data.friends;
+        if (data.configured) {
+          currentFriendsList = Array.isArray(data.friends) ? data.friends : [];
+          incomingRequests = Array.isArray(data.incoming) ? data.incoming : [];
+          outgoingRequests = Array.isArray(data.outgoing) ? data.outgoing : [];
           renderFriendsList();
           return;
         }
@@ -269,11 +380,11 @@ export async function loadFriendsScreen() {
     } catch (e) { }
   }
 
-  currentFriendsList = getLocalFallbackFriends(state.currentUser);
+  loadLocalFallbackState(state.currentUser);
   renderFriendsList();
 }
 
-async function handleAddFriendSubmit(e) {
+async function handleSendRequestSubmit(e) {
   e.preventDefault();
   if (!state.currentUser) return;
   const input = document.getElementById("add-friend-input");
@@ -283,27 +394,29 @@ async function handleAddFriendSubmit(e) {
     return;
   }
 
-  setFriendsMsg("מחפש שחקן...", "");
+  setFriendsMsg("שולח בקשת חברות...", "");
 
   if (isHttp) {
     try {
       const res = await fetch("/api/friends", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "add", username: state.currentUser, target: raw })
+        body: JSON.stringify({ action: "request", username: state.currentUser, target: raw })
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok && data.friend) {
+      if (res.ok && data.ok) {
         if (input) input.value = "";
-        setFriendsMsg(`✓ ${data.friend.username} נוסף לרשימת החברים!`, "success");
+        if (data.status === "accepted") {
+          playWinSfx();
+          setFriendsMsg(`🎉 ${data.friend?.username || "השחקן"} ואתה עכשיו חברים!`, "success");
+        } else {
+          playClickSfx();
+          setFriendsMsg(`✓ בקשת חברות נשלחה ל-${data.target?.username || raw}! ממתין לאישור.`, "success");
+        }
         await loadFriendsScreen();
         return;
       }
-      if (res.status !== 404 && res.status !== 503) {
-        setFriendsMsg(data.error || "שגיאה בהוספת חבר", "error");
-        return;
-      }
-      if (res.status === 404 && data.error) {
+      if (data.error) {
         setFriendsMsg(data.error, "error");
         return;
       }
@@ -320,20 +433,66 @@ async function handleAddFriendSubmit(e) {
     setFriendsMsg("לא נמצא שחקן עם ה-ID או השם הזה.", "error");
     return;
   }
-  if (found.username.toLowerCase() === state.currentUser.toLowerCase()) {
-    setFriendsMsg("אי אפשר להוסיף את עצמך כחבר 😄", "error");
+  const meKey = state.currentUser.toLowerCase();
+  const targetKey = found.username.toLowerCase();
+  if (targetKey === meKey) {
+    setFriendsMsg("אי אפשר לשלוח בקשה לעצמך 😄", "error");
     return;
   }
-  const map = loadLocalFriendsMap();
-  const meKey = state.currentUser.toLowerCase();
-  const set = new Set(map[meKey] || []);
-  set.add(found.username.toLowerCase());
-  map[meKey] = Array.from(set);
-  saveLocalFriendsMap(map);
+  const reqs = loadJson(LOCAL_REQS_KEY, []);
+  if (!reqs.some(r => r.from === meKey && r.to === targetKey)) {
+    reqs.push({ from: meKey, to: targetKey });
+    safeStorageSet(LOCAL_REQS_KEY, JSON.stringify(reqs));
+  }
   if (input) input.value = "";
-  setFriendsMsg(`✓ ${found.username} נוסף לרשימת החברים!`, "success");
-  currentFriendsList = getLocalFallbackFriends(state.currentUser);
+  setFriendsMsg(`✓ בקשת חברות נשלחה ל-${found.username}! ממתין לאישור.`, "success");
+  loadLocalFallbackState(state.currentUser);
   renderFriendsList();
+}
+
+async function respondToRequest(action, fromLower) {
+  if (!state.currentUser || !fromLower) return;
+  if (isHttp) {
+    try {
+      await fetch("/api/friends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, username: state.currentUser, fromLower })
+      });
+    } catch (e) { }
+  }
+  const meKey = state.currentUser.toLowerCase();
+  let reqs = loadJson(LOCAL_REQS_KEY, []);
+  reqs = reqs.filter(r => !(r.from === fromLower && r.to === meKey));
+  safeStorageSet(LOCAL_REQS_KEY, JSON.stringify(reqs));
+  if (action === "accept") {
+    playWinSfx();
+    const fMap = loadJson(LOCAL_FRIENDS_KEY, {});
+    fMap[meKey] = Array.from(new Set([...(fMap[meKey] || []), fromLower]));
+    fMap[fromLower] = Array.from(new Set([...(fMap[fromLower] || []), meKey]));
+    safeStorageSet(LOCAL_FRIENDS_KEY, JSON.stringify(fMap));
+  } else {
+    playClickSfx();
+  }
+  await loadFriendsScreen();
+}
+
+async function cancelOutgoingRequest(toLower) {
+  if (!state.currentUser || !toLower) return;
+  if (isHttp) {
+    try {
+      await fetch("/api/friends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel", username: state.currentUser, toLower })
+      });
+    } catch (e) { }
+  }
+  const meKey = state.currentUser.toLowerCase();
+  const reqs = loadJson(LOCAL_REQS_KEY, []).filter(r => !(r.from === meKey && r.to === toLower));
+  safeStorageSet(LOCAL_REQS_KEY, JSON.stringify(reqs));
+  playClickSfx();
+  await loadFriendsScreen();
 }
 
 async function handleRemoveActiveFriend() {
@@ -350,12 +509,11 @@ async function handleRemoveActiveFriend() {
     } catch (e) { }
   }
 
-  const map = loadLocalFriendsMap();
+  const fMap = loadJson(LOCAL_FRIENDS_KEY, {});
   const meKey = state.currentUser.toLowerCase();
-  if (Array.isArray(map[meKey])) {
-    map[meKey] = map[meKey].filter(k => k !== targetLower);
-    saveLocalFriendsMap(map);
-  }
+  if (Array.isArray(fMap[meKey])) fMap[meKey] = fMap[meKey].filter(k => k !== targetLower);
+  if (Array.isArray(fMap[targetLower])) fMap[targetLower] = fMap[targetLower].filter(k => k !== meKey);
+  safeStorageSet(LOCAL_FRIENDS_KEY, JSON.stringify(fMap));
 
   activeViewedFriend = null;
   await loadFriendsScreen();
@@ -366,7 +524,7 @@ function bindFriendsListenersOnce() {
   listenersBound = true;
 
   const form = document.getElementById("add-friend-form");
-  if (form) form.addEventListener("submit", handleAddFriendSubmit);
+  if (form) form.addEventListener("submit", handleSendRequestSubmit);
 
   const copyBtn = document.getElementById("copy-my-id-btn");
   if (copyBtn) {

@@ -2339,3 +2339,98 @@ body.hide-bottom-nav .bottom-nav {
   font-weight: 800;
   cursor: pointer;
 }
+
+/* Friend Requests UI & Home Notification Badge */
+.home-friends-dot {
+  display: none;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ec4899;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 900;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.75);
+}
+
+.home-friends-dot.visible {
+  display: inline-flex;
+}
+
+.friends-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friends-section-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #e9d5ff;
+  padding: 0 2px;
+}
+
+.friends-req-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.friend-req-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26, 15, 56, 0.92);
+  border: 1px solid rgba(236, 72, 153, 0.42);
+  border-radius: 15px;
+  padding: 10px 12px;
+}
+
+.friend-req-row.is-outgoing {
+  border-color: rgba(192, 132, 252, 0.25);
+  background: rgba(18, 11, 38, 0.85);
+}
+
+.friend-row-avatar.small {
+  width: 36px;
+  height: 36px;
+  font-size: 17px;
+  border-radius: 11px;
+}
+
+.friend-req-pending-tag {
+  font-size: 11px;
+  color: #fde047;
+  font-weight: 700;
+}
+
+.friend-req-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.freq-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 7px 11px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.freq-btn.accept {
+  background: #22c55e;
+  color: #052e16;
+}
+
+.freq-btn.decline {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #fca5a5;
+}

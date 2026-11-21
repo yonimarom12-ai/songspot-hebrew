@@ -1,4 +1,4 @@
-// Cloudflare Pages Function: מערכת חברים, Player ID ופרופיל חבר חי מתוך Cloudflare D1
+// Cloudflare Pages Function: מערכת חברים עם בקשות חברות (שליחה, אישור, דחייה, ביטול והסרה) ב-Cloudflare D1
 const PLAYERS_SQL = `
 CREATE TABLE IF NOT EXISTS players (
   username TEXT PRIMARY KEY,
@@ -22,7 +22,14 @@ CREATE TABLE IF NOT EXISTS friendships (
   PRIMARY KEY (user_lower, friend_lower)
 );`;
 
-// קוד שחקן דטרמיניסטי ויציב בן 6 תווים (למשל A7F392) לכל שם משתמש
+const REQUESTS_SQL = `
+CREATE TABLE IF NOT EXISTS friend_requests (
+  from_lower TEXT NOT NULL,
+  to_lower TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (from_lower, to_lower)
+);`;
+
 function computeFriendCode(usernameLower) {
   const str = `ss_id_v1:${String(usernameLower || "").trim().toLowerCase()}`;
   let h1 = 0x811c9dc5;
@@ -65,10 +72,16 @@ function mapPlayerRow(row) {
   };
 }
 
+async function ensureTables(db) {
+  await db.prepare(PLAYERS_SQL).run();
+  await db.prepare(FRIENDSHIPS_SQL).run();
+  await db.prepare(REQUESTS_SQL).run();
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!env.DB) {
-    return Response.json({ configured: false, friends: [] }, { status: 503 });
+    return Response.json({ configured: false, friends: [], incoming: [], outgoing: [] }, { status: 503 });
   }
 
   const url = new URL(request.url);
@@ -79,27 +92,50 @@ export async function onRequestGet(context) {
   }
 
   try {
-    await env.DB.prepare(PLAYERS_SQL).run();
-    await env.DB.prepare(FRIENDSHIPS_SQL).run();
+    await ensureTables(env.DB);
 
-    const { results } = await env.DB
-      .prepare(
-        `SELECT p.username, p.username_lower, p.total_won, p.best_streak, p.points, p.best_timed, p.avatar_id, p.stats_json, p.updated_at
-         FROM friendships f
-         JOIN players p ON p.username_lower = f.friend_lower
-         WHERE f.user_lower = ?
-         ORDER BY p.total_won DESC, p.best_streak DESC`
-      )
-      .bind(userLower)
-      .all();
+    const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
+      env.DB
+        .prepare(
+          `SELECT p.username, p.username_lower, p.total_won, p.best_streak, p.points, p.best_timed, p.avatar_id, p.stats_json, p.updated_at
+           FROM friendships f
+           JOIN players p ON p.username_lower = f.friend_lower
+           WHERE f.user_lower = ?
+           ORDER BY p.total_won DESC, p.best_streak DESC`
+        )
+        .bind(userLower)
+        .all(),
+      env.DB
+        .prepare(
+          `SELECT p.username, p.username_lower, p.total_won, p.best_streak, p.points, p.best_timed, p.avatar_id, p.stats_json, p.updated_at
+           FROM friend_requests r
+           JOIN players p ON p.username_lower = r.from_lower
+           WHERE r.to_lower = ?
+           ORDER BY r.created_at DESC`
+        )
+        .bind(userLower)
+        .all(),
+      env.DB
+        .prepare(
+          `SELECT p.username, p.username_lower, p.total_won, p.best_streak, p.points, p.best_timed, p.avatar_id, p.stats_json, p.updated_at
+           FROM friend_requests r
+           JOIN players p ON p.username_lower = r.to_lower
+           WHERE r.from_lower = ?
+           ORDER BY r.created_at DESC`
+        )
+        .bind(userLower)
+        .all()
+    ]);
 
     return Response.json({
       configured: true,
       myCode: computeFriendCode(userLower),
-      friends: (results || []).map(mapPlayerRow)
+      friends: (friendsRes.results || []).map(mapPlayerRow),
+      incoming: (incomingRes.results || []).map(mapPlayerRow),
+      outgoing: (outgoingRes.results || []).map(mapPlayerRow)
     });
   } catch (err) {
-    return Response.json({ configured: false, friends: [] }, { status: 500 });
+    return Response.json({ configured: false, friends: [], incoming: [], outgoing: [] }, { status: 500 });
   }
 }
 
@@ -125,10 +161,9 @@ export async function onRequestPost(context) {
   }
 
   try {
-    await env.DB.prepare(PLAYERS_SQL).run();
-    await env.DB.prepare(FRIENDSHIPS_SQL).run();
+    await ensureTables(env.DB);
 
-    if (action === "add") {
+    if (action === "request" || action === "add") {
       const rawTarget = String(body?.target || "").trim();
       if (!rawTarget) {
         return Response.json({ error: "נא להזין ID של חבר או שם משתמש" }, { status: 400 });
@@ -136,7 +171,6 @@ export async function onRequestPost(context) {
       const cleanedCode = rawTarget.replace(/^#/, "").toUpperCase();
       const targetLower = rawTarget.toLowerCase();
 
-      // חיפוש לפי שם משתמש ישיר או לפי קוד ID בן 6 תווים
       let found = await env.DB
         .prepare("SELECT username, username_lower, total_won, best_streak, points, best_timed, avatar_id, stats_json, updated_at FROM players WHERE username_lower = ?")
         .bind(targetLower)
@@ -153,23 +187,78 @@ export async function onRequestPost(context) {
         return Response.json({ error: "לא נמצא שחקן עם ה-ID או השם הזה." }, { status: 404 });
       }
       if (found.username_lower === userLower) {
-        return Response.json({ error: "אי אפשר להוסיף את עצמך כחבר 😄" }, { status: 400 });
+        return Response.json({ error: "אי אפשר לשלוח בקשה לעצמך 😄" }, { status: 400 });
+      }
+
+      // בדיקה אם כבר חברים
+      const alreadyFriends = await env.DB
+        .prepare("SELECT 1 FROM friendships WHERE user_lower = ? AND friend_lower = ?")
+        .bind(userLower, found.username_lower)
+        .first();
+      if (alreadyFriends) {
+        return Response.json({ error: `${found.username} כבר נמצא ברשימת החברים שלך.` }, { status: 409 });
+      }
+
+      // אם הצד השני כבר שלח לנו בקשה -> אישור הדדי מיידי!
+      const reverseReq = await env.DB
+        .prepare("SELECT 1 FROM friend_requests WHERE from_lower = ? AND to_lower = ?")
+        .bind(found.username_lower, userLower)
+        .first();
+      if (reverseReq) {
+        await env.DB.prepare("DELETE FROM friend_requests WHERE from_lower = ? AND to_lower = ?").bind(found.username_lower, userLower).run();
+        await env.DB.prepare("INSERT OR IGNORE INTO friendships (user_lower, friend_lower) VALUES (?, ?)").bind(userLower, found.username_lower).run();
+        await env.DB.prepare("INSERT OR IGNORE INTO friendships (user_lower, friend_lower) VALUES (?, ?)").bind(found.username_lower, userLower).run();
+        return Response.json({ ok: true, status: "accepted", friend: mapPlayerRow(found) });
+      }
+
+      // בדיקה אם כבר שלחנו בקשה שממתינה לאישור
+      const existingReq = await env.DB
+        .prepare("SELECT 1 FROM friend_requests WHERE from_lower = ? AND to_lower = ?")
+        .bind(userLower, found.username_lower)
+        .first();
+      if (existingReq) {
+        return Response.json({ error: `כבר שלחת בקשת חברות ל-${found.username} (ממתין לאישור).` }, { status: 409 });
       }
 
       await env.DB
-        .prepare("INSERT OR IGNORE INTO friendships (user_lower, friend_lower) VALUES (?, ?)")
+        .prepare("INSERT INTO friend_requests (from_lower, to_lower) VALUES (?, ?)")
         .bind(userLower, found.username_lower)
         .run();
 
-      return Response.json({ ok: true, friend: mapPlayerRow(found) });
+      return Response.json({ ok: true, status: "pending", target: mapPlayerRow(found) });
+    }
+
+    if (action === "accept") {
+      const fromLower = String(body?.fromLower || "").trim().toLowerCase();
+      if (!fromLower) return Response.json({ error: "Missing fromLower" }, { status: 400 });
+      await env.DB.prepare("DELETE FROM friend_requests WHERE (from_lower = ? AND to_lower = ?) OR (from_lower = ? AND to_lower = ?)")
+        .bind(fromLower, userLower, userLower, fromLower)
+        .run();
+      await env.DB.prepare("INSERT OR IGNORE INTO friendships (user_lower, friend_lower) VALUES (?, ?)").bind(userLower, fromLower).run();
+      await env.DB.prepare("INSERT OR IGNORE INTO friendships (user_lower, friend_lower) VALUES (?, ?)").bind(fromLower, userLower).run();
+      return Response.json({ ok: true });
+    }
+
+    if (action === "decline") {
+      const fromLower = String(body?.fromLower || "").trim().toLowerCase();
+      if (!fromLower) return Response.json({ error: "Missing fromLower" }, { status: 400 });
+      await env.DB.prepare("DELETE FROM friend_requests WHERE from_lower = ? AND to_lower = ?").bind(fromLower, userLower).run();
+      return Response.json({ ok: true });
+    }
+
+    if (action === "cancel") {
+      const toLower = String(body?.toLower || "").trim().toLowerCase();
+      if (!toLower) return Response.json({ error: "Missing toLower" }, { status: 400 });
+      await env.DB.prepare("DELETE FROM friend_requests WHERE from_lower = ? AND to_lower = ?").bind(userLower, toLower).run();
+      return Response.json({ ok: true });
     }
 
     if (action === "remove") {
       const targetLower = String(body?.targetLower || "").trim().toLowerCase();
       if (!targetLower) return Response.json({ error: "Missing target" }, { status: 400 });
       await env.DB
-        .prepare("DELETE FROM friendships WHERE user_lower = ? AND friend_lower = ?")
-        .bind(userLower, targetLower)
+        .prepare("DELETE FROM friendships WHERE (user_lower = ? AND friend_lower = ?) OR (user_lower = ? AND friend_lower = ?)")
+        .bind(userLower, targetLower, targetLower, userLower)
         .run();
       return Response.json({ ok: true });
     }

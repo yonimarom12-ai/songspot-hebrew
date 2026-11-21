@@ -1,13 +1,13 @@
-import { state } from "../state.js?v=20261121x";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121x";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121x";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121x";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121x";
-import { stopTimedRun } from "./timed.js?v=20261121x";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121x";
-import { loadFriendsScreen } from "./friends.js?v=20261121x";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121x";
-import { playClickSfx } from "./sfx.js?v=20261121x";
+import { state } from "../state.js?v=20261121y";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121y";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121y";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121y";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121y";
+import { stopTimedRun } from "./timed.js?v=20261121y";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121y";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261121y";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121y";
+import { playClickSfx } from "./sfx.js?v=20261121y";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -193,6 +193,7 @@ export function showScreen(screenName) {
   if (screenName === "home") {
     updateBottomNavActiveTab("game");
     renderHomeModeStatsStrip();
+    refreshIncomingFriendsBadge();
   } else if (screenName === "modes-hub") {
     updateBottomNavActiveTab("modes");
   } else if (screenName === "leaderboard") {

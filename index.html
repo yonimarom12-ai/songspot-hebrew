@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121x">
-  <link rel="stylesheet" href="styles/home.css?v=20261121x">
-  <link rel="stylesheet" href="styles/header.css?v=20261121x">
-  <link rel="stylesheet" href="styles/player.css?v=20261121x">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121x">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121x">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121x">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121x">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121x">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121y">
+  <link rel="stylesheet" href="styles/home.css?v=20261121y">
+  <link rel="stylesheet" href="styles/header.css?v=20261121y">
+  <link rel="stylesheet" href="styles/player.css?v=20261121y">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121y">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121y">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121y">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121y">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121y">
 </head>
 
 <body>
@@ -41,6 +41,7 @@
           <button type="button" class="home-friends-pill-btn" id="home-friends-btn" title="חברים">
             <span aria-hidden="true">👥</span>
             <span>חברים</span>
+            <span class="home-friends-dot" id="home-friends-dot"></span>
           </button>
         </div>
         <div class="home-top-left">
@@ -323,9 +324,21 @@
           <input type="text" class="add-friend-input" id="add-friend-input"
             placeholder="הזן Player ID (למשל #A7F392) או שם משתמש..." autocomplete="off" autocorrect="off"
             autocapitalize="characters" spellcheck="false" />
-          <button type="submit" class="add-friend-submit-btn">+ הוסף</button>
+          <button type="submit" class="add-friend-submit-btn">שלח בקשה</button>
         </form>
         <div class="friends-action-msg" id="friends-action-msg"></div>
+
+        <!-- בקשות חברות נכנסות (ממתינות לאישור שלך) -->
+        <div class="friends-section-block" id="friends-incoming-wrap" style="display: none;">
+          <div class="friends-section-title">📩 בקשות חברות ממתינות</div>
+          <div class="friends-req-list" id="friends-incoming-list"></div>
+        </div>
+
+        <!-- בקשות ששלחת וממתינות לאישור -->
+        <div class="friends-section-block" id="friends-outgoing-wrap" style="display: none;">
+          <div class="friends-section-title">⏳ בקשות ששלחת</div>
+          <div class="friends-req-list" id="friends-outgoing-list"></div>
+        </div>
 
         <div class="friends-list" id="friends-list"></div>
       </div>
@@ -1188,7 +1201,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121x"></script>
+  <script type="module" src="src/main.js?v=20261121y"></script>
 </body>
 
 </html>
