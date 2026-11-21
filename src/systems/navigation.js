@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261121b";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121b";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121b";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121b";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121b";
-import { stopTimedRun } from "./timed.js?v=20261121b";
-import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121b";
-import { playClickSfx } from "./sfx.js?v=20261121b";
+import { state } from "../state.js?v=20261121c";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121c";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121c";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121c";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121c";
+import { stopTimedRun } from "./timed.js?v=20261121c";
+import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121c";
+import { playClickSfx } from "./sfx.js?v=20261121c";
 
 const SCREEN_IDS = {
   home: "screen-home",
