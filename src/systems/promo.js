@@ -1,10 +1,10 @@
-import { state } from "../state.js?v=20261121n";
-import { saveUserStats } from "../services/storage.js?v=20261121n";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121n";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation, formatPoints } from "./economy.js?v=20261121n";
-import { applyEquippedCosmetics } from "./shop.js?v=20261121n";
-import { launchWinConfetti } from "./confetti.js?v=20261121n";
-import { playCrystalSfx, playWinSfx, playWrongSfx } from "./sfx.js?v=20261121n";
+import { state } from "../state.js?v=20261121p";
+import { saveUserStats } from "../services/storage.js?v=20261121p";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121p";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation, formatPoints } from "./economy.js?v=20261121p";
+import { applyEquippedCosmetics } from "./shop.js?v=20261121p";
+import { launchWinConfetti } from "./confetti.js?v=20261121p";
+import { playCrystalSfx, playWinSfx, playWrongSfx } from "./sfx.js?v=20261121p";
 
 // טבלת קודים סודיים מוצפנים (SHA-256) כדי שלא יהיה ניתן לקרוא את הקודים ישירות מהקוד
 const PROMO_CATALOG = [

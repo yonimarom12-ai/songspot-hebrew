@@ -1305,3 +1305,556 @@ body.hide-bottom-nav .bottom-nav {
   border-color: var(--spotify-green);
   background: rgba(29, 185, 84, 0.16);
 }
+
+/* ===== משחק מרתון חדש (10 שאלות · 4 אופציות + ניחוש שנה · 15ש' בר) ===== */
+.marathon-shell {
+  padding: 16px 16px 32px;
+  gap: 12px;
+}
+
+.marathon-countdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 450;
+  background: radial-gradient(circle at 50% 45%, rgba(124, 58, 237, 0.92) 0%, rgba(9, 6, 22, 0.97) 75%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 24px;
+}
+
+.marathon-countdown-overlay.visible {
+  display: flex;
+}
+
+.marathon-countdown-num {
+  font-size: 112px;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 36px rgba(236, 72, 153, 0.85), 0 10px 30px rgba(0, 0, 0, 0.65);
+}
+
+.marathon-countdown-num.is-go {
+  font-size: 86px;
+  background: linear-gradient(135deg, #fef08a 0%, #f472b6 50%, #38d9ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.marathon-countdown-num.pop {
+  animation: marathonPop 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes marathonPop {
+  0% { transform: scale(0.35); opacity: 0; }
+  55% { transform: scale(1.16); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.marathon-countdown-sub {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e9d5ff;
+}
+
+.marathon-play-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.marathon-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.marathon-q-pill {
+  font-size: 12px;
+  font-weight: 800;
+  color: #e9d5ff;
+  background: rgba(124, 58, 237, 0.28);
+  border: 1px solid rgba(192, 132, 252, 0.45);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.marathon-score-pill {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #fef08a;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  border-radius: 999px;
+  padding: 6px 12px;
+  direction: ltr;
+}
+
+/* בר טיימר 15 שניות (ויזואלי בלבד, ללא מספרים) */
+.marathon-timer-track {
+  width: 100%;
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.25);
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45);
+}
+
+.marathon-timer-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e 0%, #38d9ff 100%);
+  box-shadow: 0 0 12px rgba(56, 217, 255, 0.55);
+  transition: background 0.35s ease;
+  will-change: width;
+}
+
+.marathon-timer-fill.is-warn {
+  background: linear-gradient(90deg, #f59e0b 0%, #fde047 100%);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+}
+
+.marathon-timer-fill.is-danger {
+  background: linear-gradient(90deg, #ef4444 0%, #fb7185 100%);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.8);
+}
+
+.marathon-stage-card {
+  background: rgba(20, 12, 42, 0.9);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  border-radius: 22px;
+  padding: 16px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.marathon-q-type-badge {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #f9a8d4;
+  background: rgba(236, 72, 153, 0.2);
+  border: 1px solid rgba(244, 114, 182, 0.45);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.marathon-disc-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.marathon-disc-ring {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #3b1c71, #190d35);
+  border: 2px solid rgba(192, 132, 252, 0.45);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+}
+
+.marathon-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.marathon-cover-img.revealed {
+  opacity: 1;
+}
+
+.marathon-disc-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 32px;
+}
+
+.marathon-disc-eq span {
+  width: 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f472b6, #a855f7);
+  animation: eqPulse 0.9s ease-in-out infinite alternate;
+}
+
+.marathon-disc-eq span:nth-child(1) { height: 14px; animation-delay: 0s; }
+.marathon-disc-eq span:nth-child(2) { height: 28px; animation-delay: 0.18s; }
+.marathon-disc-eq span:nth-child(3) { height: 20px; animation-delay: 0.34s; }
+.marathon-disc-eq span:nth-child(4) { height: 26px; animation-delay: 0.5s; }
+
+@keyframes eqPulse {
+  from { transform: scaleY(0.45); }
+  to { transform: scaleY(1.05); }
+}
+
+.marathon-replay-audio-btn {
+  background: rgba(38, 24, 76, 0.9);
+  border: 1px solid rgba(192, 132, 252, 0.38);
+  color: #e9d5ff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.marathon-q-prompt {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.marathon-year-song-meta {
+  margin: -4px 0 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+/* 4 אופציות זיהוי שיר */
+.marathon-choices-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+}
+
+.marathon-choice-btn {
+  width: 100%;
+  background: rgba(25, 16, 52, 0.92);
+  border: 1.5px solid rgba(192, 132, 252, 0.34);
+  border-radius: 16px;
+  padding: 13px 16px;
+  color: #fff;
+  font-family: inherit;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.marathon-choice-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.marathon-choice-title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.marathon-choice-artist {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.marathon-choice-btn.is-correct {
+  border-color: #22c55e;
+  background: rgba(22, 163, 74, 0.32);
+}
+
+.marathon-choice-btn.is-wrong {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.28);
+}
+
+/* ניחוש שנה (סליידר) */
+.marathon-year-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: rgba(20, 12, 42, 0.9);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  border-radius: 20px;
+  padding: 16px 14px;
+}
+
+.marathon-year-readout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  direction: ltr;
+}
+
+.marathon-year-val {
+  font-size: 38px;
+  font-weight: 900;
+  color: #38d9ff;
+  min-width: 96px;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(56, 217, 255, 0.5);
+}
+
+.marathon-year-step {
+  background: rgba(45, 28, 86, 0.92);
+  border: 1px solid rgba(192, 132, 252, 0.42);
+  color: #fff;
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.marathon-year-slider {
+  width: 100%;
+  accent-color: #ec4899;
+  height: 8px;
+  cursor: pointer;
+  direction: ltr;
+}
+
+.marathon-year-scale {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  direction: ltr;
+  margin-top: -6px;
+}
+
+.marathon-year-confirm-btn {
+  width: 100%;
+}
+
+/* פידבק מיידי */
+.marathon-feedback-bar {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  background: rgba(20, 12, 42, 0.95);
+}
+
+.marathon-feedback-bar.visible {
+  display: flex;
+}
+
+.marathon-feedback-bar.is-good {
+  border-color: rgba(74, 222, 128, 0.65);
+  background: rgba(20, 83, 45, 0.42);
+}
+
+.marathon-feedback-bar.is-bad {
+  border-color: rgba(248, 113, 113, 0.65);
+  background: rgba(127, 29, 29, 0.42);
+}
+
+.marathon-feedback-info {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+}
+
+.marathon-feedback-info strong {
+  font-size: 14px;
+  color: #fff;
+}
+
+.marathon-feedback-info span {
+  color: var(--text-sub);
+}
+
+.marathon-feedback-pts {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fef08a;
+  direction: ltr;
+}
+
+.marathon-next-q-btn {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-radius: 11px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* מסך סיכום מרתון */
+.marathon-summary-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.marathon-sum-hero {
+  background: linear-gradient(145deg, rgba(124, 58, 237, 0.35), rgba(20, 12, 42, 0.94));
+  border: 1px solid rgba(216, 180, 254, 0.45);
+  border-radius: 22px;
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.marathon-sum-rank {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fef08a;
+}
+
+.marathon-sum-score {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  direction: ltr;
+}
+
+.marathon-sum-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.marathon-sum-pill {
+  background: rgba(15, 9, 34, 0.82);
+  border: 1px solid rgba(192, 132, 252, 0.32);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  color: var(--text-sub);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.marathon-sum-pill strong {
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.marathon-sum-list-wrap {
+  background: rgba(18, 11, 38, 0.9);
+  border: 1px solid rgba(192, 132, 252, 0.26);
+  border-radius: 20px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.marathon-sum-list-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #e9d5ff;
+  padding: 0 4px;
+}
+
+.marathon-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.marathon-sum-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(12, 8, 28, 0.85);
+  border: 1px solid rgba(192, 132, 252, 0.18);
+  border-radius: 13px;
+  padding: 8px 10px;
+}
+
+.marathon-sum-row.is-hit { border-color: rgba(74, 222, 128, 0.45); }
+.marathon-sum-row.is-close { border-color: rgba(251, 191, 36, 0.45); }
+.marathon-sum-row.is-miss { border-color: rgba(248, 113, 113, 0.35); }
+
+.marathon-sum-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.marathon-sum-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.marathon-sum-song {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marathon-sum-detail {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.marathon-sum-pts {
+  font-size: 13px;
+  font-weight: 900;
+  color: #fef08a;
+  direction: ltr;
+  flex-shrink: 0;
+}
+
+.marathon-sum-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.marathon-home-btn {
+  justify-content: center;
+  width: 100%;
+  padding: 11px;
+}

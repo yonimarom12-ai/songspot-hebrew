@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121n">
-  <link rel="stylesheet" href="styles/home.css?v=20261121n">
-  <link rel="stylesheet" href="styles/header.css?v=20261121n">
-  <link rel="stylesheet" href="styles/player.css?v=20261121n">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121n">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121n">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121n">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121n">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121n">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121p">
+  <link rel="stylesheet" href="styles/home.css?v=20261121p">
+  <link rel="stylesheet" href="styles/header.css?v=20261121p">
+  <link rel="stylesheet" href="styles/player.css?v=20261121p">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121p">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121p">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121p">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121p">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121p">
 </head>
 
 <body>
@@ -260,6 +260,97 @@
           <span class="lb-th-stats">זיהויים · רצף · קריסטלים</span>
         </div>
         <div class="lb-table-list" id="lb-table-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 1ד: משחק מרתון חדש (10 שאלות · 4 אופציות + ניחוש שנה · 15ש' בר) ===== -->
+  <section class="app-screen" id="screen-marathon" aria-label="משחק מרתון">
+    <div class="home-stage-glow"></div>
+
+    <!-- שכבת ספירה לאחור גדולה 3 · 2 · 1 · צא! -->
+    <div class="marathon-countdown-overlay" id="marathon-countdown-overlay" aria-live="assertive">
+      <div class="marathon-countdown-num" id="marathon-countdown-num">3</div>
+      <div class="marathon-countdown-sub" id="marathon-countdown-sub">התכוננו — 10 שאלות!</div>
+    </div>
+
+    <div class="app-shell marathon-shell">
+      <!-- תצוגת שאלה פעילה -->
+      <div class="marathon-play-view" id="marathon-play-view">
+        <div class="marathon-top-bar">
+          <button type="button" class="setup-back-btn" id="marathon-exit-btn">→ יציאה</button>
+          <span class="marathon-q-pill" id="marathon-q-counter">שאלה 1 מתוך 10</span>
+          <span class="marathon-score-pill">🏆 <strong id="marathon-score-val">0</strong></span>
+        </div>
+
+        <!-- בר טיימר 15 שניות (ויזואלי בלבד, ללא מספרים) -->
+        <div class="marathon-timer-track" aria-label="זמן שנותר לשאלה">
+          <div class="marathon-timer-fill" id="marathon-timer-fill"></div>
+        </div>
+
+        <div class="marathon-stage-card">
+          <span class="marathon-q-type-badge" id="marathon-q-type-badge">🎵 זהה את השיר</span>
+          <div class="marathon-disc-wrap">
+            <div class="marathon-disc-ring">
+              <img class="marathon-cover-img" id="marathon-cover-img" alt="" />
+              <div class="marathon-disc-eq" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <button type="button" class="marathon-replay-audio-btn" id="marathon-replay-audio-btn" title="השמע שוב">🔊 השמע שוב</button>
+          </div>
+          <h2 class="marathon-q-prompt" id="marathon-q-prompt">איזה שיר מתנגן עכשיו?</h2>
+          <p class="marathon-year-song-meta" id="marathon-year-song-meta" style="display: none;"></p>
+        </div>
+
+        <!-- שאלת 4 אופציות -->
+        <div class="marathon-choices-grid" id="marathon-choices-grid"></div>
+
+        <!-- שאלת ניחוש שנה -->
+        <div class="marathon-year-box" id="marathon-year-box" style="display: none;">
+          <div class="marathon-year-readout">
+            <button type="button" class="marathon-year-step" data-year-step="-5">-5</button>
+            <button type="button" class="marathon-year-step" data-year-step="-1">-1</button>
+            <span class="marathon-year-val" id="marathon-year-val">2008</span>
+            <button type="button" class="marathon-year-step" data-year-step="1">+1</button>
+            <button type="button" class="marathon-year-step" data-year-step="5">+5</button>
+          </div>
+          <input type="range" class="marathon-year-slider" id="marathon-year-slider" min="1970" max="2026" value="2008" />
+          <div class="marathon-year-scale"><span>1970</span><span>1990</span><span>2010</span><span>2026</span></div>
+          <button type="button" class="setup-confirm-btn marathon-year-confirm-btn" id="marathon-year-confirm-btn">נעל תשובה ✓</button>
+        </div>
+
+        <!-- פידבק מיידי + מעבר לשאלה הבאה -->
+        <div class="marathon-feedback-bar" id="marathon-feedback-bar">
+          <div class="marathon-feedback-info">
+            <strong id="marathon-feedback-title"></strong>
+            <span id="marathon-feedback-sub"></span>
+          </div>
+          <span class="marathon-feedback-pts" id="marathon-feedback-pts"></span>
+          <button type="button" class="marathon-next-q-btn" id="marathon-next-q-btn">לשאלה הבאה ←</button>
+        </div>
+      </div>
+
+      <!-- מסך סיכום בסיום 10 השאלות -->
+      <div class="marathon-summary-view" id="marathon-summary-view" style="display: none;">
+        <div class="marathon-sum-hero">
+          <div class="marathon-sum-rank" id="marathon-sum-rank">👑 אגדת מוזיקה!</div>
+          <div class="marathon-sum-score" id="marathon-sum-score">0 / 10,000</div>
+          <div class="marathon-sum-pills">
+            <span class="marathon-sum-pill">דיוק: <strong id="marathon-sum-acc">0 / 10</strong></span>
+            <span class="marathon-sum-pill">פרס: <strong id="marathon-sum-crystals">+0</strong></span>
+          </div>
+        </div>
+
+        <div class="marathon-sum-list-wrap">
+          <div class="marathon-sum-list-title">סיכום 10 השאלות</div>
+          <div class="marathon-summary-list" id="marathon-summary-list"></div>
+        </div>
+
+        <div class="marathon-sum-actions">
+          <button type="button" class="setup-confirm-btn" id="marathon-replay-btn">שחק מרתון חדש ▶</button>
+          <button type="button" class="setup-back-btn marathon-home-btn" id="marathon-home-btn">חזרה ללובי</button>
+        </div>
       </div>
     </div>
   </section>
@@ -963,7 +1054,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121n"></script>
+  <script type="module" src="src/main.js?v=20261121p"></script>
 </body>
 
 </html>

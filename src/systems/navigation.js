@@ -1,16 +1,18 @@
-import { state } from "../state.js?v=20261121n";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121n";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121n";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121n";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121n";
-import { stopTimedRun } from "./timed.js?v=20261121n";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121n";
-import { playClickSfx } from "./sfx.js?v=20261121n";
+import { state } from "../state.js?v=20261121p";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121p";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121p";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121p";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121p";
+import { stopTimedRun } from "./timed.js?v=20261121p";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121p";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121p";
+import { playClickSfx } from "./sfx.js?v=20261121p";
 
 const SCREEN_IDS = {
   home: "screen-home",
   "modes-hub": "screen-modes-hub",
   leaderboard: "screen-leaderboard",
+  marathon: "screen-marathon",
   "setup-genres": "screen-setup-genres",
   "setup-decades": "screen-setup-decades",
   mode: "screen-mode",
@@ -29,12 +31,12 @@ const MODE_CATALOG = {
     action: "quickplay"
   },
   marathon: {
-    badge: "אתגר רצף",
+    badge: "10 שאלות · טריוויה מוזיקלית",
     icon: "♾️",
     title: "מרתון",
-    desc: "רצף שירים אינסופי ברמות קושי עולות בלופ — נסו לשבור את שיא הרצף האישי שלכם!",
+    desc: "10 שאלות קצביות: זיהוי שיר מבין 4 אופציות וניחוש שנת יציאה! 15 שניות לכל שאלה — כמה שיותר מדויק ומהיר, יותר נקודות!",
     status: "🔥 זמין למשחק עכשיו",
-    actionLabel: "התחל מרתון עכשיו ▶",
+    actionLabel: "התחל מרתון (10 שאלות) ▶",
     action: "start-marathon"
   },
   timed: {
@@ -81,7 +83,11 @@ export function showScreen(screenName) {
   // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/הגדרות (גלוי בבית, מצבי משחק ודירוג)
   document.body.classList.toggle("hide-bottom-nav", screenName !== "home" && screenName !== "modes-hub" && screenName !== "leaderboard");
 
-  if (screenName !== "game" && screenName !== "settings") {
+  if (screenName !== "marathon") {
+    stopMarathonSession();
+  }
+
+  if (screenName !== "game" && screenName !== "settings" && screenName !== "marathon") {
     stopTimedRun();
     stopAudioVisuals();
     releaseMediaElement();
@@ -437,11 +443,8 @@ export function initNavigationListeners() {
       const cfg = MODE_CATALOG[currentModeKey];
       if (!cfg) return showScreen("home");
       if (cfg.action === "start-marathon") {
-        state.selectedGenres.clear();
-        state.selectedGenres.add("all");
-        state.selectedDecades.clear();
-        state.selectedDecades.add("all");
-        startGameDirectly("easy");
+        showScreen("marathon");
+        startMarathonSession(() => showScreen("home"));
       } else if (cfg.action === "start-timed") {
         state.selectedGenres.clear();
         state.selectedGenres.add("all");
