@@ -1,15 +1,15 @@
-import { state } from "../state.js?v=20261122b";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122b";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122b";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122b";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261122b";
-import { stopTimedRun } from "./timed.js?v=20261122b";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122b";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122b";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122b";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122b";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122b";
-import { playClickSfx } from "./sfx.js?v=20261122b";
+import { state } from "../state.js?v=20261122c";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122c";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122c";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122c";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261122c";
+import { stopTimedRun } from "./timed.js?v=20261122c";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122c";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122c";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122c";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122c";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122c";
+import { playClickSfx } from "./sfx.js?v=20261122c";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -98,20 +98,20 @@ function renderHomeModeStatsStrip() {
   if (selectedHomeMode === "marathon") {
     const best = s.bestMarathonScore || 0;
     strip.innerHTML = best > 0
-      ? `<span>🏆 שיא אישי: <strong>${best.toLocaleString("he-IL")} נק'</strong></span>`
-      : `<span>🏆 שיא אישי: <strong>טרם נקבע</strong></span>`;
+      ? `<span><img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> שיא אישי: <strong>${best.toLocaleString("he-IL")} נק'</strong></span>`
+      : `<span><img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> שיא אישי: <strong>טרם נקבע</strong></span>`;
   } else if (selectedHomeMode === "reverse") {
     const best = s.bestReverseStreak || 0;
-    strip.innerHTML = `<span>🔄 שיא רצף הפוך: <strong>${best}</strong></span>`;
+    strip.innerHTML = `<span><img class="icon-3d-mini" src="assets/icon-reverse.png" alt="" /> שיא רצף הפוך: <strong>${best}</strong></span>`;
   } else if (selectedHomeMode === "timeline") {
     const best = s.bestTimelineScore || 0;
-    strip.innerHTML = `<span>⏳ שיא ציר זמן: <strong>${best} שירים</strong></span>`;
+    strip.innerHTML = `<span><img class="icon-3d-mini" src="assets/icon-timeline.png" alt="" /> שיא ציר זמן: <strong>${best} שירים</strong></span>`;
   } else if (selectedHomeMode === "timed") {
     const best = s.bestTimedScore || 0;
-    strip.innerHTML = `<span>⏱️ שיא 60ש': <strong>${best} ${best === 1 ? "שיר" : "שירים"}</strong></span>`;
+    strip.innerHTML = `<span><img class="icon-3d-mini" src="assets/icon-timed.png" alt="" /> שיא 60ש': <strong>${best} ${best === 1 ? "שיר" : "שירים"}</strong></span>`;
   } else if (selectedHomeMode === "daily") {
     const hardWins = s.byLevel?.hard || 0;
-    strip.innerHTML = `<span>📅 רמת קשה · זיהויים: <strong>${hardWins}</strong></span>`;
+    strip.innerHTML = `<span><img class="icon-3d-mini" src="assets/icon-daily.png" alt="" /> רמת קשה · זיהויים: <strong>${hardWins}</strong></span>`;
   } else if (selectedHomeMode === "weekly") {
     const impWins = s.byLevel?.impossible || 0;
     strip.innerHTML = `<span>👑 בונוס ×4 · בלתי אפשרי: <strong>${impWins}</strong></span>`;

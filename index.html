@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122b">
-  <link rel="stylesheet" href="styles/home.css?v=20261122b">
-  <link rel="stylesheet" href="styles/header.css?v=20261122b">
-  <link rel="stylesheet" href="styles/player.css?v=20261122b">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122b">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122b">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122b">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122b">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122b">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122c">
+  <link rel="stylesheet" href="styles/home.css?v=20261122c">
+  <link rel="stylesheet" href="styles/header.css?v=20261122c">
+  <link rel="stylesheet" href="styles/player.css?v=20261122c">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122c">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122c">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122c">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122c">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122c">
 </head>
 
 <body>
@@ -107,16 +107,7 @@
       <div class="home-modes-grid">
         <button type="button" class="mode-card theme-purple is-selected" data-open-mode="quickplay">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="32" height="32">
-              <defs>
-                <linearGradient id="qpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#f9a8d4" />
-                  <stop offset="100%" stop-color="#a855f7" />
-                </linearGradient>
-              </defs>
-              <circle cx="24" cy="24" r="16" fill="rgba(168,85,247,0.22)" stroke="url(#qpGrad)" stroke-width="3" />
-              <path d="M20 16l13 8-13 8V16z" fill="#fff" />
-            </svg>
+            <img class="mode-card-3d-img" src="assets/icon-quickplay.png" alt="" decoding="async" />
           </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">משחק מהיר</span>
@@ -152,17 +143,7 @@
 
         <button type="button" class="mode-card theme-pink" data-open-mode="marathon">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 56 32" width="38" height="24">
-              <defs>
-                <linearGradient id="pinkInf" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#ff6ec7" />
-                  <stop offset="50%" stop-color="#f43f5e" />
-                  <stop offset="100%" stop-color="#fb7185" />
-                </linearGradient>
-              </defs>
-              <path d="M16 8c-5 0-9 3.6-9 8s4 8 9 8c6 0 10-16 24-16 5 0 9 3.6 9 8s-4 8-9 8c-6 0-10-16-24-16z"
-                fill="none" stroke="url(#pinkInf)" stroke-width="4.5" stroke-linecap="round" />
-            </svg>
+            <img class="mode-card-3d-img" src="assets/icon-marathon.png" alt="" decoding="async" />
           </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">מרתון</span>
@@ -173,7 +154,9 @@
         </button>
 
         <button type="button" class="mode-card theme-reverse" data-open-mode="reverse">
-          <span class="mode-card-svg" aria-hidden="true" style="font-size: 26px;">🔄</span>
+          <span class="mode-card-svg" aria-hidden="true">
+            <img class="mode-card-3d-img" src="assets/icon-reverse.png" alt="" decoding="async" />
+          </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">הפוך על הפוך</span>
             <span class="mode-card-sub">זהו להיטים שמתנגנים בהילוך אחורי!</span>
@@ -183,7 +166,9 @@
         </button>
 
         <button type="button" class="mode-card theme-timeline" data-open-mode="timeline">
-          <span class="mode-card-svg" aria-hidden="true" style="font-size: 26px;">⏳</span>
+          <span class="mode-card-svg" aria-hidden="true">
+            <img class="mode-card-3d-img" src="assets/icon-timeline.png" alt="" decoding="async" />
+          </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">ציר זמן</span>
             <span class="mode-card-sub">מקמו שירים לפי סדר שנות היציאה!</span>
@@ -194,19 +179,7 @@
 
         <button type="button" class="mode-card theme-green" data-open-mode="timed">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="32" height="32">
-              <defs>
-                <linearGradient id="greenWatch" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#bef264" />
-                  <stop offset="100%" stop-color="#22c55e" />
-                </linearGradient>
-              </defs>
-              <rect x="20" y="5" width="8" height="4" rx="1.5" fill="#86efac" />
-              <circle cx="24" cy="27" r="14" fill="rgba(16,185,129,0.16)" stroke="url(#greenWatch)"
-                stroke-width="3.5" />
-              <path d="M24 19v8l5 3" fill="none" stroke="#ecfccb" stroke-width="3" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
+            <img class="mode-card-3d-img" src="assets/icon-timed.png" alt="" decoding="async" />
           </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">משחק בזמן</span>
@@ -218,19 +191,7 @@
 
         <button type="button" class="mode-card theme-cyan" data-open-mode="daily">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="32" height="32">
-              <defs>
-                <linearGradient id="cyanChart" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#0ea5e9" />
-                  <stop offset="100%" stop-color="#67e8f9" />
-                </linearGradient>
-              </defs>
-              <rect x="9" y="28" width="6" height="11" rx="2" fill="url(#cyanChart)" />
-              <rect x="20" y="22" width="6" height="17" rx="2" fill="url(#cyanChart)" />
-              <rect x="31" y="14" width="6" height="25" rx="2" fill="url(#cyanChart)" />
-              <path d="M9 22l9-6 6 3 11-10m0 0h-7m7 0v7" fill="none" stroke="#cffafe" stroke-width="2.8"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            <img class="mode-card-3d-img" src="assets/icon-daily.png" alt="" decoding="async" />
           </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">אתגר יומי</span>
@@ -307,7 +268,9 @@
         <button type="button" class="lb-sort-tab" data-lb-sort="points" role="tab">
           <img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> קריסטלים
         </button>
-        <button type="button" class="lb-sort-tab" data-lb-sort="bestMarathon" role="tab">♾️ מרתון</button>
+        <button type="button" class="lb-sort-tab" data-lb-sort="bestMarathon" role="tab">
+          <img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> מרתון
+        </button>
       </div>
 
       <div class="lb-podium" id="lb-podium"></div>
@@ -406,15 +369,15 @@
 
         <div class="fp-records-grid">
           <div class="fp-record-box">
-            <span class="fp-record-label">💎 קריסטלים</span>
+            <span class="fp-record-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> קריסטלים</span>
             <strong class="fp-record-val" id="fp-stat-points">0</strong>
           </div>
           <div class="fp-record-box">
-            <span class="fp-record-label">♾️ שיא מרתון</span>
+            <span class="fp-record-label"><img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> שיא מרתון</span>
             <strong class="fp-record-val" id="fp-stat-marathon">0 נק'</strong>
           </div>
           <div class="fp-record-box">
-            <span class="fp-record-label">⏱️ שיא 60 שניות</span>
+            <span class="fp-record-label"><img class="icon-3d-mini" src="assets/icon-timed.png" alt="" /> שיא 60 שניות</span>
             <strong class="fp-record-val" id="fp-stat-timed">0 שירים</strong>
           </div>
         </div>
@@ -537,12 +500,12 @@
         <span class="marathon-score-pill">🏆 שיא: <strong id="reverse-best-val">0</strong></span>
       </div>
 
-      <div class="marathon-stage-card">
-        <span class="marathon-q-type-badge">🔄 הילוך אחורי (Reverse)</span>
+        <div class="marathon-stage-card">
+        <span class="marathon-q-type-badge"><img class="icon-3d-mini" src="assets/icon-reverse.png" alt="" /> הילוך אחורי (Reverse)</span>
         <div class="marathon-disc-wrap">
           <div class="marathon-disc-ring reverse-disc" id="reverse-disc">
             <img class="marathon-cover-img" id="reverse-cover-img" alt="" />
-            <span style="font-size: 36px;">🔄</span>
+            <img class="icon-3d-reverse-disc" src="assets/icon-reverse.png" alt="" />
           </div>
           <button type="button" class="marathon-replay-audio-btn" id="reverse-play-btn">🔊 השמע שוב בהילוך אחורי</button>
         </div>
@@ -571,7 +534,7 @@
         </div>
 
         <div class="tl-mystery-card">
-          <span class="marathon-q-type-badge">⏳ מקמו את השיר בציר הזמן</span>
+          <span class="marathon-q-type-badge"><img class="icon-3d-mini" src="assets/icon-timeline.png" alt="" /> מקמו את השיר בציר הזמן</span>
           <strong class="tl-mystery-title" id="timeline-mystery-title">טוען שיר...</strong>
           <span class="tl-mystery-artist" id="timeline-mystery-artist"></span>
           <button type="button" class="marathon-replay-audio-btn" id="timeline-replay-audio-btn">🔊 השמע שיר</button>
@@ -1094,11 +1057,11 @@
 
               <div class="kpi-records-grid">
                 <div class="kpi-record-card is-marathon">
-                  <span class="kpi-record-label">♾️ שיא מרתון</span>
+                  <span class="kpi-record-label"><img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> שיא מרתון</span>
                   <span class="kpi-record-val" id="stat-best-marathon">0 נק'</span>
                 </div>
                 <div class="kpi-record-card is-timed">
-                  <span class="kpi-record-label">⏱️ שיא משחק בזמן</span>
+                  <span class="kpi-record-label"><img class="icon-3d-mini" src="assets/icon-timed.png" alt="" /> שיא משחק בזמן</span>
                   <span class="kpi-record-val" id="stat-best-timed">0 שירים</span>
                 </div>
               </div>
@@ -1307,7 +1270,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122b"></script>
+  <script type="module" src="src/main.js?v=20261122c"></script>
 </body>
 
 </html>

@@ -476,6 +476,20 @@ body.has-custom-bg .home-stage-glow {
   transform: scale(1.07);
 }
 
+.mode-card-3d-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: block;
+}
+
+.icon-3d-reverse-disc {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
 .mode-card-meta {
   flex: 1;
   min-width: 0;
