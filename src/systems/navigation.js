@@ -1,17 +1,19 @@
-import { state } from "../state.js?v=20261121v";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121v";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121v";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121v";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121v";
-import { stopTimedRun } from "./timed.js?v=20261121v";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121v";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121v";
-import { playClickSfx } from "./sfx.js?v=20261121v";
+import { state } from "../state.js?v=20261121w";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121w";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121w";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121w";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121w";
+import { stopTimedRun } from "./timed.js?v=20261121w";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121w";
+import { loadFriendsScreen } from "./friends.js?v=20261121w";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121w";
+import { playClickSfx } from "./sfx.js?v=20261121w";
 
 const SCREEN_IDS = {
   home: "screen-home",
   "modes-hub": "screen-modes-hub",
   leaderboard: "screen-leaderboard",
+  friends: "screen-friends",
   marathon: "screen-marathon",
   "setup-genres": "screen-setup-genres",
   "setup-decades": "screen-setup-decades",
@@ -441,11 +443,20 @@ export function initNavigationListeners() {
   const homePointsBtn = document.getElementById("home-points-btn");
   const homeQuestsBtn = document.getElementById("home-quests-btn");
   const homeSettingsBtn = document.getElementById("home-settings-btn");
+  const homeFriendsBtn = document.getElementById("home-friends-btn");
+  const friendsBackBtn = document.getElementById("friends-back-btn");
 
   if (homeStreakBtn) homeStreakBtn.addEventListener("click", () => toggleStreakModal(true));
   if (homePointsBtn) homePointsBtn.addEventListener("click", () => toggleShopModal(true));
   if (homeQuestsBtn) homeQuestsBtn.addEventListener("click", () => toggleQuestsModal(true));
   if (homeSettingsBtn) homeSettingsBtn.addEventListener("click", () => toggleDrawer(true));
+  if (homeFriendsBtn) {
+    homeFriendsBtn.addEventListener("click", () => {
+      showScreen("friends");
+      loadFriendsScreen();
+    });
+  }
+  if (friendsBackBtn) friendsBackBtn.addEventListener("click", () => showScreen("home"));
 
   // כפתור המשחק הראשי בבית — מפעיל את המוד שנבחר כרגע (ברירת מחדל: משחק מהיר)
   updateHomeSelectedModeUI();

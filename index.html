@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121v">
-  <link rel="stylesheet" href="styles/home.css?v=20261121v">
-  <link rel="stylesheet" href="styles/header.css?v=20261121v">
-  <link rel="stylesheet" href="styles/player.css?v=20261121v">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121v">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121v">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121v">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121v">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121v">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121w">
+  <link rel="stylesheet" href="styles/home.css?v=20261121w">
+  <link rel="stylesheet" href="styles/header.css?v=20261121w">
+  <link rel="stylesheet" href="styles/player.css?v=20261121w">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121w">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121w">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121w">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121w">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121w">
 </head>
 
 <body>
@@ -38,6 +38,10 @@
               <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.png" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
             </button>
           </div>
+          <button type="button" class="home-friends-pill-btn" id="home-friends-btn" title="חברים">
+            <span aria-hidden="true">👥</span>
+            <span>חברים</span>
+          </button>
         </div>
         <div class="home-top-left">
           <button type="button" class="home-gear-btn home-quests-btn" id="home-quests-btn" aria-label="משימות יומיות" title="משימות יומיות">
@@ -287,6 +291,98 @@
           <span class="lb-th-stats">זיהויים · רצף · קריסטלים</span>
         </div>
         <div class="lb-table-list" id="lb-table-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 1ה: חברים (מסך מלא · Player ID + הוספה + פרופיל חבר) ===== -->
+  <section class="app-screen" id="screen-friends" aria-label="חברים">
+    <div class="home-stage-glow"></div>
+    <div class="app-shell friends-shell">
+      <!-- תצוגת רשימת חברים -->
+      <div class="friends-view" id="friends-list-view">
+        <div class="setup-top-bar">
+          <button type="button" class="setup-back-btn" id="friends-back-btn">→ ללובי</button>
+          <span class="setup-step-badge">👥 חברים (<span id="friends-count-badge">0</span>)</span>
+        </div>
+
+        <div class="setup-header" style="padding: 2px 0;">
+          <h2 class="setup-title">החברים שלי</h2>
+          <p class="setup-subtitle">הוסיפו חברים לפי ה-ID שלהם וצפו בפרופיל ובשיאים שלהם</p>
+        </div>
+
+        <div class="my-id-card">
+          <div class="my-id-meta">
+            <span class="my-id-label">ה-Player ID שלך</span>
+            <strong class="my-id-code" id="my-player-id-code">#------</strong>
+          </div>
+          <button type="button" class="copy-id-btn" id="copy-my-id-btn">📋 העתק ID</button>
+        </div>
+
+        <form class="add-friend-form" id="add-friend-form" autocomplete="off">
+          <input type="text" class="add-friend-input" id="add-friend-input"
+            placeholder="הזן Player ID (למשל #A7F392) או שם משתמש..." autocomplete="off" autocorrect="off"
+            autocapitalize="characters" spellcheck="false" />
+          <button type="submit" class="add-friend-submit-btn">+ הוסף</button>
+        </form>
+        <div class="friends-action-msg" id="friends-action-msg"></div>
+
+        <div class="friends-list" id="friends-list"></div>
+      </div>
+
+      <!-- תצוגת פרופיל מלא של חבר -->
+      <div class="friends-view" id="friend-profile-view" style="display: none;">
+        <div class="setup-top-bar">
+          <button type="button" class="setup-back-btn" id="fp-back-list-btn">→ חזור לחברים</button>
+          <span class="setup-step-badge">פרופיל שחקן</span>
+        </div>
+
+        <div class="fp-hero-card">
+          <div class="fp-avatar" id="fp-avatar">🎧</div>
+          <h2 class="fp-username" id="fp-username">שחקן</h2>
+          <span class="fp-id-badge" id="fp-id-badge">ID: #------</span>
+        </div>
+
+        <div class="fp-stats-grid">
+          <div class="fp-stat-box">
+            <span class="fp-stat-val" id="fp-stat-won">0</span>
+            <span class="fp-stat-label">זיהויים</span>
+          </div>
+          <div class="fp-stat-box">
+            <span class="fp-stat-val" id="fp-stat-heard">0</span>
+            <span class="fp-stat-label">שירים ששמע</span>
+          </div>
+          <div class="fp-stat-box">
+            <span class="fp-stat-val" id="fp-stat-rate">0%</span>
+            <span class="fp-stat-label">אחוז הצלחה</span>
+          </div>
+          <div class="fp-stat-box">
+            <span class="fp-stat-val" id="fp-stat-streak">0</span>
+            <span class="fp-stat-label">שיא רצף</span>
+          </div>
+        </div>
+
+        <div class="fp-records-grid">
+          <div class="fp-record-box">
+            <span class="fp-record-label">💎 קריסטלים</span>
+            <strong class="fp-record-val" id="fp-stat-points">0</strong>
+          </div>
+          <div class="fp-record-box">
+            <span class="fp-record-label">♾️ שיא מרתון</span>
+            <strong class="fp-record-val" id="fp-stat-marathon">0 נק'</strong>
+          </div>
+          <div class="fp-record-box">
+            <span class="fp-record-label">⏱️ שיא 60 שניות</span>
+            <strong class="fp-record-val" id="fp-stat-timed">0 שירים</strong>
+          </div>
+        </div>
+
+        <div class="fp-favs-card">
+          <div class="fp-favs-title">⭐ המועדפים של השחקן</div>
+          <div class="fp-favorites-list" id="fp-favorites-list"></div>
+        </div>
+
+        <button type="button" class="fp-remove-btn" id="fp-remove-friend-btn">הסר מרשימת החברים</button>
       </div>
     </div>
   </section>
@@ -1092,7 +1188,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121v"></script>
+  <script type="module" src="src/main.js?v=20261121w"></script>
 </body>
 
 </html>

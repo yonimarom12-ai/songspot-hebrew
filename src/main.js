@@ -1,26 +1,26 @@
-import { dom } from "./dom.js?v=20261121v";
-import { initStorageState } from "./services/storage.js?v=20261121v";
-import { hydratePersistedCatalogs, ensureSeedCatalogLoaded } from "./services/itunes.js?v=20261121v";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261121v";
-import { initHintListeners } from "./systems/feedback.js?v=20261121v";
-import { initSearchListeners } from "./systems/search.js?v=20261121v";
-import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261121v";
-import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261121v";
-import { updatePointsDisplay } from "./systems/economy.js?v=20261121v";
-import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261121v";
-import { initAuthListeners } from "./systems/auth.js?v=20261121v";
-import { initDrawerListeners } from "./systems/drawer.js?v=20261121v";
-import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261121v";
-import { initSfxState } from "./systems/sfx.js?v=20261121v";
-import { updateHomeQuestsDot } from "./systems/quests.js?v=20261121v";
-import { initPromoListeners } from "./systems/promo.js?v=20261121v";
+import { dom } from "./dom.js?v=20261121w";
+import { initStorageState } from "./services/storage.js?v=20261121w";
+import { hydratePersistedCatalogs, ensureSeedCatalogLoaded } from "./services/itunes.js?v=20261121w";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261121w";
+import { initHintListeners } from "./systems/feedback.js?v=20261121w";
+import { initSearchListeners } from "./systems/search.js?v=20261121w";
+import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261121w";
+import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261121w";
+import { updatePointsDisplay } from "./systems/economy.js?v=20261121w";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261121w";
+import { initAuthListeners } from "./systems/auth.js?v=20261121w";
+import { initDrawerListeners } from "./systems/drawer.js?v=20261121w";
+import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261121w";
+import { initSfxState } from "./systems/sfx.js?v=20261121w";
+import { updateHomeQuestsDot } from "./systems/quests.js?v=20261121w";
+import { initPromoListeners } from "./systems/promo.js?v=20261121w";
 import {
   fetchRandomSong,
   goToNextSong,
   handleGuess,
   advanceAttempt,
   initDifficultyListeners
-} from "./systems/game.js?v=20261121v";
+} from "./systems/game.js?v=20261121w";
 
 function bootApp() {
   // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
