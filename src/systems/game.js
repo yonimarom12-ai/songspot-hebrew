@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261121c";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121c";
-import { dom } from "../dom.js?v=20261121c";
-import { state } from "../state.js?v=20261121c";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261121c";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261121c";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121c";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261121e";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121e";
+import { dom } from "../dom.js?v=20261121e";
+import { state } from "../state.js?v=20261121e";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261121e";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261121e";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121e";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -13,7 +13,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261121c";
+} from "../services/itunes.js?v=20261121e";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -22,19 +22,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261121c";
-import { launchWinConfetti } from "./confetti.js?v=20261121c";
+} from "./audio.js?v=20261121e";
+import { launchWinConfetti } from "./confetti.js?v=20261121e";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261121c";
+} from "./feedback.js?v=20261121e";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261121c";
-import { updateStreakDisplay } from "./profile.js?v=20261121c";
+} from "./search.js?v=20261121e";
+import { updateStreakDisplay } from "./profile.js?v=20261121e";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -42,8 +42,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261121c";
-import { recordQuestProgress } from "./quests.js?v=20261121c";
+} from "./economy.js?v=20261121e";
+import { recordQuestProgress } from "./quests.js?v=20261121e";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -52,8 +52,8 @@ import {
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong
-} from "./timed.js?v=20261121c";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261121c";
+} from "./timed.js?v=20261121e";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261121e";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -220,37 +220,45 @@ export async function fetchRandomSong() {
   let lastErrorMsg = "";
   let emptyCatalogCount = 0;
 
-  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — מציגים בר טעינה ושולפים אמן מהרשת
+  // אם אין עדיין שיר רענן במטמון עבור רמת הקושי/סינון — שולפים עד 3 אמנים במקביל (מהיר פי 3!)
   if (!selectedSong) {
     startSongLoadingBar({ immediate: true, label: "טוען שיר חדש..." });
     const triedArtists = new Set();
 
-    for (let attempt = 0; attempt < 5; attempt++) {
+    for (let batch = 0; batch < 2; batch++) {
       if (roundId !== state.activeFetchRoundId || candidatePool.length === 0) break;
 
       const remaining = candidatePool.filter(a => !triedArtists.has(a.name));
       if (remaining.length === 0) break;
 
-      // מונע בחירה של אותו זמר פעמיים ברצף ומעדיף זמרים שלא הופיעו בסיבובים האחרונים
       const nonRecent = remaining.filter(a => !state.recentArtists.includes(a.name));
       const notLast = remaining.filter(a => a.name !== state.lastPlayedArtist);
       const pickPool = nonRecent.length > 0 ? nonRecent : (notLast.length > 0 ? notLast : remaining);
-      const picked = pickPool[Math.floor(Math.random() * pickPool.length)];
-      triedArtists.add(picked.name);
 
-      try {
-        const catalog = await getArtistCatalog(picked.name);
-        if (roundId !== state.activeFetchRoundId) return;
+      // בוחרים עד 3 אמנים שונים במכה אחת ומביאים את הקטלוגים שלהם במקביל
+      const shuffled = [...pickPool].sort(() => Math.random() - 0.5);
+      const batchArtists = shuffled.slice(0, 3);
+      batchArtists.forEach(a => triedArtists.add(a.name));
 
-        if (catalog && catalog.length > 0) {
-          selectedSong = pickSongFromCatalog(catalog, picked.tier, attempt >= 3);
-          if (selectedSong) break;
-        } else {
+      const results = await Promise.allSettled(
+        batchArtists.map(a => getArtistCatalog(a.name).then(catalog => ({ artist: a, catalog })))
+      );
+      if (roundId !== state.activeFetchRoundId) return;
+
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value.catalog?.length > 0) {
+          const song = pickSongFromCatalog(r.value.catalog, r.value.artist.tier, batch >= 1);
+          if (song) {
+            selectedSong = song;
+            break;
+          }
+        } else if (r.status === "fulfilled") {
           emptyCatalogCount++;
+        } else {
+          lastErrorMsg = r.reason?.message || "network";
         }
-      } catch (err) {
-        lastErrorMsg = err?.message || "network";
       }
+      if (selectedSong) break;
     }
   }
 

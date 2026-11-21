@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121c">
-  <link rel="stylesheet" href="styles/home.css?v=20261121c">
-  <link rel="stylesheet" href="styles/header.css?v=20261121c">
-  <link rel="stylesheet" href="styles/player.css?v=20261121c">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121c">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121c">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121c">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121c">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121c">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121e">
+  <link rel="stylesheet" href="styles/home.css?v=20261121e">
+  <link rel="stylesheet" href="styles/header.css?v=20261121e">
+  <link rel="stylesheet" href="styles/player.css?v=20261121e">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121e">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121e">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121e">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121e">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121e">
 </head>
 
 <body>
@@ -588,6 +588,10 @@
           <button type="button" class="switch-toggle on" id="sfx-setting-toggle"
             aria-label="הפעל אפקטים קוליים"></button>
         </div>
+
+        <div class="promo-trigger-row">
+          <button type="button" class="promo-trigger-btn" id="open-promo-modal-btn">🎁 יש לך קוד?</button>
+        </div>
       </div>
 
       <button type="button" class="setup-confirm-btn" id="drawer-apply-btn">שמור וחזור</button>
@@ -847,6 +851,25 @@
     </div>
   </div>
 
+  <!-- חלון מימוש קודים סודיים -->
+  <div class="modal-backdrop" id="promo-modal-backdrop">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-label="מימוש קוד מתנה">
+      <div class="modal-header">
+        <h2 class="modal-title">🎁 יש לך קוד?</h2>
+        <button class="drawer-close-btn" id="promo-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="promo-modal-desc">קיבלת קוד סודי? הזן אותו כאן לקבלת מתנה (קריסטלים או פריטים בלעדיים)!</p>
+        <form class="promo-code-form" id="promo-code-form" autocomplete="off">
+          <input type="text" class="auth-input promo-code-input" id="promo-code-input"
+            placeholder="הזן קוד כאן..." maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+          <button type="submit" class="auth-submit-btn">מימוש קוד 🎁</button>
+        </form>
+        <div class="auth-msg" id="promo-msg"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- חלון משימות יומיות (נפתח ממסך הבית ליד ההגדרות) -->
   <div class="modal-backdrop" id="quests-modal-backdrop">
     <div class="profile-modal streak-modal-card" role="dialog" aria-label="משימות יומיות">
@@ -953,7 +976,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121c"></script>
+  <script type="module" src="src/main.js?v=20261121e"></script>
 </body>
 
 </html>

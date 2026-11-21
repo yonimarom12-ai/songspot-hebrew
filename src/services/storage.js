@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261121c";
+import { state } from "../state.js?v=20261121e";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -44,6 +44,7 @@ export function getDefaultStats() {
     customBackgroundData: "",
     bestTimedScore: 0,
     dailyQuests: null,
+    redeemedCodes: [],
     favorites: { song: "", album: "", artist: "" }
   };
 }
@@ -68,6 +69,7 @@ export function normalizeStatsObj(parsed) {
     customBackgroundData: typeof parsed.customBackgroundData === "string" ? parsed.customBackgroundData : "",
     bestTimedScore: Number.isFinite(Number(parsed.bestTimedScore)) ? Math.max(0, Number(parsed.bestTimedScore)) : 0,
     dailyQuests: parsed.dailyQuests && typeof parsed.dailyQuests === "object" ? parsed.dailyQuests : null,
+    redeemedCodes: Array.isArray(parsed.redeemedCodes) ? parsed.redeemedCodes : [],
     favorites: {
       song: typeof parsed.favorites?.song === "string" ? parsed.favorites.song : "",
       album: typeof parsed.favorites?.album === "string" ? parsed.favorites.album : "",

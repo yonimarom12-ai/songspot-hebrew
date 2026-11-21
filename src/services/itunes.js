@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121c";
-import { DIFFICULTIES } from "../data/config.js?v=20261121c";
-import { state, isIOS } from "../state.js?v=20261121c";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121c";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121c";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121e";
+import { DIFFICULTIES } from "../data/config.js?v=20261121e";
+import { state, isIOS } from "../state.js?v=20261121e";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121e";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121e";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -449,6 +449,20 @@ export function pickWithRecencyPriority(tracks) {
   return oldestPool[Math.floor(Math.random() * oldestPool.length)];
 }
 
+// חישוב חכם של חלון השירים לרמת קושי (מונע מצב שברמת בלתי אפשרי נותר רק שיר 1 כשלאמן יש פחות מ-32 שירים)
+function getTierSlice(tracks, range) {
+  const len = tracks.length;
+  if (len === 0) return [];
+  const minSliceSize = Math.min(len, 6);
+  let startIdx = Math.min(range[0], Math.max(0, len - minSliceSize));
+  let endIdx = Math.min(range[1], len);
+  if (endIdx - startIdx < minSliceSize) {
+    startIdx = Math.max(0, endIdx - minSliceSize);
+  }
+  const slice = tracks.slice(startIdx, endIdx);
+  return slice.length > 0 ? slice : tracks;
+}
+
 // בוחר מיד שיר רענן (שעוד לא הושמע) מתוך אמנים שכבר טעונים במטמון עבור רמת הקושי הנוכחית
 export function pickFreshSongFromCachedPool(candidatePool) {
   const diffObj = DIFFICULTIES[state.currentDifficulty];
@@ -466,10 +480,7 @@ export function pickFreshSongFromCachedPool(candidatePool) {
     if (decadeFiltered.length === 0) continue;
 
     const range = diffObj.tiers[artist.tier] || [0, 8];
-    const startIdx = Math.min(range[0], Math.max(0, decadeFiltered.length - 1));
-    const endIdx = Math.min(range[1], decadeFiltered.length);
-    let slice = decadeFiltered.slice(startIdx, endIdx);
-    if (slice.length === 0) slice = decadeFiltered;
+    const slice = getTierSlice(decadeFiltered, range);
 
     const unplayed = slice.filter(s => !state.playedTrackIds.has(s.trackId));
     if (unplayed.length > 0) {
@@ -502,8 +513,8 @@ export async function warmCatalogCache() {
 
     let targetArtist = null;
 
-    // 1. מחפש קודם שכבת קושי שעדיין יש בה פחות מ-2 אמנים במטמון
-    for (const tier of ["superstars", "established", "indie_deep"]) {
+    // 1. מחפש קודם שכבת קושי שעדיין יש בה פחות מ-4 אמנים במטמון (מונע האטה ברמות קל ובלתי אפשרי)
+    for (const tier of ["superstars", "indie_deep", "established"]) {
       const tierArtists = ARTISTS_DB.filter(artist => {
         if (artist.tier !== tier) return false;
         const genreOk = isAllGenres || artist.genres.some(g => state.selectedGenres.has(g));
@@ -511,7 +522,7 @@ export async function warmCatalogCache() {
         return genreOk && decadeOk;
       });
       const cachedCount = tierArtists.filter(a => state.artistCatalogCache[a.name]?.length > 0).length;
-      if (cachedCount < 2) {
+      if (cachedCount < 4) {
         const uncached = tierArtists.filter(a => !(state.artistCatalogCache[a.name]?.length > 0));
         if (uncached.length > 0) {
           targetArtist = uncached[Math.floor(Math.random() * uncached.length)];
@@ -544,11 +555,7 @@ export function pickSongFromCatalog(catalog, chosenTierName, allowFallbackIfEmpt
 
   const diffObj = DIFFICULTIES[state.currentDifficulty];
   const range = diffObj.tiers[chosenTierName] || [0, 8];
-
-  const startIdx = Math.min(range[0], Math.max(0, sourceCatalog.length - 1));
-  const endIdx = Math.min(range[1], sourceCatalog.length);
-  let slice = sourceCatalog.slice(startIdx, endIdx);
-  if (slice.length === 0) slice = sourceCatalog;
+  const slice = getTierSlice(sourceCatalog, range);
 
   return pickWithRecencyPriority(slice);
 }

@@ -6,7 +6,7 @@ export const DIFFICULTIES = {
     glow: "rgba(30, 215, 96, 0.55)",
     streamsText: "15M - 50M+ השמעות",
     pointsMultiplier: 1,
-    tiers: { superstars: [0, 4] }
+    tiers: { superstars: [0, 7] }
   },
   medium: {
     label: "בינוני",
