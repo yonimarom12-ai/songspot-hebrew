@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121m";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121m";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121m";
-import { state } from "../state.js?v=20261121m";
-import { saveUserStats } from "../services/storage.js?v=20261121m";
-import { fetchItunesData } from "../services/itunes.js?v=20261121m";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121m";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121m";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121m";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261121m";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121m";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121n";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121n";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121n";
+import { state } from "../state.js?v=20261121n";
+import { saveUserStats } from "../services/storage.js?v=20261121n";
+import { fetchItunesData } from "../services/itunes.js?v=20261121n";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121n";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121n";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121n";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261121n";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121n";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -484,8 +484,7 @@ export function toggleProfileModal(isOpen) {
 
 export function initProfileListeners() {
   dom.profileBtn.addEventListener("click", () => {
-    const isAlreadyOpen = dom.profileModalBackdrop.classList.contains("open");
-    toggleProfileModal(!isAlreadyOpen);
+    toggleProfileModal(true);
   });
   if (dom.navGameBtn) {
     dom.navGameBtn.addEventListener("click", () => {
@@ -496,8 +495,7 @@ export function initProfileListeners() {
   }
   if (dom.navShopBtn) {
     dom.navShopBtn.addEventListener("click", () => {
-      const isAlreadyOpen = dom.shopModalBackdrop?.classList.contains("open");
-      toggleShopModal(!isAlreadyOpen);
+      toggleShopModal(true);
     });
   }
   if (dom.shopCloseBtn) {

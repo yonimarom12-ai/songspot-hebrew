@@ -22,6 +22,56 @@
   pointer-events: auto;
 }
 
+/* ===== הפיכת פרופיל וחנות למסכים מלאים (כמו בית, משחקים ודירוג) במקום חלון קופץ ===== */
+#profile-modal-backdrop,
+#shop-modal-backdrop {
+  background-color: var(--bg-pure);
+  background-image: var(--bg-stage);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  align-items: stretch;
+  justify-content: center;
+  transition: opacity 0.16s ease, visibility 0.16s ease;
+}
+
+#profile-modal-backdrop .profile-modal,
+#shop-modal-backdrop .profile-modal {
+  width: 100%;
+  max-width: 470px;
+  height: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+#profile-modal-backdrop .modal-header,
+#shop-modal-backdrop .modal-header {
+  padding: 18px 18px 12px;
+  border-bottom: 1px solid rgba(192, 132, 252, 0.2);
+  background: rgba(12, 7, 28, 0.65);
+}
+
+#profile-modal-backdrop .modal-title,
+#shop-modal-backdrop .modal-title {
+  font-size: 21px;
+}
+
+#profile-modal-backdrop .modal-body,
+#shop-modal-backdrop .modal-body {
+  flex: 1;
+  padding: 16px 16px 104px;
+}
+
+#profile-close-btn,
+#shop-close-btn {
+  display: none;
+}
+
 .profile-modal {
   width: 100%;
   max-width: 440px;

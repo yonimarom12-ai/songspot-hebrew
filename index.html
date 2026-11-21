@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121m">
-  <link rel="stylesheet" href="styles/home.css?v=20261121m">
-  <link rel="stylesheet" href="styles/header.css?v=20261121m">
-  <link rel="stylesheet" href="styles/player.css?v=20261121m">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121m">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121m">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121m">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121m">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121m">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121n">
+  <link rel="stylesheet" href="styles/home.css?v=20261121n">
+  <link rel="stylesheet" href="styles/header.css?v=20261121n">
+  <link rel="stylesheet" href="styles/player.css?v=20261121n">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121n">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121n">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121n">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121n">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121n">
 </head>
 
 <body>
@@ -97,7 +97,7 @@
       <div class="home-modes-grid">
         <button type="button" class="mode-card theme-blue" data-open-mode="1v1">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 64 40" width="54" height="34">
+            <svg viewBox="0 0 64 40" width="44" height="28">
               <defs>
                 <linearGradient id="vsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#c084fc" />
@@ -112,14 +112,16 @@
                 font-family="Rubik,sans-serif">VS</text>
             </svg>
           </span>
-          <span class="mode-card-title">1 נגד 1</span>
-          <span class="mode-card-sub">אתגרו חבר</span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">1 נגד 1</span>
+            <span class="mode-card-sub">אתגרו חבר ראש בראש</span>
+          </span>
           <span class="mode-card-arrow">‹</span>
         </button>
 
         <button type="button" class="mode-card theme-pink" data-open-mode="marathon">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 56 32" width="48" height="28">
+            <svg viewBox="0 0 56 32" width="38" height="24">
               <defs>
                 <linearGradient id="pinkInf" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stop-color="#ff6ec7" />
@@ -131,14 +133,16 @@
                 fill="none" stroke="url(#pinkInf)" stroke-width="4.5" stroke-linecap="round" />
             </svg>
           </span>
-          <span class="mode-card-title">מרתון</span>
-          <span class="mode-card-sub">כמה שאתם יכולים</span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">מרתון</span>
+            <span class="mode-card-sub">כמה שירים תצליחו ברצף?</span>
+          </span>
           <span class="mode-card-arrow">‹</span>
         </button>
 
         <button type="button" class="mode-card theme-green" data-open-mode="timed">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="38" height="38">
+            <svg viewBox="0 0 48 48" width="32" height="32">
               <defs>
                 <linearGradient id="greenWatch" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#bef264" />
@@ -152,14 +156,16 @@
                 stroke-linejoin="round" />
             </svg>
           </span>
-          <span class="mode-card-title">משחק בזמן</span>
-          <span class="mode-card-sub">נחשו כמה שירים שתוכלו</span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">משחק בזמן</span>
+            <span class="mode-card-sub">60 שניות · נחשו כמה שיותר שירים</span>
+          </span>
           <span class="mode-card-arrow">‹</span>
         </button>
 
         <button type="button" class="mode-card theme-cyan" data-open-mode="daily">
           <span class="mode-card-svg" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="38" height="38">
+            <svg viewBox="0 0 48 48" width="32" height="32">
               <defs>
                 <linearGradient id="cyanChart" x1="0%" y1="100%" x2="100%" y2="0%">
                   <stop offset="0%" stop-color="#0ea5e9" />
@@ -173,8 +179,10 @@
                 stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
-          <span class="mode-card-title">אתגר יומי</span>
-          <span class="mode-card-sub">שיר חדש בכל יום</span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">אתגר יומי</span>
+            <span class="mode-card-sub">שיר חדש ומיוחד בכל יום</span>
+          </span>
           <span class="mode-card-arrow">‹</span>
         </button>
       </div>
@@ -955,7 +963,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121m"></script>
+  <script type="module" src="src/main.js?v=20261121n"></script>
 </body>
 
 </html>
