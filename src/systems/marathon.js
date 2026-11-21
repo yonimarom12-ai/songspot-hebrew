@@ -1,11 +1,11 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121p";
-import { state } from "../state.js?v=20261121p";
-import { getArtistCatalog } from "../services/itunes.js?v=20261121p";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121p";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121p";
-import { saveUserStats } from "../services/storage.js?v=20261121p";
-import { launchWinConfetti } from "./confetti.js?v=20261121p";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121p";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121r";
+import { state } from "../state.js?v=20261121r";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261121r";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121r";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121r";
+import { saveUserStats } from "../services/storage.js?v=20261121r";
+import { launchWinConfetti } from "./confetti.js?v=20261121r";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121r";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -80,6 +80,7 @@ function collectCachedSongs() {
 }
 
 async function prepareMarathonSongPool() {
+  await ensureSeedCatalogLoaded();
   let pool = collectCachedSongs();
 
   // אם יש פחות מ-24 שירים במטמון, נשלוף עוד 4-6 אמנים במקביל (2 בכל פעם כדי לא להכביד על iTunes)

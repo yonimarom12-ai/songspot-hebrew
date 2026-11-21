@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121p">
-  <link rel="stylesheet" href="styles/home.css?v=20261121p">
-  <link rel="stylesheet" href="styles/header.css?v=20261121p">
-  <link rel="stylesheet" href="styles/player.css?v=20261121p">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121p">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121p">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121p">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121p">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121p">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121r">
+  <link rel="stylesheet" href="styles/home.css?v=20261121r">
+  <link rel="stylesheet" href="styles/header.css?v=20261121r">
+  <link rel="stylesheet" href="styles/player.css?v=20261121r">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121r">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121r">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121r">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121r">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121r">
 </head>
 
 <body>
@@ -73,14 +73,15 @@
               </svg>
             </span>
             <span class="quickplay-text">
-              <span class="quickplay-title">משחק מהיר</span>
-              <span class="quickplay-sub">נחשו את השיר!</span>
+              <span class="quickplay-title" id="home-play-title">משחק מהיר</span>
+              <span class="quickplay-sub" id="home-play-sub">נחשו את השיר!</span>
             </span>
           </button>
           <div class="hero-wave-bars flipped" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </div>
+        <button type="button" class="home-change-mode-btn" id="home-change-mode-btn">החלף מצב משחק ⇄</button>
       </div>
     </div>
   </section>
@@ -91,10 +92,30 @@
     <div class="app-shell home-shell">
       <div class="setup-header" style="padding-top: 8px;">
         <h2 class="setup-title">מצבי משחק</h2>
-        <p class="setup-subtitle">בחרו את האתגר הבא שלכם</p>
+        <p class="setup-subtitle">בחרו מצב משחק — הוא יחכה לכם במסך הבית</p>
       </div>
 
       <div class="home-modes-grid">
+        <button type="button" class="mode-card theme-purple is-selected" data-open-mode="quickplay">
+          <span class="mode-card-svg" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="32" height="32">
+              <defs>
+                <linearGradient id="qpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f9a8d4" />
+                  <stop offset="100%" stop-color="#a855f7" />
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="16" fill="rgba(168,85,247,0.22)" stroke="url(#qpGrad)" stroke-width="3" />
+              <path d="M20 16l13 8-13 8V16z" fill="#fff" />
+            </svg>
+          </span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">משחק מהיר</span>
+            <span class="mode-card-sub">המשחק הקלאסי · בחר ז'אנר ועשור</span>
+          </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
         <button type="button" class="mode-card theme-blue" data-open-mode="1v1">
           <span class="mode-card-svg" aria-hidden="true">
             <svg viewBox="0 0 64 40" width="44" height="28">
@@ -116,6 +137,7 @@
             <span class="mode-card-title">1 נגד 1</span>
             <span class="mode-card-sub">אתגרו חבר ראש בראש</span>
           </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
 
@@ -135,8 +157,9 @@
           </span>
           <span class="mode-card-meta">
             <span class="mode-card-title">מרתון</span>
-            <span class="mode-card-sub">כמה שירים תצליחו ברצף?</span>
+            <span class="mode-card-sub">10 שאלות · זיהוי שיר וניחוש שנה</span>
           </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
 
@@ -160,6 +183,7 @@
             <span class="mode-card-title">משחק בזמן</span>
             <span class="mode-card-sub">60 שניות · נחשו כמה שיותר שירים</span>
           </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
 
@@ -183,6 +207,7 @@
             <span class="mode-card-title">אתגר יומי</span>
             <span class="mode-card-sub">שיר חדש ומיוחד בכל יום</span>
           </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
       </div>
@@ -205,6 +230,7 @@
           <span class="weekly-title">השיר השבועי</span>
           <span class="weekly-sub">תוכלו לגלות אותו עכשיו!</span>
         </span>
+        <span class="mode-card-selected-tag">✓ נבחר</span>
         <span style="font-size: 18px; opacity: 0.75;">‹</span>
       </button>
     </div>
@@ -1054,7 +1080,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121p"></script>
+  <script type="module" src="src/main.js?v=20261121r"></script>
 </body>
 
 </html>

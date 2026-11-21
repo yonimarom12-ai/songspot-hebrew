@@ -76,6 +76,8 @@ body {
 }
 
 .app-shell {
+  position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 470px;
   min-height: 100vh;

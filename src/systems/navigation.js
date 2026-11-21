@@ -1,12 +1,12 @@
-import { state } from "../state.js?v=20261121p";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121p";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121p";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121p";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121p";
-import { stopTimedRun } from "./timed.js?v=20261121p";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121p";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121p";
-import { playClickSfx } from "./sfx.js?v=20261121p";
+import { state } from "../state.js?v=20261121r";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121r";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121r";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121r";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121r";
+import { stopTimedRun } from "./timed.js?v=20261121r";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261121r";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121r";
+import { playClickSfx } from "./sfx.js?v=20261121r";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -70,7 +70,66 @@ const MODE_CATALOG = {
 
 let currentScreen = "home";
 let currentModeKey = null;
+let selectedHomeMode = "quickplay";
 let returnScreenFromSettings = "home";
+
+const HOME_MODE_CONFIG = {
+  quickplay: { title: "משחק מהיר", sub: "נחשו את השיר!", themeClass: "" },
+  marathon: { title: "מרתון", sub: "10 שאלות · זיהוי ושנים", themeClass: "mode-theme-marathon" },
+  timed: { title: "משחק בזמן", sub: "60 שניות נגד השעון!", themeClass: "mode-theme-timed" },
+  daily: { title: "אתגר יומי", sub: "השיר היומי המיוחד", themeClass: "mode-theme-daily" },
+  weekly: { title: "השיר השבועי", sub: "בונוס ×4 קריסטלים!", themeClass: "mode-theme-weekly" },
+  "1v1": { title: "1 נגד 1", sub: "בקרוב · אתגרו חבר", themeClass: "mode-theme-1v1" }
+};
+
+function updateHomeSelectedModeUI() {
+  const cfg = HOME_MODE_CONFIG[selectedHomeMode] || HOME_MODE_CONFIG.quickplay;
+  const btn = document.getElementById("home-quickplay-btn");
+  const titleEl = document.getElementById("home-play-title");
+  const subEl = document.getElementById("home-play-sub");
+  if (titleEl) titleEl.textContent = cfg.title;
+  if (subEl) subEl.textContent = cfg.sub;
+  if (btn) {
+    btn.classList.remove("mode-theme-marathon", "mode-theme-timed", "mode-theme-daily", "mode-theme-weekly", "mode-theme-1v1");
+    if (cfg.themeClass) btn.classList.add(cfg.themeClass);
+  }
+
+  document.querySelectorAll("#screen-modes-hub [data-open-mode]").forEach(card => {
+    const isSel = card.dataset.openMode === selectedHomeMode;
+    card.classList.toggle("is-selected", isSel);
+  });
+}
+
+function selectHomeMode(modeKey) {
+  if (!HOME_MODE_CONFIG[modeKey]) return;
+  selectedHomeMode = modeKey;
+  updateHomeSelectedModeUI();
+  showScreen("home");
+}
+
+function launchSelectedMode(modeKey) {
+  if (modeKey === "marathon") {
+    showScreen("marathon");
+    startMarathonSession(() => showScreen("home"));
+  } else if (modeKey === "timed") {
+    state.selectedGenres.clear();
+    state.selectedGenres.add("all");
+    state.selectedDecades.clear();
+    state.selectedDecades.add("all");
+    updateFilterPillsUI();
+    showScreen("game");
+    startTimedGameSession();
+  } else if (modeKey === "daily") {
+    startGameDirectly("hard");
+  } else if (modeKey === "weekly") {
+    startGameDirectly("impossible");
+  } else if (modeKey === "1v1") {
+    openModeScreen("1v1");
+  } else {
+    syncSetupSelectionUI();
+    showScreen("setup-genres");
+  }
+}
 
 export function showScreen(screenName) {
   if (currentScreen !== screenName) playClickSfx();
@@ -356,12 +415,18 @@ export function initNavigationListeners() {
   if (homeQuestsBtn) homeQuestsBtn.addEventListener("click", () => toggleQuestsModal(true));
   if (homeSettingsBtn) homeSettingsBtn.addEventListener("click", () => toggleDrawer(true));
 
-  // כפתור "משחק מהיר" -> שלב 1: בחירת ז'אנרים
+  // כפתור המשחק הראשי בבית — מפעיל את המוד שנבחר כרגע (ברירת מחדל: משחק מהיר)
+  updateHomeSelectedModeUI();
   const quickplayBtn = document.getElementById("home-quickplay-btn");
   if (quickplayBtn) {
     quickplayBtn.addEventListener("click", () => {
-      syncSetupSelectionUI();
-      showScreen("setup-genres");
+      launchSelectedMode(selectedHomeMode);
+    });
+  }
+  const changeModeBtn = document.getElementById("home-change-mode-btn");
+  if (changeModeBtn) {
+    changeModeBtn.addEventListener("click", () => {
+      showScreen("modes-hub");
     });
   }
 
@@ -393,9 +458,9 @@ export function initNavigationListeners() {
     decadesConfirm.addEventListener("click", () => startGameDirectly(state.currentDifficulty || "easy"));
   }
 
-  // פתיחת מסכי מודים נפרדים מהלובי
-  document.querySelectorAll("[data-open-mode]").forEach(btn => {
-    btn.addEventListener("click", () => openModeScreen(btn.dataset.openMode));
+  // בחירת מוד מתפריט המשחקים -> מחליף את המוד במסך הבית ומחזיר אוטומטית לבית
+  document.querySelectorAll("#screen-modes-hub [data-open-mode]").forEach(btn => {
+    btn.addEventListener("click", () => selectHomeMode(btn.dataset.openMode));
   });
 
   const modeBackBtn = document.getElementById("mode-back-lobby-btn");

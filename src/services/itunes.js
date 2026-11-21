@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121p";
-import { DIFFICULTIES } from "../data/config.js?v=20261121p";
-import { state, isIOS } from "../state.js?v=20261121p";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121p";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121p";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121r";
+import { DIFFICULTIES } from "../data/config.js?v=20261121r";
+import { state, isIOS } from "../state.js?v=20261121r";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121r";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121r";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -225,6 +225,35 @@ function getPersistedMap() {
     persistedCatalogsMap = {};
   }
   return persistedCatalogsMap;
+}
+
+let seedCatalogPromise = null;
+let seedCatalogLoaded = false;
+
+// טוען קטלוג שירים ישראליים מובנה מאותו דומיין (0 בעיות CORS/429 באייפון ובספארי!)
+export function ensureSeedCatalogLoaded() {
+  if (seedCatalogLoaded) return Promise.resolve(true);
+  if (seedCatalogPromise) return seedCatalogPromise;
+  seedCatalogPromise = fetch("assets/catalog-seed.json?v=20261121r")
+    .then(res => (res.ok ? res.json() : null))
+    .then(data => {
+      if (data && typeof data === "object") {
+        for (const [artistName, tracks] of Object.entries(data)) {
+          if (!Array.isArray(tracks) || tracks.length === 0) continue;
+          if (!state.artistCatalogCache[artistName]?.length) {
+            state.artistCatalogCache[artistName] = tracks;
+          }
+          for (const s of tracks) {
+            state.discoveredSongsMap.set(`${normalizeHebrew(s.title)}_${normalizeHebrew(artistName)}`, s);
+          }
+        }
+        seedCatalogLoaded = true;
+        return true;
+      }
+      return false;
+    })
+    .catch(() => false);
+  return seedCatalogPromise;
 }
 
 export function hydratePersistedCatalogs() {
