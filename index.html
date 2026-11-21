@@ -36,15 +36,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122f">
-  <link rel="stylesheet" href="styles/home.css?v=20261122f">
-  <link rel="stylesheet" href="styles/header.css?v=20261122f">
-  <link rel="stylesheet" href="styles/player.css?v=20261122f">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122f">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122f">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122f">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122f">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122f">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122g">
+  <link rel="stylesheet" href="styles/home.css?v=20261122g">
+  <link rel="stylesheet" href="styles/header.css?v=20261122g">
+  <link rel="stylesheet" href="styles/player.css?v=20261122g">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122g">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122g">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122g">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122g">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122g">
 </head>
 
 <body>
@@ -1250,6 +1250,21 @@
   <!-- באנר צף למצב הצצה (תצוגה מקדימה על מסך המשחק) -->
   <div class="shop-peek-banner" id="shop-peek-banner" role="region" aria-label="תצוגה מקדימה"></div>
 
+  <!-- מדריך למשתמש בפעם הראשונה (ניתן לדילוג בכל שלב) -->
+  <div class="onboarding-overlay" id="onboarding-overlay" role="dialog" aria-modal="true" aria-label="מדריך היכרות">
+    <div class="onboarding-card">
+      <div class="ob-top-row">
+        <span class="ob-step-counter" id="ob-step-counter">1 / 5</span>
+        <button type="button" class="ob-skip-btn" id="ob-skip-btn">דלג על המדריך ✕</button>
+      </div>
+      <div class="ob-emoji" id="ob-emoji">🎵</div>
+      <h3 class="ob-title" id="ob-title"></h3>
+      <p class="ob-desc" id="ob-desc"></p>
+      <div class="ob-dots" id="ob-dots"></div>
+      <button type="button" class="setup-confirm-btn ob-next-btn" id="ob-next-btn">הבא ←</button>
+    </div>
+  </div>
+
   <!-- סרגל ניווט תחתון (בסגנון אפליקציות / אינסטגרם) -->
   <nav class="bottom-nav" aria-label="ניווט ראשי">
     <div class="bottom-nav-inner">
@@ -1298,7 +1313,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122f"></script>
+  <script type="module" src="src/main.js?v=20261122g"></script>
 </body>
 
 </html>

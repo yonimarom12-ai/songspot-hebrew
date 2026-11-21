@@ -1,26 +1,27 @@
-import { dom } from "./dom.js?v=20261122f";
-import { initStorageState } from "./services/storage.js?v=20261122f";
-import { hydratePersistedCatalogs, ensureSeedCatalogLoaded } from "./services/itunes.js?v=20261122f";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261122f";
-import { initHintListeners } from "./systems/feedback.js?v=20261122f";
-import { initSearchListeners } from "./systems/search.js?v=20261122f";
-import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261122f";
-import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261122f";
-import { updatePointsDisplay } from "./systems/economy.js?v=20261122f";
-import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261122f";
-import { initAuthListeners } from "./systems/auth.js?v=20261122f";
-import { initDrawerListeners } from "./systems/drawer.js?v=20261122f";
-import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261122f";
-import { initSfxState } from "./systems/sfx.js?v=20261122f";
-import { updateHomeQuestsDot } from "./systems/quests.js?v=20261122f";
-import { initPromoListeners } from "./systems/promo.js?v=20261122f";
+import { dom } from "./dom.js?v=20261122g";
+import { initStorageState } from "./services/storage.js?v=20261122g";
+import { hydratePersistedCatalogs, ensureSeedCatalogLoaded } from "./services/itunes.js?v=20261122g";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261122g";
+import { initHintListeners } from "./systems/feedback.js?v=20261122g";
+import { initSearchListeners } from "./systems/search.js?v=20261122g";
+import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261122g";
+import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261122g";
+import { updatePointsDisplay } from "./systems/economy.js?v=20261122g";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261122g";
+import { initAuthListeners } from "./systems/auth.js?v=20261122g";
+import { initDrawerListeners } from "./systems/drawer.js?v=20261122g";
+import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261122g";
+import { initSfxState } from "./systems/sfx.js?v=20261122g";
+import { updateHomeQuestsDot } from "./systems/quests.js?v=20261122g";
+import { initPromoListeners } from "./systems/promo.js?v=20261122g";
+import { startOnboardingTour } from "./systems/onboarding.js?v=20261122g";
 import {
   fetchRandomSong,
   goToNextSong,
   handleGuess,
   advanceAttempt,
   initDifficultyListeners
-} from "./systems/game.js?v=20261122f";
+} from "./systems/game.js?v=20261122g";
 
 function bootApp() {
   // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
@@ -61,6 +62,8 @@ function bootApp() {
   applyEquippedCosmetics();
   updateHomeQuestsDot();
   showScreen("home");
+  // מציג מדריך היכרות קצר בפעם הראשונה בלבד (ניתן לדילוג)
+  setTimeout(() => startOnboardingTour(false), 450);
 }
 
 if (document.readyState === "loading") {

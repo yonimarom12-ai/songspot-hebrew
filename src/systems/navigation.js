@@ -1,16 +1,18 @@
-import { state } from "../state.js?v=20261122f";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122f";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122f";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122f";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122f";
-import { showGameToast } from "../utils/toast.js?v=20261122f";
-import { stopTimedRun } from "./timed.js?v=20261122f";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122f";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122f";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122f";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122f";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122f";
-import { playClickSfx } from "./sfx.js?v=20261122f";
+import { state } from "../state.js?v=20261122g";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122g";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122g";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122g";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122g";
+import { showGameToast } from "../utils/toast.js?v=20261122g";
+import { stopTimedRun } from "./timed.js?v=20261122g";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122g";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122g";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122g";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122g";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122g";
+import { playClickSfx } from "./sfx.js?v=20261122g";
+import { vibrateTap } from "../utils/toast.js?v=20261122g";
+import { isOnboardingOpen } from "./onboarding.js?v=20261122g";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -666,6 +668,82 @@ export function initNavigationListeners() {
   if (exitToLobbyBtn) {
     exitToLobbyBtn.addEventListener("click", () => showScreen("home"));
   }
+
+  // החלקה אופקית (Swipe ימינה/שמאלה) למעבר מהיר בין 5 לשוניות הסרגל התחתון
+  // סדר הלשוניות מימין לשמאל ב-RTL: פרופיל -> חנות -> בית -> משחקים -> דירוג
+  const SWIPE_TABS = ["profile", "shop", "home", "modes-hub", "leaderboard"];
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let swipeTracking = false;
+
+  function getActiveMainTab() {
+    if (document.getElementById("profile-modal-backdrop")?.classList.contains("open")) return "profile";
+    if (document.getElementById("shop-modal-backdrop")?.classList.contains("open")) return "shop";
+    if (currentScreen === "home" || currentScreen === "modes-hub" || currentScreen === "leaderboard") {
+      return currentScreen;
+    }
+    return null;
+  }
+
+  function navigateToMainTab(tabName) {
+    vibrateTap();
+    if (tabName === "profile") {
+      toggleProfileModal(true);
+    } else if (tabName === "shop") {
+      toggleShopModal(true);
+    } else if (tabName === "home") {
+      toggleProfileModal(false);
+      toggleShopModal(false);
+      showScreen("home");
+    } else if (tabName === "modes-hub") {
+      toggleProfileModal(false);
+      toggleShopModal(false);
+      showScreen("modes-hub");
+    } else if (tabName === "leaderboard") {
+      toggleProfileModal(false);
+      toggleShopModal(false);
+      showScreen("leaderboard");
+      loadAndRenderLeaderboardPage();
+    }
+  }
+
+  document.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1 || isOnboardingOpen()) { swipeTracking = false; return; }
+    // מתעלמים מהחלקה כשחלון קופץ משני פתוח או שנוגעים בשדה קלט/סליידר
+    if (
+      document.getElementById("streak-modal-backdrop")?.classList.contains("open") ||
+      document.getElementById("quests-modal-backdrop")?.classList.contains("open") ||
+      document.getElementById("promo-modal-backdrop")?.classList.contains("open")
+    ) { swipeTracking = false; return; }
+    const tag = e.target?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") { swipeTracking = false; return; }
+    if (!getActiveMainTab()) { swipeTracking = false; return; }
+
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+    swipeTracking = true;
+  }, { passive: true });
+
+  document.addEventListener("touchend", (e) => {
+    if (!swipeTracking || !e.changedTouches.length) return;
+    swipeTracking = false;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+    if (dt > 600 || Math.abs(dx) < 65 || Math.abs(dx) < Math.abs(dy) * 1.45) return;
+
+    const active = getActiveMainTab();
+    const idx = SWIPE_TABS.indexOf(active);
+    if (idx < 0) return;
+
+    // ב-RTL: החלקה ימינה (dx > 0) מושכת את הלשונית משמאל (idx + 1 -> משחקים/דירוג); החלקה שמאלה (dx < 0) מושכת מימין (idx - 1 -> חנות/פרופיל)
+    const nextIdx = dx > 0 ? idx + 1 : idx - 1;
+    if (nextIdx >= 0 && nextIdx < SWIPE_TABS.length) {
+      navigateToMainTab(SWIPE_TABS[nextIdx]);
+    }
+  }, { passive: true });
 }
 
 export function getCurrentScreen() {
