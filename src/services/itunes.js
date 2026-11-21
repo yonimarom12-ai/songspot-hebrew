@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121g";
-import { DIFFICULTIES } from "../data/config.js?v=20261121g";
-import { state, isIOS } from "../state.js?v=20261121g";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121g";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121g";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121h";
+import { DIFFICULTIES } from "../data/config.js?v=20261121h";
+import { state, isIOS } from "../state.js?v=20261121h";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121h";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121h";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",

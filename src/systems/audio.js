@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261121g";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261121g";
-import { state } from "../state.js?v=20261121g";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261121h";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261121h";
+import { state } from "../state.js?v=20261121h";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }

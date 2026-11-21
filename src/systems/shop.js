@@ -7,11 +7,11 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261121g";
-import { state } from "../state.js?v=20261121g";
-import { saveUserStats } from "../services/storage.js?v=20261121g";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121g";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121g";
+} from "../data/shop.js?v=20261121h";
+import { state } from "../state.js?v=20261121h";
+import { saveUserStats } from "../services/storage.js?v=20261121h";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121h";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121h";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }

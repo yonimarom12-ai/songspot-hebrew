@@ -1,4 +1,4 @@
-import { loadAccountsMap } from "./storage.js?v=20261121g";
+import { loadAccountsMap } from "./storage.js?v=20261121h";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
 // עם גיבוי מקומי אוטומטי אם בסיס הנתונים D1 עדיין לא חובר ב-Cloudflare Dashboard
@@ -50,16 +50,15 @@ export async function loadAccountFromCloud() {
 }
 
 export async function fetchGlobalLeaderboard(limit = 25) {
-  if (cloudAvailable) {
+  if (isHttp) {
     try {
-      const res = await fetch(`/api/leaderboard?limit=${limit}`);
+      const res = await fetch(`/api/leaderboard?limit=${limit}&_t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data.configured && Array.isArray(data.rows)) {
+          cloudAvailable = true;
           return { source: "cloud", rows: data.rows };
         }
-      } else if (res.status === 404 || res.status === 503) {
-        cloudAvailable = false;
       }
     } catch (e) { }
   }
