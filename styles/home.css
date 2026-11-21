@@ -1768,6 +1768,11 @@ body.hide-bottom-nav .bottom-nav {
   direction: ltr;
 }
 
+.marathon-feedback-pts.is-negative,
+.marathon-sum-pts.is-negative {
+  color: #fca5a5;
+}
+
 .marathon-next-q-btn {
   width: 100%;
   background: rgba(255, 255, 255, 0.14);

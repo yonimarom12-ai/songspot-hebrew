@@ -1,11 +1,11 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261121t";
-import { state } from "../state.js?v=20261121t";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261121t";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121t";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121t";
-import { saveUserStats } from "../services/storage.js?v=20261121t";
-import { launchWinConfetti } from "./confetti.js?v=20261121t";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121t";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261121u";
+import { state } from "../state.js?v=20261121u";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261121u";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121u";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261121u";
+import { saveUserStats } from "../services/storage.js?v=20261121u";
+import { launchWinConfetti } from "./confetti.js?v=20261121u";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261121u";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -207,8 +207,17 @@ function applyDynamicFactors(basePoints, song, remainingRatio, currentStreak) {
 
 function calcYearScore(guessYear, actualYear, song, remainingRatio, currentStreak) {
   const diff = Math.abs(guessYear - actualYear);
+  if (diff > 10) {
+    // טעות של יותר מ-10 שנים מורידה נקודות בהתאם למרחק
+    let penaltyBase = 210;
+    if (diff > 25) penaltyBase = 460;
+    else if (diff > 15) penaltyBase = 320;
+    const penalty = -Math.round(penaltyBase * (0.88 + Math.random() * 0.24));
+    return { points: penalty, label: "❄️ רחוק מדי!", diffLabel: "" };
+  }
+
   let base = 0;
-  let label = "❄️ רחוק מדי";
+  let label = "🤏 קצת רחוק";
   if (diff === 0) { base = 1100; label = "🎯 בול בשנה!"; }
   else if (diff === 1) { base = 900; label = "🔥 מרחק שנה אחת!"; }
   else if (diff === 2) { base = 740; label = "✨ קרוב מאוד!"; }
@@ -284,7 +293,14 @@ function showFeedbackAndScheduleNext(sessionId, { isGood, titleText, subText, po
   }
   if (fbTitle) fbTitle.textContent = titleText;
   if (fbSub) fbSub.textContent = subText;
-  if (fbPts) fbPts.textContent = pointsEarned > 0 ? `+${pointsEarned} נק'` : "0 נק'";
+  if (fbPts) {
+    fbPts.classList.toggle("is-negative", pointsEarned < 0);
+    fbPts.textContent = pointsEarned > 0
+      ? `+${pointsEarned} נק'`
+      : pointsEarned < 0
+        ? `${pointsEarned} נק'`
+        : "0 נק'";
+  }
   if (nextBtn) {
     nextBtn.textContent = currentIndex + 1 >= questions.length ? "לסיכום המרתון 🏆" : "לשאלה הבאה ←";
   }
@@ -310,6 +326,10 @@ function handleTimeout(sessionId) {
   clearQuestionTimers();
   playWrongSfx();
 
+  const timeoutPenalty = -150;
+  totalScore = Math.max(0, totalScore + timeoutPenalty);
+  updateHeaderHUD();
+
   const q = questions[currentIndex];
   if (q.type === "song") {
     document.querySelectorAll(".marathon-choice-btn").forEach(btn => {
@@ -318,7 +338,7 @@ function handleTimeout(sessionId) {
     });
     historyResults.push({
       q,
-      points: 0,
+      points: timeoutPenalty,
       userAnswerText: "נגמר הזמן",
       correctText: `${q.song.title} — ${q.song.artist}`,
       isGood: false
@@ -327,7 +347,7 @@ function handleTimeout(sessionId) {
       isGood: false,
       titleText: "⏰ נגמר הזמן!",
       subText: `השיר היה: ${q.song.title} · ${q.song.artist}`,
-      pointsEarned: 0
+      pointsEarned: timeoutPenalty
     });
   } else {
     const lockBtn = document.getElementById("marathon-year-confirm-btn");
@@ -336,7 +356,7 @@ function handleTimeout(sessionId) {
     if (slider) slider.disabled = true;
     historyResults.push({
       q,
-      points: 0,
+      points: timeoutPenalty,
       userAnswerText: "נגמר הזמן",
       correctText: `שנת ${q.correctYear}`,
       isGood: false
@@ -345,7 +365,7 @@ function handleTimeout(sessionId) {
       isGood: false,
       titleText: "⏰ נגמר הזמן!",
       subText: `השיר יצא בשנת ${q.correctYear}`,
-      pointsEarned: 0
+      pointsEarned: timeoutPenalty
     });
   }
 }
@@ -385,20 +405,23 @@ function handleSongChoiceClick(btn, opt, sessionId) {
     });
   } else {
     marathonStreak = 0;
+    const wrongPenalty = -Math.round(230 + Math.random() * 90);
+    totalScore = Math.max(0, totalScore + wrongPenalty);
+    updateHeaderHUD();
     btn.classList.add("is-wrong");
     playWrongSfx();
     historyResults.push({
       q,
-      points: 0,
+      points: wrongPenalty,
       userAnswerText: opt.title,
       correctText: `${q.song.title} — ${q.song.artist}`,
       isGood: false
     });
     showFeedbackAndScheduleNext(sessionId, {
       isGood: false,
-      titleText: "❌ לא הפעם",
+      titleText: "❌ טעות בשיר!",
       subText: `התשובה הנכונה: ${q.song.title} · ${q.song.artist}`,
-      pointsEarned: 0
+      pointsEarned: wrongPenalty
     });
   }
 }
@@ -424,7 +447,7 @@ function handleYearLockIn(sessionId) {
   else marathonStreak = 0;
 
   const { points, label, diffLabel } = calcYearScore(guessYear, q.correctYear, q.song, remainingRatio, marathonStreak);
-  totalScore += points;
+  totalScore = Math.max(0, totalScore + points);
   updateHeaderHUD();
 
   if (points >= 500) playWinSfx();
@@ -622,8 +645,8 @@ function renderMarathonSummary() {
       meta.append(title, detail);
 
       const pts = document.createElement("span");
-      pts.className = "marathon-sum-pts";
-      pts.textContent = `+${item.points}`;
+      pts.className = `marathon-sum-pts${item.points < 0 ? " is-negative" : ""}`;
+      pts.textContent = item.points > 0 ? `+${item.points}` : String(item.points);
 
       row.append(img, meta, pts);
       listEl.appendChild(row);
