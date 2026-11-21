@@ -35,16 +35,17 @@ export async function onRequestGet(context) {
     });
 
     if (!upstreamRes.ok) {
+      const status = upstreamRes.status === 429 ? 429 : 502;
       return Response.json(
         { error: "Upstream iTunes error", status: upstreamRes.status },
-        { status: 502 }
+        { status }
       );
     }
 
-    // מעביר את גוף התשובה כ-Stream ישיר (ללא טעינה כפולה לזיכרון)
+    // מעביר את גוף התשובה כ-Stream ישיר עם שמירה ארוכה במטמון Edge
     const headers = new Headers();
     headers.set("Content-Type", "application/json; charset=utf-8");
-    headers.set("Cache-Control", "public, max-age=600, s-maxage=1800");
+    headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
     return new Response(upstreamRes.body, {
       status: 200,
       headers

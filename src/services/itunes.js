@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121k";
-import { DIFFICULTIES } from "../data/config.js?v=20261121k";
-import { state, isIOS } from "../state.js?v=20261121k";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121k";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121k";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121m";
+import { DIFFICULTIES } from "../data/config.js?v=20261121m";
+import { state, isIOS } from "../state.js?v=20261121m";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121m";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261121m";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -84,14 +84,14 @@ async function fetchViaAllOriginsGet(url, timeoutMs = 5500) {
 safeStorageRemove("songspot_itunes_transport_v1");
 safeStorageRemove("songspot_itunes_transport_v2");
 
-const TRANSPORT_KEY = "songspot_itunes_transport_v3";
+const TRANSPORT_KEY = "songspot_itunes_transport_v4";
 const TRANSPORTS = {
-  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 2500)),
-  jsonp: (url, t) => fetchItunesJsonp(url, Math.min(t, 4000)),
-  corsproxy: (url, t) => fetchViaCorsProxyIo(url, Math.min(t, 4500)),
-  codetabs: (url, t) => fetchViaCodeTabs(url, Math.min(t, 4500)),
-  allorigins: (url, t) => fetchViaAllOriginsRaw(url, Math.min(t, 5500)),
-  allorigins_get: (url, t) => fetchViaAllOriginsGet(url, Math.min(t, 5500))
+  fetch: (url, t) => fetchJsonWithTimeout(url, Math.min(t, 6000)),
+  jsonp: (url, t) => fetchItunesJsonp(url, Math.min(t, 7000)),
+  corsproxy: (url, t) => fetchViaCorsProxyIo(url, Math.min(t, 6000)),
+  codetabs: (url, t) => fetchViaCodeTabs(url, Math.min(t, 6000)),
+  allorigins: (url, t) => fetchViaAllOriginsRaw(url, Math.min(t, 7000)),
+  allorigins_get: (url, t) => fetchViaAllOriginsGet(url, Math.min(t, 7000))
 };
 
 let preferredTransport = safeStorageGet(TRANSPORT_KEY);
@@ -145,11 +145,12 @@ function raceTransports(names, url, timeoutMs) {
 
 // מונע שליחה כפולה של אותה בקשה במקביל
 const inFlightRequests = new Map();
-// זוכר אם ה-Edge Proxy של Cloudflare (/api/itunes) זמין בדומיין הנוכחי
+// זוכר אם ה-Edge Proxy של Cloudflare (/api/itunes) זמין ולא מוגבל קצב (429)
 let edgeProxyAvailable = typeof window !== "undefined" && window.location.protocol.startsWith("http");
+let edgeProxyBlockedUntil = 0;
 
 async function tryCloudflareEdgeProxy(itunesUrl, timeoutMs) {
-  if (!edgeProxyAvailable) return null;
+  if (!edgeProxyAvailable || Date.now() < edgeProxyBlockedUntil) return null;
   try {
     const parsed = new URL(itunesUrl);
     if (parsed.hostname !== "itunes.apple.com" || parsed.pathname !== "/search") return null;
@@ -160,8 +161,12 @@ async function tryCloudflareEdgeProxy(itunesUrl, timeoutMs) {
     try {
       const res = await fetch(proxyUrl, controller ? { signal: controller.signal } : undefined);
       if (res.status === 404 || res.status === 405) {
-        // עדיין רץ על GitHub Pages בלי Functions -> מדלגים ישר לערוצים הרגילים בהמשך הסשן
         edgeProxyAvailable = false;
+        return null;
+      }
+      if (res.status === 429 || res.status === 502 || res.status === 503) {
+        // Apple חסם זמנית את ה-IP המשותף של Cloudflare -> מדלגים עליו ל-2 דקות
+        edgeProxyBlockedUntil = Date.now() + 120000;
         return null;
       }
       if (!res.ok) return null;
@@ -175,32 +180,26 @@ async function tryCloudflareEdgeProxy(itunesUrl, timeoutMs) {
   }
 }
 
-export async function fetchItunesData(url, timeoutMs = 5500) {
+export async function fetchItunesData(url, timeoutMs = 7500) {
   if (inFlightRequests.has(url)) {
     return await inFlightRequests.get(url);
   }
 
   const reqPromise = (async () => {
-    // 0. ב-Cloudflare Pages: עובר דרך ה-Proxy הפרטי (/api/itunes) באותו דומיין -> 0 בעיות CORS ב-Safari!
+    // 1. עדיפות ראשונה: פנייה ישירה מהמכשיר של המשתמש ל-iTunes (JSONP + fetch)
+    //    לכל משתמש יש IP אישי ולכן Apple לא מחזיר 429, ועובד חלק גם ב-iOS Safari ובמובייל!
+    const directTransports = isIOS ? ["jsonp", "fetch"] : ["fetch", "jsonp"];
+    try {
+      const directData = await raceTransports(directTransports, url, timeoutMs);
+      if (isValidPayload(directData)) return directData;
+    } catch (e) { }
+
+    // 2. גיבוי א': Edge Proxy של Cloudflare (במקרה שהרשת של המשתמש חוסמת ישירות את itunes.apple.com)
     const edgeData = await tryCloudflareEdgeProxy(url, timeoutMs);
     if (edgeData) return edgeData;
 
-    // 1. אם כבר נמצא ערוץ מהיר שעובד במכשיר הזה — מנסים אותו ראשון עם timeout קצר
-    if (preferredTransport && TRANSPORTS[preferredTransport]) {
-      try {
-        const data = await TRANSPORTS[preferredTransport](url, Math.min(timeoutMs, 3200));
-        if (isValidPayload(data)) return data;
-      } catch (e) {
-        preferredTransport = null;
-      }
-    }
-
-    // 2. מריץ במקביל את כל הערוצים (ישיר + JSONP + 4 שרתי Proxy מהירים) — הראשון שעונה מנצח מיד!
-    const allNames = isIOS
-      ? ["jsonp", "corsproxy", "codetabs", "allorigins", "allorigins_get", "fetch"]
-      : ["fetch", "jsonp", "corsproxy", "codetabs", "allorigins", "allorigins_get"];
-
-    return await raceTransports(allNames, url, timeoutMs);
+    // 3. גיבוי ב': שרתי Proxy ציבוריים במקביל
+    return await raceTransports(["corsproxy", "codetabs", "allorigins", "allorigins_get"], url, timeoutMs);
   })();
 
   inFlightRequests.set(url, reqPromise);

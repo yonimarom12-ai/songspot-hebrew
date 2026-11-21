@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261121k";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121k";
-import { dom } from "../dom.js?v=20261121k";
-import { state } from "../state.js?v=20261121k";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261121k";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261121k";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121k";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261121m";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121m";
+import { dom } from "../dom.js?v=20261121m";
+import { state } from "../state.js?v=20261121m";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261121m";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261121m";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121m";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -13,7 +13,7 @@ import {
   pickWithRecencyPriority,
   getCandidatePool,
   warmCatalogCache
-} from "../services/itunes.js?v=20261121k";
+} from "../services/itunes.js?v=20261121m";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -22,19 +22,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261121k";
-import { launchWinConfetti } from "./confetti.js?v=20261121k";
+} from "./audio.js?v=20261121m";
+import { launchWinConfetti } from "./confetti.js?v=20261121m";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261121k";
+} from "./feedback.js?v=20261121m";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261121k";
-import { updateStreakDisplay } from "./profile.js?v=20261121k";
+} from "./search.js?v=20261121m";
+import { updateStreakDisplay } from "./profile.js?v=20261121m";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -42,8 +42,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261121k";
-import { recordQuestProgress } from "./quests.js?v=20261121k";
+} from "./economy.js?v=20261121m";
+import { recordQuestProgress } from "./quests.js?v=20261121m";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -52,8 +52,8 @@ import {
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong
-} from "./timed.js?v=20261121k";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261121k";
+} from "./timed.js?v=20261121m";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261121m";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -235,9 +235,9 @@ export async function fetchRandomSong() {
       const notLast = remaining.filter(a => a.name !== state.lastPlayedArtist);
       const pickPool = nonRecent.length > 0 ? nonRecent : (notLast.length > 0 ? notLast : remaining);
 
-      // בוחרים עד 3 אמנים שונים במכה אחת ומביאים את הקטלוגים שלהם במקביל
+      // בוחרים עד 2 אמנים שונים במכה (מהיר מאוד ועדין למגבלת הקצב של iTunes במובייל)
       const shuffled = [...pickPool].sort(() => Math.random() - 0.5);
-      const batchArtists = shuffled.slice(0, 3);
+      const batchArtists = shuffled.slice(0, 2);
       batchArtists.forEach(a => triedArtists.add(a.name));
 
       const results = await Promise.allSettled(
