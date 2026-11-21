@@ -1,8 +1,8 @@
-import { state } from "../state.js?v=20261121w";
-import { SHOP_ITEMS } from "../data/shop.js?v=20261121w";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261121w";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121w";
-import { playClickSfx } from "./sfx.js?v=20261121w";
+import { state } from "../state.js?v=20261121x";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261121x";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261121x";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121x";
+import { playClickSfx } from "./sfx.js?v=20261121x";
 
 const LOCAL_FRIENDS_KEY = "songspot_local_friends_v1";
 const isHttp = typeof window !== "undefined" && window.location.protocol.startsWith("http");
@@ -35,7 +35,7 @@ export function getPlayerFriendCode(username) {
 
 function getAvatarEmoji(avatarId) {
   if (!avatarId || avatarId === "default") return "🎧";
-  const found = SHOP_ITEMS.find(i => i.id === avatarId && i.category === "avatar");
+  const found = SHOP_AVATARS.find(i => i.id === avatarId);
   return found?.emoji || "🎧";
 }
 
