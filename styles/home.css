@@ -2746,3 +2746,55 @@ body.hide-bottom-nav .bottom-nav {
   cursor: pointer;
   padding: 7px 14px;
 }
+
+/* ===== Global Floating Toast Notifications & Streak Shield Aura ===== */
+.game-toast-stack {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  width: min(92vw, 400px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.game-toast {
+  background: rgba(20, 12, 46, 0.96);
+  border: 1px solid rgba(192, 132, 252, 0.55);
+  color: #fff;
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: translateY(-14px) scale(0.96);
+  transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.game-toast.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.game-toast.is-quest {
+  border-color: rgba(74, 222, 128, 0.7);
+  background: linear-gradient(135deg, rgba(20, 83, 45, 0.94), rgba(16, 12, 38, 0.96));
+  color: #dcfce7;
+}
+
+.game-toast.is-shield {
+  border-color: rgba(56, 217, 255, 0.75);
+  background: linear-gradient(135deg, rgba(12, 74, 110, 0.94), rgba(16, 12, 38, 0.96));
+  color: #e0f2fe;
+}
+
+.has-streak-shield .icon-3d-flame,
+.has-streak-shield .streak-fire-img {
+  filter: drop-shadow(0 0 10px rgba(56, 217, 255, 0.9)) !important;
+}

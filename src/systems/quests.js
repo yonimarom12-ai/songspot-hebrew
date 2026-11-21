@@ -1,8 +1,9 @@
-import { state } from "../state.js?v=20261122c";
-import { saveUserStats } from "../services/storage.js?v=20261122c";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122c";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261122c";
-import { playCrystalSfx } from "./sfx.js?v=20261122c";
+import { state } from "../state.js?v=20261122d";
+import { saveUserStats } from "../services/storage.js?v=20261122d";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122d";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261122d";
+import { playCrystalSfx } from "./sfx.js?v=20261122d";
+import { showGameToast } from "../utils/toast.js?v=20261122d";
 
 function getTodayKey() {
   const d = new Date();
@@ -70,12 +71,22 @@ export function recordQuestProgress({ won, solvedDuration, currentStreak }) {
   const bucket = ensureDailyQuestBucket();
   if (!bucket) return;
 
+  const prevDone = new Set(
+    DAILY_QUESTS.filter(q => (bucket.progress?.[q.id] || 0) >= q.target).map(q => q.id)
+  );
+
   bucket.progress.win_3 = Math.min(3, (bucket.progress.win_3 || 0) + 1);
   if (Number(solvedDuration) <= 0.5) {
     bucket.progress.fast_win = 1;
   }
   if ((currentStreak || 0) > (bucket.progress.streak_4 || 0)) {
     bucket.progress.streak_4 = Math.min(4, currentStreak);
+  }
+
+  for (const q of DAILY_QUESTS) {
+    if (!prevDone.has(q.id) && (bucket.progress?.[q.id] || 0) >= q.target) {
+      showGameToast(`🎯 משימה יומית הושלמה: ${q.title}!`, "quest");
+    }
   }
   updateHomeQuestsDot();
 }

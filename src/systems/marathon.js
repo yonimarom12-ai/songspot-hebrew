@@ -1,11 +1,12 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122c";
-import { state } from "../state.js?v=20261122c";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122c";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122c";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122c";
-import { saveUserStats } from "../services/storage.js?v=20261122c";
-import { launchWinConfetti } from "./confetti.js?v=20261122c";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122c";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122d";
+import { state } from "../state.js?v=20261122d";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122d";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122d";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122d";
+import { saveUserStats } from "../services/storage.js?v=20261122d";
+import { launchWinConfetti } from "./confetti.js?v=20261122d";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122d";
+import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261122d";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -302,11 +303,16 @@ function updateMarathonPowerupButtons() {
   }
 }
 
+let displayedScore = 0;
+
 function updateHeaderHUD() {
   const qNumEl = document.getElementById("marathon-q-counter");
   const scoreEl = document.getElementById("marathon-score-val");
   if (qNumEl) qNumEl.textContent = `שאלה ${Math.min(currentIndex + 1, questions.length)} מתוך ${questions.length}`;
-  if (scoreEl) scoreEl.textContent = totalScore.toLocaleString("he-IL");
+  if (scoreEl) {
+    animateCountUp(scoreEl, displayedScore, totalScore, v => Math.round(v).toLocaleString("he-IL"), 380);
+    displayedScore = totalScore;
+  }
   updateMarathonPowerupButtons();
 }
 
@@ -474,6 +480,7 @@ function handleSongChoiceClick(btn, opt, sessionId) {
     updateHeaderHUD();
     btn.classList.add("is-wrong");
     playWrongSfx();
+    vibrateError();
     historyResults.push({
       q,
       points: wrongPenalty,
@@ -751,8 +758,10 @@ async function runBigCountdown(sessionId, prepPromise) {
     if (i === 3) {
       numEl.classList.add("is-go");
       playWinSfx();
+      vibrateWin();
     } else {
       playClickSfx();
+      vibrateTap();
     }
     await new Promise(r => setTimeout(r, i === 3 ? 650 : 850));
   }
@@ -840,6 +849,9 @@ function bindMarathonListenersOnce() {
   const exitBtn = document.getElementById("marathon-exit-btn");
   if (exitBtn) {
     exitBtn.addEventListener("click", () => {
+      if (questions.length > 0 && currentIndex < questions.length && currentIndex > 0) {
+        if (!window.confirm("לצאת באמצע המרתון? ההתקדמות בריצה הנוכחית תימחק.")) return;
+      }
       stopMarathonSession();
       if (typeof exitCallback === "function") exitCallback();
     });
@@ -897,6 +909,7 @@ export async function startMarathonSession(onExit) {
   questions = [];
   currentIndex = 0;
   totalScore = 0;
+  displayedScore = 0;
   marathonStreak = 0;
   historyResults = [];
   questionAnswered = false;

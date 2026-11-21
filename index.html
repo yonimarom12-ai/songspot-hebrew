@@ -7,6 +7,10 @@
   <title>נחש את השיר — משחק הלהיטים הישראלי</title>
   <meta name="description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון 10 שאלות, הפוך על הפוך, ציר זמן ודירוג עולמי חי עם חברים.">
   <meta name="theme-color" content="#090616">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="נחש את השיר">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="assets/icon-quickplay.png">
   <link rel="apple-touch-icon" href="assets/icon-quickplay.png">
 
@@ -32,18 +36,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122c">
-  <link rel="stylesheet" href="styles/home.css?v=20261122c">
-  <link rel="stylesheet" href="styles/header.css?v=20261122c">
-  <link rel="stylesheet" href="styles/player.css?v=20261122c">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122c">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122c">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122c">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122c">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122c">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122d">
+  <link rel="stylesheet" href="styles/home.css?v=20261122d">
+  <link rel="stylesheet" href="styles/header.css?v=20261122d">
+  <link rel="stylesheet" href="styles/player.css?v=20261122d">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122d">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122d">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122d">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122d">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122d">
 </head>
 
 <body>
+  <div class="game-toast-stack" id="game-toast-stack" aria-live="polite"></div>
   <canvas id="confetti-canvas"></canvas>
 
   <!-- ===== מסך 1: לובי הבית ===== -->
@@ -1293,7 +1298,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122c"></script>
+  <script type="module" src="src/main.js?v=20261122d"></script>
 </body>
 
 </html>

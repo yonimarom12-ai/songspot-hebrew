@@ -1,8 +1,8 @@
-import { state } from "../state.js?v=20261122c";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261122c";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122c";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122c";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122c";
+import { state } from "../state.js?v=20261122d";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261122d";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122d";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122d";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122d";
 
 const LOCAL_FRIENDS_KEY = "songspot_local_friends_v1";
 const LOCAL_REQS_KEY = "songspot_local_friend_reqs_v1";

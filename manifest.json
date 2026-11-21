@@ -1,0 +1,27 @@
+{
+  "name": "נחש את השיר — משחק הלהיטים הישראלי",
+  "short_name": "נחש את השיר",
+  "description": "זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון 10 שאלות, הפוך על הפוך, ציר זמן ודירוג עולמי חי.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#090616",
+  "theme_color": "#090616",
+  "icons": [
+    {
+      "src": "assets/icon-quickplay.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-quickplay.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

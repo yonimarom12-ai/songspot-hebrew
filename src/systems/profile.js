@@ -1,22 +1,26 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261122c";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122c";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122c";
-import { state } from "../state.js?v=20261122c";
-import { saveUserStats } from "../services/storage.js?v=20261122c";
-import { fetchItunesData } from "../services/itunes.js?v=20261122c";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122c";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122c";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122c";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261122c";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122c";
+import { ARTISTS_DB } from "../data/artists.js?v=20261122d";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122d";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122d";
+import { state } from "../state.js?v=20261122d";
+import { saveUserStats } from "../services/storage.js?v=20261122d";
+import { fetchItunesData } from "../services/itunes.js?v=20261122d";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122d";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122d";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122d";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261122d";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122d";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
+  const hasShield = (state.userStats?.powerups?.streakFreeze || 0) > 0;
   dom.streakCountEl.textContent = s;
   dom.streakBadge.classList.toggle("active-streak", s > 0);
   dom.streakBadge.classList.toggle("zero-streak", s === 0);
+  dom.streakBadge.classList.toggle("has-streak-shield", hasShield);
   const homeStreakEl = document.getElementById("home-streak-count");
   if (homeStreakEl) homeStreakEl.textContent = s;
+  const homeStreakBtn = document.getElementById("home-streak-btn");
+  if (homeStreakBtn) homeStreakBtn.classList.toggle("has-streak-shield", hasShield);
   if (dom.profileBtnLabel) {
     dom.profileBtnLabel.textContent = state.currentUser ? state.currentUser : "אורח";
   }

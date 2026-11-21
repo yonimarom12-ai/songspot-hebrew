@@ -1,15 +1,15 @@
-import { state } from "../state.js?v=20261122c";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122c";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122c";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122c";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261122c";
-import { stopTimedRun } from "./timed.js?v=20261122c";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122c";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122c";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122c";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122c";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122c";
-import { playClickSfx } from "./sfx.js?v=20261122c";
+import { state } from "../state.js?v=20261122d";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122d";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122d";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122d";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261122d";
+import { stopTimedRun } from "./timed.js?v=20261122d";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122d";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122d";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122d";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122d";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122d";
+import { playClickSfx } from "./sfx.js?v=20261122d";
 
 const SCREEN_IDS = {
   home: "screen-home",

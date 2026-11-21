@@ -1,10 +1,10 @@
-import { state } from "../state.js?v=20261122c";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122c";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122c";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122c";
-import { saveUserStats } from "../services/storage.js?v=20261122c";
-import { launchWinConfetti } from "./confetti.js?v=20261122c";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122c";
+import { state } from "../state.js?v=20261122d";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122d";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122d";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122d";
+import { saveUserStats } from "../services/storage.js?v=20261122d";
+import { launchWinConfetti } from "./confetti.js?v=20261122d";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122d";
 
 const TARGET_CARDS = 8;
 const MAX_LIVES = 3;
@@ -228,6 +228,9 @@ function bindListenersOnce() {
   const exitBtn = document.getElementById("timeline-exit-btn");
   if (exitBtn) {
     exitBtn.addEventListener("click", () => {
+      if (correctPlacements > 0 && lives > 0 && timelineCards.length < TARGET_CARDS) {
+        if (!window.confirm("לצאת באמצע ציר הזמן? ההתקדמות בריצה הנוכחית תימחק.")) return;
+      }
       stopTimelineSession();
       if (typeof exitCallback === "function") exitCallback();
     });
