@@ -7,11 +7,11 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261121f";
-import { state } from "../state.js?v=20261121f";
-import { saveUserStats } from "../services/storage.js?v=20261121f";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261121f";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121f";
+} from "../data/shop.js?v=20261121g";
+import { state } from "../state.js?v=20261121g";
+import { saveUserStats } from "../services/storage.js?v=20261121g";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261121g";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261121g";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -86,6 +86,16 @@ function resolveEquippedAvatar() {
     return buildCustomItem("avatar", customData);
   }
   return findAvatar(id);
+}
+
+function setCrystalLabel(el, prefix, price) {
+  el.textContent = "";
+  if (prefix) el.appendChild(document.createTextNode(`${prefix} `));
+  const img = document.createElement("img");
+  img.className = "icon-3d-mini icon-3d-crystal";
+  img.src = "assets/icon-crystal.png";
+  img.alt = "";
+  el.append(img, document.createTextNode(` ${formatPoints(price)}`));
 }
 
 function setShopMessage(text, kind = "") {
@@ -348,7 +358,11 @@ function renderPeekBanner() {
     const buyBtn = document.createElement("button");
     buyBtn.type = "button";
     buyBtn.className = "shop-peek-btn primary";
-    buyBtn.textContent = owned ? (isNewCustomUpload ? "שמור והפעל" : "הפעל") : `קנה 💎 ${formatPoints(item.price)}`;
+    if (owned) {
+      buyBtn.textContent = isNewCustomUpload ? "שמור והפעל" : "הפעל";
+    } else {
+      setCrystalLabel(buyBtn, "קנה", item.price);
+    }
     buyBtn.addEventListener("click", () => purchaseOrEquip(type, item));
     actions.appendChild(buyBtn);
   }
@@ -460,7 +474,7 @@ function renderPreviewPanel() {
     primaryBtn.textContent = isNewCustomUpload ? "שמור והפעל תמונה" : "הפעל פריט";
     primaryBtn.addEventListener("click", () => purchaseOrEquip(type, item));
   } else {
-    primaryBtn.textContent = `קנה ב-💎 ${formatPoints(item.price)}`;
+    setCrystalLabel(primaryBtn, "קנה ב-", item.price);
     primaryBtn.addEventListener("click", () => purchaseOrEquip(type, item));
   }
 
@@ -567,7 +581,7 @@ function buildCustomUploadCard(type) {
     action.textContent = savedData ? "הפעל / החלף" : "העלה תמונה";
     action.classList.add("is-owned");
   } else {
-    action.textContent = `💎 ${formatPoints(price)}`;
+    setCrystalLabel(action, "", price);
   }
 
   row.append(preview, info, action);
@@ -636,7 +650,7 @@ function buildCard(type, item) {
     action.textContent = "הפעל";
     action.classList.add("is-owned");
   } else {
-    action.textContent = `💎 ${formatPoints(item.price)}`;
+    setCrystalLabel(action, "", item.price);
   }
 
   card.appendChild(action);

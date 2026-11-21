@@ -73,11 +73,23 @@
   transform: scale(1.1);
 }
 
-.streak-fire-svg {
-  width: 58px;
-  height: 64px;
+.streak-fire-svg,
+.streak-fire-img {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
   overflow: visible;
   filter: drop-shadow(0 4px 14px rgba(255, 102, 0, 0.58));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.streak-fire-badge.active-streak .streak-fire-img {
+  animation: flamePulse 1.35s ease-in-out infinite alternate;
+}
+
+.streak-fire-badge.zero-streak .streak-fire-svg,
+.streak-fire-badge.zero-streak .streak-fire-img {
+  filter: grayscale(0.8) opacity(0.5);
 }
 
 .streak-fire-badge.active-streak .flame-outer {

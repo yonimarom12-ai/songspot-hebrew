@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261121f";
-import { dom } from "../dom.js?v=20261121f";
-import { state } from "../state.js?v=20261121f";
-import { saveUserStats } from "../services/storage.js?v=20261121f";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261121g";
+import { dom } from "../dom.js?v=20261121g";
+import { state } from "../state.js?v=20261121g";
+import { saveUserStats } from "../services/storage.js?v=20261121g";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
@@ -145,12 +145,13 @@ export function launchCrystalRewardAnimation(earnedAmount) {
   document.body.appendChild(floatText);
   setTimeout(() => floatText.remove(), 1200);
 
-  // חלקיקי קריסטל עפים אל המונה
+  // חלקיקי קריסטל 3D שקופים עפים אל המונה
   const count = Math.min(10, Math.max(5, Math.ceil(earnedAmount / 2)));
   for (let i = 0; i < count; i++) {
-    const p = document.createElement("div");
-    p.className = "crystal-fly-particle";
-    p.textContent = "💎";
+    const p = document.createElement("img");
+    p.className = "crystal-fly-particle icon-3d-crystal";
+    p.src = "assets/icon-crystal.png";
+    p.alt = "";
     const jitterX = (Math.random() - 0.5) * 90;
     const jitterY = (Math.random() - 0.5) * 50;
     p.style.left = `${startX + jitterX}px`;

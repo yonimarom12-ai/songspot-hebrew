@@ -139,9 +139,24 @@ body.has-custom-bg .home-stage-glow {
   width: 22px;
   height: 22px;
   object-fit: contain;
-  mix-blend-mode: screen;
+  vertical-align: middle;
+  flex-shrink: 0;
   filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.45));
   transition: filter 0.25s ease;
+}
+
+.icon-3d-mini {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  vertical-align: -2px;
+  flex-shrink: 0;
+}
+
+.crystal-fly-particle {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
 }
 
 .mode-card.full-span {
@@ -404,6 +419,11 @@ body.has-custom-bg .home-stage-glow {
     0 10px 26px rgba(0, 0, 0, 0.45),
     inset 0 1px 1px rgba(255, 255, 255, 0.28);
   transition: transform 0.18s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.mode-card.full-span {
+  grid-column: 1 / -1;
+  min-height: 92px;
 }
 
 .mode-card:hover {

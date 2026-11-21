@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261121f">
-  <link rel="stylesheet" href="styles/home.css?v=20261121f">
-  <link rel="stylesheet" href="styles/header.css?v=20261121f">
-  <link rel="stylesheet" href="styles/player.css?v=20261121f">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261121f">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261121f">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121f">
-  <link rel="stylesheet" href="styles/animations.css?v=20261121f">
-  <link rel="stylesheet" href="styles/themes.css?v=20261121f">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261121g">
+  <link rel="stylesheet" href="styles/home.css?v=20261121g">
+  <link rel="stylesheet" href="styles/header.css?v=20261121g">
+  <link rel="stylesheet" href="styles/player.css?v=20261121g">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261121g">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261121g">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261121g">
+  <link rel="stylesheet" href="styles/animations.css?v=20261121g">
+  <link rel="stylesheet" href="styles/themes.css?v=20261121g">
 </head>
 
 <body>
@@ -30,11 +30,11 @@
         <div class="home-top-right">
           <div class="home-status-pill">
             <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
-              <img class="icon-3d-inline icon-3d-flame" src="assets/icon-flame.jpg" alt="" aria-hidden="true" /><span id="home-streak-count">0</span>
+              <img class="icon-3d-inline icon-3d-flame" src="assets/icon-flame.png" alt="" aria-hidden="true" /><span id="home-streak-count">0</span>
             </button>
             <span class="home-stat-divider"></span>
             <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים">
-              <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.jpg" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
+              <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.png" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
             </button>
           </div>
         </div>
@@ -350,36 +350,7 @@
             </button>
             <!-- יתרת קריסטלים -->
             <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים">
-              <svg class="points-crystal-svg" viewBox="0 0 28 32" aria-hidden="true">
-                <defs>
-                  <linearGradient id="crystalTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#d6fbff" />
-                    <stop offset="55%" stop-color="#56e0ff" />
-                    <stop offset="100%" stop-color="#229bff" />
-                  </linearGradient>
-                  <linearGradient id="crystalLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#8bf0ff" />
-                    <stop offset="100%" stop-color="#3b82f6" />
-                  </linearGradient>
-                  <linearGradient id="crystalRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#38bdf8" />
-                    <stop offset="100%" stop-color="#6d28d9" />
-                  </linearGradient>
-                  <linearGradient id="crystalCore" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e0faff" stop-opacity="0.95" />
-                    <stop offset="50%" stop-color="#38d9ff" stop-opacity="0.85" />
-                    <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.95" />
-                  </linearGradient>
-                </defs>
-                <!-- פאה מרכזית ומעטפת קריסטל רב-פאות -->
-                <polygon points="14,1 25,11 14,31 3,11" fill="url(#crystalRight)" />
-                <polygon points="14,1 3,11 14,14" fill="url(#crystalTop)" />
-                <polygon points="14,1 25,11 14,14" fill="url(#crystalLeft)" />
-                <polygon points="3,11 14,14 14,31" fill="url(#crystalLeft)" opacity="0.88" />
-                <polygon points="14,4 19.5,11.2 14,25.5 8.5,11.2" fill="url(#crystalCore)" />
-                <!-- הבזק אור עליון -->
-                <polygon points="14,1 18.5,9.5 14,11 9.5,9.5" fill="#ffffff" opacity="0.55" />
-              </svg>
+              <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.png" alt="" aria-hidden="true" />
               <span class="points-count-text" id="points-count">0</span>
             </button>
           </div>
@@ -400,32 +371,10 @@
           <span class="timed-delta-flash" id="timed-delta-flash"></span>
         </div>
 
-        <!-- אש הרצף במקום שהתפנה מתחת לסרגל העליון -->
+        <!-- אש הרצף החדשה (PNG שקוף 3D) -->
         <div class="streak-top-slot">
           <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
-            <svg class="streak-fire-svg" viewBox="0 0 38 44">
-              <defs>
-                <linearGradient id="fireGradOuter" x1="50%" y1="100%" x2="50%" y2="0%">
-                  <stop offset="0%" stop-color="#d91b00" />
-                  <stop offset="48%" stop-color="#ff6a00" />
-                  <stop offset="100%" stop-color="#ffbe1a" />
-                </linearGradient>
-                <linearGradient id="fireGradMid" x1="50%" y1="100%" x2="50%" y2="0%">
-                  <stop offset="0%" stop-color="#ff5e00" />
-                  <stop offset="100%" stop-color="#ffd54a" />
-                </linearGradient>
-                <linearGradient id="fireGradInner" x1="50%" y1="100%" x2="50%" y2="0%">
-                  <stop offset="0%" stop-color="#ffae00" />
-                  <stop offset="100%" stop-color="#fff4b8" />
-                </linearGradient>
-              </defs>
-              <path class="flame-outer" fill="url(#fireGradOuter)"
-                d="M19 2C19 2 31.5 11.5 31.5 24.5C31.5 33.4 25.9 40.5 19 40.5C12.1 40.5 6.5 33.4 6.5 24.5C6.5 18.6 9.6 13.1 12.6 9.8C12.2 13.1 14 15.6 15.6 16.2C14.1 11 16.2 5.6 19 2Z" />
-              <path class="flame-mid" fill="url(#fireGradMid)" opacity="0.88"
-                d="M19 9.5C19 9.5 27.2 16.8 27.2 25.5C27.2 32.1 23.6 37.5 19 37.5C14.4 37.5 10.8 32.1 10.8 25.5C10.8 20.5 14.5 15 19 9.5Z" />
-              <path class="flame-inner" fill="url(#fireGradInner)"
-                d="M19 16.5C19 16.5 24 21.2 24 27C24 31.7 21.8 35.5 19 35.5C16.2 35.5 14 31.7 14 27C14 23.5 16.4 19.8 19 16.5Z" />
-            </svg>
+            <img class="streak-fire-img icon-3d-flame" src="assets/icon-flame.png" alt="" aria-hidden="true" />
             <span class="streak-count-text" id="streak-count">0</span>
           </div>
         </div>
@@ -675,7 +624,7 @@
             <div class="profile-subview active" id="profile-view-main">
               <div class="wallet-summary-card">
                 <div class="wallet-summary-main">
-                  <span class="wallet-summary-label">💎 יתרת קריסטלים</span>
+                  <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> יתרת קריסטלים</span>
                   <span class="wallet-summary-val" id="stat-points">0</span>
                 </div>
                 <div class="wallet-summary-meta">
@@ -820,7 +769,7 @@
   <div class="modal-backdrop" id="streak-modal-backdrop">
     <div class="profile-modal streak-modal-card" role="dialog" aria-label="נתוני רצף ניצחונות">
       <div class="modal-header">
-        <h2 class="modal-title">🔥 אש הרצף שלך</h2>
+        <h2 class="modal-title"><img class="icon-3d-inline icon-3d-flame" src="assets/icon-flame.png" alt="" /> אש הרצף שלך</h2>
         <button class="drawer-close-btn" id="streak-close-btn" aria-label="סגור">&times;</button>
       </div>
       <div class="modal-body">
@@ -880,13 +829,13 @@
   <div class="modal-backdrop" id="shop-modal-backdrop">
     <div class="profile-modal" role="dialog" aria-label="חנות הקריסטלים">
       <div class="modal-header">
-        <h2 class="modal-title">💎 חנות הקריסטלים</h2>
+        <h2 class="modal-title"><img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> חנות הקריסטלים</h2>
         <button class="drawer-close-btn" id="shop-close-btn" aria-label="סגור חנות">&times;</button>
       </div>
       <div class="modal-body">
         <div class="wallet-summary-card">
           <div class="wallet-summary-main">
-            <span class="wallet-summary-label">💎 היתרה שלך לקניות בחנות</span>
+            <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> היתרה שלך לקניות בחנות</span>
             <span class="wallet-summary-val" id="shop-points-balance">0</span>
           </div>
         </div>
@@ -968,7 +917,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261121f"></script>
+  <script type="module" src="src/main.js?v=20261121g"></script>
 </body>
 
 </html>

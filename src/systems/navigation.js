@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261121f";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121f";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121f";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121f";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121f";
-import { stopTimedRun } from "./timed.js?v=20261121f";
-import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121f";
-import { playClickSfx } from "./sfx.js?v=20261121f";
+import { state } from "../state.js?v=20261121g";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121g";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121g";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121g";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121g";
+import { stopTimedRun } from "./timed.js?v=20261121g";
+import { fetchGlobalLeaderboard } from "../services/cloud.js?v=20261121g";
+import { playClickSfx } from "./sfx.js?v=20261121g";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -131,6 +131,15 @@ function toggleSetChoice(targetSet, val) {
   syncSetupSelectionUI();
 }
 
+const MODE_ICONS_HTML = {
+  "1v1": `<svg viewBox="0 0 64 40" width="76" height="48"><defs><linearGradient id="mVsG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs><circle cx="15" cy="13" r="6" fill="url(#mVsG)"/><path d="M5 31c0-5.5 4.5-9 10-9s10 3.5 10 9" fill="url(#mVsG)" opacity="0.92"/><circle cx="49" cy="13" r="6" fill="url(#mVsG)"/><path d="M39 31c0-5.5 4.5-9 10-9s10 3.5 10 9" fill="url(#mVsG)" opacity="0.92"/><text x="32" y="25" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="900" font-family="Rubik,sans-serif">VS</text></svg>`,
+  leaderboard: `<svg viewBox="0 0 48 48" width="58" height="58"><defs><linearGradient id="mTrG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fef08a"/><stop offset="45%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/></linearGradient></defs><path d="M13 8h22v11c0 6.5-4.8 11.5-11 11.5S13 25.5 13 19V8z" fill="url(#mTrG)"/><path d="M13 11H8c0 6 2.5 10 6 10.5M35 11h5c0 6-2.5 10-6 10.5" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/><rect x="21" y="30" width="6" height="6" fill="#d97706"/><rect x="15" y="36" width="18" height="4" rx="2" fill="url(#mTrG)"/><polygon points="24,13 25.8,16.8 30,17.3 26.9,20.2 27.7,24.3 24,22.3 20.3,24.3 21.1,20.2 18,17.3 22.2,16.8" fill="#fff7cc"/></svg>`,
+  marathon: `<svg viewBox="0 0 56 32" width="72" height="42"><defs><linearGradient id="mInfG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff6ec7"/><stop offset="50%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#fb7185"/></linearGradient></defs><path d="M16 8c-5 0-9 3.6-9 8s4 8 9 8c6 0 10-16 24-16 5 0 9 3.6 9 8s-4 8-9 8c-6 0-10-16-24-16z" fill="none" stroke="url(#mInfG)" stroke-width="4.5" stroke-linecap="round"/></svg>`,
+  timed: `<svg viewBox="0 0 48 48" width="58" height="58"><defs><linearGradient id="mWtG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#bef264"/><stop offset="100%" stop-color="#22c55e"/></linearGradient></defs><rect x="20" y="5" width="8" height="4" rx="1.5" fill="#86efac"/><circle cx="24" cy="27" r="14" fill="rgba(16,185,129,0.16)" stroke="url(#mWtG)" stroke-width="3.5"/><path d="M24 19v8l5 3" fill="none" stroke="#ecfccb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  daily: `<svg viewBox="0 0 48 48" width="58" height="58"><defs><linearGradient id="mChG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><rect x="9" y="28" width="6" height="11" rx="2" fill="url(#mChG)"/><rect x="20" y="22" width="6" height="17" rx="2" fill="url(#mChG)"/><rect x="31" y="14" width="6" height="25" rx="2" fill="url(#mChG)"/><path d="M9 22l9-6 6 3 11-10m0 0h-7m7 0v7" fill="none" stroke="#cffafe" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  weekly: `<svg viewBox="0 0 48 48" width="62" height="62"><defs><linearGradient id="mCrG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/></linearGradient></defs><path d="M6 34L10 14l9 8 5-12 5 12 9-8 4 20H6z" fill="url(#mCrG)" stroke="#fff7cc" stroke-width="1.5" stroke-linejoin="round"/><rect x="8" y="36" width="32" height="4" rx="2" fill="#fde047"/></svg>`
+};
+
 function openModeScreen(modeKey) {
   const cfg = MODE_CATALOG[modeKey];
   if (!cfg) return;
@@ -144,7 +153,10 @@ function openModeScreen(modeKey) {
   const actionBtn = document.getElementById("mode-detail-action-btn");
 
   if (badge) badge.textContent = cfg.badge;
-  if (icon) icon.textContent = cfg.icon;
+  if (icon) {
+    if (MODE_ICONS_HTML[modeKey]) icon.innerHTML = MODE_ICONS_HTML[modeKey];
+    else icon.textContent = cfg.icon;
+  }
   if (title) title.textContent = cfg.title;
   if (desc) desc.textContent = cfg.desc;
   if (status) status.textContent = cfg.status;
@@ -187,7 +199,7 @@ function openModeScreen(modeKey) {
         nameSpan.textContent = r.username;
         const metaSpan = document.createElement("span");
         metaSpan.className = "lb-meta";
-        metaSpan.textContent = `${r.totalWon}🎵 · ${r.bestStreak}🔥 · ${r.points}💎`;
+        metaSpan.innerHTML = `${r.totalWon} 🎵 · ${r.bestStreak}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> · ${r.points}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
         item.append(rankSpan, nameSpan, metaSpan);
         lbWrap.appendChild(item);
       });
