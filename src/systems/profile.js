@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261121j";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121j";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121j";
-import { state } from "../state.js?v=20261121j";
-import { saveUserStats } from "../services/storage.js?v=20261121j";
-import { fetchItunesData } from "../services/itunes.js?v=20261121j";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121j";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121j";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121j";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261121j";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121j";
+import { ARTISTS_DB } from "../data/artists.js?v=20261121k";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261121k";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261121k";
+import { state } from "../state.js?v=20261121k";
+import { saveUserStats } from "../services/storage.js?v=20261121k";
+import { fetchItunesData } from "../services/itunes.js?v=20261121k";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261121k";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261121k";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261121k";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261121k";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261121k";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -392,6 +392,8 @@ export function updateBottomNavActiveTab(activeTab = "game") {
   if (dom.navGameBtn) dom.navGameBtn.classList.toggle("active", activeTab === "game");
   const navModesBtn = document.getElementById("nav-modes-btn");
   if (navModesBtn) navModesBtn.classList.toggle("active", activeTab === "modes");
+  const navLbBtn = document.getElementById("nav-leaderboard-btn");
+  if (navLbBtn) navLbBtn.classList.toggle("active", activeTab === "leaderboard");
   if (dom.navShopBtn) dom.navShopBtn.classList.toggle("active", activeTab === "shop");
 }
 

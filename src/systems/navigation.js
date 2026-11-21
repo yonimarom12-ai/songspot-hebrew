@@ -1,15 +1,16 @@
-import { state } from "../state.js?v=20261121j";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121j";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121j";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121j";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121j";
-import { stopTimedRun } from "./timed.js?v=20261121j";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121j";
-import { playClickSfx } from "./sfx.js?v=20261121j";
+import { state } from "../state.js?v=20261121k";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261121k";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261121k";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261121k";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession } from "./game.js?v=20261121k";
+import { stopTimedRun } from "./timed.js?v=20261121k";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261121k";
+import { playClickSfx } from "./sfx.js?v=20261121k";
 
 const SCREEN_IDS = {
   home: "screen-home",
   "modes-hub": "screen-modes-hub",
+  leaderboard: "screen-leaderboard",
   "setup-genres": "screen-setup-genres",
   "setup-decades": "screen-setup-decades",
   mode: "screen-mode",
@@ -25,15 +26,6 @@ const MODE_CATALOG = {
     desc: "התחרו ראש בראש מול חבר באותו שיר — מי שמזהה מהר יותר מנצח וגורף את הקריסטלים!",
     status: "🚧 מצב אונליין בבנייה · בקרוב!",
     actionLabel: "שחק משחק מהיר בינתיים ▶",
-    action: "quickplay"
-  },
-  leaderboard: {
-    badge: "תחרות עולמית",
-    icon: "🏆",
-    title: "דירוג עולמי",
-    desc: "טבלת השחקנים המובילים ב״נחש את השיר״ לפי כמות זיהויים, שיא רצף וקריסטלים.",
-    status: "טוען דירוג...",
-    actionLabel: "שחק וצבור קריסטלים ▶",
     action: "quickplay"
   },
   marathon: {
@@ -86,8 +78,8 @@ export function showScreen(screenName) {
     if (el) el.classList.toggle("active", key === screenName);
   });
 
-  // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/הגדרות (גלוי בבית ובמסך מצבי המשחק)
-  document.body.classList.toggle("hide-bottom-nav", screenName !== "home" && screenName !== "modes-hub");
+  // מסתיר את סרגל הניווט התחתון בתוך המשחק ובמסכי ההגדרה/הגדרות (גלוי בבית, מצבי משחק ודירוג)
+  document.body.classList.toggle("hide-bottom-nav", screenName !== "home" && screenName !== "modes-hub" && screenName !== "leaderboard");
 
   if (screenName !== "game" && screenName !== "settings") {
     stopTimedRun();
@@ -104,6 +96,8 @@ export function showScreen(screenName) {
     updateBottomNavActiveTab("game");
   } else if (screenName === "modes-hub") {
     updateBottomNavActiveTab("modes");
+  } else if (screenName === "leaderboard") {
+    updateBottomNavActiveTab("leaderboard");
   }
   window.scrollTo({ top: 0, behavior: "instant" });
 }
@@ -165,49 +159,160 @@ function openModeScreen(modeKey) {
   const lbWrap = document.getElementById("mode-leaderboard-wrap");
   if (lbWrap) {
     lbWrap.innerHTML = "";
-    lbWrap.style.display = modeKey === "leaderboard" ? "flex" : "none";
+    lbWrap.style.display = "none";
   }
 
   showScreen("mode");
+}
 
-  if (modeKey === "leaderboard" && lbWrap) {
-    const syncFirst = state.currentUser && state.userStats
-      ? syncAccountToCloud(state.currentUser, state.userStats).catch(() => false)
-      : Promise.resolve(false);
-    syncFirst.then(() => fetchGlobalLeaderboard(25)).then(({ source, rows }) => {
-      if (currentModeKey !== "leaderboard") return;
-      if (status) {
-        status.textContent = source === "cloud"
-          ? "☁️ דירוג עולמי חי"
-          : "🏆 דירוג מקומי";
-      }
-      lbWrap.innerHTML = "";
-      if (!rows || rows.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "lb-empty";
-        empty.textContent = "עדיין אין שחקנים רשומים בדירוג — הירשם בפרופיל ושחק כדי להיכנס לטבלה!";
-        lbWrap.appendChild(empty);
-        return;
-      }
-      rows.forEach((r, idx) => {
-        const item = document.createElement("div");
-        const isMe = state.currentUser && r.username.toLowerCase() === state.currentUser.toLowerCase();
-        item.className = `lb-row ${isMe ? "is-me" : ""}`;
-        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
-        const rankSpan = document.createElement("span");
-        rankSpan.className = "lb-rank";
-        rankSpan.textContent = medal;
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "lb-name";
-        nameSpan.textContent = r.username;
-        const metaSpan = document.createElement("span");
-        metaSpan.className = "lb-meta";
-        metaSpan.innerHTML = `${r.totalWon} 🎵 · ${r.bestStreak}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> · ${r.points}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
-        item.append(rankSpan, nameSpan, metaSpan);
-        lbWrap.appendChild(item);
+let cachedLeaderboardRows = [];
+let activeLeaderboardSort = "totalWon";
+
+function formatMetricValue(val) {
+  const n = Number(val) || 0;
+  return Number.isInteger(n) ? String(n) : n.toFixed(1).replace(/\.0$/, "");
+}
+
+function getSortedLeaderboardRows(rows, sortKey) {
+  return [...rows].sort((a, b) => {
+    if (sortKey === "bestStreak") {
+      return (b.bestStreak - a.bestStreak) || (b.totalWon - a.totalWon) || (b.points - a.points);
+    }
+    if (sortKey === "points") {
+      return (b.points - a.points) || (b.totalWon - a.totalWon) || (b.bestStreak - a.bestStreak);
+    }
+    return (b.totalWon - a.totalWon) || (b.bestStreak - a.bestStreak) || (b.points - a.points);
+  });
+}
+
+function renderLeaderboardView() {
+  const podiumEl = document.getElementById("lb-podium");
+  const myRankEl = document.getElementById("lb-my-rank-card");
+  const listEl = document.getElementById("lb-table-list");
+  if (!listEl) return;
+
+  const sorted = getSortedLeaderboardRows(cachedLeaderboardRows, activeLeaderboardSort);
+
+  // פודיום טופ 3
+  if (podiumEl) {
+    podiumEl.innerHTML = "";
+    if (sorted.length >= 2) {
+      const top3 = [sorted[1] || null, sorted[0] || null, sorted[2] || null];
+      const rankMeta = [
+        { pos: 2, cls: "rank-2", medal: "🥈" },
+        { pos: 1, cls: "rank-1", medal: "🥇" },
+        { pos: 3, cls: "rank-3", medal: "🥉" }
+      ];
+      top3.forEach((player, i) => {
+        const slot = document.createElement("div");
+        const meta = rankMeta[i];
+        slot.className = `lb-podium-slot ${meta.cls}${!player ? " is-empty" : ""}`;
+        if (!player) {
+          slot.innerHTML = `<div class="lb-podium-medal">${meta.medal}</div><div class="lb-podium-name">—</div><div class="lb-podium-pedestal">${meta.pos}</div>`;
+        } else {
+          const isMe = state.currentUser && player.username.toLowerCase() === state.currentUser.toLowerCase();
+          if (isMe) slot.classList.add("is-me");
+          const scoreHtml = activeLeaderboardSort === "bestStreak"
+            ? `${player.bestStreak}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" />`
+            : activeLeaderboardSort === "points"
+              ? `${formatMetricValue(player.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`
+              : `${player.totalWon} 🎵`;
+          const medalDiv = document.createElement("div");
+          medalDiv.className = "lb-podium-medal";
+          medalDiv.textContent = meta.medal;
+          const nameDiv = document.createElement("div");
+          nameDiv.className = "lb-podium-name";
+          nameDiv.textContent = player.username;
+          const scoreDiv = document.createElement("div");
+          scoreDiv.className = "lb-podium-score";
+          scoreDiv.innerHTML = scoreHtml;
+          const pedDiv = document.createElement("div");
+          pedDiv.className = "lb-podium-pedestal";
+          pedDiv.textContent = String(meta.pos);
+          slot.append(medalDiv, nameDiv, scoreDiv, pedDiv);
+        }
+        podiumEl.appendChild(slot);
       });
-    });
+      podiumEl.style.display = "grid";
+    } else {
+      podiumEl.style.display = "none";
+    }
   }
+
+  // כרטיס מיקום אישי
+  if (myRankEl) {
+    if (state.currentUser) {
+      const myIdx = sorted.findIndex(r => r.username.toLowerCase() === state.currentUser.toLowerCase());
+      if (myIdx >= 0) {
+        const me = sorted[myIdx];
+        myRankEl.style.display = "flex";
+        myRankEl.innerHTML = "";
+        const label = document.createElement("span");
+        label.className = "lb-my-rank-label";
+        label.textContent = `המיקום שלך: #${myIdx + 1} (${me.username})`;
+        const stats = document.createElement("span");
+        stats.className = "lb-meta";
+        stats.innerHTML = `${me.totalWon} 🎵 · ${me.bestStreak}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> · ${formatMetricValue(me.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
+        myRankEl.append(label, stats);
+      } else {
+        myRankEl.style.display = "none";
+      }
+    } else {
+      myRankEl.style.display = "flex";
+      myRankEl.innerHTML = `<span class="lb-my-rank-guest">הירשם או התחבר דרך לשונית <strong>פרופיל</strong> כדי להופיע בטבלה העולמית!</span>`;
+    }
+  }
+
+  // טבלה מלאה
+  listEl.innerHTML = "";
+  if (sorted.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "lb-empty";
+    empty.textContent = "עדיין אין שחקנים רשומים בדירוג — הירשם בפרופיל כדי להיות הראשון בטבלה!";
+    listEl.appendChild(empty);
+    return;
+  }
+
+  sorted.forEach((r, idx) => {
+    const row = document.createElement("div");
+    const isMe = state.currentUser && r.username.toLowerCase() === state.currentUser.toLowerCase();
+    row.className = `lb-table-row ${isMe ? "is-me" : ""}${idx < 3 ? ` top-${idx + 1}` : ""}`;
+
+    const rankSpan = document.createElement("span");
+    rankSpan.className = "lb-rank";
+    rankSpan.textContent = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "lb-name";
+    nameSpan.textContent = r.username;
+
+    const metaSpan = document.createElement("span");
+    metaSpan.className = "lb-meta";
+    metaSpan.innerHTML = `${r.totalWon} 🎵 · ${r.bestStreak}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> · ${formatMetricValue(r.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
+
+    row.append(rankSpan, nameSpan, metaSpan);
+    listEl.appendChild(row);
+  });
+}
+
+async function loadAndRenderLeaderboardPage() {
+  const statusEl = document.getElementById("lb-page-status");
+  const refreshBtn = document.getElementById("lb-refresh-btn");
+  if (statusEl) statusEl.textContent = "טוען דירוג...";
+  if (refreshBtn) refreshBtn.disabled = true;
+
+  if (state.currentUser && state.userStats) {
+    await syncAccountToCloud(state.currentUser, state.userStats).catch(() => false);
+  }
+  const { source, rows } = await fetchGlobalLeaderboard(50);
+  cachedLeaderboardRows = Array.isArray(rows) ? rows : [];
+
+  if (statusEl) {
+    statusEl.textContent = source === "cloud" ? "☁️ דירוג עולמי חי" : "🏆 דירוג מקומי";
+    statusEl.classList.toggle("is-cloud", source === "cloud");
+  }
+  if (refreshBtn) refreshBtn.disabled = false;
+  renderLeaderboardView();
 }
 
 function startGameDirectly(difficulty = "easy") {
@@ -290,7 +395,7 @@ export function initNavigationListeners() {
   const modeBackBtn = document.getElementById("mode-back-lobby-btn");
   if (modeBackBtn) modeBackBtn.addEventListener("click", () => showScreen("modes-hub"));
 
-  // לשוניות סרגל תחתון: בית + משחקים (מודים)
+  // לשוניות סרגל תחתון: בית + משחקים + דירוג עולמי
   const navModesBtn = document.getElementById("nav-modes-btn");
   if (navModesBtn) {
     navModesBtn.addEventListener("click", () => {
@@ -299,6 +404,26 @@ export function initNavigationListeners() {
       showScreen("modes-hub");
     });
   }
+  const navLeaderboardBtn = document.getElementById("nav-leaderboard-btn");
+  if (navLeaderboardBtn) {
+    navLeaderboardBtn.addEventListener("click", () => {
+      toggleProfileModal(false);
+      toggleShopModal(false);
+      showScreen("leaderboard");
+      loadAndRenderLeaderboardPage();
+    });
+  }
+  const lbRefreshBtn = document.getElementById("lb-refresh-btn");
+  if (lbRefreshBtn) {
+    lbRefreshBtn.addEventListener("click", () => loadAndRenderLeaderboardPage());
+  }
+  document.querySelectorAll("[data-lb-sort]").forEach(tab => {
+    tab.addEventListener("click", () => {
+      activeLeaderboardSort = tab.dataset.lbSort || "totalWon";
+      document.querySelectorAll("[data-lb-sort]").forEach(t => t.classList.toggle("active", t === tab));
+      renderLeaderboardView();
+    });
+  });
   const navGameBtn = document.getElementById("nav-game-btn");
   if (navGameBtn) {
     navGameBtn.addEventListener("click", () => {

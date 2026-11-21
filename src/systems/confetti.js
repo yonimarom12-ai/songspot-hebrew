@@ -1,4 +1,4 @@
-import { dom } from "../dom.js?v=20261121j";
+import { dom } from "../dom.js?v=20261121k";
 
 // אפקט קונפטי בניצחון
 const confettiCtx = dom.confettiCanvas ? dom.confettiCanvas.getContext("2d") : null;

@@ -240,6 +240,7 @@
 
 .bottom-nav-item {
   flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   color: var(--text-sub);
@@ -249,7 +250,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 4px 2px;
   cursor: pointer;
   transition: color 0.2s ease, transform 0.18s ease;
 }
