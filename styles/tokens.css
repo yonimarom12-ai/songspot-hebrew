@@ -95,3 +95,70 @@ body {
   margin-bottom: auto;
   padding: 8px 0 18px;
 }
+
+/* ===== אופטימיזציית ביצועים למובייל (60fps חלק ב-iOS Safari ו-Android Chrome) ===== */
+@media (max-width: 768px), (hover: none) {
+  body {
+    /* background-attachment: fixed גורם ל-repaint מלא בכל גלילה במובייל */
+    background-attachment: scroll;
+  }
+
+  .app-screen {
+    contain: layout style;
+  }
+
+  .app-screen.active {
+    animation-duration: 0.14s;
+  }
+
+  /* החלפת backdrop-filter blur כבד ברקעים חצי-שקופים נקיים וחדים למניעת לאגים ב-GPU של הטלפון */
+  .home-status-pill,
+  .home-gear-btn,
+  .bottom-nav,
+  .header-icon-btn,
+  .points-badge,
+  .mode-detail-card,
+  .setup-choice-card,
+  .settings-section-card,
+  .profile-modal,
+  .shop-modal,
+  .streak-modal,
+  .quests-modal,
+  .drawer-panel,
+  .guess-input-wrapper,
+  .autocomplete-dropdown,
+  .player-card,
+  .stage-bar-wrap,
+  .result-banner-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .home-status-pill,
+  .home-gear-btn {
+    background: rgba(24, 15, 48, 0.92);
+  }
+
+  .bottom-nav {
+    background: rgba(14, 9, 32, 0.96);
+  }
+
+  .profile-modal,
+  .shop-modal,
+  .streak-modal,
+  .quests-modal {
+    background: rgba(16, 11, 34, 0.98);
+  }
+
+  /* הפחתת צלליות drop-shadow מונפשות כבדות בזמן גלילה ולחיצה במובייל */
+  .mode-card-svg,
+  .icon-3d-inline,
+  .icon-3d-mini {
+    filter: none !important;
+  }
+
+  .home-stage-glow {
+    opacity: 0.72;
+    animation: none !important;
+  }
+}
