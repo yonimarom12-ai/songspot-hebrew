@@ -59,18 +59,18 @@ export const SHOP_BACKGROUNDS = [
 export const SHOP_THEMES = [
   {
     id: "default",
-    name: "במת הופעות",
-    desc: "סגול ניאון + במת קונצרט",
-    previewBg: "linear-gradient(135deg,#1f0d47 0%,#7c3aed 55%,#ec4899 100%)",
-    accent: "#c084fc",
+    name: "קלאסי ספוטיפיי",
+    desc: "שחור עדין + ירוק ספוטיפיי ואור במה רגוע",
+    previewBg: "linear-gradient(135deg,#070b09 0%,#121212 58%,#1db954 100%)",
+    accent: "#1ed760",
     price: 0
   },
   {
-    id: "spotify",
-    name: "קלאסי ספוטיפיי",
-    desc: "שחור נקי + ירוק קלאסי",
-    previewBg: "linear-gradient(135deg,#000000 0%,#121212 58%,#1db954 100%)",
-    accent: "#1ed760",
+    id: "concert_purple",
+    name: "במת הופעות",
+    desc: "סגול ניאון + במת קונצרט צבעונית",
+    previewBg: "linear-gradient(135deg,#1f0d47 0%,#7c3aed 55%,#ec4899 100%)",
+    accent: "#c084fc",
     price: 350
   },
   {

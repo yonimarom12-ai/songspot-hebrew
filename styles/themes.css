@@ -16,7 +16,13 @@ body[data-theme="spotify"] {
 }
 
 body[data-theme="spotify"] .home-stage-glow {
-  background: radial-gradient(ellipse at 50% 0%, rgba(29, 185, 84, 0.24) 0%, rgba(0, 0, 0, 0.96) 65%);
+  background:
+    linear-gradient(180deg, rgba(6, 10, 8, 0.25) 0%, rgba(6, 10, 8, 0.52) 48%, rgba(4, 7, 6, 0.94) 84%, #050807 100%),
+    url("../assets/stage-bg-calm.jpg") center top / cover no-repeat;
+}
+
+body[data-theme="spotify"] .home-stage-glow::after {
+  background: radial-gradient(ellipse at 50% 10%, rgba(29, 185, 84, 0.14), transparent 65%);
 }
 
 body[data-theme="spotify"] .home-title {

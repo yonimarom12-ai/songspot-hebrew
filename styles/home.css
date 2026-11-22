@@ -2983,7 +2983,27 @@ body.hide-bottom-nav .bottom-nav {
 }
 
 /* ===== אנימציית החלקה כיוונית חלקה בין 5 מסכי הסרגל התחתון ===== */
-html, body {
+html {
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 6px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+body {
   overflow-x: clip;
 }
 

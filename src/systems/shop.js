@@ -8,11 +8,11 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261122s";
-import { state } from "../state.js?v=20261122s";
-import { saveUserStats } from "../services/storage.js?v=20261122s";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122s";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122s";
+} from "../data/shop.js?v=20261122t";
+import { state } from "../state.js?v=20261122t";
+import { saveUserStats } from "../services/storage.js?v=20261122t";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122t";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122t";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -119,7 +119,11 @@ function applyAvatarToEl(el, avatar) {
 
 function applyCosmeticsVisuals(bg, avatar, theme) {
   const activeTheme = theme || findTheme(getEquipped("theme"));
-  if (activeTheme.id === "default") {
+  if (activeTheme.id === "default" || activeTheme.id === "spotify") {
+    // ברירת המחדל היא ערכת הנושא הירוקה העדינה בסגנון ספוטיפיי
+    document.body.dataset.theme = "spotify";
+  } else if (activeTheme.id === "concert_purple") {
+    // במת ההופעות הסגולה-ניאון משתמשת בצבעי הבסיס המקוריים
     delete document.body.dataset.theme;
   } else {
     document.body.dataset.theme = activeTheme.id;
