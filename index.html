@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122m">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122m">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122n">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122n">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122m">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122n">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122m">
-  <link rel="stylesheet" href="styles/home.css?v=20261122m">
-  <link rel="stylesheet" href="styles/header.css?v=20261122m">
-  <link rel="stylesheet" href="styles/player.css?v=20261122m">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122m">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122m">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122m">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122m">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122m">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122n">
+  <link rel="stylesheet" href="styles/home.css?v=20261122n">
+  <link rel="stylesheet" href="styles/header.css?v=20261122n">
+  <link rel="stylesheet" href="styles/player.css?v=20261122n">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122n">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122n">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122n">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122n">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122n">
 </head>
 
 <body>
@@ -225,6 +225,7 @@
             <span class="mode-card-title">אתגר יומי</span>
             <span class="mode-card-sub">שיר חדש ומיוחד בכל יום</span>
           </span>
+          <span class="mode-card-completed-tag">✓ הושלם</span>
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
@@ -248,6 +249,7 @@
           <span class="weekly-title">השיר השבועי</span>
           <span class="weekly-sub">תוכלו לגלות אותו עכשיו!</span>
         </span>
+        <span class="mode-card-completed-tag">✓ הושלם</span>
         <span class="mode-card-selected-tag">✓ נבחר</span>
         <span style="font-size: 18px; opacity: 0.75;">‹</span>
       </button>
@@ -444,10 +446,9 @@
           <div class="marathon-timer-fill" id="marathon-timer-fill"></div>
         </div>
 
-        <!-- עזרי מרתון מהחנות (50/50 ו-+5 שניות) -->
+        <!-- עזרי מרתון מהחנות (50/50) -->
         <div class="marathon-powerups-row">
           <button type="button" class="marathon-pu-btn" id="marathon-pu-5050" disabled>🎯 50/50 (0)</button>
-          <button type="button" class="marathon-pu-btn" id="marathon-pu-time" disabled>⏸️ +5ש' (0)</button>
         </div>
 
         <div class="marathon-stage-card">
@@ -471,13 +472,11 @@
         <!-- שאלת ניחוש שנה -->
         <div class="marathon-year-box" id="marathon-year-box" style="display: none;">
           <div class="marathon-year-readout">
-            <button type="button" class="marathon-year-step" data-year-step="-5">-5</button>
-            <button type="button" class="marathon-year-step" data-year-step="-1">-1</button>
-            <span class="marathon-year-val" id="marathon-year-val">2008</span>
-            <button type="button" class="marathon-year-step" data-year-step="1">+1</button>
-            <button type="button" class="marathon-year-step" data-year-step="5">+5</button>
+            <button type="button" class="marathon-year-step" data-year-step="-1" aria-label="שנה אחורה">-</button>
+            <span class="marathon-year-val" id="marathon-year-val">2010</span>
+            <button type="button" class="marathon-year-step" data-year-step="1" aria-label="שנה קדימה">+</button>
           </div>
-          <input type="range" class="marathon-year-slider" id="marathon-year-slider" min="1970" max="2026" value="2008" />
+          <input type="range" class="marathon-year-slider" id="marathon-year-slider" min="1970" max="2026" value="2010" />
           <div class="marathon-year-scale"><span>1970</span><span>1990</span><span>2010</span><span>2026</span></div>
           <button type="button" class="setup-confirm-btn marathon-year-confirm-btn" id="marathon-year-confirm-btn">נעל תשובה ✓</button>
         </div>
@@ -728,6 +727,7 @@
           <div class="timed-hud-pill clock">⏱️ <strong id="timed-clock-val">60s</strong></div>
           <div class="timed-hud-pill score">🎵 <strong id="timed-score-val">0</strong> שירים</div>
           <div class="timed-hud-pill best">🏆 שיא: <strong id="timed-best-val">0</strong></div>
+          <button type="button" class="timed-pu-btn" id="timed-pu-time" disabled>⏸️ +5ש' (0)</button>
           <span class="timed-delta-flash" id="timed-delta-flash"></span>
         </div>
 
@@ -1247,6 +1247,7 @@
       <p class="song-reveal-artist" id="song-artist-reveal"></p>
       <div class="points-earned-notice" id="points-earned-notice"></div>
       <div class="level-up-notice" id="level-up-notice"></div>
+      <div class="timed-summary-list" id="timed-summary-list" style="display: none;"></div>
       <div class="reveal-media-actions" id="reveal-media-actions">
         <a class="reveal-action-chip spotify" id="reveal-spotify-link" href="#" target="_blank" rel="noopener noreferrer">Spotify</a>
         <a class="reveal-action-chip apple" id="reveal-apple-link" href="#" target="_blank" rel="noopener noreferrer">Apple Music</a>
@@ -1332,7 +1333,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122m"></script>
+  <script type="module" src="src/main.js?v=20261122n"></script>
 </body>
 
 </html>

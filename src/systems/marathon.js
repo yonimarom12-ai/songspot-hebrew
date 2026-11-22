@@ -1,12 +1,12 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122m";
-import { state } from "../state.js?v=20261122m";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122m";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122m";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122m";
-import { saveUserStats } from "../services/storage.js?v=20261122m";
-import { launchWinConfetti } from "./confetti.js?v=20261122m";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122m";
-import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261122m";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122n";
+import { state } from "../state.js?v=20261122n";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122n";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122n";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122n";
+import { saveUserStats } from "../services/storage.js?v=20261122n";
+import { launchWinConfetti } from "./confetti.js?v=20261122n";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122n";
+import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261122n";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -287,19 +287,13 @@ function playSongSnippet(previewUrl) {
 
 function updateMarathonPowerupButtons() {
   const pu5050 = document.getElementById("marathon-pu-5050");
-  const puTime = document.getElementById("marathon-pu-time");
   const q = questions[currentIndex];
   const c5050 = state.userStats?.powerups?.fiftyFifty || 0;
-  const cTime = state.userStats?.powerups?.extraTime || 0;
 
   if (pu5050) {
     pu5050.textContent = `🎯 50/50 (${c5050})`;
     const can5050 = !questionAnswered && c5050 > 0 && q && (q.type === "song" || q.type === "artist");
     pu5050.disabled = !can5050;
-  }
-  if (puTime) {
-    puTime.textContent = `⏸️ +5ש' (${cTime})`;
-    puTime.disabled = questionAnswered || cTime <= 0;
   }
 }
 
@@ -629,9 +623,9 @@ function renderCurrentQuestion(sessionId) {
     const lockBtn = document.getElementById("marathon-year-confirm-btn");
     if (slider) {
       slider.disabled = false;
-      slider.value = "2008";
+      slider.value = "2010";
     }
-    if (yearDisplay) yearDisplay.textContent = "2008";
+    if (yearDisplay) yearDisplay.textContent = "2010";
     if (lockBtn) lockBtn.disabled = false;
   }
 
@@ -813,18 +807,6 @@ function bindMarathonListenersOnce() {
       playClickSfx();
       updateMarathonPowerupButtons();
       pu5050.disabled = true;
-    });
-  }
-
-  const puTime = document.getElementById("marathon-pu-time");
-  if (puTime) {
-    puTime.addEventListener("click", () => {
-      if (questionAnswered || !(state.userStats?.powerups?.extraTime > 0)) return;
-      state.userStats.powerups.extraTime--;
-      saveUserStats();
-      questionStartPerf = Math.min(performance.now(), questionStartPerf + 5000);
-      playCrystalSfx();
-      updateMarathonPowerupButtons();
     });
   }
 

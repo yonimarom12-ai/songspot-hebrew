@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122m";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122m";
-import { dom } from "../dom.js?v=20261122m";
-import { state } from "../state.js?v=20261122m";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122m";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122m";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122m";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122n";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122n";
+import { dom } from "../dom.js?v=20261122n";
+import { state } from "../state.js?v=20261122n";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122n";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122n";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122n";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261122m";
+} from "../services/itunes.js?v=20261122n";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261122m";
-import { launchWinConfetti } from "./confetti.js?v=20261122m";
+} from "./audio.js?v=20261122n";
+import { launchWinConfetti } from "./confetti.js?v=20261122n";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261122m";
+} from "./feedback.js?v=20261122n";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261122m";
-import { updateStreakDisplay } from "./profile.js?v=20261122m";
+} from "./search.js?v=20261122n";
+import { updateStreakDisplay } from "./profile.js?v=20261122n";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,18 +43,19 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261122m";
-import { recordQuestProgress } from "./quests.js?v=20261122m";
+} from "./economy.js?v=20261122n";
+import { recordQuestProgress } from "./quests.js?v=20261122n";
 import {
   isTimedModeActive,
   startTimedRun,
   pauseTimedClock,
   resumeTimedClock,
   handleTimedWin,
-  handleTimedWrong
-} from "./timed.js?v=20261122m";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122m";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122m";
+  handleTimedWrong,
+  recordTimedSong
+} from "./timed.js?v=20261122n";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122n";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122n";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -126,13 +127,34 @@ export function setActiveDifficultyUI(level) {
   document.documentElement.style.setProperty("--level-glow", diff.glow);
 }
 
+function syncGameModeVisibility() {
+  const isTimed = isTimedModeActive();
+  const isSpecial = !!state.activeSpecialChallenge;
+  const isClassic = !isTimed && !isSpecial;
+
+  const streakSlot = document.querySelector(".streak-top-slot");
+  const diffBar = document.getElementById("difficulty-bar");
+  const filterRow = document.querySelector(".filter-summary-row");
+  const timelineWrap = document.getElementById("timeline-wrapper");
+
+  if (streakSlot) streakSlot.style.display = isClassic ? "" : "none";
+  if (diffBar) diffBar.style.display = isClassic ? "" : "none";
+  if (filterRow) filterRow.style.display = isClassic ? "" : "none";
+  if (timelineWrap) timelineWrap.style.display = isTimed ? "none" : "";
+}
+
 export function updateSkipButtonLabel() {
+  if (isTimedModeActive()) {
+    dom.skipBtn.textContent = "דלג לשיר הבא ⏭️";
+    return;
+  }
   const nextIdx = state.currentAttempt + 1;
   dom.skipBtn.textContent = nextIdx < DURATIONS.length ? `דלג (+${DURATIONS[nextIdx]}ש')` : "דלג (וותר)";
 }
 
 export function resetUI() {
-  state.currentAttempt = 0;
+  const isTimed = isTimedModeActive();
+  state.currentAttempt = isTimed ? DURATIONS.length - 1 : 0;
   state.usedHintInRound = false;
   state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.usedRedFeedbackInRound = state.redFeedbackEnabled;
@@ -141,13 +163,15 @@ export function resetUI() {
   stopAudioVisuals(0);
   releaseMediaElement();
   resetHintButtons();
+  syncGameModeVisibility();
 
   dom.discWrapper.classList.remove("revealed");
   dom.statusLabel.style.color = "var(--text-sub)";
   dom.durationBadge.style.display = "flex";
-  if (dom.timelineMarker) dom.timelineMarker.style.display = "flex";
-  updateTimelineMarkerForStage(0);
+  if (dom.timelineMarker) dom.timelineMarker.style.display = isTimed ? "none" : "flex";
+  updateTimelineMarkerForStage(state.currentAttempt);
   updateSkipButtonLabel();
+  if (isTimed && dom.hintsPanel) dom.hintsPanel.style.display = "none";
 
   dom.guessInput.value = "";
   delete dom.guessInput.dataset.selectedTitle;
@@ -159,8 +183,15 @@ export function resetUI() {
   dom.submitBtn.disabled = true;
   dom.skipBtn.disabled = true;
   dom.playBtn.disabled = true;
-  dom.resultBanner.classList.remove("open", "is-win", "is-loss");
+  dom.resultBanner.classList.remove("open", "is-win", "is-loss", "is-challenge-win");
   dom.resultBanner.style.display = "none";
+  delete dom.nextBtn.dataset.exitToLobby;
+  delete dom.nextBtn.dataset.restartTimed;
+  const timedSumList = document.getElementById("timed-summary-list");
+  if (timedSumList) {
+    timedSumList.style.display = "none";
+    timedSumList.innerHTML = "";
+  }
   if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
   dom.levelUpNotice.style.display = "none";
   dom.retryBtn.style.display = "none";
@@ -203,7 +234,18 @@ export async function fetchRandomSong() {
   dom.retryBtn.style.display = "none";
 
   let selectedSong = null;
-  if (
+  if (isTimedModeActive()) {
+    // במוד 60 שניות: שירים אקראיים לחלוטין מכל הקטלוג ללא סינון רמות קושי, ז'אנרים או עשורים
+    await ensureSeedCatalogLoaded();
+    if (roundId !== state.activeFetchRoundId) return;
+    const allTimedSongs = Array.from(state.discoveredSongsMap.values()).filter(s => s && s.previewUrl && s.title);
+    const notLast = allTimedSongs.filter(s => s.artist !== state.lastPlayedArtist);
+    const nonRecent = notLast.filter(s => !state.recentArtists.includes(s.artist));
+    const poolForTimed = nonRecent.length > 0 ? nonRecent : (notLast.length > 0 ? notLast : allTimedSongs);
+    if (poolForTimed.length > 0) {
+      selectedSong = pickWithRecencyPriority(poolForTimed);
+    }
+  } else if (
     state.preloadedNextSong &&
     state.preloadedNextSong.difficulty === state.currentDifficulty &&
     state.preloadedNextSong.song?.artist !== state.lastPlayedArtist
@@ -332,12 +374,15 @@ export async function fetchRandomSong() {
 }
 
 export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0) {
+  const isClassic = !isTimedModeActive() && !state.activeSpecialChallenge;
   state.userStats.totalHeard = (state.userStats.totalHeard || 0) + 1;
   if (won) {
     state.userStats.totalWon = (state.userStats.totalWon || 0) + 1;
-    state.userStats.currentStreak = (state.userStats.currentStreak || 0) + 1;
-    if (state.userStats.currentStreak > (state.userStats.bestStreak || 0)) {
-      state.userStats.bestStreak = state.userStats.currentStreak;
+    if (isClassic) {
+      state.userStats.currentStreak = (state.userStats.currentStreak || 0) + 1;
+      if (state.userStats.currentStreak > (state.userStats.bestStreak || 0)) {
+        state.userStats.bestStreak = state.userStats.currentStreak;
+      }
     }
     state.userStats.byLevel[difficultyLevel] = (state.userStats.byLevel[difficultyLevel] || 0) + 1;
     const speedKey = String(solvedDuration);
@@ -363,8 +408,8 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
         state.userStats.wonSongs = state.userStats.wonSongs.slice(0, 60);
       }
     }
-  } else {
-    // מגן רצף מהחנות: מציל אוטומטית את הרצף אם היה רצף פעיל!
+  } else if (isClassic) {
+    // מגן רצף מהחנות: פועל אך ורק במשחק הקלאסי!
     if ((state.userStats.currentStreak || 0) > 0 && (state.userStats.powerups?.streakFreeze || 0) > 0) {
       state.userStats.powerups.streakFreeze--;
       state.lastRoundStreakSaved = true;
@@ -372,12 +417,14 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
       state.userStats.currentStreak = 0;
       state.lastRoundStreakSaved = false;
     }
+  } else {
+    state.lastRoundStreakSaved = false;
   }
 
   recordQuestProgress({
     won,
     solvedDuration,
-    currentStreak: state.userStats.currentStreak || 0
+    currentStreak: isClassic ? (state.userStats.currentStreak || 0) : 0
   });
   saveUserStats();
   if (state.currentUser) {
@@ -395,32 +442,37 @@ export function endRound(won) {
   dom.durationBadge.style.display = "none";
   if (dom.timelineMarker) dom.timelineMarker.style.display = "none";
 
+  const specialChallenge = state.activeSpecialChallenge ? { ...state.activeSpecialChallenge } : null;
+  const isClassic = !isTimedModeActive() && !specialChallenge;
   const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
   const playedDifficulty = state.currentDifficulty;
   const usedHint = state.usedHintInRound;
   const usedEasySearch = state.usedEasySearchInRound || state.easySearchFiftyActive;
   const usedRedFeedback = (state.usedRedFeedbackInRound || state.redFeedbackEnabled) && solvedAtSec >= 8;
-  const nextStreakIfWon = won ? (state.userStats.currentStreak || 0) + 1 : 0;
+  const nextStreakIfWon = isClassic && won ? (state.userStats.currentStreak || 0) + 1 : 0;
   const earnedPoints = won
     ? calculateRoundReward(solvedAtSec, playedDifficulty, {
         usedHint,
         usedEasySearch,
         usedRedFeedback,
-        streak: nextStreakIfWon
+        streak: isClassic ? nextStreakIfWon : 0
       })
     : 0;
   recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints);
 
   // מסמן השלמת אתגר יומי / שיר שבועי (ניסיון אחד בלבד ליום/שבוע!)
-  if (state.activeSpecialChallenge) {
-    if (state.activeSpecialChallenge.kind === "daily") {
-      state.userStats.completedDailyDate = state.activeSpecialChallenge.key;
-    } else if (state.activeSpecialChallenge.kind === "weekly") {
-      state.userStats.completedWeeklyKey = state.activeSpecialChallenge.key;
+  if (specialChallenge) {
+    if (specialChallenge.kind === "daily") {
+      state.userStats.completedDailyDate = specialChallenge.key;
+    } else if (specialChallenge.kind === "weekly") {
+      state.userStats.completedWeeklyKey = specialChallenge.key;
     }
-    state.lastCompletedSpecialKind = state.activeSpecialChallenge.kind;
+    state.lastCompletedSpecialKind = specialChallenge.kind;
     state.activeSpecialChallenge = null;
     saveUserStats();
+    if (state.currentUser) {
+      syncAccountToCloud(state.currentUser, state.userStats);
+    }
   } else {
     state.lastCompletedSpecialKind = null;
   }
@@ -455,7 +507,7 @@ export function endRound(won) {
       } else {
         const notes = [];
         const mult = DIFFICULTIES[playedDifficulty]?.pointsMultiplier ?? 1;
-        const streakMult = getStreakMultiplier(nextStreakIfWon);
+        const streakMult = isClassic ? getStreakMultiplier(nextStreakIfWon) : 1;
         if (mult > 1) notes.push(`×${mult}`);
         if (streakMult > 1) notes.push(`רצף ×${streakMult}🔥`);
         if (usedHint && playedDifficulty === "impossible") notes.push("רמז ×0.5");
@@ -474,10 +526,13 @@ export function endRound(won) {
   // משמיע אוטומטית את השיר המלא גם בניצחון וגם בהפסד (ונכבה אוטומטית כשממשיכים לשיר הבא)
   playRevealPreview();
 
-  // מעבר לשלב הבא יקרה רק בלחיצה על "לשיר הבא", ואחרי בלתי אפשרי חוזר לקל בלולאה
-  const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
-  if (currDiffIdx >= 0) {
-    state.pendingNextDifficulty = DIFFICULTY_ORDER[(currDiffIdx + 1) % DIFFICULTY_ORDER.length];
+  if (isClassic) {
+    const currDiffIdx = DIFFICULTY_ORDER.indexOf(playedDifficulty);
+    if (currDiffIdx >= 0) {
+      state.pendingNextDifficulty = DIFFICULTY_ORDER[(currDiffIdx + 1) % DIFFICULTY_ORDER.length];
+    }
+  } else {
+    state.pendingNextDifficulty = null;
   }
   if (dom.levelUpNotice) {
     dom.levelUpNotice.textContent = "";
@@ -495,10 +550,17 @@ export function endRound(won) {
   if (revealBg) {
     revealBg.style.backgroundImage = hiResArt ? `url("${hiResArt}")` : "";
   }
+  const isSpecialWin = Boolean(specialChallenge && won);
   if (revealOutcome) {
-    revealOutcome.textContent = won
-      ? `✓ זיהית נכון תוך ${solvedAtSec} שניות!`
-      : "השיר היה:";
+    if (isSpecialWin) {
+      revealOutcome.textContent = specialChallenge.kind === "weekly"
+        ? `👑 פיצחת את השיר השבועי תוך ${solvedAtSec}ש'!`
+        : `🏆 פיצחת את האתגר היומי תוך ${solvedAtSec}ש'!`;
+    } else {
+      revealOutcome.textContent = won
+        ? `✓ זיהית נכון תוך ${solvedAtSec} שניות!`
+        : "השיר היה:";
+    }
     revealOutcome.className = `reveal-outcome-badge ${won ? "is-win" : "is-loss"}`;
   }
 
@@ -512,13 +574,24 @@ export function endRound(won) {
 
   dom.songTitleReveal.textContent = state.currentSong.title;
   dom.songArtistReveal.textContent = state.currentSong.artist;
-  dom.nextBtn.textContent = "לשיר הבא";
-  dom.resultBanner.classList.remove("is-win", "is-loss");
+
+  if (specialChallenge) {
+    dom.nextBtn.textContent = "חזרה ללובי 🏠";
+    dom.nextBtn.dataset.exitToLobby = "1";
+  } else {
+    delete dom.nextBtn.dataset.exitToLobby;
+    dom.nextBtn.textContent = "לשיר הבא";
+  }
+
+  dom.resultBanner.classList.remove("is-win", "is-loss", "is-challenge-win");
   dom.resultBanner.classList.add(won ? "is-win" : "is-loss", "open");
+  if (isSpecialWin) dom.resultBanner.classList.add("is-challenge-win");
   dom.resultBanner.style.display = "flex";
 
-  // טוען מראש ברקע את השיר הבא + השמע שלו כדי שהמעבר יהיה מיידי
-  preloadNextSongInBackground(state.pendingNextDifficulty || playedDifficulty);
+  // טוען מראש ברקע את השיר הבא רק במשחק הקלאסי
+  if (isClassic) {
+    preloadNextSongInBackground(state.pendingNextDifficulty || playedDifficulty);
+  }
 
   clearSearchBarFeedback();
   dom.guessInput.disabled = true;
@@ -529,6 +602,16 @@ export function endRound(won) {
 }
 
 export function advanceAttempt() {
+  // במוד 60 שניות: דילוג חינם מיידי לשיר הבא בלי לחשוף את השיר הנוכחי!
+  if (isTimedModeActive()) {
+    if (!state.currentSong) return;
+    recordTimedSong(state.currentSong, "skipped");
+    playSkipSfx();
+    stopAudioVisuals(0);
+    fetchRandomSong();
+    return;
+  }
+
   const wasPlaying = state.isPlayingSnippet;
   closeSuggestionsDropdown();
   dom.segments[state.currentAttempt].classList.remove("active");
@@ -574,6 +657,32 @@ export function handleGuess() {
     isFuzzySongMatch(rawValue, state.currentSong.title) ||
     (itunesTitle && isFuzzySongMatch(rawValue, itunesTitle));
 
+  if (isTimedModeActive()) {
+    if (isMatched) {
+      const earnedPoints = calculateRoundReward(15, "medium", { streak: 0 });
+      recordTimedSong(state.currentSong, "hit");
+      recordRoundStats(true, 15, "medium", earnedPoints);
+      handleTimedWin(earnedPoints);
+      playWinSfx();
+      vibrateWin();
+      showGameToast(`✓ ${state.currentSong.title} (+5ש')`, "quest");
+      stopAudioVisuals(0);
+      fetchRandomSong();
+    } else {
+      playWrongSfx();
+      vibrateError();
+      handleTimedWrong();
+      dom.guessInput.value = "";
+      delete dom.guessInput.dataset.selectedTitle;
+      delete dom.guessInput.dataset.selectedArtist;
+      updateSubmitButtonVisibility();
+      dom.playerCard.classList.remove("shake");
+      void dom.playerCard.offsetWidth;
+      dom.playerCard.classList.add("shake");
+    }
+    return;
+  }
+
   if (isMatched) {
     endRound(true);
   } else {
@@ -588,7 +697,6 @@ export function handleGuess() {
         dom.pointsEarnedNotice.style.display = "inline-flex";
       }
     }
-    if (isTimedModeActive()) handleTimedWrong();
     dom.playerCard.classList.remove("shake");
     void dom.playerCard.offsetWidth;
     dom.playerCard.classList.add("shake");
@@ -597,16 +705,17 @@ export function handleGuess() {
 }
 
 export function startTimedGameSession() {
+  state.activeSpecialChallenge = null;
   state.pendingNextDifficulty = null;
-  setActiveDifficultyUI("easy");
   startTimedRun({
-    onTimeUp: ({ score, crystals, isNewRecord, best }) => {
+    onTimeUp: ({ score, crystals, isNewRecord, best, history = [] }) => {
       stopAudioVisuals(0);
       closeSuggestionsDropdown();
       const revealOutcome = document.getElementById("reveal-outcome-badge");
       const revealCover = document.getElementById("reveal-cover-img");
       const revealBg = document.getElementById("reveal-bg-blur");
       const revealMediaActions = document.getElementById("reveal-media-actions");
+      const sumList = document.getElementById("timed-summary-list");
       if (revealOutcome) {
         revealOutcome.textContent = isNewRecord ? "🏆 שיא אישי חדש במשחק בזמן!" : "⏱️ נגמר הזמן!";
         revealOutcome.className = `reveal-outcome-badge ${score > 0 ? "is-win" : "is-loss"}`;
@@ -630,9 +739,45 @@ export function startTimedGameSession() {
           dom.pointsEarnedNotice.style.display = "none";
         }
       }
+
+      if (sumList) {
+        sumList.innerHTML = "";
+        if (history.length > 0) {
+          history.forEach(item => {
+            const row = document.createElement("div");
+            row.className = `timed-sum-row is-${item.status}`;
+            const img = document.createElement("img");
+            img.className = "timed-sum-thumb";
+            img.src = item.artwork || "";
+            img.alt = "";
+            const meta = document.createElement("div");
+            meta.className = "timed-sum-meta";
+            const t = document.createElement("span");
+            t.className = "timed-sum-title";
+            t.textContent = item.title;
+            const a = document.createElement("span");
+            a.className = "timed-sum-artist";
+            a.textContent = item.artist;
+            meta.append(t, a);
+            const badge = document.createElement("span");
+            badge.className = `timed-sum-badge is-${item.status}`;
+            badge.textContent = item.status === "hit"
+              ? "✓ זיהית"
+              : item.status === "skipped"
+                ? "⏭️ דילגת"
+                : "⏱️ נגמר הזמן";
+            row.append(img, meta, badge);
+            sumList.appendChild(row);
+          });
+          sumList.style.display = "flex";
+        } else {
+          sumList.style.display = "none";
+        }
+      }
+
       dom.nextBtn.textContent = "שחק שוב משחק בזמן ⏱️";
       dom.nextBtn.dataset.restartTimed = "1";
-      dom.resultBanner.classList.remove("is-win", "is-loss");
+      dom.resultBanner.classList.remove("is-win", "is-loss", "is-challenge-win");
       dom.resultBanner.classList.add(score > 0 ? "is-win" : "is-loss", "open");
       dom.resultBanner.style.display = "flex";
     }
@@ -691,6 +836,12 @@ export async function startDeterministicChallenge(kind) {
 }
 
 export function goToNextSong() {
+  if (dom.nextBtn?.dataset.exitToLobby === "1") {
+    delete dom.nextBtn.dataset.exitToLobby;
+    const exitBtn = document.getElementById("exit-to-lobby-btn");
+    if (exitBtn) exitBtn.click();
+    return;
+  }
   if (dom.nextBtn?.dataset.restartTimed === "1") {
     delete dom.nextBtn.dataset.restartTimed;
     startTimedGameSession();
@@ -706,6 +857,7 @@ export function goToNextSong() {
 export function initDifficultyListeners() {
   dom.diffButtons.forEach(btn => {
     btn.addEventListener("click", () => {
+      if (isTimedModeActive() || state.activeSpecialChallenge) return;
       state.pendingNextDifficulty = null;
       state.preloadedNextSong = null;
       setActiveDifficultyUI(btn.dataset.level);

@@ -1,18 +1,18 @@
-import { state } from "../state.js?v=20261122m";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122m";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122m";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122m";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122m";
-import { showGameToast } from "../utils/toast.js?v=20261122m";
-import { stopTimedRun } from "./timed.js?v=20261122m";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122m";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122m";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122m";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122m";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122m";
-import { playClickSfx } from "./sfx.js?v=20261122m";
-import { vibrateTap } from "../utils/toast.js?v=20261122m";
-import { isOnboardingOpen } from "./onboarding.js?v=20261122m";
+import { state } from "../state.js?v=20261122n";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122n";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122n";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122n";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122n";
+import { showGameToast } from "../utils/toast.js?v=20261122n";
+import { stopTimedRun } from "./timed.js?v=20261122n";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122n";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122n";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122n";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122n";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122n";
+import { playClickSfx } from "./sfx.js?v=20261122n";
+import { vibrateTap } from "../utils/toast.js?v=20261122n";
+import { isOnboardingOpen } from "./onboarding.js?v=20261122n";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -145,8 +145,21 @@ function updateHomeSelectedModeUI() {
   }
 
   document.querySelectorAll("#screen-modes-hub [data-open-mode]").forEach(card => {
-    const isSel = card.dataset.openMode === selectedHomeMode;
+    const mode = card.dataset.openMode;
+    const isSel = mode === selectedHomeMode;
     card.classList.toggle("is-selected", isSel);
+
+    if (mode === "daily") {
+      const done = state.userStats?.completedDailyDate === getTodayDateKey();
+      card.classList.toggle("is-completed", done);
+      const subEl = card.querySelector(".mode-card-sub");
+      if (subEl) subEl.textContent = done ? "✓ כבר עשית את האתגר היומי להיום!" : "שיר חדש ומיוחד בכל יום";
+    } else if (mode === "weekly") {
+      const done = state.userStats?.completedWeeklyKey === getCurrentWeekKey();
+      card.classList.toggle("is-completed", done);
+      const subEl = card.querySelector(".weekly-sub");
+      if (subEl) subEl.textContent = done ? "✓ כבר עשית את השיר השבועי השבוע!" : "תוכלו לגלות אותו עכשיו!";
+    }
   });
 
   const filterBtn = document.getElementById("home-filter-btn");
@@ -221,6 +234,7 @@ export function showScreen(screenName) {
 
   if (screenName !== "game" && screenName !== "settings" && screenName !== "marathon" && screenName !== "reverse" && screenName !== "timeline") {
     stopTimedRun();
+    state.activeSpecialChallenge = null;
     stopAudioVisuals();
     releaseMediaElement();
     const reveal = document.getElementById("result-banner");
@@ -232,10 +246,11 @@ export function showScreen(screenName) {
 
   if (screenName === "home") {
     updateBottomNavActiveTab("game");
-    renderHomeModeStatsStrip();
+    updateHomeSelectedModeUI();
     refreshIncomingFriendsBadge();
   } else if (screenName === "modes-hub") {
     updateBottomNavActiveTab("modes");
+    updateHomeSelectedModeUI();
   } else if (screenName === "leaderboard") {
     updateBottomNavActiveTab("leaderboard");
   }

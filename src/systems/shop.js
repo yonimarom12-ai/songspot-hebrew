@@ -8,11 +8,11 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261122m";
-import { state } from "../state.js?v=20261122m";
-import { saveUserStats } from "../services/storage.js?v=20261122m";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122m";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122m";
+} from "../data/shop.js?v=20261122n";
+import { state } from "../state.js?v=20261122n";
+import { saveUserStats } from "../services/storage.js?v=20261122n";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122n";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122n";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }

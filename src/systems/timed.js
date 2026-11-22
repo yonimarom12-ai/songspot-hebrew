@@ -1,5 +1,7 @@
-import { state } from "../state.js?v=20261122m";
-import { saveUserStats } from "../services/storage.js?v=20261122m";
+import { state } from "../state.js?v=20261122n";
+import { saveUserStats } from "../services/storage.js?v=20261122n";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122n";
+import { playCrystalSfx } from "./sfx.js?v=20261122n";
 
 const TIMED_START_SEC = 60;
 const TIMED_WIN_BONUS = 5;
@@ -10,8 +12,38 @@ let timedPaused = false;
 let timeLeft = TIMED_START_SEC;
 let timedScore = 0;
 let timedCrystals = 0;
+let timedHistory = [];
 let timedInterval = null;
 let onTimeUpCallback = null;
+let timedPuBound = false;
+
+function updateTimedExtraTimeButton() {
+  const btn = document.getElementById("timed-pu-time");
+  if (!btn) return;
+  const count = state.userStats?.powerups?.extraTime || 0;
+  btn.textContent = `⏸️ +5ש' (${count})`;
+  btn.disabled = !timedActive || count <= 0;
+}
+
+function bindTimedPowerupListenerOnce() {
+  if (timedPuBound) return;
+  timedPuBound = true;
+  const btn = document.getElementById("timed-pu-time");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    if (!timedActive) return;
+    const count = state.userStats?.powerups?.extraTime || 0;
+    if (count <= 0) return;
+    state.userStats.powerups.extraTime = count - 1;
+    timeLeft = Math.min(999, timeLeft + 5);
+    saveUserStats();
+    if (state.currentUser) {
+      syncAccountToCloud(state.currentUser, state.userStats);
+    }
+    playCrystalSfx();
+    renderTimedHud("+5ש' ⚡", "bonus");
+  });
+}
 
 function renderTimedHud(flashText = "", flashKind = "") {
   const hud = document.getElementById("timed-hud-bar");
@@ -27,6 +59,7 @@ function renderTimedHud(flashText = "", flashKind = "") {
   }
   if (scoreEl) scoreEl.textContent = String(timedScore);
   if (bestEl) bestEl.textContent = String(state.userStats?.bestTimedScore || 0);
+  updateTimedExtraTimeButton();
 
   if (flashEl && flashText) {
     flashEl.textContent = flashText;
@@ -45,8 +78,20 @@ export function getTimedRunStats() {
   return {
     score: timedScore,
     crystals: timedCrystals,
-    best: state.userStats?.bestTimedScore || 0
+    best: state.userStats?.bestTimedScore || 0,
+    history: [...timedHistory]
   };
+}
+
+export function recordTimedSong(song, status) {
+  if (!timedActive || !song) return;
+  timedHistory.push({
+    trackId: song.trackId,
+    title: song.title || "",
+    artist: song.artist || "",
+    artwork: song.artwork || "",
+    status // "hit" | "skipped" | "timeout"
+  });
 }
 
 export function pauseTimedClock() {
@@ -67,12 +112,14 @@ export function stopTimedRun() {
 }
 
 export function startTimedRun({ onTimeUp }) {
+  bindTimedPowerupListenerOnce();
   stopTimedRun();
   timedActive = true;
   timedPaused = true; // מושהה עד שהשיר הראשון נטען
   timeLeft = TIMED_START_SEC;
   timedScore = 0;
   timedCrystals = 0;
+  timedHistory = [];
   onTimeUpCallback = onTimeUp;
   renderTimedHud();
 
@@ -81,7 +128,21 @@ export function startTimedRun({ onTimeUp }) {
     timeLeft = Math.max(0, timeLeft - 1);
     renderTimedHud();
     if (timeLeft <= 0) {
+      if (state.currentSong) {
+        const last = timedHistory[timedHistory.length - 1];
+        if (!last || last.trackId !== state.currentSong.trackId) {
+          timedHistory.push({
+            trackId: state.currentSong.trackId,
+            title: state.currentSong.title || "",
+            artist: state.currentSong.artist || "",
+            artwork: state.currentSong.artwork || "",
+            status: "timeout"
+          });
+        }
+      }
       const finalScore = timedScore;
+      const finalCrystals = timedCrystals;
+      const finalHistory = [...timedHistory];
       const prevBest = state.userStats?.bestTimedScore || 0;
       const isNewRecord = finalScore > prevBest;
       if (isNewRecord && state.userStats) {
@@ -90,7 +151,15 @@ export function startTimedRun({ onTimeUp }) {
       }
       const cb = onTimeUpCallback;
       stopTimedRun();
-      if (cb) cb({ score: finalScore, crystals: timedCrystals, isNewRecord, best: Math.max(finalScore, prevBest) });
+      if (cb) {
+        cb({
+          score: finalScore,
+          crystals: finalCrystals,
+          isNewRecord,
+          best: Math.max(finalScore, prevBest),
+          history: finalHistory
+        });
+      }
     }
   }, 1000);
 }
@@ -99,7 +168,7 @@ export function handleTimedWin(earnedPoints = 0) {
   if (!timedActive) return;
   timedScore += 1;
   timedCrystals = Math.round((timedCrystals + (earnedPoints || 0)) * 100) / 100;
-  timeLeft = Math.min(99, timeLeft + TIMED_WIN_BONUS);
+  timeLeft = Math.min(999, timeLeft + TIMED_WIN_BONUS);
   if (state.userStats && timedScore > (state.userStats.bestTimedScore || 0)) {
     state.userStats.bestTimedScore = timedScore;
     saveUserStats();
