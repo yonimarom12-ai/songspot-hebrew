@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122t">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122t">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122u">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122u">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122t">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122u">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122t">
-  <link rel="stylesheet" href="styles/home.css?v=20261122t">
-  <link rel="stylesheet" href="styles/header.css?v=20261122t">
-  <link rel="stylesheet" href="styles/player.css?v=20261122t">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122t">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122t">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122t">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122t">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122t">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122u">
+  <link rel="stylesheet" href="styles/home.css?v=20261122u">
+  <link rel="stylesheet" href="styles/header.css?v=20261122u">
+  <link rel="stylesheet" href="styles/player.css?v=20261122u">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122u">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122u">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122u">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122u">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122u">
 </head>
 
 <body data-theme="spotify">
@@ -906,6 +906,7 @@
 
         <div class="promo-trigger-row">
           <button type="button" class="promo-trigger-btn" id="open-promo-modal-btn">🎁 יש לך קוד?</button>
+          <button type="button" class="promo-trigger-btn" id="replay-onboarding-btn">📖 הפעל מדריך מחדש</button>
         </div>
       </div>
 
@@ -1381,8 +1382,10 @@
         </div>
       </div>
       <button type="button" class="share-result-btn" id="ob-install-now-btn" style="display: none;">📲 התקן אפליקציה בלחיצה</button>
+      <div class="ob-action-pill" id="ob-action-pill" style="display: none;">👆 לחצו על הכפתור המסומן</div>
       <div class="ob-dots" id="ob-dots"></div>
       <button type="button" class="setup-confirm-btn ob-next-btn" id="ob-next-btn">הבא ←</button>
+      <button type="button" class="ob-skip-step-btn" id="ob-skip-step-btn" style="display: none;">דלג על שלב זה ›</button>
     </div>
   </div>
 
@@ -1434,7 +1437,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122t"></script>
+  <script type="module" src="src/main.js?v=20261122u"></script>
 </body>
 
 </html>

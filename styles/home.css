@@ -2819,6 +2819,76 @@ body.hide-bottom-nav .bottom-nav {
   display: flex;
 }
 
+/* מצב אינטראקטיבי: מאפשר ללחוץ ישירות על הכפתור המסומן בזמן שהכרטיס מוצג למעלה או למטה */
+.onboarding-overlay.is-interactive {
+  background: rgba(6, 10, 8, 0.34);
+  pointer-events: none;
+  padding: 14px;
+}
+
+.onboarding-overlay.is-interactive.dock-top {
+  align-items: flex-start;
+  padding-top: 18px;
+}
+
+.onboarding-overlay.is-interactive.dock-bottom {
+  align-items: flex-end;
+  padding-bottom: 92px;
+}
+
+.onboarding-overlay.is-interactive .onboarding-card {
+  pointer-events: auto;
+  padding: 15px 16px 14px;
+  gap: 8px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.85), 0 0 28px rgba(29, 185, 84, 0.28);
+}
+
+.onboarding-overlay.is-interactive .ob-emoji {
+  font-size: 32px;
+  margin-top: 0;
+}
+
+.ob-action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(29, 185, 84, 0.2);
+  border: 1.5px solid rgba(74, 222, 128, 0.65);
+  color: #bbf7d0;
+  font-size: 12.5px;
+  font-weight: 800;
+  animation: obActionPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes obActionPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.ob-skip-step-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 6px;
+  opacity: 0.8;
+}
+
+.ob-dot.done {
+  background: #22c55e;
+}
+
+@keyframes tourSpotlightPulse {
+  0%, 100% { box-shadow: 0 0 0 3px #22c55e, 0 0 22px rgba(34, 197, 94, 0.85); }
+  50% { box-shadow: 0 0 0 5px #38d9ff, 0 0 34px rgba(56, 217, 255, 0.95); }
+}
+
 .onboarding-card {
   width: 100%;
   max-width: 380px;
@@ -2910,8 +2980,9 @@ body.hide-bottom-nav .bottom-nav {
 
 .tour-spotlight-target {
   position: relative !important;
-  z-index: 570 !important;
-  box-shadow: 0 0 0 3px #f472b6, 0 0 28px rgba(236, 72, 153, 0.85) !important;
+  z-index: 620 !important;
+  animation: tourSpotlightPulse 1.2s ease-in-out infinite !important;
+  pointer-events: auto !important;
 }
 
 /* ===== הדגמה מונפשת "הוסף למסך הבית" במדריך ===== */
