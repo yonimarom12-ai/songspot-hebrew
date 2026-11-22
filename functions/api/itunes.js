@@ -1,5 +1,4 @@
-
-.// Cloudflare Pages Function: Proxy פרטי ומהיר ל-iTunes API (אותו דומיין -> 0 בעיות CORS ב-iOS Safari)
+// Cloudflare Pages Function: Proxy פרטי ומהיר ל-iTunes API (אותו דומיין -> 0 בעיות CORS ב-iOS Safari)
 const ALLOWED_ENTITIES = new Set(["song", "album", "musicArtist"]);
 
 export async function onRequestGet(context) {
