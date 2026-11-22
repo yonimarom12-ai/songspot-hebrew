@@ -62,7 +62,13 @@ export async function onRequestPost(context) {
         return Response.json({ error: "שם המשתמש כבר תפוס, אנא בחר שם אחר." }, { status: 409 });
       }
 
-      const stats = body?.stats && typeof body.stats === "object" ? body.stats : {};
+      const rawStats = body?.stats && typeof body.stats === "object" ? body.stats : {};
+      const sanitizeImg = (v, maxLen) => (typeof v === "string" && v.startsWith("data:image/") && v.length <= maxLen ? v : "");
+      const stats = {
+        ...rawStats,
+        customAvatarData: sanitizeImg(rawStats.customAvatarData, 60000),
+        customBackgroundData: sanitizeImg(rawStats.customBackgroundData, 120000)
+      };
       await env.DB
         .prepare(
           `INSERT INTO players (username, username_lower, email, password_hash, total_won, best_streak, points, best_timed, avatar_id, stats_json, updated_at)

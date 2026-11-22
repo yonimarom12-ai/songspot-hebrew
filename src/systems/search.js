@@ -1,8 +1,8 @@
-import { dom } from "../dom.js?v=20261122k";
-import { state } from "../state.js?v=20261122k";
-import { cleanTrackTitle, normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261122k";
-import { fetchItunesData } from "../services/itunes.js?v=20261122k";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261122k";
+import { dom } from "../dom.js?v=20261122m";
+import { state } from "../state.js?v=20261122m";
+import { cleanTrackTitle, normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261122m";
+import { fetchItunesData } from "../services/itunes.js?v=20261122m";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261122m";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;
@@ -116,6 +116,69 @@ export function renderSuggestions(items) {
   dom.suggestionsList.style.display = "block";
 }
 
+function scoreSongMatch(title, artist, normVal, fuzzyVal, queryWords) {
+  const normTitle = normalizeHebrew(title);
+  const normArtist = normalizeHebrew(artist);
+  const combinedNorm = `${normTitle} ${normArtist}`;
+  if (normTitle === normVal) return 100;
+  if (normTitle.startsWith(normVal)) return 85;
+  if (normTitle.includes(normVal)) return 70;
+  if (queryWords.length >= 2 && queryWords.every(w => combinedNorm.includes(w))) return 65;
+  if (normArtist.startsWith(normVal)) return 55;
+  if (normArtist.includes(normVal)) return 45;
+  if (fuzzyVal.length >= 2) {
+    const fuzzyTitle = normalizeHebrewFuzzy(title);
+    const fuzzyArtist = normalizeHebrewFuzzy(artist);
+    const fuzzyCombined = `${fuzzyTitle} ${fuzzyArtist}`;
+    if (fuzzyTitle === fuzzyVal) return 75;
+    if (fuzzyTitle.startsWith(fuzzyVal)) return 60;
+    if (fuzzyTitle.includes(fuzzyVal)) return 40;
+    if (fuzzyArtist.includes(fuzzyVal)) return 32;
+    const fuzzyWords = queryWords.map(w => normalizeHebrewFuzzy(w)).filter(Boolean);
+    if (fuzzyWords.length >= 2 && fuzzyWords.every(w => fuzzyCombined.includes(w))) return 50;
+  }
+  return 0;
+}
+
+async function fetchDeezerTrackSuggestions(query) {
+  const isHttp = typeof window !== "undefined" && window.location.protocol.startsWith("http");
+  if (!isHttp) return [];
+  try {
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 3500) : null;
+    const res = await fetch(`/api/deezer?type=track&limit=20&q=${encodeURIComponent(query)}`, controller ? { signal: controller.signal } : undefined);
+    if (timer) clearTimeout(timer);
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json?.data) ? json.data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function ensureCurrentSongInList(list, normVal, fuzzyVal, queryWords, limit) {
+  if (!state.currentSong) return list;
+  const curTitle = state.currentSong.title || "";
+  const curAltTitle = state.currentSong.itunesTitle || "";
+  const curArtist = state.currentSong.artist || "";
+
+  const scoreMain = scoreSongMatch(curTitle, curArtist, normVal, fuzzyVal, queryWords);
+  const scoreAlt = curAltTitle ? scoreSongMatch(curAltTitle, curArtist, normVal, fuzzyVal, queryWords) : 0;
+  if (scoreMain <= 0 && scoreAlt <= 0) return list;
+
+  const curNormTitle = normalizeHebrew(curTitle);
+  const targetIdx = list.findIndex(c => normalizeHebrew(c.title) === curNormTitle);
+  if (targetIdx === -1) {
+    const insertPos = Math.floor(Math.random() * Math.min(5, list.length + 1));
+    list.splice(insertPos, 0, { title: curTitle, artist: curArtist });
+  } else if (targetIdx >= limit) {
+    const [targetItem] = list.splice(targetIdx, 1);
+    const insertPos = Math.floor(Math.random() * Math.min(5, list.length + 1));
+    list.splice(insertPos, 0, targetItem);
+  }
+  return list;
+}
+
 export function triggerSearchForCurrentInput() {
   const val = dom.guessInput.value.trim();
   clearTimeout(state.searchDebounce);
@@ -132,78 +195,60 @@ export function triggerSearchForCurrentInput() {
     return;
   }
 
-  const matchesText = (text) => {
-    const norm = normalizeHebrew(text);
-    if (norm.includes(normalizedVal)) return true;
-    return fuzzyVal.length >= 2 && normalizeHebrewFuzzy(text).includes(fuzzyVal);
-  };
+  const queryWords = normalizedVal.split(/\s+/).filter(Boolean);
+  const MAX_RESULTS = 12;
 
-  let localMatches = Array.from(state.discoveredSongsMap.values()).filter(s =>
-    matchesText(s.title) || matchesText(s.artist)
-  );
-
-  if (state.easySearchFiftyActive) {
-    localMatches = localMatches.filter(s => isSongAllowedInEasyMode(s.title, s.artist));
+  const scoredLocal = [];
+  for (const s of state.discoveredSongsMap.values()) {
+    if (state.easySearchFiftyActive && !isSongAllowedInEasyMode(s.title, s.artist)) continue;
+    const score = scoreSongMatch(s.title, s.artist, normalizedVal, fuzzyVal, queryWords);
+    if (score > 0) scoredLocal.push({ item: s, score });
   }
+  scoredLocal.sort((a, b) => b.score - a.score);
+  const localMatches = scoredLocal.map(x => x.item);
 
-  renderSuggestions(localMatches.slice(0, 8));
+  ensureCurrentSongInList(localMatches, normalizedVal, fuzzyVal, queryWords, MAX_RESULTS);
+  renderSuggestions(localMatches.slice(0, MAX_RESULTS));
 
   if (val.length >= 2) {
-    state.searchDebounce = setTimeout(async () => {
-      try {
-        const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=16&term=${encodeURIComponent(val)}`;
-        const data = await fetchItunesData(url, 4000);
+    state.searchDebounce = setTimeout(() => {
+      const combined = [...localMatches];
+      const seen = new Set(combined.map(c => `${normalizeHebrew(c.title)}|${normalizeHebrew(c.artist)}`));
+
+      const appendRemote = (rawTitle, rawArtist) => {
+        const cleanTitle = cleanTrackTitle(rawTitle || "");
+        const artistName = (rawArtist || "").trim();
+        if (!cleanTitle) return;
+        const score = scoreSongMatch(cleanTitle, artistName, normalizedVal, fuzzyVal, queryWords);
+        if (score <= 0) return;
+        if (state.easySearchFiftyActive && !isSongAllowedInEasyMode(cleanTitle, artistName)) return;
+        const key = `${normalizeHebrew(cleanTitle)}|${normalizeHebrew(artistName)}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        combined.push({ title: cleanTitle, artist: artistName });
+      };
+
+      const commit = () => {
         if (dom.guessInput.value.trim() !== val) return;
+        ensureCurrentSongInList(combined, normalizedVal, fuzzyVal, queryWords, MAX_RESULTS);
+        renderSuggestions(combined.slice(0, MAX_RESULTS));
+      };
 
-        if (data?.results) {
-          const combined = [...localMatches];
-          data.results.forEach(r => {
-            const cleanTitle = cleanTrackTitle(r.trackName || "");
-            const artistName = r.artistName || "";
-            if (!cleanTitle) return;
+      // 1. Deezer proxy מהיר (~200ms) — מוצג מיד בלי לחכות ל-iTunes!
+      fetchDeezerTrackSuggestions(val).then((dzList) => {
+        if (dom.guessInput.value.trim() !== val || !dzList.length) return;
+        dzList.forEach(r => appendRemote(r.title, r.artist?.name));
+        commit();
+      }).catch(() => { });
 
-            const matchesQuery =
-              normalizeHebrew(cleanTitle).includes(normalizedVal) ||
-              normalizeHebrew(artistName).includes(normalizedVal);
-            if (!matchesQuery) return;
-
-            if (state.easySearchFiftyActive && !isSongAllowedInEasyMode(cleanTitle, artistName)) {
-              return;
-            }
-
-            const exists = combined.some(c =>
-              normalizeHebrew(c.title) === normalizeHebrew(cleanTitle) &&
-              normalizeHebrew(c.artist) === normalizeHebrew(artistName)
-            );
-            if (!exists) {
-              combined.push({ title: cleanTitle, artist: artistName });
-            }
-          });
-
-          if (state.currentSong) {
-            const targetMatchesQuery =
-              normalizeHebrew(state.currentSong.title).includes(normalizedVal) ||
-              normalizeHebrew(state.currentSong.artist).includes(normalizedVal);
-
-            if (targetMatchesQuery) {
-              const targetIdx = combined.findIndex(
-                c => normalizeHebrew(c.title) === normalizeHebrew(state.currentSong.title)
-              );
-              if (targetIdx === -1) {
-                const insertPos = Math.floor(Math.random() * Math.min(5, combined.length + 1));
-                combined.splice(insertPos, 0, { title: state.currentSong.title, artist: state.currentSong.artist });
-              } else if (targetIdx >= 8) {
-                const [targetItem] = combined.splice(targetIdx, 1);
-                const insertPos = Math.floor(Math.random() * Math.min(5, combined.length + 1));
-                combined.splice(insertPos, 0, targetItem);
-              }
-            }
-          }
-
-          renderSuggestions(combined.slice(0, 8));
-        }
-      } catch (e) { }
-    }, 250);
+      // 2. iTunes IL במקביל — משלים שירים נוספים אם חוזר
+      const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=20&term=${encodeURIComponent(val)}`;
+      fetchItunesData(url, 4000).then((data) => {
+        if (dom.guessInput.value.trim() !== val || !data?.results) return;
+        data.results.forEach(r => appendRemote(r.trackName, r.artistName));
+        commit();
+      }).catch(() => { });
+    }, 200);
   }
 }
 

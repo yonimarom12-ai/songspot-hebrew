@@ -1,11 +1,11 @@
-import { dom } from "../dom.js?v=20261122k";
-import { state } from "../state.js?v=20261122k";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261122k";
-import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261122k";
-import { stopGalleryPreview } from "./gallery.js?v=20261122k";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261122k";
-import { updatePointsDisplay } from "./economy.js?v=20261122k";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261122k";
+import { dom } from "../dom.js?v=20261122m";
+import { state } from "../state.js?v=20261122m";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261122m";
+import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261122m";
+import { stopGalleryPreview } from "./gallery.js?v=20261122m";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261122m";
+import { updatePointsDisplay } from "./economy.js?v=20261122m";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261122m";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -174,7 +174,14 @@ export function initAuthListeners() {
         safeStorageSet("songspot_current_user_v1", state.currentUser);
         const accounts = loadAccountsMap();
         const localStats = accounts[state.currentUser]?.stats || {};
-        state.userStats = normalizeStatsObj({ ...localStats, ...(cloudRes.stats || {}) });
+        const cloudStats = cloudRes.stats || {};
+        const mergedStats = {
+          ...localStats,
+          ...cloudStats,
+          customAvatarData: cloudStats.customAvatarData || localStats.customAvatarData || "",
+          customBackgroundData: cloudStats.customBackgroundData || localStats.customBackgroundData || ""
+        };
+        state.userStats = normalizeStatsObj(mergedStats);
         accounts[state.currentUser] = {
           username: state.currentUser,
           email: accounts[state.currentUser]?.email || "",

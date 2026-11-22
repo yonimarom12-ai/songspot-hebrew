@@ -35,10 +35,16 @@ export async function onRequestPost(context) {
     return Response.json({ error: "Invalid payload" }, { status: 400 });
   }
 
+  const sanitizeImageData = (val, maxLen) => {
+    if (typeof val !== "string") return "";
+    if (!val.startsWith("data:image/")) return "";
+    return val.length <= maxLen ? val : "";
+  };
+
   const compactStats = {
     ...stats,
-    customAvatarData: "",
-    customBackgroundData: ""
+    customAvatarData: sanitizeImageData(stats.customAvatarData, 60000),
+    customBackgroundData: sanitizeImageData(stats.customBackgroundData, 120000)
   };
 
   const usernameLower = username.toLowerCase();

@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261122k";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261122k";
-import { state } from "../state.js?v=20261122k";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261122m";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261122m";
+import { state } from "../state.js?v=20261122m";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -106,24 +106,30 @@ export function initAudioContext() {
   // אם הקובץ הגולמי של הסיבוב זמין והבאפר טרם פוענח ב-AudioContext הנוכחי — מפענחים מיד (~25ms)
   if (state.rawAudioBuffer && !state.audioBuffer && !pendingDecode) {
     decodeRawAudioForRound(state.rawAudioBuffer, state.activeFetchRoundId);
+  } else if (!state.rawAudioBuffer && !state.audioBuffer && !pendingRawFetch && state.currentSong?.previewUrl) {
+    preloadAudioBufferInBackground(state.currentSong.previewUrl, state.activeFetchRoundId);
   }
 
   return ctx;
 }
 
 export function unlockAudioOnFirstGesture() {
-  const unlock = () => {
-    initAudioContext();
+  const attachOneShotUnlock = () => {
+    const unlock = () => {
+      initAudioContext();
+    };
+    document.addEventListener("touchstart", unlock, { capture: true, passive: true, once: true });
+    document.addEventListener("pointerdown", unlock, { capture: true, passive: true, once: true });
+    document.addEventListener("click", unlock, { capture: true, passive: true, once: true });
   };
-  document.addEventListener("touchstart", unlock, { capture: true, passive: true, once: true });
-  document.addEventListener("pointerdown", unlock, { capture: true, passive: true, once: true });
-  document.addEventListener("click", unlock, { capture: true, passive: true, once: true });
+  attachOneShotUnlock();
 
   if (!lifecycleGuardsInstalled) {
     lifecycleGuardsInstalled = true;
     const markForRebuild = () => {
       // יציאה מהדף/נעילת מסך באייפון עלולה לנתק את ערוץ השמע של ה-AudioContext הישן
       stopAudioVisuals();
+      releaseMediaElement();
       audioUnlocked = false;
       needsContextRebuildOnGesture = true;
     };
@@ -134,6 +140,8 @@ export function unlockAudioOnFirstGesture() {
         configureAudioSession();
         needsContextRebuildOnGesture = true;
         audioUnlocked = false;
+        // ברגע שחוזרים לדף — מאזינים למגע הראשון בכל מקום במסך כדי לשחרר ולבנות מחדש AudioContext עוד לפני הלחיצה על Play!
+        attachOneShotUnlock();
       }
     });
     window.addEventListener("pagehide", markForRebuild);
@@ -142,6 +150,7 @@ export function unlockAudioOnFirstGesture() {
       if (e.persisted || state.audioCtx) {
         needsContextRebuildOnGesture = true;
         audioUnlocked = false;
+        attachOneShotUnlock();
       }
     });
   }
@@ -565,6 +574,30 @@ function playViaMediaElement(duration, targetPct) {
   }
 }
 
+function resumeContextSafely(ctx, timeoutMs = 1000) {
+  if (!ctx || ctx.state === "running") return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const timer = setTimeout(() => finish(ctx.state === "running"), timeoutMs);
+    try {
+      const p = ctx.resume();
+      if (p && typeof p.then === "function") {
+        p.then(() => finish(ctx.state === "running")).catch(() => finish(false));
+      } else {
+        finish(ctx.state === "running");
+      }
+    } catch (e) {
+      finish(false);
+    }
+  });
+}
+
 export function playSnippet() {
   if (beforePlaySnippetHook) beforePlaySnippetHook();
   if (state.isPlayingSnippet) {
@@ -577,9 +610,7 @@ export function playSnippet() {
 
   // שחרור Web Audio מיידית בתוך מחוות הלחיצה
   const ctx = initAudioContext();
-  const resumePromise = ctx && ctx.state !== "running"
-    ? Promise.resolve(ctx.resume()).catch(() => { })
-    : Promise.resolve();
+  const resumePromise = resumeContextSafely(ctx, 1000);
 
   const duration = DURATIONS[state.currentAttempt];
   const targetPct = STAGE_STOPS_PCT[state.currentAttempt];
@@ -593,9 +624,13 @@ export function playSnippet() {
     if (ctx.state === "running") {
       startBufferSnippet(ctx, buffer, duration, targetPct);
     } else {
-      resumePromise.then(() => {
+      resumePromise.then((running) => {
         if (myToken !== playToken || !state.isPlayingSnippet) return;
-        startBufferSnippet(ctx, buffer, duration, targetPct);
+        if (running && ctx.state === "running") {
+          startBufferSnippet(ctx, buffer, duration, targetPct);
+        } else {
+          playViaMediaElement(duration, targetPct);
+        }
       });
     }
     return;
@@ -607,8 +642,14 @@ export function playSnippet() {
     if (dom.statusLabel) dom.statusLabel.textContent = "מכין שמע...";
 
     (async () => {
-      await resumePromise;
+      const running = await resumePromise;
       if (myToken !== playToken || !state.isPlayingSnippet) return;
+
+      if (!running || ctx.state !== "running") {
+        if (dom.statusLabel) dom.statusLabel.textContent = prevStatus;
+        playViaMediaElement(duration, targetPct);
+        return;
+      }
 
       let buffer = state.audioBuffer;
       if (!buffer && pendingDecode && pendingDecode.roundId === roundId) {
@@ -629,7 +670,7 @@ export function playSnippet() {
       if (myToken !== playToken || !state.isPlayingSnippet) return;
       if (dom.statusLabel) dom.statusLabel.textContent = prevStatus;
 
-      if (buffer) {
+      if (buffer && ctx.state === "running") {
         startBufferSnippet(ctx, buffer, duration, targetPct);
       } else {
         // גיבוי אוטומטי ל-<audio> בלי לדרוש מהמשתמש ללחוץ שוב על ניגון

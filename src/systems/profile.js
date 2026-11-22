@@ -1,14 +1,14 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261122k";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122k";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122k";
-import { state } from "../state.js?v=20261122k";
-import { saveUserStats } from "../services/storage.js?v=20261122k";
-import { fetchItunesData } from "../services/itunes.js?v=20261122k";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122k";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122k";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122k";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261122k";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122k";
+import { ARTISTS_DB } from "../data/artists.js?v=20261122m";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122m";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122m";
+import { state } from "../state.js?v=20261122m";
+import { saveUserStats } from "../services/storage.js?v=20261122m";
+import { fetchItunesData } from "../services/itunes.js?v=20261122m";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122m";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122m";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122m";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261122m";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122m";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -271,28 +271,48 @@ function renderFavSuggestions(field, items, queryAtCall) {
   list.style.display = "block";
 }
 
+function renderFavStatusRow(field, message) {
+  const cfg = FAV_FIELD_CONFIG[field];
+  const list = document.getElementById(cfg.listId);
+  if (!list) return;
+  list.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "suggestion-row fav-status-row";
+  div.style.opacity = "0.75";
+  div.style.justifyContent = "center";
+  div.style.pointerEvents = "none";
+  div.textContent = message;
+  list.appendChild(div);
+  list.style.display = "block";
+}
+
 function getLocalFavoriteMatches(field, normalizedQuery) {
   if (!normalizedQuery) return [];
+  const words = normalizedQuery.split(/\s+/).filter(Boolean);
   const results = [];
   const seen = new Set();
 
   if (field === "artist") {
     for (const a of ARTISTS_DB) {
-      if (normalizeHebrew(a.name).includes(normalizedQuery)) {
-        const key = normalizeHebrew(a.name);
-        if (!seen.has(key)) {
-          seen.add(key);
+      const norm = normalizeHebrew(a.name);
+      if (norm.includes(normalizedQuery) || (words.length >= 2 && words.every(w => norm.includes(w)))) {
+        if (!seen.has(norm)) {
+          seen.add(norm);
           const sampleArt = state.artistCatalogCache?.[a.name]?.[0]?.artwork || "";
           results.push({ primary: a.name, secondary: "אמן ישראלי", displayValue: a.name, artwork: sampleArt });
         }
       }
-      if (results.length >= 10) break;
+      if (results.length >= 12) break;
     }
   } else if (field === "song") {
     for (const s of state.discoveredSongsMap.values()) {
+      const normTitle = normalizeHebrew(s.title);
+      const normArtist = normalizeHebrew(s.artist);
+      const combined = `${normTitle} ${normArtist}`;
       if (
-        normalizeHebrew(s.title).includes(normalizedQuery) ||
-        normalizeHebrew(s.artist).includes(normalizedQuery)
+        normTitle.includes(normalizedQuery) ||
+        normArtist.includes(normalizedQuery) ||
+        (words.length >= 2 && words.every(w => combined.includes(w)))
       ) {
         const displayValue = `${s.title} - ${s.artist}`;
         const key = normalizeHebrew(displayValue);
@@ -301,7 +321,7 @@ function getLocalFavoriteMatches(field, normalizedQuery) {
           results.push({ primary: s.title, secondary: s.artist, displayValue, artwork: s.artwork || "" });
         }
       }
-      if (results.length >= 10) break;
+      if (results.length >= 12) break;
     }
   }
   return results;
@@ -315,7 +335,10 @@ async function fetchDeezerFavoriteResults(field, query) {
   // 1. עדיפות ראשונה: Proxy מאותו דומיין ב-Cloudflare (/api/deezer) -> 0 בעיות CORS באייפון!
   if (isHttp) {
     try {
-      const res = await fetch(`/api/deezer?type=${dzType}&limit=25&q=${encodeURIComponent(query)}`);
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timer = controller ? setTimeout(() => controller.abort(), 4500) : null;
+      const res = await fetch(`/api/deezer?type=${dzType}&limit=25&q=${encodeURIComponent(query)}`, controller ? { signal: controller.signal } : undefined);
+      if (timer) clearTimeout(timer);
       if (res.ok) {
         const json = await res.json();
         if (Array.isArray(json?.data)) return json.data;
@@ -327,7 +350,7 @@ async function fetchDeezerFavoriteResults(field, query) {
   return await new Promise((resolve) => {
     const cb = "dzCb_" + Math.random().toString(36).slice(2, 10);
     const script = document.createElement("script");
-    const timer = setTimeout(() => { cleanup(); resolve([]); }, 5000);
+    const timer = setTimeout(() => { cleanup(); resolve([]); }, 4500);
     function cleanup() {
       clearTimeout(timer);
       try { delete window[cb]; } catch (e) { window[cb] = undefined; }
@@ -363,40 +386,37 @@ function triggerFavoriteSearch(field) {
   const localMatches = getLocalFavoriteMatches(field, normalizedVal);
   if (localMatches.length > 0) {
     renderFavSuggestions(field, localMatches, val);
+  } else if (val.length >= 2) {
+    renderFavStatusRow(field, "מחפש...");
   }
 
   if (val.length < 2) return;
 
-  favSearchTimers[field] = setTimeout(async () => {
-    try {
-      const enc = encodeURIComponent(val);
-      const combined = [...localMatches];
-      const seen = new Set(combined.map(c => normalizeHebrew(c.displayValue)));
+  favSearchTimers[field] = setTimeout(() => {
+    const enc = encodeURIComponent(val);
+    const combined = [...localMatches];
+    const seen = new Set(combined.map(c => normalizeHebrew(c.displayValue)));
+    let pendingSources = 3;
 
-      const pushUnique = (item) => {
-        if (!item) return;
-        const key = normalizeHebrew(item.displayValue);
-        if (!seen.has(key)) {
-          seen.add(key);
-          combined.push(item);
-        }
-      };
+    const pushUnique = (item) => {
+      if (!item) return;
+      const key = normalizeHebrew(item.displayValue);
+      if (!seen.has(key)) {
+        seen.add(key);
+        combined.push(item);
+      }
+    };
 
-      // חיפוש מקביל ב-Deezer (מאגר ענק בעברית ובלועזית + תמונות אמנים אמיתיות) + iTunes (IL + US)
-      const itunesEntity = field === "album" ? "album" : "song";
-      const [dzRes, itIlRes, itUsRes] = await Promise.allSettled([
-        fetchDeezerFavoriteResults(field, val),
-        fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=${itunesEntity}&limit=25&term=${enc}`, 6000),
-        fetchItunesData(`https://itunes.apple.com/search?country=US&media=music&entity=${itunesEntity}&limit=15&term=${enc}`, 6000)
-      ]);
+    const commitResults = () => {
       if (input.value.trim() !== val) return;
+      if (combined.length > 0) {
+        renderFavSuggestions(field, combined.slice(0, 24), val);
+      } else if (pendingSources <= 0) {
+        renderFavStatusRow(field, "לא נמצאו תוצאות — נסה מילה אחרת");
+      }
+    };
 
-      const dzList = dzRes.status === "fulfilled" ? (dzRes.value || []) : [];
-      const itList = [
-        ...(itIlRes.status === "fulfilled" ? (itIlRes.value?.results || []) : []),
-        ...(itUsRes.status === "fulfilled" ? (itUsRes.value?.results || []) : [])
-      ];
-
+    const appendDeezerList = (dzList) => {
       if (field === "song") {
         for (const r of dzList) {
           const title = cleanTrackTitle(r.title || "");
@@ -407,17 +427,6 @@ function triggerFavoriteSearch(field) {
             secondary: artist,
             displayValue: `${title} - ${artist}`,
             artwork: r.album?.cover_medium || r.album?.cover_small || ""
-          });
-        }
-        for (const r of itList) {
-          const title = cleanTrackTitle(r.trackName || "");
-          const artist = (r.artistName || "").trim();
-          if (!title || !artist) continue;
-          pushUnique({
-            primary: title,
-            secondary: artist,
-            displayValue: `${title} - ${artist}`,
-            artwork: upgradeArtUrl(r.artworkUrl100)
           });
         }
       } else if (field === "album") {
@@ -432,6 +441,34 @@ function triggerFavoriteSearch(field) {
             artwork: r.cover_medium || r.cover_small || ""
           });
         }
+      } else if (field === "artist") {
+        for (const r of dzList) {
+          const nm = (r.name || "").trim();
+          if (!nm) continue;
+          pushUnique({
+            primary: nm,
+            secondary: r.nb_fan ? `${Number(r.nb_fan).toLocaleString("he-IL")} מאזינים` : "אמן",
+            displayValue: nm,
+            artwork: r.picture_medium || r.picture_small || ""
+          });
+        }
+      }
+    };
+
+    const appendItunesList = (itList) => {
+      if (field === "song") {
+        for (const r of itList) {
+          const title = cleanTrackTitle(r.trackName || "");
+          const artist = (r.artistName || "").trim();
+          if (!title || !artist) continue;
+          pushUnique({
+            primary: title,
+            secondary: artist,
+            displayValue: `${title} - ${artist}`,
+            artwork: upgradeArtUrl(r.artworkUrl100)
+          });
+        }
+      } else if (field === "album") {
         for (const r of itList) {
           const albumName = (r.collectionName || "").trim();
           const artistName = (r.artistName || "").trim();
@@ -444,16 +481,6 @@ function triggerFavoriteSearch(field) {
           });
         }
       } else if (field === "artist") {
-        for (const r of dzList) {
-          const nm = (r.name || "").trim();
-          if (!nm) continue;
-          pushUnique({
-            primary: nm,
-            secondary: r.nb_fan ? `${Number(r.nb_fan).toLocaleString("he-IL")} מאזינים` : "אמן",
-            displayValue: nm,
-            artwork: r.picture_medium || r.picture_small || ""
-          });
-        }
         for (const r of itList) {
           const nm = (r.artistName || "").trim();
           if (!nm) continue;
@@ -465,10 +492,40 @@ function triggerFavoriteSearch(field) {
           });
         }
       }
+    };
 
-      renderFavSuggestions(field, combined.slice(0, 20), val);
-    } catch (e) { }
-  }, 200);
+    // מריצים את 3 המקורות באופן עצמאי — Deezer מוצג מיד (~200ms) בלי להיחסם ע"י timeout של iTunes!
+    fetchDeezerFavoriteResults(field, val)
+      .then((dzList) => {
+        if (Array.isArray(dzList) && dzList.length) appendDeezerList(dzList);
+      })
+      .catch(() => { })
+      .finally(() => {
+        pendingSources--;
+        commitResults();
+      });
+
+    const itunesEntity = field === "album" ? "album" : "song";
+    fetchItunesData(`https://itunes.apple.com/search?country=IL&media=music&entity=${itunesEntity}&limit=25&term=${enc}`, 4500)
+      .then((res) => {
+        if (Array.isArray(res?.results) && res.results.length) appendItunesList(res.results);
+      })
+      .catch(() => { })
+      .finally(() => {
+        pendingSources--;
+        commitResults();
+      });
+
+    fetchItunesData(`https://itunes.apple.com/search?country=US&media=music&entity=${itunesEntity}&limit=15&term=${enc}`, 4500)
+      .then((res) => {
+        if (Array.isArray(res?.results) && res.results.length) appendItunesList(res.results);
+      })
+      .catch(() => { })
+      .finally(() => {
+        pendingSources--;
+        commitResults();
+      });
+  }, 180);
 }
 
 function renderProfileFavorites() {

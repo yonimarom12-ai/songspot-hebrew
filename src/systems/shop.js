@@ -8,11 +8,11 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261122k";
-import { state } from "../state.js?v=20261122k";
-import { saveUserStats } from "../services/storage.js?v=20261122k";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122k";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122k";
+} from "../data/shop.js?v=20261122m";
+import { state } from "../state.js?v=20261122m";
+import { saveUserStats } from "../services/storage.js?v=20261122m";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122m";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122m";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -196,7 +196,7 @@ function exitPeekToShop() {
   renderShop();
 }
 
-// דחיסה והקטנה של תמונה בצד הלקוח כדי לשמור בצורה בטוחה ב-localStorage
+// דחיסה והקטנה חכמה של תמונה בצד הלקוח כדי שתשקול מעט ותסתנכרן בקלות גם בענן וגם בין מכשירים
 function compressUploadedImage(file, type) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -217,14 +217,18 @@ function compressUploadedImage(file, type) {
           const sx = (img.width - minSide) / 2;
           const sy = (img.height - minSide) / 2;
           ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
-          resolve(canvas.toDataURL("image/jpeg", 0.82));
+          let out = canvas.toDataURL("image/jpeg", 0.72);
+          if (out.length > 45000) out = canvas.toDataURL("image/jpeg", 0.52);
+          resolve(out);
         } else {
-          const maxDim = 960;
+          const maxDim = 640;
           const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
           canvas.width = Math.max(1, Math.round(img.width * scale));
           canvas.height = Math.max(1, Math.round(img.height * scale));
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL("image/jpeg", 0.72));
+          let out = canvas.toDataURL("image/jpeg", 0.62);
+          if (out.length > 90000) out = canvas.toDataURL("image/jpeg", 0.45);
+          resolve(out);
         }
       };
       img.src = reader.result;

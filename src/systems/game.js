@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122k";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122k";
-import { dom } from "../dom.js?v=20261122k";
-import { state } from "../state.js?v=20261122k";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122k";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122k";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122k";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122m";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122m";
+import { dom } from "../dom.js?v=20261122m";
+import { state } from "../state.js?v=20261122m";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122m";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122m";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122m";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261122k";
+} from "../services/itunes.js?v=20261122m";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261122k";
-import { launchWinConfetti } from "./confetti.js?v=20261122k";
+} from "./audio.js?v=20261122m";
+import { launchWinConfetti } from "./confetti.js?v=20261122m";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261122k";
+} from "./feedback.js?v=20261122m";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261122k";
-import { updateStreakDisplay } from "./profile.js?v=20261122k";
+} from "./search.js?v=20261122m";
+import { updateStreakDisplay } from "./profile.js?v=20261122m";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261122k";
-import { recordQuestProgress } from "./quests.js?v=20261122k";
+} from "./economy.js?v=20261122m";
+import { recordQuestProgress } from "./quests.js?v=20261122m";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -52,9 +52,9 @@ import {
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong
-} from "./timed.js?v=20261122k";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122k";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122k";
+} from "./timed.js?v=20261122m";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122m";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122m";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;

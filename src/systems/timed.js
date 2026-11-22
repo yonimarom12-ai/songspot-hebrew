@@ -1,5 +1,5 @@
-import { state } from "../state.js?v=20261122k";
-import { saveUserStats } from "../services/storage.js?v=20261122k";
+import { state } from "../state.js?v=20261122m";
+import { saveUserStats } from "../services/storage.js?v=20261122m";
 
 const TIMED_START_SEC = 60;
 const TIMED_WIN_BONUS = 5;
