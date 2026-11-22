@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261122q";
+import { state } from "../state.js?v=20261122s";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -67,6 +67,7 @@ export function getDefaultStats() {
     completedWeeklyKey: "",
     powerups: { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 },
     dailyQuests: null,
+    dailyGifts: { lastClaimDate: "", streakDay: 0 },
     redeemedCodes: [],
     favorites: { song: "", album: "", artist: "", songImg: "", albumImg: "", artistImg: "" }
   };
@@ -111,6 +112,10 @@ export function normalizeStatsObj(parsed) {
       extraTime: Math.max(0, Number(parsed.powerups?.extraTime) || 0)
     },
     dailyQuests: parsed.dailyQuests && typeof parsed.dailyQuests === "object" ? parsed.dailyQuests : null,
+    dailyGifts: {
+      lastClaimDate: typeof parsed.dailyGifts?.lastClaimDate === "string" ? parsed.dailyGifts.lastClaimDate : "",
+      streakDay: Number.isFinite(Number(parsed.dailyGifts?.streakDay)) ? Math.max(0, Math.min(7, Math.round(Number(parsed.dailyGifts.streakDay)))) : 0
+    },
     redeemedCodes: Array.isArray(parsed.redeemedCodes) ? parsed.redeemedCodes : [],
     favorites: {
       song: typeof parsed.favorites?.song === "string" ? parsed.favorites.song : "",

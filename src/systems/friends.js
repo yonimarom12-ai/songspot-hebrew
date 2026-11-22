@@ -1,8 +1,17 @@
-import { state } from "../state.js?v=20261122q";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261122q";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122q";
-import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261122q";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122q";
+import { state } from "../state.js?v=20261122s";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261122s";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261122s";
+import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261122s";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122s";
+import { showGameToast } from "../utils/toast.js?v=20261122s";
+
+const PUBLIC_BASE_URL = "https://guessthesonghebrew.pages.dev";
+let activeViewedRelation = "friend";
+let qrStream = null;
+let qrScanRaf = null;
+let qrScanActive = false;
+let jsQrLoadPromise = null;
+let showScreenFn = null;
 
 const LOCAL_FRIENDS_KEY = "songspot_local_friends_v1";
 const LOCAL_REQS_KEY = "songspot_local_friend_reqs_v1";
@@ -75,9 +84,81 @@ function formatNum(val) {
   return Number.isInteger(n) ? n.toLocaleString("he-IL") : n.toFixed(1).replace(/\.0$/, "");
 }
 
-function openFriendProfileView(friend) {
+function buildProfileShareUrl(username) {
+  const base = (typeof window !== "undefined" && window.location.protocol.startsWith("http"))
+    ? window.location.origin
+    : PUBLIC_BASE_URL;
+  return `${base}/?profile=${encodeURIComponent(username)}`;
+}
+
+async function shareMyProfileLink(feedbackBtn, defaultLabel) {
+  if (!state.currentUser) return;
+  const url = buildProfileShareUrl(state.currentUser);
+  const text = `🎵 בואו לראות את הפרופיל והשיאים שלי ב״נחש את השיר״ ולהוסיף אותי כחבר! 👇\n${url}`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: `הפרופיל של ${state.currentUser} — נחש את השיר`, text, url });
+      return;
+    } catch (e) {
+      if (e?.name === "AbortError") return;
+    }
+  }
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(url).catch(() => { });
+  }
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, "_blank", "noopener,noreferrer");
+
+  if (feedbackBtn) {
+    feedbackBtn.textContent = "✓ הקישור הועתק!";
+    setTimeout(() => { feedbackBtn.textContent = defaultLabel; }, 2000);
+  }
+  showGameToast("🔗 קישור הפרופיל הועתק לשיתוף!", "quest");
+}
+
+function setFriendProfileMsg(text, type = "") {
+  const el = document.getElementById("fp-action-msg");
+  if (!el) return;
+  el.textContent = text;
+  el.className = `friends-action-msg${type ? ` ${type}` : ""}`;
+}
+
+function syncFriendProfileActionButtons() {
+  const addBtn = document.getElementById("fp-add-friend-btn");
+  const removeBtn = document.getElementById("fp-remove-friend-btn");
+  if (removeBtn) {
+    removeBtn.style.display = activeViewedRelation === "friend" ? "block" : "none";
+  }
+  if (!addBtn) return;
+
+  if (activeViewedRelation === "friend" || activeViewedRelation === "self") {
+    addBtn.style.display = "none";
+    return;
+  }
+
+  addBtn.style.display = "block";
+  if (!state.currentUser) {
+    addBtn.disabled = false;
+    addBtn.textContent = "🔒 התחבר בפרופיל כדי לשלוח בקשת חברות";
+  } else if (activeViewedRelation === "outgoing") {
+    addBtn.disabled = true;
+    addBtn.textContent = "⏳ בקשת חברות נשלחה (ממתין לאישור)";
+  } else if (activeViewedRelation === "incoming") {
+    addBtn.disabled = false;
+    addBtn.textContent = "✓ אשר בקשת חברות";
+  } else {
+    addBtn.disabled = false;
+    addBtn.textContent = "➕ שלח בקשת חברות";
+  }
+}
+
+function openFriendProfileView(friend, relation = "friend") {
   if (!friend) return;
   activeViewedFriend = friend;
+  activeViewedRelation = relation;
+  setFriendProfileMsg("");
   playClickSfx();
 
   const avEl = document.getElementById("fp-avatar");
@@ -96,7 +177,17 @@ function openFriendProfileView(friend) {
   const won = friend.totalWon || 0;
   const rate = heard > 0 ? Math.round((won / heard) * 100) : 0;
 
-  if (avEl) avEl.textContent = getAvatarEmoji(friend.avatarId);
+  if (avEl) {
+    if (friend.avatarId === "custom" && friend.customAvatarData) {
+      avEl.textContent = "";
+      avEl.style.backgroundImage = `url("${friend.customAvatarData}")`;
+      avEl.classList.add("has-custom-img");
+    } else {
+      avEl.style.backgroundImage = "";
+      avEl.classList.remove("has-custom-img");
+      avEl.textContent = getAvatarEmoji(friend.avatarId);
+    }
+  }
   if (nameEl) nameEl.textContent = friend.username;
   if (idEl) idEl.textContent = `ID: #${friend.friendCode || getPlayerFriendCode(friend.username)}`;
   if (heardEl) heardEl.textContent = formatNum(heard);
@@ -153,6 +244,7 @@ function openFriendProfileView(friend) {
     }
   }
 
+  syncFriendProfileActionButtons();
   showFriendsSubView("profile");
 }
 
@@ -352,11 +444,13 @@ export async function loadFriendsScreen() {
 
   const myCodeEl = document.getElementById("my-player-id-code");
   const copyBtn = document.getElementById("copy-my-id-btn");
+  const shareTools = document.getElementById("friends-share-tools");
   const addForm = document.getElementById("add-friend-form");
 
   if (!state.currentUser) {
     if (myCodeEl) myCodeEl.textContent = "התחבר כדי לקבל ID";
     if (copyBtn) copyBtn.style.display = "none";
+    if (shareTools) shareTools.style.display = "none";
     if (addForm) addForm.style.display = "none";
     currentFriendsList = [];
     incomingRequests = [];
@@ -368,6 +462,7 @@ export async function loadFriendsScreen() {
   const myCode = getPlayerFriendCode(state.currentUser);
   if (myCodeEl) myCodeEl.textContent = `#${myCode}`;
   if (copyBtn) copyBtn.style.display = "inline-flex";
+  if (shareTools) shareTools.style.display = "grid";
   if (addForm) addForm.style.display = "flex";
 
   if (state.userStats) {
@@ -558,4 +653,259 @@ function bindFriendsListenersOnce() {
   if (removeBtn) {
     removeBtn.addEventListener("click", handleRemoveActiveFriend);
   }
+
+  const fpAddBtn = document.getElementById("fp-add-friend-btn");
+  if (fpAddBtn) {
+    fpAddBtn.addEventListener("click", handleAddFromProfileView);
+  }
+
+  const shareLinkBtn = document.getElementById("share-invite-link-btn");
+  if (shareLinkBtn) {
+    shareLinkBtn.addEventListener("click", () => shareMyProfileLink(shareLinkBtn, "🔗 שלח קישור"));
+  }
+
+  const showQrBtn = document.getElementById("show-my-qr-btn");
+  if (showQrBtn) showQrBtn.addEventListener("click", openMyQrModal);
+
+  const qrCloseBtn = document.getElementById("qr-close-btn");
+  const qrBackdrop = document.getElementById("qr-modal-backdrop");
+  if (qrCloseBtn) qrCloseBtn.addEventListener("click", () => qrBackdrop?.classList.remove("open"));
+  if (qrBackdrop) {
+    qrBackdrop.addEventListener("click", (e) => {
+      if (e.target === qrBackdrop) qrBackdrop.classList.remove("open");
+    });
+  }
+
+  const qrShareWaBtn = document.getElementById("qr-share-wa-btn");
+  if (qrShareWaBtn) {
+    qrShareWaBtn.addEventListener("click", () => shareMyProfileLink(qrShareWaBtn, "📤 שתף קישור לוואטסאפ"));
+  }
+
+  const scanQrBtn = document.getElementById("scan-qr-btn");
+  if (scanQrBtn) scanQrBtn.addEventListener("click", openQrScannerModal);
+
+  const scannerCloseBtn = document.getElementById("qr-scanner-close-btn");
+  const scannerBackdrop = document.getElementById("qr-scanner-modal-backdrop");
+  if (scannerCloseBtn) scannerCloseBtn.addEventListener("click", closeQrScannerModal);
+  if (scannerBackdrop) {
+    scannerBackdrop.addEventListener("click", (e) => {
+      if (e.target === scannerBackdrop) closeQrScannerModal();
+    });
+  }
+}
+
+async function handleAddFromProfileView() {
+  if (!activeViewedFriend) return;
+  if (!state.currentUser) {
+    const profileBtn = document.getElementById("profile-btn");
+    if (profileBtn) profileBtn.click();
+    return;
+  }
+
+  if (activeViewedRelation === "incoming") {
+    await respondToRequest("accept", activeViewedFriend.usernameLower || activeViewedFriend.username.toLowerCase());
+    activeViewedRelation = "friend";
+    syncFriendProfileActionButtons();
+    setFriendProfileMsg(`🎉 ${activeViewedFriend.username} ואתה עכשיו חברים!`, "success");
+    return;
+  }
+
+  setFriendProfileMsg("שולח בקשת חברות...", "");
+  if (isHttp) {
+    try {
+      const res = await fetch("/api/friends", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ action: "request", username: state.currentUser, target: activeViewedFriend.username })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        if (data.status === "accepted") {
+          activeViewedRelation = "friend";
+          playWinSfx();
+          setFriendProfileMsg(`🎉 ${activeViewedFriend.username} ואתה עכשיו חברים!`, "success");
+        } else {
+          activeViewedRelation = "outgoing";
+          playClickSfx();
+          setFriendProfileMsg(`✓ בקשת חברות נשלחה ל-${activeViewedFriend.username}!`, "success");
+        }
+        syncFriendProfileActionButtons();
+        return;
+      }
+      if (data.error) {
+        setFriendProfileMsg(data.error, "error");
+        return;
+      }
+    } catch (e) { }
+  }
+  setFriendProfileMsg("לא ניתן לשלוח בקשה כרגע — נסה שוב.", "error");
+}
+
+function openMyQrModal() {
+  if (!state.currentUser) return;
+  const backdrop = document.getElementById("qr-modal-backdrop");
+  const img = document.getElementById("my-qr-img");
+  const nameEl = document.getElementById("qr-username-label");
+  const codeEl = document.getElementById("qr-code-badge");
+  const url = buildProfileShareUrl(state.currentUser);
+  if (img) {
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=${encodeURIComponent(url)}`;
+  }
+  if (nameEl) nameEl.textContent = state.currentUser;
+  if (codeEl) codeEl.textContent = `ID: #${getPlayerFriendCode(state.currentUser)}`;
+  if (backdrop) backdrop.classList.add("open");
+}
+
+function ensureJsQrLoaded() {
+  if (typeof window !== "undefined" && typeof window.jsQR === "function") {
+    return Promise.resolve(window.jsQR);
+  }
+  if (jsQrLoadPromise) return jsQrLoadPromise;
+  jsQrLoadPromise = new Promise((resolve) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
+    s.async = true;
+    s.onload = () => resolve(typeof window.jsQR === "function" ? window.jsQR : null);
+    s.onerror = () => resolve(null);
+    document.head.appendChild(s);
+  });
+  return jsQrLoadPromise;
+}
+
+function extractTargetFromQrText(rawText) {
+  const txt = String(rawText || "").trim();
+  if (!txt) return "";
+  try {
+    const parsed = new URL(txt);
+    const p = parsed.searchParams.get("profile");
+    if (p) return p.trim();
+  } catch (e) { }
+  return txt;
+}
+
+export function closeQrScannerModal() {
+  qrScanActive = false;
+  if (qrScanRaf) {
+    cancelAnimationFrame(qrScanRaf);
+    qrScanRaf = null;
+  }
+  if (qrStream) {
+    try { qrStream.getTracks().forEach(t => t.stop()); } catch (e) { }
+    qrStream = null;
+  }
+  const video = document.getElementById("qr-scanner-video");
+  if (video) video.srcObject = null;
+  const backdrop = document.getElementById("qr-scanner-modal-backdrop");
+  if (backdrop) backdrop.classList.remove("open");
+}
+
+async function openQrScannerModal() {
+  const backdrop = document.getElementById("qr-scanner-modal-backdrop");
+  const statusEl = document.getElementById("qr-scanner-status");
+  const video = document.getElementById("qr-scanner-video");
+  const canvas = document.getElementById("qr-scanner-canvas");
+  if (!backdrop || !video || !canvas) return;
+
+  backdrop.classList.add("open");
+  if (statusEl) statusEl.textContent = "מפעיל מצלמה...";
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    if (statusEl) statusEl.textContent = "הדפדפן אינו תומך בגישה למצלמה במכשיר זה.";
+    return;
+  }
+
+  try {
+    qrStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    });
+    video.srcObject = qrStream;
+    await video.play();
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "לא התקבלה הרשאת מצלמה — אשר גישה למצלמה בהגדרות הדפדפן.";
+    return;
+  }
+
+  qrScanActive = true;
+  if (statusEl) statusEl.textContent = "כוון את המצלמה אל קוד ה-QR של החבר...";
+
+  let detector = null;
+  if (typeof window.BarcodeDetector === "function") {
+    try { detector = new window.BarcodeDetector({ formats: ["qr_code"] }); } catch (e) { detector = null; }
+  }
+  const jsQrFn = detector ? null : await ensureJsQrLoaded();
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+  const onQrDetected = (rawValue) => {
+    const target = extractTargetFromQrText(rawValue);
+    if (!target) return;
+    closeQrScannerModal();
+    playWinSfx();
+    openSharedProfileLookup(target);
+  };
+
+  const scanLoop = async () => {
+    if (!qrScanActive) return;
+    if (video.readyState >= 2 && video.videoWidth > 0) {
+      try {
+        if (detector) {
+          const codes = await detector.detect(video);
+          if (codes && codes.length > 0 && codes[0].rawValue) {
+            onQrDetected(codes[0].rawValue);
+            return;
+          }
+        } else if (jsQrFn && ctx) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const decoded = jsQrFn(imgData.data, imgData.width, imgData.height);
+          if (decoded?.data) {
+            onQrDetected(decoded.data);
+            return;
+          }
+        }
+      } catch (e) { }
+    }
+    qrScanRaf = requestAnimationFrame(scanLoop);
+  };
+  qrScanRaf = requestAnimationFrame(scanLoop);
+}
+
+async function openSharedProfileLookup(targetParam) {
+  bindFriendsListenersOnce();
+  if (!targetParam || !isHttp) return;
+  try {
+    const viewerQ = state.currentUser ? `&viewer=${encodeURIComponent(state.currentUser)}` : "";
+    const res = await fetch(`/api/friends?profile=${encodeURIComponent(targetParam)}${viewerQ}&_t=${Date.now()}`, { cache: "no-store" });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.found && data.profile) {
+      if (typeof showScreenFn === "function") showScreenFn("friends");
+      openFriendProfileView(data.profile, data.relation || "none");
+    } else {
+      showGameToast("❌ הפרופיל שחיפשת לא נמצא", "error");
+    }
+  } catch (e) {
+    showGameToast("שגיאה בטעינת הפרופיל", "error");
+  }
+}
+
+export function initProfileShareButton() {
+  const btn = document.getElementById("share-my-profile-btn");
+  if (!btn) return;
+  btn.addEventListener("click", () => shareMyProfileLink(btn, "📤 שתף"));
+}
+
+export function checkSharedProfileDeepLink(onShowScreen) {
+  showScreenFn = onShowScreen || null;
+  if (typeof window === "undefined") return;
+  const params = new URLSearchParams(window.location.search);
+  const profileParam = (params.get("profile") || "").trim();
+  if (!profileParam) return;
+  try {
+    params.delete("profile");
+    const nextUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
+    window.history.replaceState({}, "", nextUrl);
+  } catch (e) { }
+  openSharedProfileLookup(profileParam);
 }

@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122q">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122q">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122s">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122s">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122q">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122s">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122q">
-  <link rel="stylesheet" href="styles/home.css?v=20261122q">
-  <link rel="stylesheet" href="styles/header.css?v=20261122q">
-  <link rel="stylesheet" href="styles/player.css?v=20261122q">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122q">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122q">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122q">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122q">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122q">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122s">
+  <link rel="stylesheet" href="styles/home.css?v=20261122s">
+  <link rel="stylesheet" href="styles/header.css?v=20261122s">
+  <link rel="stylesheet" href="styles/player.css?v=20261122s">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122s">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122s">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122s">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122s">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122s">
 </head>
 
 <body>
@@ -73,6 +73,10 @@
           </button>
         </div>
         <div class="home-top-left">
+          <button type="button" class="home-gear-btn home-quests-btn" id="home-gifts-btn" aria-label="מתנות יומיות" title="מתנות יומיות">
+            <span>🎁</span>
+            <span class="home-quests-dot" id="home-gifts-dot"></span>
+          </button>
           <button type="button" class="home-gear-btn home-quests-btn" id="home-quests-btn" aria-label="משימות יומיות" title="משימות יומיות">
             <span>🎯</span>
             <span class="home-quests-dot" id="home-quests-dot"></span>
@@ -336,11 +340,18 @@
         </div>
 
         <div class="my-id-card">
-          <div class="my-id-meta">
-            <span class="my-id-label">ה-Player ID שלך</span>
-            <strong class="my-id-code" id="my-player-id-code">#------</strong>
+          <div class="my-id-top-row">
+            <div class="my-id-meta">
+              <span class="my-id-label">ה-Player ID שלך</span>
+              <strong class="my-id-code" id="my-player-id-code">#------</strong>
+            </div>
+            <button type="button" class="copy-id-btn" id="copy-my-id-btn">📋 העתק ID</button>
           </div>
-          <button type="button" class="copy-id-btn" id="copy-my-id-btn">📋 העתק ID</button>
+          <div class="friends-share-tools" id="friends-share-tools">
+            <button type="button" class="friends-tool-btn primary" id="share-invite-link-btn">🔗 שלח קישור</button>
+            <button type="button" class="friends-tool-btn" id="show-my-qr-btn">📱 QR שלי</button>
+            <button type="button" class="friends-tool-btn" id="scan-qr-btn">📷 סרוק QR</button>
+          </div>
         </div>
 
         <form class="add-friend-form" id="add-friend-form" autocomplete="off">
@@ -418,6 +429,8 @@
           <div class="fp-favorites-list" id="fp-favorites-list"></div>
         </div>
 
+        <button type="button" class="setup-confirm-btn fp-add-btn" id="fp-add-friend-btn" style="display: none;">➕ שלח בקשת חברות</button>
+        <div class="friends-action-msg" id="fp-action-msg"></div>
         <button type="button" class="fp-remove-btn" id="fp-remove-friend-btn">הסר מרשימת החברים</button>
       </div>
     </div>
@@ -914,7 +927,10 @@
             <span class="profile-modal-avatar" id="profile-modal-avatar">🎧</span>
             <span>מחובר בתור: <strong id="logged-username-display" style="color: var(--spotify-green);"></strong></span>
           </div>
-          <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
+          <div class="logged-user-actions">
+            <button type="button" class="share-profile-btn" id="share-my-profile-btn" title="שתף פרופיל בוואטסאפ">📤 שתף</button>
+            <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
+          </div>
         </div>
 
         <!-- כרטיס התחברות / הרשמה / שכחתי סיסמא (למצב אורח) -->
@@ -1192,6 +1208,22 @@
     </div>
   </div>
 
+  <!-- חלון מתנות יומיות — מיני לוח שנה של 7 ימים -->
+  <div class="modal-backdrop" id="gifts-modal-backdrop">
+    <div class="profile-modal streak-modal-card gifts-modal-card" role="dialog" aria-modal="true" aria-label="מתנות יומיות">
+      <div class="modal-header">
+        <h2 class="modal-title">🎁 מתנות יומיות</h2>
+        <button class="drawer-close-btn" id="gifts-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body gifts-modal-body">
+        <p class="gifts-modal-sub" id="gifts-modal-sub">חזור כל יום כדי לאסוף פרסים שווים!</p>
+        <p class="quests-guest-hint" id="gifts-guest-hint" style="display: none;">🔒 התחבר בפרופיל כדי לאסוף מתנות יומיות</p>
+        <div class="gifts-calendar-grid" id="gifts-calendar-grid"></div>
+        <button type="button" class="setup-confirm-btn gifts-claim-btn" id="gifts-claim-btn">אסוף מתנה 🎁</button>
+      </div>
+    </div>
+  </div>
+
   <!-- חלון משימות יומיות (נפתח ממסך הבית ליד ההגדרות) -->
   <div class="modal-backdrop" id="quests-modal-backdrop">
     <div class="profile-modal streak-modal-card" role="dialog" aria-label="משימות יומיות">
@@ -1232,6 +1264,43 @@
         <div class="shop-msg" id="shop-msg"></div>
         <div class="shop-grid avatars" id="shop-grid"></div>
         <input type="file" id="shop-image-upload-input" accept="image/*" style="display: none;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- חלון קוד QR אישי לשיתוף פרופיל וחברות -->
+  <div class="modal-backdrop" id="qr-modal-backdrop" style="z-index: 410;">
+    <div class="profile-modal streak-modal-card qr-modal-card" role="dialog" aria-modal="true" aria-label="קוד ה-QR שלי">
+      <div class="modal-header">
+        <h2 class="modal-title">📱 קוד ה-QR שלי</h2>
+        <button class="drawer-close-btn" id="qr-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body qr-modal-body">
+        <p class="qr-modal-sub">תן לחבר לסרוק את הקוד הזה כדי לפתוח את הפרופיל שלך ולשלוח בקשת חברות!</p>
+        <div class="qr-img-frame">
+          <img id="my-qr-img" class="my-qr-img" alt="קוד QR אישי" width="220" height="220" />
+        </div>
+        <strong class="qr-username-label" id="qr-username-label"></strong>
+        <span class="fp-id-badge" id="qr-code-badge">#------</span>
+        <button type="button" class="setup-confirm-btn" id="qr-share-wa-btn">📤 שתף קישור לוואטסאפ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- חלון סורק QR חי מהמצלמה -->
+  <div class="modal-backdrop" id="qr-scanner-modal-backdrop" style="z-index: 415;">
+    <div class="profile-modal streak-modal-card qr-modal-card" role="dialog" aria-modal="true" aria-label="סורק קוד QR">
+      <div class="modal-header">
+        <h2 class="modal-title">📷 סרוק QR של חבר</h2>
+        <button class="drawer-close-btn" id="qr-scanner-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body qr-modal-body">
+        <p class="qr-modal-sub" id="qr-scanner-status">כוון את המצלמה אל קוד ה-QR של החבר...</p>
+        <div class="qr-video-wrap">
+          <video id="qr-scanner-video" playsinline muted autoplay></video>
+          <div class="qr-scan-frame" aria-hidden="true"></div>
+        </div>
+        <canvas id="qr-scanner-canvas" style="display: none;"></canvas>
       </div>
     </div>
   </div>
@@ -1365,7 +1434,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122q"></script>
+  <script type="module" src="src/main.js?v=20261122s"></script>
 </body>
 
 </html>

@@ -1,18 +1,18 @@
-import { state } from "../state.js?v=20261122q";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122q";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122q";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122q";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122q";
-import { showGameToast } from "../utils/toast.js?v=20261122q";
-import { stopTimedRun } from "./timed.js?v=20261122q";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122q";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122q";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122q";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122q";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122q";
-import { playClickSfx } from "./sfx.js?v=20261122q";
-import { vibrateTap } from "../utils/toast.js?v=20261122q";
-import { isOnboardingOpen } from "./onboarding.js?v=20261122q";
+import { state } from "../state.js?v=20261122s";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122s";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122s";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122s";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122s";
+import { showGameToast } from "../utils/toast.js?v=20261122s";
+import { stopTimedRun } from "./timed.js?v=20261122s";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122s";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122s";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122s";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122s";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122s";
+import { playClickSfx } from "./sfx.js?v=20261122s";
+import { vibrateTap } from "../utils/toast.js?v=20261122s";
+import { isOnboardingOpen } from "./onboarding.js?v=20261122s";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -766,7 +766,10 @@ export function initNavigationListeners() {
       document.getElementById("streak-modal-backdrop")?.classList.contains("open") ||
       document.getElementById("quests-modal-backdrop")?.classList.contains("open") ||
       document.getElementById("promo-modal-backdrop")?.classList.contains("open") ||
-      document.getElementById("shop-confirm-backdrop")?.classList.contains("open")
+      document.getElementById("shop-confirm-backdrop")?.classList.contains("open") ||
+      document.getElementById("gifts-modal-backdrop")?.classList.contains("open") ||
+      document.getElementById("qr-modal-backdrop")?.classList.contains("open") ||
+      document.getElementById("qr-scanner-modal-backdrop")?.classList.contains("open")
     ) { swipeTracking = false; return; }
     const tag = e.target?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") { swipeTracking = false; return; }

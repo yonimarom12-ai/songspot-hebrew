@@ -117,6 +117,59 @@ export async function onRequestGet(context) {
   }
 
   const url = new URL(request.url);
+  const profileQuery = String(url.searchParams.get("profile") || "").trim();
+  const viewerLower = String(url.searchParams.get("viewer") || "").trim().toLowerCase();
+
+  // צפייה בפרופיל ציבורי משותף (מקישור וואטסאפ או סריקת QR)
+  if (profileQuery) {
+    try {
+      await ensureTables(env.DB);
+      const targetLower = profileQuery.toLowerCase();
+      const cleanedCode = profileQuery.replace(/^#/, "").toUpperCase();
+
+      let found = await env.DB
+        .prepare("SELECT username, username_lower, total_won, best_streak, points, best_timed, avatar_id, stats_json, updated_at FROM players WHERE username_lower = ?")
+        .bind(targetLower)
+        .first();
+
+      if (!found && cleanedCode.length === 6) {
+        const { results: allPlayers } = await env.DB
+          .prepare("SELECT username, username_lower, total_won, best_streak, points, best_timed, avatar_id, stats_json, updated_at FROM players LIMIT 500")
+          .all();
+        found = (allPlayers || []).find(p => computeFriendCode(p.username_lower) === cleanedCode) || null;
+      }
+
+      if (!found) {
+        return Response.json({ configured: true, found: false, error: "הפרופיל לא נמצא." }, { status: 404 });
+      }
+
+      let relation = "none";
+      if (viewerLower) {
+        if (viewerLower === found.username_lower) {
+          relation = "self";
+        } else {
+          const [isFriend, isOut, isIn] = await Promise.all([
+            env.DB.prepare("SELECT 1 FROM friendships WHERE user_lower = ? AND friend_lower = ?").bind(viewerLower, found.username_lower).first(),
+            env.DB.prepare("SELECT 1 FROM friend_requests WHERE from_lower = ? AND to_lower = ?").bind(viewerLower, found.username_lower).first(),
+            env.DB.prepare("SELECT 1 FROM friend_requests WHERE from_lower = ? AND to_lower = ?").bind(found.username_lower, viewerLower).first()
+          ]);
+          if (isFriend) relation = "friend";
+          else if (isOut) relation = "outgoing";
+          else if (isIn) relation = "incoming";
+        }
+      }
+
+      return Response.json({
+        configured: true,
+        found: true,
+        profile: mapPlayerRow(found),
+        relation
+      });
+    } catch (err) {
+      return Response.json({ configured: false, found: false, error: "שגיאה בטעינת הפרופיל" }, { status: 500 });
+    }
+  }
+
   const username = String(url.searchParams.get("username") || "").trim();
   const userLower = username.toLowerCase();
   if (!userLower) {

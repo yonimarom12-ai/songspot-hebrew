@@ -1,6 +1,6 @@
-import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122q";
-import { isIOS } from "../state.js?v=20261122q";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122q";
+import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122s";
+import { isIOS } from "../state.js?v=20261122s";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122s";
 
 const ONBOARDING_KEY = "songspot_onboarding_done_v1";
 let deferredInstallPrompt = null;
