@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261122n";
-import { dom } from "../dom.js?v=20261122n";
-import { state } from "../state.js?v=20261122n";
-import { saveUserStats } from "../services/storage.js?v=20261122n";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261122q";
+import { dom } from "../dom.js?v=20261122q";
+import { state } from "../state.js?v=20261122q";
+import { saveUserStats } from "../services/storage.js?v=20261122q";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
@@ -65,13 +65,18 @@ export function getPointsBalance() {
   return roundPoints(state.userStats?.points || 0);
 }
 
-export function awardPoints(amount, { persist = true } = {}) {
+export function awardPoints(amount, { persist = true, isPromo = false } = {}) {
   if (!state.currentUser) return 0;
   const delta = roundPoints(amount);
   if (delta <= 0 || !state.userStats) return 0;
 
   state.userStats.points = roundPoints((state.userStats.points || 0) + delta);
   state.userStats.totalPointsEarned = roundPoints((state.userStats.totalPointsEarned || 0) + delta);
+  if (isPromo) {
+    state.userStats.promoPointsReceived = roundPoints((state.userStats.promoPointsReceived || 0) + delta);
+  } else {
+    state.userStats.earnedPoints = roundPoints((state.userStats.earnedPoints || 0) + delta);
+  }
 
   if (persist) {
     saveUserStats();

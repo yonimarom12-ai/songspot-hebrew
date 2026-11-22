@@ -1,7 +1,7 @@
-import { state } from "../state.js?v=20261122n";
-import { saveUserStats } from "../services/storage.js?v=20261122n";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122n";
-import { playCrystalSfx } from "./sfx.js?v=20261122n";
+import { state } from "../state.js?v=20261122q";
+import { saveUserStats } from "../services/storage.js?v=20261122q";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122q";
+import { playCrystalSfx } from "./sfx.js?v=20261122q";
 
 const TIMED_START_SEC = 60;
 const TIMED_WIN_BONUS = 5;

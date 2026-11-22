@@ -65,6 +65,24 @@
 #shop-modal-backdrop .modal-body {
   flex: 1;
   padding: 16px 16px 104px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(192, 132, 252, 0.28) transparent;
+}
+
+#profile-modal-backdrop .modal-body::-webkit-scrollbar,
+#shop-modal-backdrop .modal-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+#profile-modal-backdrop .modal-body::-webkit-scrollbar-track,
+#shop-modal-backdrop .modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#profile-modal-backdrop .modal-body::-webkit-scrollbar-thumb,
+#shop-modal-backdrop .modal-body::-webkit-scrollbar-thumb {
+  background: rgba(192, 132, 252, 0.28);
+  border-radius: 999px;
 }
 
 #profile-close-btn,

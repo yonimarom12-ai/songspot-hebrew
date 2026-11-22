@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122n">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122n">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122q">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122q">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122n">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122q">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122n">
-  <link rel="stylesheet" href="styles/home.css?v=20261122n">
-  <link rel="stylesheet" href="styles/header.css?v=20261122n">
-  <link rel="stylesheet" href="styles/player.css?v=20261122n">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122n">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122n">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122n">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122n">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122n">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261122q">
+  <link rel="stylesheet" href="styles/home.css?v=20261122q">
+  <link rel="stylesheet" href="styles/header.css?v=20261122q">
+  <link rel="stylesheet" href="styles/player.css?v=20261122q">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261122q">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261122q">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122q">
+  <link rel="stylesheet" href="styles/animations.css?v=20261122q">
+  <link rel="stylesheet" href="styles/themes.css?v=20261122q">
 </head>
 
 <body>
@@ -302,6 +302,7 @@
           <img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> מרתון
         </button>
       </div>
+      <div class="lb-fair-note" id="lb-fair-note">💎 דירוג הקריסטלים מחשב רק קריסטלים שהורווחו במשחקים, משימות ומתנות יומיות (קריסטלים מקודים לא נספרים).</div>
 
       <div class="lb-podium" id="lb-podium"></div>
 
@@ -1235,6 +1236,37 @@
     </div>
   </div>
 
+  <!-- חלון אישור רכישה + בחירת כמות לעזרים בחנות -->
+  <div class="modal-backdrop" id="shop-confirm-backdrop" style="z-index: 420;">
+    <div class="profile-modal streak-modal-card shop-confirm-card" role="dialog" aria-modal="true" aria-label="אישור רכישה">
+      <div class="modal-header">
+        <h2 class="modal-title" id="shop-confirm-title">אישור רכישה</h2>
+        <button class="drawer-close-btn" id="shop-confirm-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body shop-confirm-body">
+        <div class="shop-confirm-emoji" id="shop-confirm-emoji">💎</div>
+        <p class="shop-confirm-desc" id="shop-confirm-desc"></p>
+
+        <div class="shop-qty-picker" id="shop-qty-picker" style="display: none;">
+          <label class="shop-qty-label" for="shop-qty-input">כמה תרצה לקנות?</label>
+          <div class="shop-qty-controls">
+            <button type="button" class="shop-qty-step" id="shop-qty-minus" aria-label="הפחת">-</button>
+            <input type="number" class="shop-qty-input" id="shop-qty-input" min="1" max="99" value="1" inputmode="numeric" />
+            <button type="button" class="shop-qty-step" id="shop-qty-plus" aria-label="הוסף">+</button>
+          </div>
+          <div class="shop-qty-total" id="shop-qty-total">סה"כ לתשלום: 0 💎</div>
+        </div>
+
+        <div class="shop-confirm-error" id="shop-confirm-error"></div>
+
+        <div class="shop-confirm-actions">
+          <button type="button" class="setup-confirm-btn" id="shop-confirm-ok-btn">אישור</button>
+          <button type="button" class="setup-back-btn" id="shop-confirm-cancel-btn">ביטול</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- מסך מלא לחשיפת השיר בסיום סיבוב (ילד ישיר של body כדי למלא 100% מהמסך) -->
   <div class="result-banner reveal-fullscreen" id="result-banner" role="dialog" aria-label="חשיפת השיר">
     <div class="reveal-bg-blur" id="reveal-bg-blur"></div>
@@ -1333,7 +1365,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122n"></script>
+  <script type="module" src="src/main.js?v=20261122q"></script>
 </body>
 
 </html>

@@ -2983,18 +2983,22 @@ body.hide-bottom-nav .bottom-nav {
 }
 
 /* ===== אנימציית החלקה כיוונית חלקה בין 5 מסכי הסרגל התחתון ===== */
+html, body {
+  overflow-x: clip;
+}
+
 .tab-slide-from-left {
-  animation: tabSlideFromLeft 0.26s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  animation: tabSlideFromLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 .tab-slide-from-right {
-  animation: tabSlideFromRight 0.26s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  animation: tabSlideFromRight 0.24s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 @keyframes tabSlideFromLeft {
   from {
     opacity: 0.45;
-    transform: translateX(-56px);
+    transform: translateX(-36px);
   }
   to {
     opacity: 1;
@@ -3005,7 +3009,7 @@ body.hide-bottom-nav .bottom-nav {
 @keyframes tabSlideFromRight {
   from {
     opacity: 0.45;
-    transform: translateX(56px);
+    transform: translateX(36px);
   }
   to {
     opacity: 1;
@@ -3160,4 +3164,109 @@ body.hide-bottom-nav .bottom-nav {
 }
 .result-banner.is-challenge-win .reveal-cover-wrap {
   box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.75), 0 0 32px rgba(250, 204, 21, 0.45);
+}
+
+/* ===== שלב 3: הערת דירוג קריסטלים הוגן + חלון אישור רכישה ובחירת כמות לעזרים ===== */
+.lb-fair-note {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #d8b4fe;
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  border-radius: 12px;
+  padding: 7px 11px;
+  text-align: center;
+}
+
+.shop-confirm-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 18px 18px 20px !important;
+}
+
+.shop-confirm-emoji {
+  font-size: 42px;
+  line-height: 1;
+}
+
+.shop-confirm-desc {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #f3e8ff;
+}
+
+.shop-qty-picker {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(192, 132, 252, 0.28);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.shop-qty-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.shop-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shop-qty-step {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  background: rgba(139, 92, 246, 0.22);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.shop-qty-input {
+  width: 74px;
+  height: 38px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 6, 24, 0.85);
+  color: #fff;
+  text-align: center;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.shop-qty-total {
+  font-size: 14px;
+  font-weight: 900;
+  color: #38d9ff;
+}
+
+.shop-confirm-error {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fca5a5;
+  min-height: 16px;
+}
+
+.shop-confirm-actions {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+.shop-confirm-actions > button {
+  flex: 1;
 }

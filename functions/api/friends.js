@@ -51,9 +51,34 @@ function computeFriendCode(usernameLower) {
   return code;
 }
 
+const PROMO_CRYSTAL_VALUES = {
+  welcome100: 100,
+  music2026: 250,
+  spotifyvip: 50,
+  kingcrown: 100,
+  royalgold: 0,
+  yonivip: 2500,
+  test10k: 10000
+};
+
+function computeFairEarnedPoints(row, stats) {
+  if (Number.isFinite(Number(stats?.earnedPoints))) {
+    return Math.max(0, Math.round(Number(stats.earnedPoints) * 100) / 100);
+  }
+  const baseTotal = Number.isFinite(Number(stats?.totalPointsEarned))
+    ? Number(stats.totalPointsEarned)
+    : (Number(row.points) || 0);
+  const codes = Array.isArray(stats?.redeemedCodes) ? stats.redeemedCodes : [];
+  const promoSum = Number.isFinite(Number(stats?.promoPointsReceived))
+    ? Number(stats.promoPointsReceived)
+    : codes.reduce((sum, id) => sum + (PROMO_CRYSTAL_VALUES[id] || 0), 0);
+  return Math.max(0, Math.round((baseTotal - promoSum) * 100) / 100);
+}
+
 function mapPlayerRow(row) {
   let stats = {};
   try { stats = JSON.parse(row.stats_json || "{}"); } catch (e) { }
+  const earnedPoints = computeFairEarnedPoints(row, stats);
   return {
     username: row.username,
     usernameLower: row.username_lower,
@@ -61,10 +86,12 @@ function mapPlayerRow(row) {
     totalWon: row.total_won || 0,
     totalHeard: Number(stats.totalHeard) || 0,
     bestStreak: row.best_streak || 0,
-    points: row.points || 0,
+    points: earnedPoints,
+    earnedPoints,
     bestTimed: row.best_timed || Number(stats.bestTimedScore) || 0,
     bestMarathon: Number(stats.bestMarathonScore) || 0,
     avatarId: row.avatar_id || stats.equippedAvatar || "default",
+    customAvatarData: typeof stats.customAvatarData === "string" ? stats.customAvatarData : "",
     favorites: {
       song: stats.favorites?.song || "",
       album: stats.favorites?.album || "",

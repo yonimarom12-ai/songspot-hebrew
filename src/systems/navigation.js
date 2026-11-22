@@ -1,18 +1,18 @@
-import { state } from "../state.js?v=20261122n";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122n";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122n";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122n";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122n";
-import { showGameToast } from "../utils/toast.js?v=20261122n";
-import { stopTimedRun } from "./timed.js?v=20261122n";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122n";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122n";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122n";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122n";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122n";
-import { playClickSfx } from "./sfx.js?v=20261122n";
-import { vibrateTap } from "../utils/toast.js?v=20261122n";
-import { isOnboardingOpen } from "./onboarding.js?v=20261122n";
+import { state } from "../state.js?v=20261122q";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122q";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122q";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122q";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122q";
+import { showGameToast } from "../utils/toast.js?v=20261122q";
+import { stopTimedRun } from "./timed.js?v=20261122q";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122q";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122q";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122q";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122q";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122q";
+import { playClickSfx } from "./sfx.js?v=20261122q";
+import { vibrateTap } from "../utils/toast.js?v=20261122q";
+import { isOnboardingOpen } from "./onboarding.js?v=20261122q";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -489,7 +489,7 @@ async function loadAndRenderLeaderboardPage() {
             username: state.currentUser,
             totalWon: state.userStats?.totalWon || 0,
             bestStreak: state.userStats?.bestStreak || 0,
-            points: state.userStats?.points || 0,
+            points: state.userStats?.earnedPoints ?? state.userStats?.points ?? 0,
             bestMarathon: state.userStats?.bestMarathonScore || 0
           };
           cachedFriendsLeaderboardRows = [meRow, ...fData.friends];
@@ -696,7 +696,7 @@ export function initNavigationListeners() {
       ? document.querySelector("#profile-modal-backdrop .profile-modal")
       : tabName === "shop"
         ? document.querySelector("#shop-modal-backdrop .profile-modal")
-        : document.getElementById(SCREEN_IDS[tabName]);
+        : document.querySelector(`#${SCREEN_IDS[tabName]} > .app-shell`) || document.getElementById(SCREEN_IDS[tabName]);
     if (!targetEl) return;
     targetEl.classList.remove("tab-slide-from-left", "tab-slide-from-right");
     void targetEl.offsetWidth;
@@ -765,7 +765,8 @@ export function initNavigationListeners() {
     if (
       document.getElementById("streak-modal-backdrop")?.classList.contains("open") ||
       document.getElementById("quests-modal-backdrop")?.classList.contains("open") ||
-      document.getElementById("promo-modal-backdrop")?.classList.contains("open")
+      document.getElementById("promo-modal-backdrop")?.classList.contains("open") ||
+      document.getElementById("shop-confirm-backdrop")?.classList.contains("open")
     ) { swipeTracking = false; return; }
     const tag = e.target?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") { swipeTracking = false; return; }

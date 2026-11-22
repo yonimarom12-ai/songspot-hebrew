@@ -14,6 +14,30 @@ CREATE TABLE IF NOT EXISTS players (
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );`;
 
+const PROMO_CRYSTAL_VALUES = {
+  welcome100: 100,
+  music2026: 250,
+  spotifyvip: 50,
+  kingcrown: 100,
+  royalgold: 0,
+  yonivip: 2500,
+  test10k: 10000
+};
+
+function computeFairEarnedPoints(r, stats) {
+  if (Number.isFinite(Number(stats?.earnedPoints))) {
+    return Math.max(0, Math.round(Number(stats.earnedPoints) * 100) / 100);
+  }
+  const baseTotal = Number.isFinite(Number(stats?.totalPointsEarned))
+    ? Number(stats.totalPointsEarned)
+    : (Number(r.points) || 0);
+  const codes = Array.isArray(stats?.redeemedCodes) ? stats.redeemedCodes : [];
+  const promoSum = Number.isFinite(Number(stats?.promoPointsReceived))
+    ? Number(stats.promoPointsReceived)
+    : codes.reduce((sum, id) => sum + (PROMO_CRYSTAL_VALUES[id] || 0), 0);
+  return Math.max(0, Math.round((baseTotal - promoSum) * 100) / 100);
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!env.DB) {
@@ -42,11 +66,13 @@ export async function onRequestGet(context) {
         rows: (results || []).map(r => {
           let stats = {};
           try { stats = JSON.parse(r.stats_json || "{}"); } catch (e) { }
+          const earnedPoints = computeFairEarnedPoints(r, stats);
           return {
             username: r.username,
             totalWon: r.total_won || 0,
             bestStreak: r.best_streak || 0,
-            points: r.points || 0,
+            points: earnedPoints,
+            earnedPoints,
             bestTimed: r.best_timed || Number(stats.bestTimedScore) || 0,
             bestMarathon: Number(stats.bestMarathonScore) || 0,
             avatarId: r.avatar_id || "default"

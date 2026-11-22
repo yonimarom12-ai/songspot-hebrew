@@ -8,11 +8,11 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261122n";
-import { state } from "../state.js?v=20261122n";
-import { saveUserStats } from "../services/storage.js?v=20261122n";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122n";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122n";
+} from "../data/shop.js?v=20261122q";
+import { state } from "../state.js?v=20261122q";
+import { saveUserStats } from "../services/storage.js?v=20261122q";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261122q";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122q";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -245,7 +245,90 @@ function triggerCustomImageUpload(type) {
   input.click();
 }
 
-function purchaseOrEquip(type, item) {
+let shopConfirmState = null;
+
+function closeShopConfirmModal() {
+  const backdrop = document.getElementById("shop-confirm-backdrop");
+  if (backdrop) backdrop.classList.remove("open");
+  shopConfirmState = null;
+}
+
+function openCosmeticConfirmModal({ type, item, onConfirm }) {
+  const backdrop = document.getElementById("shop-confirm-backdrop");
+  if (!backdrop) { onConfirm(); return; }
+  const titleEl = document.getElementById("shop-confirm-title");
+  const emojiEl = document.getElementById("shop-confirm-emoji");
+  const descEl = document.getElementById("shop-confirm-desc");
+  const qtyPicker = document.getElementById("shop-qty-picker");
+  const errEl = document.getElementById("shop-confirm-error");
+  const okBtn = document.getElementById("shop-confirm-ok-btn");
+
+  const typeLabel = type === "avatar" ? "תמונת הפרופיל" : type === "theme" ? "ערכת הנושא" : "הרקע";
+  if (titleEl) titleEl.textContent = "אישור רכישה";
+  if (emojiEl) emojiEl.textContent = item.emoji || "💎";
+  if (descEl) descEl.textContent = `האם אתה בטוח שברצונך לקנות את ${typeLabel} "${item.name}" ב-${formatPoints(item.price)} קריסטלים?`;
+  if (qtyPicker) qtyPicker.style.display = "none";
+  if (errEl) errEl.textContent = "";
+  if (okBtn) {
+    okBtn.textContent = `כן, קנה ב-${formatPoints(item.price)} 💎`;
+    okBtn.disabled = false;
+  }
+
+  shopConfirmState = { mode: "cosmetic", onConfirm };
+  backdrop.classList.add("open");
+}
+
+function openPowerupQuantityModal(item) {
+  const backdrop = document.getElementById("shop-confirm-backdrop");
+  if (!backdrop) return;
+  const titleEl = document.getElementById("shop-confirm-title");
+  const emojiEl = document.getElementById("shop-confirm-emoji");
+  const descEl = document.getElementById("shop-confirm-desc");
+  const qtyPicker = document.getElementById("shop-qty-picker");
+  const qtyInput = document.getElementById("shop-qty-input");
+  const errEl = document.getElementById("shop-confirm-error");
+  const okBtn = document.getElementById("shop-confirm-ok-btn");
+
+  if (titleEl) titleEl.textContent = `קניית ${item.name}`;
+  if (emojiEl) emojiEl.textContent = item.emoji || "⚡";
+  if (descEl) descEl.textContent = `${item.desc} (${formatPoints(item.price)} 💎 ליחידה)`;
+  if (qtyPicker) qtyPicker.style.display = "flex";
+  if (qtyInput) qtyInput.value = "1";
+  if (errEl) errEl.textContent = "";
+  if (okBtn) okBtn.textContent = "המשך לקנייה";
+
+  shopConfirmState = { mode: "powerup-qty", item, qty: 1 };
+  updatePowerupQtyTotalUI();
+  backdrop.classList.add("open");
+}
+
+function updatePowerupQtyTotalUI() {
+  if (!shopConfirmState || shopConfirmState.mode !== "powerup-qty") return;
+  const qtyInput = document.getElementById("shop-qty-input");
+  const totalEl = document.getElementById("shop-qty-total");
+  const errEl = document.getElementById("shop-confirm-error");
+  const okBtn = document.getElementById("shop-confirm-ok-btn");
+
+  const raw = parseInt(qtyInput?.value || "1", 10);
+  const qty = Number.isFinite(raw) ? Math.max(1, Math.min(99, raw)) : 1;
+  shopConfirmState.qty = qty;
+
+  const totalCost = Math.round(qty * shopConfirmState.item.price * 100) / 100;
+  const balance = getPointsBalance();
+  const affordable = canAfford(totalCost);
+
+  if (totalEl) {
+    totalEl.textContent = `סה"כ לתשלום: ${formatPoints(totalCost)} 💎 (יתרתך: ${formatPoints(balance)} 💎)`;
+  }
+  if (errEl) {
+    errEl.textContent = affordable ? "" : `חסרים לך ${formatPoints(totalCost - balance)} קריסטלים לכמות זו`;
+  }
+  if (okBtn) {
+    okBtn.disabled = !affordable;
+  }
+}
+
+function purchaseOrEquip(type, item, skipConfirm = false) {
   const owned = isOwned(type, item);
   const wasPeeking = isPeeking;
 
@@ -264,6 +347,14 @@ function purchaseOrEquip(type, item) {
       if (wasPeeking) exitPeekToShop();
       const missing = formatPoints(item.price - getPointsBalance());
       setShopMessage(`חסרים לך ${missing} קריסטלים לפריט הזה`, "error");
+      return;
+    }
+    if (!skipConfirm) {
+      openCosmeticConfirmModal({
+        type,
+        item,
+        onConfirm: () => purchaseOrEquip(type, item, true)
+      });
       return;
     }
     if (!spendPoints(item.price)) {
@@ -693,26 +784,21 @@ function buildPowerupCard(item) {
   const buyBtn = document.createElement("button");
   buyBtn.type = "button";
   buyBtn.className = "shop-item-action shop-pu-buy-btn";
-  setCrystalLabel(buyBtn, "קנה ב-", item.price);
-  buyBtn.addEventListener("click", () => {
+  setCrystalLabel(buyBtn, "קנה · ", item.price);
+  const openPuFlow = () => {
     if (!state.currentUser) {
       setShopMessage("יש להתחבר בפרופיל כדי לקנות עזרים.", "error");
       return;
     }
-    if (!canAfford(item.price)) {
-      setShopMessage("אין מספיק קריסטלים לקניית העזר הזה.", "error");
-      return;
-    }
-    if (!spendPoints(item.price)) return;
-    if (!state.userStats.powerups) {
-      state.userStats.powerups = { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 };
-    }
-    state.userStats.powerups[item.id] = (state.userStats.powerups[item.id] || 0) + 1;
-    saveUserStats();
-    syncAccountToCloud(state.currentUser, state.userStats);
-    setShopMessage(`✓ רכשת ${item.emoji} ${item.name}! (ברשותך: ${state.userStats.powerups[item.id]})`, "success");
-    renderShop();
+    setShopMessage("");
+    openPowerupQuantityModal(item);
+  };
+  buyBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openPuFlow();
   });
+  card.style.cursor = "pointer";
+  card.addEventListener("click", openPuFlow);
 
   foot.append(qty, buyBtn);
   card.append(head, foot);
@@ -760,6 +846,90 @@ export function initShopListeners() {
       renderShop();
     });
   });
+
+  // מאזינים לחלון אישור רכישה + בחירת כמות לעזרים
+  const confirmBackdrop = document.getElementById("shop-confirm-backdrop");
+  const confirmClose = document.getElementById("shop-confirm-close-btn");
+  const confirmCancel = document.getElementById("shop-confirm-cancel-btn");
+  const confirmOk = document.getElementById("shop-confirm-ok-btn");
+  const qtyInput = document.getElementById("shop-qty-input");
+  const qtyMinus = document.getElementById("shop-qty-minus");
+  const qtyPlus = document.getElementById("shop-qty-plus");
+
+  if (confirmClose) confirmClose.addEventListener("click", closeShopConfirmModal);
+  if (confirmCancel) confirmCancel.addEventListener("click", closeShopConfirmModal);
+  if (confirmBackdrop) {
+    confirmBackdrop.addEventListener("click", (e) => {
+      if (e.target === confirmBackdrop) closeShopConfirmModal();
+    });
+  }
+  if (qtyInput) {
+    qtyInput.addEventListener("input", updatePowerupQtyTotalUI);
+  }
+  if (qtyMinus && qtyInput) {
+    qtyMinus.addEventListener("click", () => {
+      const v = Math.max(1, (parseInt(qtyInput.value || "1", 10) || 1) - 1);
+      qtyInput.value = String(v);
+      updatePowerupQtyTotalUI();
+    });
+  }
+  if (qtyPlus && qtyInput) {
+    qtyPlus.addEventListener("click", () => {
+      const v = Math.min(99, (parseInt(qtyInput.value || "1", 10) || 1) + 1);
+      qtyInput.value = String(v);
+      updatePowerupQtyTotalUI();
+    });
+  }
+  if (confirmOk) {
+    confirmOk.addEventListener("click", () => {
+      if (!shopConfirmState) return;
+
+      if (shopConfirmState.mode === "cosmetic") {
+        const fn = shopConfirmState.onConfirm;
+        closeShopConfirmModal();
+        if (fn) fn();
+        return;
+      }
+
+      if (shopConfirmState.mode === "powerup-qty") {
+        const { item, qty } = shopConfirmState;
+        const totalCost = Math.round(qty * item.price * 100) / 100;
+        if (!canAfford(totalCost)) {
+          updatePowerupQtyTotalUI();
+          return;
+        }
+        // שלב 2: אישור סופי לפני החיוב!
+        const titleEl = document.getElementById("shop-confirm-title");
+        const descEl = document.getElementById("shop-confirm-desc");
+        const qtyPicker = document.getElementById("shop-qty-picker");
+        const errEl = document.getElementById("shop-confirm-error");
+        if (titleEl) titleEl.textContent = "אישור סופי לרכישה";
+        if (descEl) descEl.textContent = `האם אתה בטוח שברצונך לקנות ${qty} × ${item.name} ב-${formatPoints(totalCost)} קריסטלים?`;
+        if (qtyPicker) qtyPicker.style.display = "none";
+        if (errEl) errEl.textContent = "";
+        confirmOk.textContent = `כן, קנה ב-${formatPoints(totalCost)} 💎`;
+        shopConfirmState = { mode: "powerup-final", item, qty, totalCost };
+        return;
+      }
+
+      if (shopConfirmState.mode === "powerup-final") {
+        const { item, qty, totalCost } = shopConfirmState;
+        closeShopConfirmModal();
+        if (!state.currentUser || !canAfford(totalCost) || !spendPoints(totalCost)) {
+          setShopMessage("אין מספיק קריסטלים להשלמת הרכישה.", "error");
+          return;
+        }
+        if (!state.userStats.powerups) {
+          state.userStats.powerups = { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 };
+        }
+        state.userStats.powerups[item.id] = (state.userStats.powerups[item.id] || 0) + qty;
+        saveUserStats();
+        syncAccountToCloud(state.currentUser, state.userStats);
+        setShopMessage(`✓ רכשת ${qty} × ${item.emoji} ${item.name}! (ברשותך: ${state.userStats.powerups[item.id]})`, "success");
+        renderShop();
+      }
+    });
+  }
 
   const fileInput = document.getElementById("shop-image-upload-input");
   if (fileInput) {

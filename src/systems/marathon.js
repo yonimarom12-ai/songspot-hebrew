@@ -1,12 +1,12 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122n";
-import { state } from "../state.js?v=20261122n";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122n";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122n";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122n";
-import { saveUserStats } from "../services/storage.js?v=20261122n";
-import { launchWinConfetti } from "./confetti.js?v=20261122n";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122n";
-import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261122n";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122q";
+import { state } from "../state.js?v=20261122q";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122q";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122q";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122q";
+import { saveUserStats } from "../services/storage.js?v=20261122q";
+import { launchWinConfetti } from "./confetti.js?v=20261122q";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122q";
+import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261122q";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;

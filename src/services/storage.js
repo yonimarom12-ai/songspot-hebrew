@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261122n";
+import { state } from "../state.js?v=20261122q";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -24,6 +24,21 @@ export function safeStorageRemove(key) {
   } catch (e) { }
 }
 
+const PROMO_CRYSTAL_VALUES = {
+  welcome100: 100,
+  music2026: 250,
+  spotifyvip: 50,
+  kingcrown: 100,
+  royalgold: 0,
+  yonivip: 2500,
+  test10k: 10000
+};
+
+function calcPromoCrystalsFromCodes(codes) {
+  if (!Array.isArray(codes)) return 0;
+  return codes.reduce((sum, id) => sum + (PROMO_CRYSTAL_VALUES[id] || 0), 0);
+}
+
 // ניהול חשבונות משתמשים, אורח וסטטיסטיקות ב-localStorage
 export function getDefaultStats() {
   return {
@@ -33,6 +48,8 @@ export function getDefaultStats() {
     bestStreak: 0,
     points: 0,
     totalPointsEarned: 0,
+    earnedPoints: 0,
+    promoPointsReceived: 0,
     byLevel: { easy: 0, medium: 0, hard: 0, very_hard: 0, impossible: 0 },
     bySpeed: { "0.1": 0, "0.5": 0, "2": 0, "8": 0, "15": 0 },
     wonSongs: [],
@@ -62,11 +79,20 @@ export function normalizeStatsObj(parsed) {
   const totalPointsEarned = Number.isFinite(Number(parsed.totalPointsEarned))
     ? Math.max(points, Math.round(Number(parsed.totalPointsEarned) * 100) / 100)
     : points;
+  const redeemedCodes = Array.isArray(parsed.redeemedCodes) ? parsed.redeemedCodes : [];
+  const promoPointsReceived = Number.isFinite(Number(parsed.promoPointsReceived))
+    ? Math.max(0, Math.round(Number(parsed.promoPointsReceived) * 100) / 100)
+    : calcPromoCrystalsFromCodes(redeemedCodes);
+  const earnedPoints = Number.isFinite(Number(parsed.earnedPoints))
+    ? Math.max(0, Math.round(Number(parsed.earnedPoints) * 100) / 100)
+    : Math.max(0, Math.round((totalPointsEarned - promoPointsReceived) * 100) / 100);
   return {
     ...def,
     ...parsed,
     points,
     totalPointsEarned,
+    earnedPoints,
+    promoPointsReceived,
     byLevel: { ...def.byLevel, ...(parsed.byLevel || {}) },
     bySpeed: { ...def.bySpeed, ...(parsed.bySpeed || {}) },
     wonSongs: Array.isArray(parsed.wonSongs) ? parsed.wonSongs : [],

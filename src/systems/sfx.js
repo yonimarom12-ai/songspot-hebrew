@@ -1,6 +1,6 @@
-import { state } from "../state.js?v=20261122n";
-import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122n";
-import { initAudioContext } from "./audio.js?v=20261122n";
+import { state } from "../state.js?v=20261122q";
+import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122q";
+import { initAudioContext } from "./audio.js?v=20261122q";
 
 const SFX_STORAGE_KEY = "songspot_sfx_enabled_v1";
 
