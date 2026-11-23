@@ -8,12 +8,12 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261123i";
-import { state } from "../state.js?v=20261123i";
-import { saveUserStats } from "../services/storage.js?v=20261123i";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123i";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123i";
-import { recordStarterShopPurchase } from "./quests.js?v=20261123i";
+} from "../data/shop.js?v=20261123m";
+import { state } from "../state.js?v=20261123m";
+import { saveUserStats } from "../services/storage.js?v=20261123m";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123m";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123m";
+import { recordStarterShopPurchase } from "./quests.js?v=20261123m";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -119,6 +119,15 @@ function applyAvatarToEl(el, avatar) {
   }
 }
 
+function syncThemeUiIcons(themeId) {
+  const isGreenSet = themeId === "default" || themeId === "spotify" || themeId === "emerald";
+  const prefix = isGreenSet ? "green" : "color";
+  document.querySelectorAll("img[data-ui-icon]").forEach(img => {
+    const name = img.dataset.uiIcon;
+    if (name) img.src = `assets/ui-${prefix}-${name}.png`;
+  });
+}
+
 function applyCosmeticsVisuals(bg, avatar, theme) {
   const activeTheme = theme || findTheme(getEquipped("theme"));
   if (activeTheme.id === "default" || activeTheme.id === "spotify") {
@@ -130,6 +139,7 @@ function applyCosmeticsVisuals(bg, avatar, theme) {
   } else {
     document.body.dataset.theme = activeTheme.id;
   }
+  syncThemeUiIcons(activeTheme.id);
 
   const isCustomBg = bg.id !== "default";
   document.body.classList.toggle("has-custom-bg", isCustomBg);

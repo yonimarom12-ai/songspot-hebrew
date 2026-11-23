@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261123h";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123h";
-import { dom } from "../dom.js?v=20261123h";
-import { state } from "../state.js?v=20261123h";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261123h";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261123h";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123h";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261123m";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123m";
+import { dom } from "../dom.js?v=20261123m";
+import { state } from "../state.js?v=20261123m";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261123m";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261123m";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123m";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261123h";
+} from "../services/itunes.js?v=20261123m";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261123h";
-import { launchWinConfetti } from "./confetti.js?v=20261123h";
+} from "./audio.js?v=20261123m";
+import { launchWinConfetti } from "./confetti.js?v=20261123m";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261123h";
+} from "./feedback.js?v=20261123m";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261123h";
-import { updateStreakDisplay } from "./profile.js?v=20261123h";
+} from "./search.js?v=20261123m";
+import { updateStreakDisplay } from "./profile.js?v=20261123m";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261123h";
-import { recordQuestProgress } from "./quests.js?v=20261123h";
+} from "./economy.js?v=20261123m";
+import { recordQuestProgress } from "./quests.js?v=20261123m";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261123h";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261123h";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261123h";
+} from "./timed.js?v=20261123m";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261123m";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261123m";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -159,6 +159,7 @@ export function resetUI() {
   state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.usedRedFeedbackInRound = state.redFeedbackEnabled;
   state.guessedWrongKeys.clear();
+  state.roundEnded = false;
   state.maxAudioHeardSec = 0;
   state.lastExactSolveSec = null;
   state.audioBuffer = null;
@@ -387,6 +388,9 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
         state.userStats.bestStreak = state.userStats.currentStreak;
       }
     }
+    if (!state.userStats.byLevel) state.userStats.byLevel = {};
+    if (!state.userStats.bySpeed) state.userStats.bySpeed = {};
+    if (!Array.isArray(state.userStats.wonSongs)) state.userStats.wonSongs = [];
     state.userStats.byLevel[difficultyLevel] = (state.userStats.byLevel[difficultyLevel] || 0) + 1;
     const speedKey = String(solvedDuration);
     state.userStats.bySpeed[speedKey] = (state.userStats.bySpeed[speedKey] || 0) + 1;
@@ -439,6 +443,9 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
 }
 
 export function endRound(won) {
+  if (state.roundEnded) return;
+  state.roundEnded = true;
+
   stopAudioVisuals(won ? 100 : 0);
   closeSuggestionsDropdown();
   dom.hintsPanel.style.display = "none";
@@ -448,10 +455,10 @@ export function endRound(won) {
 
   const specialChallenge = state.activeSpecialChallenge ? { ...state.activeSpecialChallenge } : null;
   const isClassic = !isTimedModeActive() && !specialChallenge;
-  const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
+  const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)] || 15;
   // הנקודה הרחוקה ביותר שאליה השחקן האזין בשיר בסיבוב הזה (גם אם ניגן מחדש אח"כ!)
-  const rawHeard = state.maxAudioHeardSec || 0;
-  const exactSolveSec = rawHeard > 0
+  const rawHeard = Number(state.maxAudioHeardSec) || 0;
+  const exactSolveSec = Number.isFinite(rawHeard) && rawHeard > 0
     ? Math.max(0.1, Math.min(solvedAtSec, Math.round(rawHeard * 10) / 10))
     : solvedAtSec;
   state.lastExactSolveSec = won ? exactSolveSec : null;
@@ -469,7 +476,9 @@ export function endRound(won) {
         streak: isClassic ? nextStreakIfWon : 0
       })
     : 0;
-  recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints, exactSolveSec);
+  try {
+    recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints, exactSolveSec);
+  } catch (e) { }
 
   // מסמן השלמת אתגר יומי / שיר שבועי (ניסיון אחד בלבד ליום/שבוע!)
   if (specialChallenge) {
@@ -494,17 +503,20 @@ export function endRound(won) {
   }
 
   if (won) {
-    dom.segments[state.currentAttempt].classList.remove("active");
-    dom.segments[state.currentAttempt].classList.add("correct");
+    const seg = dom.segments[state.currentAttempt];
+    if (seg) {
+      seg.classList.remove("active");
+      seg.classList.add("correct");
+    }
     if (dom.playbackFill) dom.playbackFill.style.width = "100%";
     dom.statusLabel.textContent = `זיהית נכון תוך ${exactSolveLabel} שניות!`;
     dom.statusLabel.style.color = "var(--spotify-green)";
-    launchWinConfetti();
-    playWinSfx();
-    vibrateWin();
+    try { launchWinConfetti(); } catch (e) { }
+    try { playWinSfx(); } catch (e) { }
+    try { vibrateWin(); } catch (e) { }
     if (earnedPoints > 0) {
-      playCrystalSfx();
-      launchCrystalRewardAnimation(earnedPoints);
+      try { playCrystalSfx(); } catch (e) { }
+      try { launchCrystalRewardAnimation(earnedPoints); } catch (e) { }
     }
 
     if (dom.pointsEarnedNotice) {

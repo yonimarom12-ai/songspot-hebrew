@@ -1,19 +1,19 @@
-import { state } from "../state.js?v=20261123i";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123i";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261123i";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261123i";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261123i";
-import { showGameToast } from "../utils/toast.js?v=20261123i";
-import { stopTimedRun } from "./timed.js?v=20261123i";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261123i";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261123i";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261123i";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261123i";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261123i";
-import { playClickSfx } from "./sfx.js?v=20261123i";
-import { vibrateTap } from "../utils/toast.js?v=20261123i";
-import { isOnboardingOpen } from "./onboarding.js?v=20261123i";
-import { recordStarterModePlayed } from "./quests.js?v=20261123i";
+import { state } from "../state.js?v=20261123m";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123m";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261123m";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261123m";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261123m";
+import { showGameToast } from "../utils/toast.js?v=20261123m";
+import { stopTimedRun } from "./timed.js?v=20261123m";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261123m";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261123m";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261123m";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261123m";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261123m";
+import { playClickSfx } from "./sfx.js?v=20261123m";
+import { vibrateTap } from "../utils/toast.js?v=20261123m";
+import { isOnboardingOpen } from "./onboarding.js?v=20261123m";
+import { recordStarterModePlayed } from "./quests.js?v=20261123m";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -129,7 +129,9 @@ function renderHomeModeStatsStrip() {
     const won = s.totalWon || 0;
     const heard = s.totalHeard || 0;
     const rate = heard > 0 ? Math.round((won / heard) * 100) : 0;
-    strip.innerHTML = `<span>🎵 זיהויים: <strong>${won}</strong></span><span class="hm-stat-sep">·</span><span>🎯 דיוק: <strong>${rate}%</strong></span>`;
+    const themeId = s.equippedTheme || "default";
+    const px = (themeId === "default" || themeId === "spotify" || themeId === "emerald") ? "green" : "color";
+    strip.innerHTML = `<span><img class="icon-3d-mini ui-theme-icon" data-ui-icon="notes" src="assets/ui-${px}-notes.png" alt="" /> זיהויים: <strong>${won}</strong></span><span class="hm-stat-sep">·</span><span><img class="icon-3d-mini ui-theme-icon" data-ui-icon="quests" src="assets/ui-${px}-quests.png" alt="" /> דיוק: <strong>${rate}%</strong></span>`;
   }
 }
 

@@ -3708,3 +3708,28 @@ body {
     font-size: 42px;
   }
 }
+
+/* ===== אייקוני תפריט מותאמי ערכת נושא (ירוק-ספוטיפיי / צבעוני) ===== */
+.ui-theme-icon {
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.ui-top-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.ui-btn-icon {
+  width: 19px;
+  height: 19px;
+}
+
+.home-change-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}

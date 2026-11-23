@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123h";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123h";
-import { state } from "../state.js?v=20261123h";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123m";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123m";
+import { state } from "../state.js?v=20261123m";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -437,9 +437,11 @@ export function extendActivePlaybackToStage(stageIdx) {
 
     if (activeGainNode) {
       try {
-        activeGainNode.gain.cancelScheduledValues(ctx.currentTime);
+        // ב-iOS Safari (WebKit) חובה לבטל מ-0 ולא מ-ctx.currentTime כדי שהשתקה ישנה תבוטל בוודאות!
+        activeGainNode.gain.cancelScheduledValues(0);
+        activeGainNode.gain.value = 1;
         activeGainNode.gain.setValueAtTime(1, ctx.currentTime);
-        activeGainNode.gain.setValueAtTime(0, snippetStartCtxTime + newDuration);
+        activeGainNode.gain.setValueAtTime(0, snippetStartCtxTime + newDuration + 0.02);
       } catch (e) { }
     }
 

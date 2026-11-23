@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123i">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123i">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123m">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123m">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123i">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123m">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261123i">
-  <link rel="stylesheet" href="styles/home.css?v=20261123i">
-  <link rel="stylesheet" href="styles/header.css?v=20261123i">
-  <link rel="stylesheet" href="styles/player.css?v=20261123i">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261123i">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261123i">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261123i">
-  <link rel="stylesheet" href="styles/animations.css?v=20261123i">
-  <link rel="stylesheet" href="styles/themes.css?v=20261123i">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261123m">
+  <link rel="stylesheet" href="styles/home.css?v=20261123m">
+  <link rel="stylesheet" href="styles/header.css?v=20261123m">
+  <link rel="stylesheet" href="styles/player.css?v=20261123m">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261123m">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261123m">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261123m">
+  <link rel="stylesheet" href="styles/animations.css?v=20261123m">
+  <link rel="stylesheet" href="styles/themes.css?v=20261123m">
 </head>
 
 <body data-theme="spotify">
@@ -59,33 +59,30 @@
         <div class="home-top-right">
           <div class="home-status-pill">
             <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
-              <img class="icon-3d-inline icon-3d-flame" src="assets/icon-flame.png" alt="" aria-hidden="true" /><span id="home-streak-count">0</span>
+              <img class="icon-3d-inline ui-theme-icon" data-ui-icon="flame" src="assets/ui-green-flame.png" alt="" aria-hidden="true" /><span id="home-streak-count">0</span>
             </button>
             <span class="home-stat-divider"></span>
             <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים">
-              <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.png" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
+              <img class="icon-3d-inline ui-theme-icon" data-ui-icon="crystal" src="assets/ui-green-crystal.png" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
             </button>
           </div>
           <button type="button" class="home-friends-pill-btn" id="home-friends-btn" title="חברים">
-            <span aria-hidden="true">👥</span>
+            <img class="ui-theme-icon ui-btn-icon" data-ui-icon="friends" src="assets/ui-green-friends.png" alt="" aria-hidden="true" />
             <span>חברים</span>
             <span class="home-friends-dot" id="home-friends-dot"></span>
           </button>
         </div>
         <div class="home-top-left">
           <button type="button" class="home-gear-btn home-quests-btn" id="home-gifts-btn" aria-label="מתנות יומיות" title="מתנות יומיות">
-            <span>🎁</span>
+            <img class="ui-theme-icon ui-top-icon" data-ui-icon="gifts" src="assets/ui-green-gifts.png" alt="" aria-hidden="true" />
             <span class="home-quests-dot" id="home-gifts-dot"></span>
           </button>
           <button type="button" class="home-gear-btn home-quests-btn" id="home-quests-btn" aria-label="משימות יומיות" title="משימות יומיות">
-            <span>🎯</span>
+            <img class="ui-theme-icon ui-top-icon" data-ui-icon="quests" src="assets/ui-green-quests.png" alt="" aria-hidden="true" />
             <span class="home-quests-dot" id="home-quests-dot"></span>
           </button>
           <button type="button" class="home-gear-btn" id="home-settings-btn" aria-label="הגדרות" title="הגדרות">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
-            </svg>
+            <img class="ui-theme-icon ui-top-icon" data-ui-icon="settings" src="assets/ui-green-settings.png" alt="" aria-hidden="true" />
           </button>
         </div>
       </header>
@@ -120,8 +117,14 @@
         </div>
         <div class="home-mode-stats-strip" id="home-mode-stats-strip" aria-live="polite"></div>
         <div class="home-quick-actions-row">
-          <button type="button" class="home-change-mode-btn" id="home-change-mode-btn">החלף מצב ⇄</button>
-          <button type="button" class="home-change-mode-btn is-filter" id="home-filter-btn">🎛️ ז'אנר ועשור</button>
+          <button type="button" class="home-change-mode-btn" id="home-change-mode-btn">
+            <img class="ui-theme-icon ui-btn-icon" data-ui-icon="swap" src="assets/ui-green-swap.png" alt="" aria-hidden="true" />
+            <span>החלף מצב</span>
+          </button>
+          <button type="button" class="home-change-mode-btn is-filter" id="home-filter-btn">
+            <img class="ui-theme-icon ui-btn-icon" data-ui-icon="mixer" src="assets/ui-green-mixer.png" alt="" aria-hidden="true" />
+            <span>ז'אנר ועשור</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1466,7 +1469,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261123i"></script>
+  <script type="module" src="src/main.js?v=20261123m"></script>
 </body>
 
 </html>
