@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123q";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123q";
-import { state } from "../state.js?v=20261123q";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123y";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123y";
+import { state } from "../state.js?v=20261123y";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -18,18 +18,46 @@ let activeTargetPct = 0;
 let audioHealthTimer = null;
 let lifecycleGuardsInstalled = false;
 let needsContextRebuildOnGesture = false;
+let needsAudioSessionKick = true;
+let iosKickAudioEl = null;
+
+// קובץ WAV שקט תקני (0.05 שניות, 8kHz mono PCM) — מעיר את AVAudioSession של iOS WebKit אחרי חזרה מהרקע
+const SILENT_WAV_DATA_URI = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
 
 export function setBeforePlaySnippetHook(fn) {
   beforePlaySnippetHook = fn;
 }
 
-function configureAudioSession() {
+function configureAudioSession(forceReset = false) {
   try {
-    // iOS 17+: מאפשר שמע גם כשמתג ההשתקה הפיזי באייפון פעיל
+    // iOS 17+: מאפשר שמע גם כשמתג ההשתקה הפיזי באייפון פעיל.
+    // החלפה רגעית דרך "auto" -> "playback" מאלצת את WebKit להפעיל מחדש את AVAudioSession אחרי חזרה מהרקע!
     if (typeof navigator !== "undefined" && navigator.audioSession) {
+      if (forceReset) {
+        navigator.audioSession.type = "auto";
+      }
       navigator.audioSession.type = "playback";
     }
   } catch (e) { }
+}
+
+function kickIosAudioSession() {
+  configureAudioSession(true);
+  try {
+    if (!iosKickAudioEl) {
+      iosKickAudioEl = document.createElement("audio");
+      iosKickAudioEl.setAttribute("playsinline", "");
+      iosKickAudioEl.setAttribute("webkit-playsinline", "");
+      iosKickAudioEl.preload = "auto";
+      iosKickAudioEl.src = SILENT_WAV_DATA_URI;
+    }
+    iosKickAudioEl.muted = false;
+    iosKickAudioEl.volume = 1;
+    iosKickAudioEl.currentTime = 0;
+    const p = iosKickAudioEl.play();
+    if (p && typeof p.catch === "function") p.catch(() => { });
+  } catch (e) { }
+  needsAudioSessionKick = false;
 }
 
 function attachContextStateListener(ctx) {
@@ -73,7 +101,13 @@ function getAudioContext() {
 }
 
 export function initAudioContext() {
-  configureAudioSession();
+  // מעיר את ערוץ השמע החומרתי של iOS (AVAudioSession) בתוך מחוות לחיצה אמיתית — פותר את באג ההשתקה אחרי חזרה מהרקע!
+  if (needsAudioSessionKick || needsContextRebuildOnGesture) {
+    kickIosAudioSession();
+  } else {
+    configureAudioSession(false);
+  }
+
   let ctx = getAudioContext();
   if (!ctx) return null;
 
@@ -116,11 +150,14 @@ export function initAudioContext() {
 export function unlockAudioOnFirstGesture() {
   const attachOneShotUnlock = () => {
     const unlock = () => {
+      document.removeEventListener("touchend", unlock, true);
+      document.removeEventListener("click", unlock, true);
       initAudioContext();
     };
-    document.addEventListener("touchstart", unlock, { capture: true, passive: true, once: true });
-    document.addEventListener("pointerdown", unlock, { capture: true, passive: true, once: true });
-    document.addEventListener("click", unlock, { capture: true, passive: true, once: true });
+    // חשוב ב-iOS Safari: רק touchend ו-click נחשבים User Activation חוקי!
+    // touchstart/pointerdown עלולים לבנות AudioContext מושתק לצמיתות לפני ה-click!
+    document.addEventListener("touchend", unlock, { capture: true, passive: true });
+    document.addEventListener("click", unlock, { capture: true, passive: true });
   };
   attachOneShotUnlock();
 
@@ -130,25 +167,29 @@ export function unlockAudioOnFirstGesture() {
       // יציאה מהדף/נעילת מסך באייפון עלולה לנתק את ערוץ השמע של ה-AudioContext הישן
       stopAudioVisuals();
       releaseMediaElement();
+      if (state.audioCtx && state.audioCtx.state === "running") {
+        try { state.audioCtx.suspend(); } catch (e) { }
+      }
       audioUnlocked = false;
       needsContextRebuildOnGesture = true;
+      needsAudioSessionKick = true;
     };
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         markForRebuild();
       } else {
-        configureAudioSession();
         needsContextRebuildOnGesture = true;
+        needsAudioSessionKick = true;
         audioUnlocked = false;
-        // ברגע שחוזרים לדף — מאזינים למגע הראשון בכל מקום במסך כדי לשחרר ולבנות מחדש AudioContext עוד לפני הלחיצה על Play!
+        // ברגע שחוזרים לדף — מאזינים ללחיצה/touchend הראשונה כדי להעיר את AVAudioSession ולבנות AudioContext טרי!
         attachOneShotUnlock();
       }
     });
     window.addEventListener("pagehide", markForRebuild);
     window.addEventListener("pageshow", (e) => {
-      configureAudioSession();
       if (e.persisted || state.audioCtx) {
         needsContextRebuildOnGesture = true;
+        needsAudioSessionKick = true;
         audioUnlocked = false;
         attachOneShotUnlock();
       }
@@ -698,7 +739,7 @@ export function playSnippet() {
 
 // השמעת השיר המלא בסוף הסיבוב (אחרי שהתשובה נחשפה)
 export function playRevealPreview() {
-  const ctx = state.audioCtx;
+  const ctx = initAudioContext();
   if (ctx && state.audioBuffer) {
     try {
       const source = ctx.createBufferSource();

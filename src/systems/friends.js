@@ -1,9 +1,9 @@
-import { state } from "../state.js?v=20261123q";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261123q";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261123q";
-import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261123q";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261123q";
-import { showGameToast } from "../utils/toast.js?v=20261123q";
+import { state } from "../state.js?v=20261123y";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261123y";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261123y";
+import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261123y";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261123y";
+import { showGameToast } from "../utils/toast.js?v=20261123y";
 
 const PUBLIC_BASE_URL = "https://guessthesonghebrew.pages.dev";
 let activeViewedRelation = "friend";
@@ -194,10 +194,10 @@ function openFriendProfileView(friend, relation = "friend") {
   if (wonEl) wonEl.textContent = formatNum(won);
   if (rateEl) rateEl.textContent = `${rate}%`;
   if (streakEl) {
-    streakEl.innerHTML = `${friend.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" />`;
+    streakEl.innerHTML = `${friend.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" />`;
   }
   if (pointsEl) {
-    pointsEl.innerHTML = `${formatNum(friend.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
+    pointsEl.innerHTML = `${formatNum(friend.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
   }
   if (marathonEl) marathonEl.textContent = `${formatNum(friend.bestMarathon)} נק'`;
   if (timedEl) {
@@ -381,7 +381,7 @@ function renderFriendsList() {
 
     const stats = document.createElement("span");
     stats.className = "friend-row-stats";
-    stats.innerHTML = `${friend.totalWon || 0} 🎵 · ${friend.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" />`;
+    stats.innerHTML = `${friend.totalWon || 0} 🎵 · ${friend.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" />`;
 
     const arrow = document.createElement("span");
     arrow.className = "friend-row-arrow";

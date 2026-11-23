@@ -52,9 +52,10 @@ body {
 .app-screen {
   display: none;
   width: 100%;
-  max-width: 470px;
+  max-width: none;
   min-height: 100vh;
   min-height: 100dvh;
+  align-items: center;
 }
 
 .app-screen.active {
@@ -105,10 +106,6 @@ body {
     background-attachment: scroll;
   }
 
-  .app-screen {
-    contain: layout style;
-  }
-
   .app-screen.active {
     animation-duration: 0.14s;
   }
@@ -136,8 +133,7 @@ body {
     -webkit-backdrop-filter: none !important;
   }
 
-  .home-status-pill,
-  .home-gear-btn {
+  .home-status-pill {
     background: rgba(24, 15, 48, 0.92);
   }
 

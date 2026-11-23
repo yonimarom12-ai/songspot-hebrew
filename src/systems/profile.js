@@ -1,15 +1,15 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261123q";
-import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261123q";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123q";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261123q";
-import { state } from "../state.js?v=20261123q";
-import { saveUserStats } from "../services/storage.js?v=20261123q";
-import { fetchItunesData } from "../services/itunes.js?v=20261123q";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261123q";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261123q";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261123q";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261123q";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261123q";
+import { ARTISTS_DB } from "../data/artists.js?v=20261123y";
+import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261123y";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123y";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261123y";
+import { state } from "../state.js?v=20261123y";
+import { saveUserStats } from "../services/storage.js?v=20261123y";
+import { fetchItunesData } from "../services/itunes.js?v=20261123y";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261123y";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261123y";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261123y";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261123y";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261123y";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -77,7 +77,7 @@ export function renderProfileStatsModal() {
   document.getElementById("stat-rate").textContent = `${rate}%`;
   const bestStreakEl = document.getElementById("stat-best-streak");
   if (bestStreakEl) {
-    bestStreakEl.innerHTML = `${state.userStats.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" />`;
+    bestStreakEl.innerHTML = `${state.userStats.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" />`;
   }
   const bestMarathonEl = document.getElementById("stat-best-marathon");
   if (bestMarathonEl) {
@@ -158,7 +158,7 @@ export function renderProfileStatsModal() {
       const timePill = document.createElement("span");
       timePill.className = "gallery-time-pill";
       const shownSec = item.exactTimeSec ?? item.timeSec;
-      timePill.textContent = `תוך ${shownSec} שניות`;
+      timePill.textContent = `${shownSec}`;
 
       const lvlDiff = DIFFICULTIES[item.level];
       const lvlPill = document.createElement("span");
@@ -685,7 +685,7 @@ export function toggleStreakModal(isOpen) {
 
     if (currEl) currEl.textContent = `${curr}🔥`;
     if (multEl) multEl.textContent = `×${mult}`;
-    if (bestEl) bestEl.textContent = `${best}🏆`;
+    if (bestEl) bestEl.innerHTML = `${best}<img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" />`;
     if (hintEl) {
       if (curr >= 10) {
         hintEl.textContent = "🔥 אתה במכפיל המקסימלי (×2 קריסטלים לכל זיהוי)!";

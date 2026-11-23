@@ -1,9 +1,9 @@
-import { state } from "../state.js?v=20261123q";
-import { saveUserStats } from "../services/storage.js?v=20261123q";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123q";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261123q";
-import { playCrystalSfx } from "./sfx.js?v=20261123q";
-import { showGameToast } from "../utils/toast.js?v=20261123q";
+import { state } from "../state.js?v=20261123y";
+import { saveUserStats } from "../services/storage.js?v=20261123y";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123y";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261123y";
+import { playCrystalSfx } from "./sfx.js?v=20261123y";
+import { showGameToast } from "../utils/toast.js?v=20261123y";
 
 function getTodayKey() {
   const d = new Date();
@@ -255,13 +255,13 @@ export function renderQuestsModal() {
         const claimBtn = document.createElement("button");
         claimBtn.type = "button";
         claimBtn.className = "quest-claim-btn";
-        claimBtn.textContent = `🎁 אסוף +${q.reward} 💎`;
+        claimBtn.innerHTML = `<img class="icon-3d-mini" src="assets/ui-final-gifts.png" alt="" /> אסוף +${q.reward} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" />`;
         claimBtn.addEventListener("click", onClaim);
         right.appendChild(claimBtn);
       } else {
         const progPill = document.createElement("span");
         progPill.className = "quest-status-pill";
-        progPill.textContent = `${Math.min(q.target, prog)}/${q.target} · +${q.reward} 💎`;
+        progPill.innerHTML = `${Math.min(q.target, prog)}/${q.target} · +${q.reward} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" />`;
         right.appendChild(progPill);
       }
 

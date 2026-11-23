@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123q">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123q">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123y">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123y">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123q">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123y">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261123q">
-  <link rel="stylesheet" href="styles/home.css?v=20261123q">
-  <link rel="stylesheet" href="styles/header.css?v=20261123q">
-  <link rel="stylesheet" href="styles/player.css?v=20261123q">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261123q">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261123q">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261123q">
-  <link rel="stylesheet" href="styles/animations.css?v=20261123q">
-  <link rel="stylesheet" href="styles/themes.css?v=20261123q">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261123y">
+  <link rel="stylesheet" href="styles/home.css?v=20261123y">
+  <link rel="stylesheet" href="styles/header.css?v=20261123y">
+  <link rel="stylesheet" href="styles/player.css?v=20261123y">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261123y">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261123y">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261123y">
+  <link rel="stylesheet" href="styles/animations.css?v=20261123y">
+  <link rel="stylesheet" href="styles/themes.css?v=20261123y">
 </head>
 
 <body data-theme="spotify">
@@ -108,7 +108,7 @@
             </span>
             <span class="quickplay-text">
               <span class="quickplay-title" id="home-play-title">משחק מהיר</span>
-              <span class="quickplay-sub" id="home-play-sub">נחשו את השיר!</span>
+              <span class="quickplay-sub" id="home-play-sub" style="display: none;"></span>
             </span>
           </button>
           <div class="hero-wave-bars flipped" aria-hidden="true">
@@ -273,20 +273,7 @@
     <div class="app-shell lb-page-shell">
       <div class="lb-hero">
         <div class="lb-hero-trophy" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="54" height="54">
-            <defs>
-              <linearGradient id="lbHeroGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fef08a" />
-                <stop offset="45%" stop-color="#f59e0b" />
-                <stop offset="100%" stop-color="#b45309" />
-              </linearGradient>
-            </defs>
-            <path d="M13 8h22v11c0 6.5-4.8 11.5-11 11.5S13 25.5 13 19V8z" fill="url(#lbHeroGold)" />
-            <path d="M13 11H8c0 6 2.5 10 6 10.5M35 11h5c0 6-2.5 10-6 10.5" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" />
-            <rect x="21" y="30" width="6" height="6" fill="#d97706" />
-            <rect x="15" y="36" width="18" height="4" rx="2" fill="url(#lbHeroGold)" />
-            <polygon points="24,13 25.8,16.8 30,17.3 26.9,20.2 27.7,24.3 24,22.3 20.3,24.3 21.1,20.2 18,17.3 22.2,16.8" fill="#fff7cc" />
-          </svg>
+          <img src="assets/ui-final-trophy.png" alt="" style="width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 6px 16px rgba(245, 158, 11, 0.55));" />
         </div>
         <h2 class="lb-hero-title">דירוג עולמי</h2>
         <p class="lb-hero-sub">השחקנים המובילים ב״נחש את השיר״</p>
@@ -304,10 +291,10 @@
       <div class="lb-sort-tabs" id="lb-sort-tabs" role="tablist" aria-label="מיון טבלה">
         <button type="button" class="lb-sort-tab active" data-lb-sort="totalWon" role="tab"><img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> זיהויים</button>
         <button type="button" class="lb-sort-tab" data-lb-sort="bestStreak" role="tab">
-          <img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> רצף
+          <img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> רצף
         </button>
         <button type="button" class="lb-sort-tab" data-lb-sort="points" role="tab">
-          <img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> קריסטלים
+          <img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> קריסטלים
         </button>
       </div>
       <div class="lb-fair-note" id="lb-fair-note"><img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" /> דירוג הקריסטלים מחשב רק קריסטלים שהורווחו במשחקים, משימות ומתנות יומיות (קריסטלים מקודים לא נספרים).</div>
@@ -415,7 +402,7 @@
 
         <div class="fp-records-grid">
           <div class="fp-record-box">
-            <span class="fp-record-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> קריסטלים</span>
+            <span class="fp-record-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> קריסטלים</span>
             <strong class="fp-record-val" id="fp-stat-points">0</strong>
           </div>
           <div class="fp-record-box">
@@ -456,7 +443,7 @@
         <div class="marathon-top-bar">
           <button type="button" class="setup-back-btn" id="marathon-exit-btn">→ יציאה</button>
           <span class="marathon-q-pill" id="marathon-q-counter">שאלה 1 מתוך 10</span>
-          <span class="marathon-score-pill">🏆 <strong id="marathon-score-val">0</strong></span>
+          <span class="marathon-score-pill"><img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" /> <strong id="marathon-score-val">0</strong></span>
         </div>
 
         <!-- בר טיימר 15 שניות (ויזואלי בלבד, ללא מספרים) -->
@@ -527,7 +514,7 @@
         </div>
 
         <div class="marathon-sum-actions">
-          <button type="button" class="share-result-btn" id="marathon-lb-btn" data-mode-lb="marathon">🏆 טופ מרתון</button>
+          <button type="button" class="share-result-btn" id="marathon-lb-btn" data-mode-lb="marathon"><img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" /> טופ מרתון</button>
           <button type="button" class="share-result-btn" id="marathon-share-btn">📤 שתף תוצאה (בלי ספוילרים)</button>
           <button type="button" class="setup-confirm-btn" id="marathon-replay-btn">שחק מרתון חדש ▶</button>
           <button type="button" class="setup-back-btn marathon-home-btn" id="marathon-home-btn">חזרה ללובי</button>
@@ -543,7 +530,7 @@
       <div class="marathon-top-bar">
         <button type="button" class="setup-back-btn" id="reverse-exit-btn">→ יציאה</button>
         <span class="marathon-q-pill">🔄 רצף: <strong id="reverse-streak-val">0</strong></span>
-        <span class="marathon-score-pill">🏆 שיא: <strong id="reverse-best-val">0</strong></span>
+        <span class="marathon-score-pill"><img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" /> שיא: <strong id="reverse-best-val">0</strong></span>
       </div>
 
         <div class="marathon-stage-card">
@@ -698,7 +685,7 @@
         <span class="setup-step-badge" id="mode-screen-badge">מצב משחק</span>
       </div>
       <div class="mode-detail-card">
-        <div class="mode-detail-icon" id="mode-detail-icon">🏆</div>
+        <div class="mode-detail-icon" id="mode-detail-icon"><img class="icon-3d-inline" src="assets/ui-final-trophy.png" alt="" style="width:44px;height:44px;" /></div>
         <h2 class="mode-detail-title" id="mode-detail-title"></h2>
         <p class="mode-detail-desc" id="mode-detail-desc"></p>
         <span class="mode-detail-badge" id="mode-detail-status"></span>
@@ -728,7 +715,7 @@
             </button>
             <!-- יתרת קריסטלים -->
             <button class="points-badge guest-locked" id="points-badge" type="button" title="יתרת קריסטלים">
-              <img class="icon-3d-inline icon-3d-crystal" src="assets/icon-crystal.png" alt="" aria-hidden="true" />
+              <img class="icon-3d-inline icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" aria-hidden="true" />
               <span class="points-count-text" id="points-count">0</span>
             </button>
           </div>
@@ -753,7 +740,7 @@
         <!-- אש הרצף החדשה (PNG שקוף 3D) -->
         <div class="streak-top-slot">
           <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
-            <img class="streak-fire-img icon-3d-flame" src="assets/icon-flame.png" alt="" aria-hidden="true" />
+            <img class="streak-fire-img icon-3d-flame" src="assets/ui-final-flame.png" alt="" aria-hidden="true" />
             <span class="streak-count-text" id="streak-count">0</span>
           </div>
         </div>
@@ -1016,7 +1003,7 @@
             <div class="profile-subview active" id="profile-view-main">
               <div class="wallet-summary-card">
                 <div class="wallet-summary-main">
-                  <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> יתרת קריסטלים</span>
+                  <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> יתרת קריסטלים</span>
                   <span class="wallet-summary-val" id="stat-points">0</span>
                 </div>
                 <div class="wallet-summary-meta">
@@ -1185,13 +1172,13 @@
   <div class="modal-backdrop" id="streak-modal-backdrop">
     <div class="profile-modal streak-modal-card" role="dialog" aria-label="נתוני רצף ניצחונות">
       <div class="modal-header">
-        <h2 class="modal-title"><img class="icon-3d-inline icon-3d-flame" src="assets/icon-flame.png" alt="" /> אש הרצף שלך</h2>
+        <h2 class="modal-title"><img class="icon-3d-inline icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> אש הרצף שלך</h2>
         <button class="drawer-close-btn" id="streak-close-btn" aria-label="סגור">&times;</button>
       </div>
       <div class="modal-body">
         <div class="streak-info-grid">
           <div class="streak-info-box">
-            <span class="streak-info-val" id="streak-modal-current">0🔥</span>
+            <span class="streak-info-val" id="streak-modal-current">0<img class="icon-3d-mini" src="assets/ui-final-flame.png" alt="" /></span>
             <span class="streak-info-label">רצף נוכחי</span>
           </div>
           <div class="streak-info-box highlight">
@@ -1199,7 +1186,7 @@
             <span class="streak-info-label">מכפיל קריסטלים</span>
           </div>
           <div class="streak-info-box">
-            <span class="streak-info-val" id="streak-modal-best">0🏆</span>
+            <span class="streak-info-val" id="streak-modal-best">0<img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" /></span>
             <span class="streak-info-label">שיא רצף</span>
           </div>
         </div>
@@ -1267,7 +1254,7 @@
       <div class="modal-body">
         <div class="wallet-summary-card">
           <div class="wallet-summary-main">
-            <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> היתרה שלך לקניות בחנות</span>
+            <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> היתרה שלך לקניות בחנות</span>
             <span class="wallet-summary-val" id="shop-points-balance">0</span>
           </div>
         </div>
@@ -1346,7 +1333,7 @@
         <button class="drawer-close-btn" id="shop-confirm-close-btn" aria-label="סגור">&times;</button>
       </div>
       <div class="modal-body shop-confirm-body">
-        <div class="shop-confirm-emoji" id="shop-confirm-emoji">💎</div>
+        <div class="shop-confirm-emoji" id="shop-confirm-emoji"><img class="icon-3d-inline" src="assets/ui-final-crystal.png" alt="" /></div>
         <p class="shop-confirm-desc" id="shop-confirm-desc"></p>
 
         <div class="shop-qty-picker" id="shop-qty-picker" style="display: none;">
@@ -1356,7 +1343,7 @@
             <input type="number" class="shop-qty-input" id="shop-qty-input" min="1" max="99" value="1" inputmode="numeric" />
             <button type="button" class="shop-qty-step" id="shop-qty-plus" aria-label="הוסף">+</button>
           </div>
-          <div class="shop-qty-total" id="shop-qty-total">סה"כ לתשלום: 0 💎</div>
+          <div class="shop-qty-total" id="shop-qty-total">סה"כ לתשלום: 0 <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" /></div>
         </div>
 
         <div class="shop-confirm-error" id="shop-confirm-error"></div>
@@ -1457,7 +1444,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261123q"></script>
+  <script type="module" src="src/main.js?v=20261123y"></script>
 </body>
 
 </html>

@@ -8,12 +8,12 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261123q";
-import { state } from "../state.js?v=20261123q";
-import { saveUserStats } from "../services/storage.js?v=20261123q";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123q";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123q";
-import { recordStarterShopPurchase } from "./quests.js?v=20261123q";
+} from "../data/shop.js?v=20261123y";
+import { state } from "../state.js?v=20261123y";
+import { saveUserStats } from "../services/storage.js?v=20261123y";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123y";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123y";
+import { recordStarterShopPurchase } from "./quests.js?v=20261123y";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -96,7 +96,7 @@ function setCrystalLabel(el, prefix, price) {
   if (prefix) el.appendChild(document.createTextNode(`${prefix} `));
   const img = document.createElement("img");
   img.className = "icon-3d-mini icon-3d-crystal";
-  img.src = "assets/icon-crystal.png";
+  img.src = "assets/ui-final-crystal.png";
   img.alt = "";
   el.append(img, document.createTextNode(` ${formatPoints(price)}`));
 }
@@ -279,12 +279,15 @@ function openCosmeticConfirmModal({ type, item, onConfirm }) {
 
   const typeLabel = type === "avatar" ? "תמונת הפרופיל" : type === "theme" ? "ערכת הנושא" : "הרקע";
   if (titleEl) titleEl.textContent = "אישור רכישה";
-  if (emojiEl) emojiEl.textContent = item.emoji || "💎";
+  if (emojiEl) {
+    if (item.emoji) emojiEl.textContent = item.emoji;
+    else emojiEl.innerHTML = `<img class="icon-3d-inline" src="assets/ui-final-crystal.png" alt="" />`;
+  }
   if (descEl) descEl.textContent = `האם אתה בטוח שברצונך לקנות את ${typeLabel} "${item.name}" ב-${formatPoints(item.price)} קריסטלים?`;
   if (qtyPicker) qtyPicker.style.display = "none";
   if (errEl) errEl.textContent = "";
   if (okBtn) {
-    okBtn.textContent = `כן, קנה ב-${formatPoints(item.price)} 💎`;
+    okBtn.innerHTML = `כן, קנה ב-${formatPoints(item.price)} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" />`;
     okBtn.disabled = false;
   }
 
@@ -305,7 +308,7 @@ function openPowerupQuantityModal(item) {
 
   if (titleEl) titleEl.textContent = `קניית ${item.name}`;
   if (emojiEl) emojiEl.textContent = item.emoji || "⚡";
-  if (descEl) descEl.textContent = `${item.desc} (${formatPoints(item.price)} 💎 ליחידה)`;
+  if (descEl) descEl.innerHTML = `${item.desc} (${formatPoints(item.price)} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" /> ליחידה)`;
   if (qtyPicker) qtyPicker.style.display = "flex";
   if (qtyInput) qtyInput.value = "1";
   if (errEl) errEl.textContent = "";
@@ -332,7 +335,7 @@ function updatePowerupQtyTotalUI() {
   const affordable = canAfford(totalCost);
 
   if (totalEl) {
-    totalEl.textContent = `סה"כ לתשלום: ${formatPoints(totalCost)} 💎 (יתרתך: ${formatPoints(balance)} 💎)`;
+    totalEl.innerHTML = `סה"כ לתשלום: ${formatPoints(totalCost)} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" /> (יתרתך: ${formatPoints(balance)} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" />)`;
   }
   if (errEl) {
     errEl.textContent = affordable ? "" : `חסרים לך ${formatPoints(totalCost - balance)} קריסטלים לכמות זו`;
@@ -926,7 +929,7 @@ export function initShopListeners() {
         if (descEl) descEl.textContent = `האם אתה בטוח שברצונך לקנות ${qty} × ${item.name} ב-${formatPoints(totalCost)} קריסטלים?`;
         if (qtyPicker) qtyPicker.style.display = "none";
         if (errEl) errEl.textContent = "";
-        confirmOk.textContent = `כן, קנה ב-${formatPoints(totalCost)} 💎`;
+        confirmOk.innerHTML = `כן, קנה ב-${formatPoints(totalCost)} <img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" />`;
         shopConfirmState = { mode: "powerup-final", item, qty, totalCost };
         return;
       }

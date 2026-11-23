@@ -1,19 +1,19 @@
-import { state } from "../state.js?v=20261123q";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123q";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261123q";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261123q";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261123q";
-import { showGameToast } from "../utils/toast.js?v=20261123q";
-import { stopTimedRun } from "./timed.js?v=20261123q";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261123q";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261123q";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261123q";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261123q";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261123q";
-import { playClickSfx } from "./sfx.js?v=20261123q";
-import { vibrateTap } from "../utils/toast.js?v=20261123q";
-import { isOnboardingOpen } from "./onboarding.js?v=20261123q";
-import { recordStarterModePlayed } from "./quests.js?v=20261123q";
+import { state } from "../state.js?v=20261123y";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123y";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261123y";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261123y";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261123y";
+import { showGameToast } from "../utils/toast.js?v=20261123y";
+import { stopTimedRun } from "./timed.js?v=20261123y";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261123y";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261123y";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261123y";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261123y";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261123y";
+import { playClickSfx } from "./sfx.js?v=20261123y";
+import { vibrateTap } from "../utils/toast.js?v=20261123y";
+import { isOnboardingOpen } from "./onboarding.js?v=20261123y";
+import { recordStarterModePlayed } from "./quests.js?v=20261123y";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -84,14 +84,14 @@ let selectedHomeMode = "quickplay";
 let returnScreenFromSettings = "home";
 
 const HOME_MODE_CONFIG = {
-  quickplay: { title: "משחק מהיר", sub: "נחשו את השיר!", themeClass: "" },
-  marathon: { title: "מרתון", sub: "10 שאלות · זיהוי, זמר ושנים", themeClass: "mode-theme-marathon" },
-  reverse: { title: "הפוך על הפוך", sub: "זהו את השיר בהילוך אחורי! 🔄", themeClass: "mode-theme-reverse" },
-  timeline: { title: "ציר זמן", sub: "מקמו שירים לפי סדר השנים! ⏳", themeClass: "mode-theme-timeline" },
-  timed: { title: "משחק בזמן", sub: "60 שניות נגד השעון!", themeClass: "mode-theme-timed" },
-  daily: { title: "אתגר יומי", sub: "השיר היומי המיוחד", themeClass: "mode-theme-daily" },
-  weekly: { title: "השיר השבועי", sub: "בונוס ×4 קריסטלים!", themeClass: "mode-theme-weekly" },
-  "1v1": { title: "1 נגד 1", sub: "בקרוב · אתגרו חבר", themeClass: "mode-theme-1v1" }
+  quickplay: { title: "משחק מהיר", sub: "", themeClass: "" },
+  marathon: { title: "מרתון", sub: "", themeClass: "mode-theme-marathon" },
+  reverse: { title: "הפוך על הפוך", sub: "", themeClass: "mode-theme-reverse" },
+  timeline: { title: "ציר זמן", sub: "", themeClass: "mode-theme-timeline" },
+  timed: { title: "משחק בזמן", sub: "", themeClass: "mode-theme-timed" },
+  daily: { title: "אתגר יומי", sub: "", themeClass: "mode-theme-daily" },
+  weekly: { title: "השיר השבועי", sub: "", themeClass: "mode-theme-weekly" },
+  "1v1": { title: "1 נגד 1", sub: "", themeClass: "mode-theme-1v1" }
 };
 
 function renderHomeModeStatsStrip() {
@@ -139,7 +139,10 @@ function updateHomeSelectedModeUI() {
   const titleEl = document.getElementById("home-play-title");
   const subEl = document.getElementById("home-play-sub");
   if (titleEl) titleEl.textContent = cfg.title;
-  if (subEl) subEl.textContent = cfg.sub;
+  if (subEl) {
+    subEl.textContent = cfg.sub || "";
+    subEl.style.display = cfg.sub ? "" : "none";
+  }
   if (btn) {
     btn.classList.remove("mode-theme-marathon", "mode-theme-reverse", "mode-theme-timeline", "mode-theme-timed", "mode-theme-daily", "mode-theme-weekly", "mode-theme-1v1");
     if (cfg.themeClass) btn.classList.add(cfg.themeClass);
@@ -378,12 +381,12 @@ function renderLeaderboardView() {
           const isMe = state.currentUser && player.username.toLowerCase() === state.currentUser.toLowerCase();
           if (isMe) slot.classList.add("is-me");
           const scoreHtml = activeLeaderboardSort === "bestStreak"
-            ? `${player.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" />`
+            ? `${player.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" />`
             : activeLeaderboardSort === "points"
-              ? `${formatMetricValue(player.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`
+              ? `${formatMetricValue(player.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`
               : activeLeaderboardSort === "bestMarathon"
                 ? `${(player.bestMarathon || 0).toLocaleString("he-IL")} ♾️`
-                : `${player.totalWon || 0} 🎵`;
+                : `${player.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />`;
           const medalDiv = document.createElement("div");
           medalDiv.className = "lb-podium-medal";
           medalDiv.textContent = meta.medal;
@@ -420,8 +423,8 @@ function renderLeaderboardView() {
         const stats = document.createElement("span");
         stats.className = "lb-meta";
         stats.innerHTML = activeLeaderboardSort === "bestMarathon"
-          ? `♾️ ${(me.bestMarathon || 0).toLocaleString("he-IL")} נק' · ${me.totalWon || 0} 🎵`
-          : `${me.totalWon || 0} 🎵 · ${me.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> · ${formatMetricValue(me.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
+          ? `♾️ ${(me.bestMarathon || 0).toLocaleString("he-IL")} נק' · ${me.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />`
+          : `${me.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> · ${me.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> · ${formatMetricValue(me.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
         myRankEl.append(label, stats);
       } else {
         myRankEl.style.display = "none";
@@ -462,8 +465,8 @@ function renderLeaderboardView() {
     const metaSpan = document.createElement("span");
     metaSpan.className = "lb-meta";
     metaSpan.innerHTML = activeLeaderboardSort === "bestMarathon"
-      ? `♾️ ${(r.bestMarathon || 0).toLocaleString("he-IL")} נק' · ${r.totalWon || 0} 🎵`
-      : `${r.totalWon || 0} 🎵 · ${r.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/icon-flame.png" alt="" /> · ${formatMetricValue(r.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" />`;
+      ? `♾️ ${(r.bestMarathon || 0).toLocaleString("he-IL")} נק' · ${r.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />`
+      : `${r.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> · ${r.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> · ${formatMetricValue(r.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
 
     row.append(rankSpan, nameSpan, metaSpan);
     listEl.appendChild(row);
@@ -504,7 +507,9 @@ async function loadAndRenderLeaderboardPage() {
   }
 
   if (statusEl) {
-    statusEl.textContent = source === "cloud" ? "☁️ דירוג עולמי חי" : "🏆 דירוג מקומי";
+    statusEl.innerHTML = source === "cloud"
+      ? "☁️ דירוג עולמי חי"
+      : `<img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" /> דירוג מקומי`;
     statusEl.classList.toggle("is-cloud", source === "cloud");
   }
   if (refreshBtn) refreshBtn.disabled = false;

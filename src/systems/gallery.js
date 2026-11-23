@@ -1,8 +1,8 @@
-import { PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123q";
-import { state } from "../state.js?v=20261123q";
-import { fetchItunesData } from "../services/itunes.js?v=20261123q";
-import { saveUserStats } from "../services/storage.js?v=20261123q";
-import { stopAudioVisuals } from "./audio.js?v=20261123q";
+import { PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123y";
+import { state } from "../state.js?v=20261123y";
+import { fetchItunesData } from "../services/itunes.js?v=20261123y";
+import { saveUserStats } from "../services/storage.js?v=20261123y";
+import { stopAudioVisuals } from "./audio.js?v=20261123y";
 
 // ניגון אינטראקטיבי מתוך גלריית השירים בפרופיל + חשיפת קישור ל-Spotify
 export function stopGalleryPreview() {
