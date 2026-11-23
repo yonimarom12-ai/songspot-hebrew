@@ -247,26 +247,32 @@
 }
 
 .bottom-nav-item .nav-3d-icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.48));
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
+.bottom-nav-item .nav-3d-icon.nav-home-icon {
+  width: 34px;
+  height: 34px;
+  margin-top: -5px;
+}
+
 .bottom-nav-item.active .nav-3d-icon {
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.65));
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.72));
 }
 
 .nav-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1;
   border: 1.5px solid rgba(255, 255, 255, 0.22);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -279,7 +285,7 @@
 }
 
 .bottom-nav-label {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   line-height: 1;
   max-width: 90px;

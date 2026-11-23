@@ -1,10 +1,10 @@
-import { state } from "../state.js?v=20261123p";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123p";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123p";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123p";
-import { saveUserStats } from "../services/storage.js?v=20261123p";
-import { launchWinConfetti } from "./confetti.js?v=20261123p";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123p";
+import { state } from "../state.js?v=20261123q";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123q";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123q";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123q";
+import { saveUserStats } from "../services/storage.js?v=20261123q";
+import { launchWinConfetti } from "./confetti.js?v=20261123q";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123q";
 
 let sessionId = 0;
 let currentSong = null;
