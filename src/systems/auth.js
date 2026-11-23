@@ -1,12 +1,12 @@
-import { dom } from "../dom.js?v=20261123e";
-import { state } from "../state.js?v=20261123e";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261123e";
-import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261123e";
-import { stopGalleryPreview } from "./gallery.js?v=20261123e";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261123e";
-import { updatePointsDisplay } from "./economy.js?v=20261123e";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261123e";
-import { applyUserPreferencesFromStats } from "./drawer.js?v=20261123e";
+import { dom } from "../dom.js?v=20261123i";
+import { state } from "../state.js?v=20261123i";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261123i";
+import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261123i";
+import { stopGalleryPreview } from "./gallery.js?v=20261123i";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261123i";
+import { updatePointsDisplay } from "./economy.js?v=20261123i";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261123i";
+import { applyUserPreferencesFromStats } from "./drawer.js?v=20261123i";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;

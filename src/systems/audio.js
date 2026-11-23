@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123e";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123e";
-import { state } from "../state.js?v=20261123e";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123h";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123h";
+import { state } from "../state.js?v=20261123h";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -338,8 +338,12 @@ export function startProgressLoop(durationSec, resetStart = true) {
   function tick(now) {
     if (!state.isPlayingSnippet) return;
     const elapsedSec = (now - snippetStartPerf) / 1000;
+    const clampedSec = Math.min(elapsedSec, activeDurationSec);
+    if (clampedSec > (state.maxAudioHeardSec || 0)) {
+      state.maxAudioHeardSec = clampedSec;
+    }
     if (dom.playbackFill) {
-      dom.playbackFill.style.width = `${elapsedSecondsToBarPercent(Math.min(elapsedSec, activeDurationSec))}%`;
+      dom.playbackFill.style.width = `${elapsedSecondsToBarPercent(clampedSec)}%`;
     }
     if (elapsedSec < activeDurationSec) {
       state.rafProgressId = requestAnimationFrame(tick);
@@ -350,6 +354,12 @@ export function startProgressLoop(durationSec, resetStart = true) {
 }
 
 export function stopAudioVisuals(finalPct = null) {
+  if (state.isPlayingSnippet && snippetStartPerf !== null && activeDurationSec > 0) {
+    const clampedSec = Math.min((performance.now() - snippetStartPerf) / 1000, activeDurationSec);
+    if (clampedSec > (state.maxAudioHeardSec || 0)) {
+      state.maxAudioHeardSec = clampedSec;
+    }
+  }
   playToken++;
   state.isPlayingSnippet = false;
   snippetStartPerf = null;

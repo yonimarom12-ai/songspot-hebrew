@@ -1,4 +1,4 @@
-import { loadAccountsMap, safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261123e";
+import { loadAccountsMap, safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261123i";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
 // עם אימות Session Token חתום ב-HMAC-SHA256 וגיבוי מקומי אוטומטי

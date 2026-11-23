@@ -1,7 +1,7 @@
-import { dom } from "../dom.js?v=20261123e";
-import { state } from "../state.js?v=20261123e";
-import { normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261123e";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261123e";
+import { dom } from "../dom.js?v=20261123i";
+import { state } from "../state.js?v=20261123i";
+import { normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261123i";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261123i";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;
@@ -77,24 +77,66 @@ function mergeArtistNames(aStr, bStr) {
   return out.join(", ");
 }
 
+function ensureSearchIndex(song) {
+  if (song._idxReady) return song;
+  const nt = normalizeHebrew(song.title || "");
+  const na = normalizeHebrew(song.artist || "");
+  const nAlt = song.itunesTitle ? normalizeHebrew(song.itunesTitle) : "";
+  const ft = normalizeHebrewFuzzy(song.title || "");
+  const fa = normalizeHebrewFuzzy(song.artist || "");
+  const fAlt = song.itunesTitle ? normalizeHebrewFuzzy(song.itunesTitle) : "";
+  song._nt = nt;
+  song._na = na;
+  song._nc = `${nt} ${na}`;
+  song._nAlt = nAlt;
+  song._nAltC = nAlt ? `${nAlt} ${na}` : "";
+  song._ft = ft;
+  song._fa = fa;
+  song._fc = `${ft} ${fa}`;
+  song._fAlt = fAlt;
+  song._idxReady = true;
+  return song;
+}
+
 function dedupeAndMergeSongs(items) {
   const merged = [];
+  const byTrackId = new Map();
+  const byPreview = new Map();
+  const byNormTitle = new Map(); // O(N) bucket lookup instead of O(N^2)!
+
   for (const raw of items) {
     if (!raw || !raw.title) continue;
-    const normTitle = normalizeHebrew(raw.title);
-    const existing = merged.find(m => {
-      if (raw.trackId && m.trackId && String(raw.trackId) === String(m.trackId)) return true;
-      if (raw.previewUrl && m.previewUrl && raw.previewUrl === m.previewUrl) return true;
-      if (normalizeHebrew(m.title) !== normTitle) return false;
-      // מאחדים כשיש חפיפת אמנים (דואט/שיתוף פעולה) — אבל משאירים בנפרד שירים שונים בעלי אותו שם של זמרים שונים!
-      return artistsOverlap(m.artist, raw.artist);
-    });
+    const normTitle = raw._nt || normalizeHebrew(raw.title);
+    let existing = null;
+
+    if (raw.trackId && byTrackId.has(String(raw.trackId))) {
+      existing = byTrackId.get(String(raw.trackId));
+    } else if (raw.previewUrl && byPreview.has(raw.previewUrl)) {
+      existing = byPreview.get(raw.previewUrl);
+    } else {
+      const bucket = byNormTitle.get(normTitle);
+      if (bucket) {
+        existing = bucket.find(m => artistsOverlap(m.artist, raw.artist)) || null;
+      }
+    }
+
     if (existing) {
       existing.artist = mergeArtistNames(existing.artist, raw.artist);
-      if (!existing.trackId && raw.trackId) existing.trackId = raw.trackId;
-      if (!existing.previewUrl && raw.previewUrl) existing.previewUrl = raw.previewUrl;
+      if (!existing.trackId && raw.trackId) {
+        existing.trackId = raw.trackId;
+        byTrackId.set(String(raw.trackId), existing);
+      }
+      if (!existing.previewUrl && raw.previewUrl) {
+        existing.previewUrl = raw.previewUrl;
+        byPreview.set(raw.previewUrl, existing);
+      }
     } else {
-      merged.push({ ...raw });
+      const clone = { ...raw, _nt: normTitle };
+      merged.push(clone);
+      if (clone.trackId) byTrackId.set(String(clone.trackId), clone);
+      if (clone.previewUrl) byPreview.set(clone.previewUrl, clone);
+      if (!byNormTitle.has(normTitle)) byNormTitle.set(normTitle, []);
+      byNormTitle.get(normTitle).push(clone);
     }
   }
   return merged;
@@ -213,20 +255,47 @@ function scoreSongMatch(title, artist, normVal, fuzzyVal, queryWords) {
   return 0;
 }
 
-function ensureCurrentSongInList(list, normVal, fuzzyVal, queryWords, limit) {
+function scoreIndexedSong(song, normVal, fuzzyVal, queryWords, fuzzyWords) {
+  const s = ensureSearchIndex(song);
+  let best = 0;
+
+  if (s._nt === normVal) return 100;
+  if (s._nt.startsWith(normVal)) best = 85;
+  else if (s._nt.includes(normVal)) best = 70;
+  else if (queryWords.length >= 2 && queryWords.every(w => s._nc.includes(w))) best = 65;
+  else if (s._na.startsWith(normVal)) best = 55;
+  else if (s._na.includes(normVal)) best = 45;
+
+  if (best < 70 && s._nAlt) {
+    if (s._nAlt === normVal) return 95;
+    if (s._nAlt.startsWith(normVal)) best = Math.max(best, 80);
+    else if (s._nAlt.includes(normVal)) best = Math.max(best, 68);
+    else if (queryWords.length >= 2 && queryWords.every(w => s._nAltC.includes(w))) best = Math.max(best, 62);
+  }
+
+  if (best === 0 && fuzzyVal.length >= 2) {
+    if (s._ft === fuzzyVal) best = 75;
+    else if (s._ft.startsWith(fuzzyVal)) best = 60;
+    else if (s._ft.includes(fuzzyVal)) best = 40;
+    else if (s._fa.includes(fuzzyVal)) best = 32;
+    else if (s._fAlt && s._fAlt.includes(fuzzyVal)) best = 38;
+    else if (fuzzyWords.length >= 2 && fuzzyWords.every(w => s._fc.includes(w))) best = 50;
+  }
+
+  return best;
+}
+
+function ensureCurrentSongInList(list, normVal, fuzzyVal, queryWords, fuzzyWords, limit) {
   if (!state.currentSong) return list;
+  const score = scoreIndexedSong(state.currentSong, normVal, fuzzyVal, queryWords, fuzzyWords);
+  if (score <= 0) return list;
+
   const curTitle = state.currentSong.title || "";
-  const curAltTitle = state.currentSong.itunesTitle || "";
   const curArtist = state.currentSong.artist || "";
-
-  const scoreMain = scoreSongMatch(curTitle, curArtist, normVal, fuzzyVal, queryWords);
-  const scoreAlt = curAltTitle ? scoreSongMatch(curAltTitle, curArtist, normVal, fuzzyVal, queryWords) : 0;
-  if (scoreMain <= 0 && scoreAlt <= 0) return list;
-
-  const curNormTitle = normalizeHebrew(curTitle);
+  const curNormTitle = state.currentSong._nt || normalizeHebrew(curTitle);
   const targetIdx = list.findIndex(c =>
     (c.trackId && state.currentSong.trackId && String(c.trackId) === String(state.currentSong.trackId)) ||
-    (normalizeHebrew(c.title) === curNormTitle && artistsOverlap(c.artist, curArtist))
+    ((c._nt || normalizeHebrew(c.title)) === curNormTitle && artistsOverlap(c.artist, curArtist))
   );
   if (targetIdx === -1) {
     const insertPos = Math.floor(Math.random() * Math.min(5, list.length + 1));
@@ -234,7 +303,8 @@ function ensureCurrentSongInList(list, normVal, fuzzyVal, queryWords, limit) {
       title: curTitle,
       artist: curArtist,
       trackId: state.currentSong.trackId,
-      previewUrl: state.currentSong.previewUrl
+      previewUrl: state.currentSong.previewUrl,
+      _nt: curNormTitle
     });
   } else if (targetIdx >= limit) {
     const [targetItem] = list.splice(targetIdx, 1);
@@ -242,6 +312,33 @@ function ensureCurrentSongInList(list, normVal, fuzzyVal, queryWords, limit) {
     list.splice(insertPos, 0, targetItem);
   }
   return list;
+}
+
+function runInstantCatalogSearch(val) {
+  const normalizedVal = normalizeHebrew(val);
+  const fuzzyVal = normalizeHebrewFuzzy(val);
+  if (!normalizedVal) {
+    closeSuggestionsDropdown();
+    return;
+  }
+
+  const queryWords = normalizedVal.split(/\s+/).filter(Boolean);
+  const fuzzyWords = queryWords.length >= 2 ? queryWords.map(w => normalizeHebrewFuzzy(w)).filter(Boolean) : [];
+  const MAX_RESULTS = 12;
+
+  // איסוף מהיר (<1ms) עם אינדקס טרום-מחושב + חיתוך ל-40 המובילים בלבד לפני איחוד אמנים
+  const scoredLocal = [];
+  for (const s of state.discoveredSongsMap.values()) {
+    if (state.easySearchFiftyActive && !isSongAllowedInEasyMode(s.title, s.artist)) continue;
+    const score = scoreIndexedSong(s, normalizedVal, fuzzyVal, queryWords, fuzzyWords);
+    if (score > 0) scoredLocal.push({ item: s, score });
+  }
+  scoredLocal.sort((a, b) => b.score - a.score);
+
+  const topCandidates = scoredLocal.slice(0, 40).map(x => x.item);
+  const mergedLocal = dedupeAndMergeSongs(topCandidates);
+  ensureCurrentSongInList(mergedLocal, normalizedVal, fuzzyVal, queryWords, fuzzyWords, MAX_RESULTS);
+  renderSuggestions(mergedLocal.slice(0, MAX_RESULTS));
 }
 
 export function triggerSearchForCurrentInput() {
@@ -253,31 +350,15 @@ export function triggerSearchForCurrentInput() {
     return;
   }
 
-  const normalizedVal = normalizeHebrew(val);
-  const fuzzyVal = normalizeHebrewFuzzy(val);
-  if (!normalizedVal) {
-    closeSuggestionsDropdown();
-    return;
-  }
-
-  const queryWords = normalizedVal.split(/\s+/).filter(Boolean);
-  const MAX_RESULTS = 12;
-
-  // חיפוש מיידי (0ms) ומדויק בתוך הקטלוג המאוחד בעברית (מונע כפילויות אנגלית/עברית משרתים חיצוניים!)
-  const scoredLocal = [];
-  for (const s of state.discoveredSongsMap.values()) {
-    if (state.easySearchFiftyActive && !isSongAllowedInEasyMode(s.title, s.artist)) continue;
-    const scoreMain = scoreSongMatch(s.title, s.artist, normalizedVal, fuzzyVal, queryWords);
-    const scoreAlt = s.itunesTitle ? scoreSongMatch(s.itunesTitle, s.artist, normalizedVal, fuzzyVal, queryWords) : 0;
-    const score = Math.max(scoreMain, scoreAlt);
-    if (score > 0) scoredLocal.push({ item: s, score });
-  }
-  scoredLocal.sort((a, b) => b.score - a.score);
-
-  // מאחדים מראש שירים משותפים של כמה אמנים לפני החיתוך ל-12 תוצאות
-  const mergedLocal = dedupeAndMergeSongs(scoredLocal.map(x => x.item));
-  ensureCurrentSongInList(mergedLocal, normalizedVal, fuzzyVal, queryWords, MAX_RESULTS);
-  renderSuggestions(mergedLocal.slice(0, MAX_RESULTS));
+  // השהייה זעירה (45ms) כדי שהמקלדת במובייל ובמחשב תגיב בצורה חלקה לחלוטין ללא שום תקיעה!
+  state.searchDebounce = setTimeout(() => {
+    const latest = dom.guessInput.value.trim();
+    if (latest.length < 1) {
+      closeSuggestionsDropdown();
+      return;
+    }
+    runInstantCatalogSearch(latest);
+  }, 45);
 }
 
 export function initSearchListeners({ onSubmitGuess }) {

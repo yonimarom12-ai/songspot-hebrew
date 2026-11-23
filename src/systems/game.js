@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261123e";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123e";
-import { dom } from "../dom.js?v=20261123e";
-import { state } from "../state.js?v=20261123e";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261123e";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261123e";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123e";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261123h";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123h";
+import { dom } from "../dom.js?v=20261123h";
+import { state } from "../state.js?v=20261123h";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261123h";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261123h";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123h";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261123e";
+} from "../services/itunes.js?v=20261123h";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261123e";
-import { launchWinConfetti } from "./confetti.js?v=20261123e";
+} from "./audio.js?v=20261123h";
+import { launchWinConfetti } from "./confetti.js?v=20261123h";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261123e";
+} from "./feedback.js?v=20261123h";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261123e";
-import { updateStreakDisplay } from "./profile.js?v=20261123e";
+} from "./search.js?v=20261123h";
+import { updateStreakDisplay } from "./profile.js?v=20261123h";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261123e";
-import { recordQuestProgress } from "./quests.js?v=20261123e";
+} from "./economy.js?v=20261123h";
+import { recordQuestProgress } from "./quests.js?v=20261123h";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261123e";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261123e";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261123e";
+} from "./timed.js?v=20261123h";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261123h";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261123h";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -159,6 +159,8 @@ export function resetUI() {
   state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.usedRedFeedbackInRound = state.redFeedbackEnabled;
   state.guessedWrongKeys.clear();
+  state.maxAudioHeardSec = 0;
+  state.lastExactSolveSec = null;
   state.audioBuffer = null;
   state.rawAudioBuffer = null;
   stopAudioVisuals(0);
@@ -374,7 +376,7 @@ export async function fetchRandomSong() {
   warmTimerId = setTimeout(() => warmCatalogCache(), 3500);
 }
 
-export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0) {
+export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0, exactTimeSec = null) {
   const isClassic = !isTimedModeActive() && !state.activeSpecialChallenge;
   state.userStats.totalHeard = (state.userStats.totalHeard || 0) + 1;
   if (won) {
@@ -402,6 +404,7 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
         artwork: state.currentSong.artwork,
         previewUrl: state.currentSong.previewUrl,
         timeSec: solvedDuration,
+        exactTimeSec: exactTimeSec ?? solvedDuration,
         level: difficultyLevel,
         pointsEarned: earnedPoints
       });
@@ -446,6 +449,13 @@ export function endRound(won) {
   const specialChallenge = state.activeSpecialChallenge ? { ...state.activeSpecialChallenge } : null;
   const isClassic = !isTimedModeActive() && !specialChallenge;
   const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
+  // הנקודה הרחוקה ביותר שאליה השחקן האזין בשיר בסיבוב הזה (גם אם ניגן מחדש אח"כ!)
+  const rawHeard = state.maxAudioHeardSec || 0;
+  const exactSolveSec = rawHeard > 0
+    ? Math.max(0.1, Math.min(solvedAtSec, Math.round(rawHeard * 10) / 10))
+    : solvedAtSec;
+  state.lastExactSolveSec = won ? exactSolveSec : null;
+  const exactSolveLabel = Number.isInteger(exactSolveSec) ? String(exactSolveSec) : exactSolveSec.toFixed(1);
   const playedDifficulty = state.currentDifficulty;
   const usedHint = state.usedHintInRound;
   const usedEasySearch = state.usedEasySearchInRound || state.easySearchFiftyActive;
@@ -459,7 +469,7 @@ export function endRound(won) {
         streak: isClassic ? nextStreakIfWon : 0
       })
     : 0;
-  recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints);
+  recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints, exactSolveSec);
 
   // מסמן השלמת אתגר יומי / שיר שבועי (ניסיון אחד בלבד ליום/שבוע!)
   if (specialChallenge) {
@@ -487,7 +497,7 @@ export function endRound(won) {
     dom.segments[state.currentAttempt].classList.remove("active");
     dom.segments[state.currentAttempt].classList.add("correct");
     if (dom.playbackFill) dom.playbackFill.style.width = "100%";
-    dom.statusLabel.textContent = `זיהית נכון תוך ${solvedAtSec} שניות!`;
+    dom.statusLabel.textContent = `זיהית נכון תוך ${exactSolveLabel} שניות!`;
     dom.statusLabel.style.color = "var(--spotify-green)";
     launchWinConfetti();
     playWinSfx();
@@ -555,11 +565,11 @@ export function endRound(won) {
   if (revealOutcome) {
     if (isSpecialWin) {
       revealOutcome.textContent = specialChallenge.kind === "weekly"
-        ? `👑 פיצחת את השיר השבועי תוך ${solvedAtSec}ש'!`
-        : `🏆 פיצחת את האתגר היומי תוך ${solvedAtSec}ש'!`;
+        ? `👑 פיצחת את השיר השבועי תוך ${exactSolveLabel} שניות!`
+        : `🏆 פיצחת את האתגר היומי תוך ${exactSolveLabel} שניות!`;
     } else {
       revealOutcome.textContent = won
-        ? `✓ זיהית נכון תוך ${solvedAtSec} שניות!`
+        ? `✓ זיהית נכון תוך ${exactSolveLabel} שניות!`
         : "השיר היה:";
     }
     revealOutcome.className = `reveal-outcome-badge ${won ? "is-win" : "is-loss"}`;
@@ -696,14 +706,16 @@ export function handleGuess() {
 
   if (isTimedModeActive()) {
     if (isMatched) {
+      stopAudioVisuals(0);
       const earnedPoints = calculateRoundReward(15, "medium", { streak: 0 });
+      const rawHeard = state.maxAudioHeardSec || 0;
+      const timedExact = rawHeard > 0 ? Math.max(0.1, Math.min(15, Math.round(rawHeard * 10) / 10)) : 15;
       recordTimedSong(state.currentSong, "hit");
-      recordRoundStats(true, 15, "medium", earnedPoints);
+      recordRoundStats(true, 15, "medium", earnedPoints, timedExact);
       handleTimedWin(earnedPoints);
       playWinSfx();
       vibrateWin();
       showGameToast(`✓ ${state.currentSong.title} (+5ש')`, "quest");
-      stopAudioVisuals(0);
       fetchRandomSong();
     } else {
       recordWrongGuessKey(rawValue, selectedArtist, selectedTrackId);
@@ -916,7 +928,7 @@ export function initDifficultyListeners() {
         return "⬜";
       }).join("");
       const diffLabel = DIFFICULTIES[state.currentDifficulty]?.label || "";
-      const sec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
+      const sec = state.lastExactSolveSec ?? DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)];
       const line = won
         ? `זיהיתי תוך ${sec} שניות! 🔥 (רמת ${diffLabel})`
         : `לא הצלחתי הפעם 😅 (רמת ${diffLabel})`;

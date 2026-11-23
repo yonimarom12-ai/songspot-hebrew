@@ -41,6 +41,8 @@ export const state = {
   searchDebounce: null,
   activeFetchRoundId: 0,
   isPlayingSnippet: false,
+  maxAudioHeardSec: 0,
+  lastExactSolveSec: null,
 
   // ניווט מקלדת ברשימת ההצעות + שירים שנוחשו לא נכון בסיבוב הנוכחי
   currentSuggestionItems: [],
