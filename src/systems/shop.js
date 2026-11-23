@@ -8,12 +8,12 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261123n";
-import { state } from "../state.js?v=20261123n";
-import { saveUserStats } from "../services/storage.js?v=20261123n";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123n";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123n";
-import { recordStarterShopPurchase } from "./quests.js?v=20261123n";
+} from "../data/shop.js?v=20261123p";
+import { state } from "../state.js?v=20261123p";
+import { saveUserStats } from "../services/storage.js?v=20261123p";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123p";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123p";
+import { recordStarterShopPurchase } from "./quests.js?v=20261123p";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -119,12 +119,10 @@ function applyAvatarToEl(el, avatar) {
   }
 }
 
-function syncThemeUiIcons(themeId) {
-  const isGreenSet = themeId === "default" || themeId === "spotify" || themeId === "emerald";
-  const prefix = isGreenSet ? "green" : "color";
+function syncThemeUiIcons() {
   document.querySelectorAll("img[data-ui-icon]").forEach(img => {
     const name = img.dataset.uiIcon;
-    if (name) img.src = `assets/ui-${prefix}-${name}.png`;
+    if (name) img.src = `assets/ui-final-${name}.png`;
   });
 }
 

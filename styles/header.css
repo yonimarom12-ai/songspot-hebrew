@@ -246,6 +246,20 @@
   transition: fill 0.2s ease, transform 0.2s ease;
 }
 
+.bottom-nav-item .nav-3d-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.bottom-nav-item.active .nav-3d-icon {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.65));
+}
+
 .nav-avatar {
   width: 24px;
   height: 24px;
