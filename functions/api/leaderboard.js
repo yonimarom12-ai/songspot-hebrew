@@ -15,13 +15,10 @@ CREATE TABLE IF NOT EXISTS players (
 );`;
 
 const PROMO_CRYSTAL_VALUES = {
-  welcome100: 100,
-  music2026: 250,
-  spotifyvip: 50,
-  kingcrown: 100,
-  royalgold: 0,
-  yonivip: 2500,
-  test10k: 10000
+  welcome100: 100, music2026: 250, spotifyvip: 50, kingcrown: 100, royalgold: 0, yonivip: 2500, test10k: 10000,
+  songspot50: 50, israel2026: 120, beats150: 150, studio200: 200, hitmaker300: 300, vipgold500: 500, legend750: 750,
+  galaxyvip: 100, crimsonvip: 100, arcticvip: 100, alienmask: 50, diamondface: 75, dragonking: 75, ghostmode: 50,
+  aurorabg: 50, matrixbg: 50, velvetbg: 50
 };
 
 function computeFairEarnedPoints(r, stats) {
@@ -75,6 +72,8 @@ export async function onRequestGet(context) {
             earnedPoints,
             bestTimed: r.best_timed || Number(stats.bestTimedScore) || 0,
             bestMarathon: Number(stats.bestMarathonScore) || 0,
+            bestReverse: Number(stats.bestReverseStreak) || 0,
+            bestTimeline: Number(stats.bestTimelineScore) || 0,
             avatarId: r.avatar_id || "default"
           };
         })

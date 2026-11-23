@@ -38,7 +38,12 @@ export const SHOP_AVATARS = [
   { id: "lion", name: "אריה", emoji: "🦁", bg: "linear-gradient(135deg,#f12711,#f5af19)", price: 180 },
   { id: "fire", name: "להבה", emoji: "🔥", bg: "linear-gradient(135deg,#ff416c,#ff4b2b)", price: 220 },
   { id: "unicorn", name: "חד-קרן", emoji: "🦄", bg: "linear-gradient(135deg,#f953c6,#b91d73)", price: 260 },
-  { id: "crown", name: "כתר", emoji: "👑", bg: "linear-gradient(135deg,#b88a00,#ffe259)", price: 350 }
+  { id: "crown", name: "כתר", emoji: "👑", bg: "linear-gradient(135deg,#b88a00,#ffe259)", price: 350 },
+  // אווטארים בלעדיים שניתן להשיג רק דרך קודים סודיים!
+  { id: "alien", name: "חייזר בלעדי", emoji: "👽", bg: "linear-gradient(135deg,#00f260,#0575e6)", price: 0, exclusive: true },
+  { id: "diamond", name: "יהלום VIP", emoji: "💎", bg: "linear-gradient(135deg,#38ef7d,#11998e)", price: 0, exclusive: true },
+  { id: "dragon", name: "מלך הדרקונים", emoji: "🐉", bg: "linear-gradient(135deg,#cb2d3e,#ef473a)", price: 0, exclusive: true },
+  { id: "ghost", name: "מצב רוח", emoji: "👻", bg: "linear-gradient(135deg,#434343,#000000)", price: 0, exclusive: true }
 ];
 
 export const SHOP_BACKGROUNDS = [
@@ -53,7 +58,11 @@ export const SHOP_BACKGROUNDS = [
   { id: "dots", name: "נקודות", css: "radial-gradient(rgba(255,255,255,0.08) 1.5px,transparent 1.6px) 0 0/18px 18px, #070707", price: 150 },
   { id: "stars", name: "שמי כוכבים", css: "radial-gradient(rgba(255,255,255,0.55) 1px,transparent 1.2px) 0 0/46px 46px, radial-gradient(rgba(255,255,255,0.3) 1px,transparent 1.2px) 23px 23px/46px 46px, linear-gradient(180deg,#0a0f2c 0%,#000000 85%)", price: 220 },
   { id: "neon", name: "נאון", css: "radial-gradient(circle at 15% 10%,rgba(255,0,153,0.28),transparent 45%), radial-gradient(circle at 85% 90%,rgba(0,229,255,0.24),transparent 45%), #050008", price: 260 },
-  { id: "gold", name: "זהב יוקרתי", css: "radial-gradient(circle at 50% 0%,rgba(255,200,60,0.25),transparent 55%), linear-gradient(180deg,#1a1300 0%,#000000 80%)", price: 350 }
+  { id: "gold", name: "זהב יוקרתי", css: "radial-gradient(circle at 50% 0%,rgba(255,200,60,0.25),transparent 55%), linear-gradient(180deg,#1a1300 0%,#000000 80%)", price: 350 },
+  // רקעים בלעדיים שניתן להשיג רק דרך קודים סודיים!
+  { id: "aurora", name: "זוהר צפוני 🔐", css: "radial-gradient(circle at 20% 0%,rgba(16,185,129,0.34),transparent 48%), radial-gradient(circle at 80% 10%,rgba(56,189,248,0.3),transparent 50%), linear-gradient(180deg,#03111c 0%,#02060a 85%)", price: 0, exclusive: true },
+  { id: "matrix", name: "מטריקס 🔐", css: "repeating-linear-gradient(90deg,rgba(34,197,94,0.08) 0 2px,transparent 2px 18px), linear-gradient(180deg,#021406 0%,#000000 85%)", price: 0, exclusive: true },
+  { id: "velvet", name: "קטיפה מלכותית 🔐", css: "radial-gradient(circle at 50% 0%,rgba(225,29,72,0.32),transparent 55%), linear-gradient(180deg,#1c0510 0%,#060104 85%)", price: 0, exclusive: true }
 ];
 
 export const SHOP_THEMES = [
@@ -104,8 +113,52 @@ export const SHOP_THEMES = [
     previewBg: "linear-gradient(135deg,#090806 0%,#ca8a04 55%,#fde047 100%)",
     accent: "#fde047",
     price: 900
+  },
+  // ערכות נושא בלעדיות שניתן להשיג רק דרך קודים סודיים!
+  {
+    id: "galaxy_nebula",
+    name: "גלקסיה קוסמית 🔐",
+    desc: "ערפילית אינדיגו + כוכבים (בלעדי לקוד!)",
+    previewBg: "linear-gradient(135deg,#09051f 0%,#4f46e5 52%,#38bdf8 100%)",
+    accent: "#818cf8",
+    price: 0,
+    exclusive: true
+  },
+  {
+    id: "crimson_vip",
+    name: "אדום VIP 🔐",
+    desc: "אובסידיאן + ארגמן יוקרתי (בלעדי לקוד!)",
+    previewBg: "linear-gradient(135deg,#120306 0%,#dc2626 55%,#f97316 100%)",
+    accent: "#f87171",
+    price: 0,
+    exclusive: true
+  },
+  {
+    id: "arctic_ice",
+    name: "קרח ארקטי 🔐",
+    desc: "כחול קרחוני + תכלת זוהר (בלעדי לקוד!)",
+    previewBg: "linear-gradient(135deg,#04101a 0%,#0284c7 55%,#bae6fd 100%)",
+    accent: "#7dd3fc",
+    price: 0,
+    exclusive: true
   }
 ];
+
+// 8 רקעים חינמיים לבחירה חופשית בעריכת הפרופיל
+export const FREE_PROFILE_BANNERS = [
+  { id: "default", name: "ספוטיפיי עדין", css: "linear-gradient(135deg, rgba(29,185,84,0.28) 0%, rgba(10,16,12,0.92) 70%)" },
+  { id: "purple_night", name: "לילה סגול", css: "linear-gradient(135deg, rgba(139,92,246,0.34) 0%, rgba(15,8,34,0.94) 75%)" },
+  { id: "ocean_wave", name: "אוקיינוס", css: "linear-gradient(135deg, rgba(14,165,233,0.32) 0%, rgba(6,20,34,0.94) 75%)" },
+  { id: "warm_sunset", name: "שקיעה חמה", css: "linear-gradient(135deg, rgba(249,115,22,0.32) 0%, rgba(36,10,20,0.94) 75%)" },
+  { id: "emerald_gold", name: "אמרלד וזהב", css: "linear-gradient(135deg, rgba(16,185,129,0.3) 0%, rgba(234,179,8,0.18) 55%, rgba(6,16,12,0.95) 100%)" },
+  { id: "royal_amber", name: "זהב מלכותי", css: "linear-gradient(135deg, rgba(250,204,21,0.28) 0%, rgba(28,20,6,0.95) 75%)" },
+  { id: "rose_velvet", name: "ורד קטיפה", css: "linear-gradient(135deg, rgba(236,72,153,0.32) 0%, rgba(26,8,20,0.94) 75%)" },
+  { id: "minimal_dark", name: "פחם נקי", css: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(12,12,14,0.96) 80%)" }
+];
+
+export function findProfileBanner(id) {
+  return FREE_PROFILE_BANNERS.find(b => b.id === id) || FREE_PROFILE_BANNERS[0];
+}
 
 export function findAvatar(id) {
   return SHOP_AVATARS.find(a => a.id === id) || SHOP_AVATARS[0];

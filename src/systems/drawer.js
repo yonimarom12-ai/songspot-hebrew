@@ -1,15 +1,57 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261122u";
-import { dom } from "../dom.js?v=20261122u";
-import { state } from "../state.js?v=20261122u";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261123a";
+import { dom } from "../dom.js?v=20261123a";
+import { state } from "../state.js?v=20261123a";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261122u";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261122u";
-import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261122u";
+} from "./feedback.js?v=20261123a";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261123a";
+import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261123a";
+import { saveUserStats } from "../services/storage.js?v=20261123a";
 
 let settingsScreenHandler = null;
+
+export function saveUserPreferences() {
+  if (!state.userStats) return;
+  state.userStats.preferences = {
+    selectedGenres: Array.from(state.selectedGenres),
+    selectedDecades: Array.from(state.selectedDecades),
+    easySearch: Boolean(state.easySearchFiftyActive),
+    redFeedback: Boolean(state.redFeedbackEnabled),
+    hintsEnabled: Boolean(state.hintsEnabled),
+    sfxEnabled: Boolean(state.sfxEnabled)
+  };
+  saveUserStats();
+}
+
+export function applyUserPreferencesFromStats() {
+  const prefs = state.userStats?.preferences;
+  if (!prefs || typeof prefs !== "object") return;
+
+  state.selectedGenres.clear();
+  (Array.isArray(prefs.selectedGenres) && prefs.selectedGenres.length ? prefs.selectedGenres : ["all"])
+    .forEach(g => state.selectedGenres.add(g));
+
+  state.selectedDecades.clear();
+  (Array.isArray(prefs.selectedDecades) && prefs.selectedDecades.length ? prefs.selectedDecades : ["all"])
+    .forEach(d => state.selectedDecades.add(d));
+
+  state.easySearchFiftyActive = Boolean(prefs.easySearch);
+  state.redFeedbackEnabled = Boolean(prefs.redFeedback);
+  state.hintsEnabled = Boolean(prefs.hintsEnabled);
+  setSfxEnabled(prefs.sfxEnabled !== undefined ? Boolean(prefs.sfxEnabled) : true);
+
+  if (dom.easySearchSettingToggle) dom.easySearchSettingToggle.classList.toggle("on", state.easySearchFiftyActive);
+  if (dom.redFeedbackSettingToggle) dom.redFeedbackSettingToggle.classList.toggle("on", state.redFeedbackEnabled);
+  if (dom.hintsSettingToggle) dom.hintsSettingToggle.classList.toggle("on", state.hintsEnabled);
+  const sfxToggle = document.getElementById("sfx-setting-toggle");
+  if (sfxToggle) sfxToggle.classList.toggle("on", state.sfxEnabled);
+
+  updateFilterPillsUI();
+  updateSettingsStatusPills();
+  updateHintsPanelVisibility();
+}
 
 export function setSettingsScreenHandler(fn) {
   settingsScreenHandler = fn;
@@ -53,6 +95,7 @@ export function setupMultiSelectFilter(buttons, dataKey, targetSet) {
         if (targetSet.size === 0) targetSet.add("all");
       }
       updateFilterPillsUI();
+      saveUserPreferences();
     });
   });
 }
@@ -68,6 +111,7 @@ export function initDrawerListeners() {
     }
     dom.easySearchSettingToggle.classList.toggle("on", state.easySearchFiftyActive);
     updateSettingsStatusPills();
+    saveUserPreferences();
     if (dom.guessInput.value.trim().length > 0 && !dom.guessInput.disabled) {
       triggerSearchForCurrentInput();
     } else {
@@ -83,12 +127,14 @@ export function initDrawerListeners() {
     dom.redFeedbackSettingToggle.classList.toggle("on", state.redFeedbackEnabled);
     updateSettingsStatusPills();
     updateSearchBarProximityFeedback(dom.guessInput.value);
+    saveUserPreferences();
   });
 
   dom.hintsSettingToggle.addEventListener("click", () => {
     state.hintsEnabled = !state.hintsEnabled;
     dom.hintsSettingToggle.classList.toggle("on", state.hintsEnabled);
     updateHintsPanelVisibility();
+    saveUserPreferences();
     playClickSfx();
   });
 
@@ -98,6 +144,7 @@ export function initDrawerListeners() {
     sfxToggle.addEventListener("click", () => {
       setSfxEnabled(!state.sfxEnabled);
       sfxToggle.classList.toggle("on", state.sfxEnabled);
+      saveUserPreferences();
       if (state.sfxEnabled) playClickSfx();
     });
   }

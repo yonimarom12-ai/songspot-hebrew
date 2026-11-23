@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261122u";
+import { state } from "../state.js?v=20261123a";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -25,13 +25,10 @@ export function safeStorageRemove(key) {
 }
 
 const PROMO_CRYSTAL_VALUES = {
-  welcome100: 100,
-  music2026: 250,
-  spotifyvip: 50,
-  kingcrown: 100,
-  royalgold: 0,
-  yonivip: 2500,
-  test10k: 10000
+  welcome100: 100, music2026: 250, spotifyvip: 50, kingcrown: 100, royalgold: 0, yonivip: 2500, test10k: 10000,
+  songspot50: 50, israel2026: 120, beats150: 150, studio200: 200, hitmaker300: 300, vipgold500: 500, legend750: 750,
+  galaxyvip: 100, crimsonvip: 100, arcticvip: 100, alienmask: 50, diamondface: 75, dragonking: 75, ghostmode: 50,
+  aurorabg: 50, matrixbg: 50, velvetbg: 50
 };
 
 function calcPromoCrystalsFromCodes(codes) {
@@ -57,6 +54,7 @@ export function getDefaultStats() {
     equippedAvatar: "default",
     equippedBackground: "default",
     equippedTheme: "default",
+    profileBanner: "default",
     customAvatarData: "",
     customBackgroundData: "",
     bestTimedScore: 0,
@@ -67,7 +65,16 @@ export function getDefaultStats() {
     completedWeeklyKey: "",
     powerups: { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 },
     dailyQuests: null,
+    starterQuests: { modesPlayed: [], boughtItem: false, completedMarathon: false, claimed: [] },
     dailyGifts: { lastClaimDate: "", streakDay: 0 },
+    preferences: {
+      selectedGenres: ["all"],
+      selectedDecades: ["all"],
+      easySearch: false,
+      redFeedback: false,
+      hintsEnabled: false,
+      sfxEnabled: true
+    },
     redeemedCodes: [],
     favorites: { song: "", album: "", artist: "", songImg: "", albumImg: "", artistImg: "" }
   };
@@ -112,9 +119,23 @@ export function normalizeStatsObj(parsed) {
       extraTime: Math.max(0, Number(parsed.powerups?.extraTime) || 0)
     },
     dailyQuests: parsed.dailyQuests && typeof parsed.dailyQuests === "object" ? parsed.dailyQuests : null,
+    starterQuests: {
+      modesPlayed: Array.isArray(parsed.starterQuests?.modesPlayed) ? parsed.starterQuests.modesPlayed : [],
+      boughtItem: Boolean(parsed.starterQuests?.boughtItem),
+      completedMarathon: Boolean(parsed.starterQuests?.completedMarathon),
+      claimed: Array.isArray(parsed.starterQuests?.claimed) ? parsed.starterQuests.claimed : []
+    },
     dailyGifts: {
       lastClaimDate: typeof parsed.dailyGifts?.lastClaimDate === "string" ? parsed.dailyGifts.lastClaimDate : "",
       streakDay: Number.isFinite(Number(parsed.dailyGifts?.streakDay)) ? Math.max(0, Math.min(7, Math.round(Number(parsed.dailyGifts.streakDay)))) : 0
+    },
+    preferences: {
+      selectedGenres: Array.isArray(parsed.preferences?.selectedGenres) && parsed.preferences.selectedGenres.length > 0 ? parsed.preferences.selectedGenres : ["all"],
+      selectedDecades: Array.isArray(parsed.preferences?.selectedDecades) && parsed.preferences.selectedDecades.length > 0 ? parsed.preferences.selectedDecades : ["all"],
+      easySearch: Boolean(parsed.preferences?.easySearch),
+      redFeedback: Boolean(parsed.preferences?.redFeedback),
+      hintsEnabled: Boolean(parsed.preferences?.hintsEnabled),
+      sfxEnabled: parsed.preferences?.sfxEnabled !== undefined ? Boolean(parsed.preferences.sfxEnabled) : true
     },
     redeemedCodes: Array.isArray(parsed.redeemedCodes) ? parsed.redeemedCodes : [],
     favorites: {

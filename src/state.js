@@ -42,9 +42,10 @@ export const state = {
   activeFetchRoundId: 0,
   isPlayingSnippet: false,
 
-  // ניווט מקלדת ברשימת ההצעות
+  // ניווט מקלדת ברשימת ההצעות + שירים שנוחשו לא נכון בסיבוב הנוכחי
   currentSuggestionItems: [],
   highlightedSuggestionIndex: -1,
+  guessedWrongKeys: new Set(),
 
   artistCatalogCache: {},
   discoveredSongsMap: new Map(),

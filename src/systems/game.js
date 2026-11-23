@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261122u";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122u";
-import { dom } from "../dom.js?v=20261122u";
-import { state } from "../state.js?v=20261122u";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch } from "../utils/text.js?v=20261122u";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261122u";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122u";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261123a";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123a";
+import { dom } from "../dom.js?v=20261123a";
+import { state } from "../state.js?v=20261123a";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261123a";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261123a";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123a";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261122u";
+} from "../services/itunes.js?v=20261123a";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261122u";
-import { launchWinConfetti } from "./confetti.js?v=20261122u";
+} from "./audio.js?v=20261123a";
+import { launchWinConfetti } from "./confetti.js?v=20261123a";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261122u";
+} from "./feedback.js?v=20261123a";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261122u";
-import { updateStreakDisplay } from "./profile.js?v=20261122u";
+} from "./search.js?v=20261123a";
+import { updateStreakDisplay } from "./profile.js?v=20261123a";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261122u";
-import { recordQuestProgress } from "./quests.js?v=20261122u";
+} from "./economy.js?v=20261123a";
+import { recordQuestProgress } from "./quests.js?v=20261123a";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261122u";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261122u";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261122u";
+} from "./timed.js?v=20261123a";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261123a";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261123a";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -158,6 +158,7 @@ export function resetUI() {
   state.usedHintInRound = false;
   state.usedEasySearchInRound = state.easySearchFiftyActive;
   state.usedRedFeedbackInRound = state.redFeedbackEnabled;
+  state.guessedWrongKeys.clear();
   state.audioBuffer = null;
   state.rawAudioBuffer = null;
   stopAudioVisuals(0);
@@ -639,13 +640,44 @@ export function advanceAttempt() {
   }
 }
 
+function splitArtistTokens(str) {
+  return String(str || "")
+    .split(/\s*(?:,|&|\+|feat\.?|ft\.?|×|\bעם\b)\s*/i)
+    .map(normalizeHebrew)
+    .filter(Boolean);
+}
+
+function isArtistMatchingSong(guessArtist, songArtist) {
+  const gTokens = splitArtistTokens(guessArtist);
+  const sTokens = splitArtistTokens(songArtist);
+  if (!gTokens.length || !sTokens.length) return true;
+  return gTokens.some(g => sTokens.some(s => g === s || (g.length >= 3 && s.includes(g)) || (s.length >= 3 && g.includes(s))));
+}
+
+function recordWrongGuessKey(title, artist, trackId) {
+  if (trackId) state.guessedWrongKeys.add(`id:${trackId}`);
+  if (title) {
+    state.guessedWrongKeys.add(getSongKey(title, artist || ""));
+    for (const part of String(artist || "").split(/\s*(?:,|&|\+|feat\.?|ft\.?|×|\bעם\b)\s*/i).map(s => s.trim()).filter(Boolean)) {
+      state.guessedWrongKeys.add(getSongKey(title, part));
+    }
+  }
+}
+
 export function handleGuess() {
   if (!state.currentSong) return;
 
   let rawValue = dom.guessInput.dataset.selectedTitle;
+  let selectedArtist = dom.guessInput.dataset.selectedArtist || "";
+  const selectedTrackId = dom.guessInput.dataset.selectedTrackId || "";
   if (!rawValue) {
     const sepIdx = dom.guessInput.value.lastIndexOf(" - ");
-    rawValue = sepIdx > 0 ? dom.guessInput.value.slice(0, sepIdx) : dom.guessInput.value;
+    if (sepIdx > 0) {
+      rawValue = dom.guessInput.value.slice(0, sepIdx);
+      selectedArtist = dom.guessInput.value.slice(sepIdx + 3).trim();
+    } else {
+      rawValue = dom.guessInput.value;
+    }
   }
 
   const userGuess = normalizeHebrew(rawValue);
@@ -653,9 +685,14 @@ export function handleGuess() {
 
   closeSuggestionsDropdown();
   const itunesTitle = state.currentSong.itunesTitle ? cleanTrackTitle(state.currentSong.itunesTitle) : "";
-  const isMatched =
+  const titleMatched =
     isFuzzySongMatch(rawValue, state.currentSong.title) ||
     (itunesTitle && isFuzzySongMatch(rawValue, itunesTitle));
+
+  // התאמה מדויקת: אם נבחר Track ID זהה -> נכון; אחרת אם יש אמן בבחירה, חייבת להיות גם התאמת אמן!
+  const sameTrackId = Boolean(selectedTrackId && state.currentSong.trackId && String(selectedTrackId) === String(state.currentSong.trackId));
+  const artistOk = !selectedArtist || isArtistMatchingSong(selectedArtist, state.currentSong.artist);
+  const isMatched = sameTrackId || (titleMatched && artistOk);
 
   if (isTimedModeActive()) {
     if (isMatched) {
@@ -669,12 +706,14 @@ export function handleGuess() {
       stopAudioVisuals(0);
       fetchRandomSong();
     } else {
+      recordWrongGuessKey(rawValue, selectedArtist, selectedTrackId);
       playWrongSfx();
       vibrateError();
       handleTimedWrong();
       dom.guessInput.value = "";
       delete dom.guessInput.dataset.selectedTitle;
       delete dom.guessInput.dataset.selectedArtist;
+      delete dom.guessInput.dataset.selectedTrackId;
       updateSubmitButtonVisibility();
       dom.playerCard.classList.remove("shake");
       void dom.playerCard.offsetWidth;
@@ -686,6 +725,7 @@ export function handleGuess() {
   if (isMatched) {
     endRound(true);
   } else {
+    recordWrongGuessKey(rawValue, selectedArtist, selectedTrackId);
     playWrongSfx();
     vibrateError();
     if (state.lastRoundStreakSaved) {

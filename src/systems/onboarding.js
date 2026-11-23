@@ -1,6 +1,6 @@
-import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261122u";
-import { isIOS } from "../state.js?v=20261122u";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261122u";
+import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261123a";
+import { isIOS } from "../state.js?v=20261123a";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261123a";
 
 // מפתח v2 — מפעיל את המדריך האינטראקטיבי החדש פעם אחת גם למשתמשים ותיקים!
 const ONBOARDING_KEY = "songspot_onboarding_done_v2";
@@ -189,10 +189,17 @@ function renderStep() {
       if (step.requireAction) {
         const onTargetTap = () => {
           playWinSfx();
-          // מחכה רגע קצר כדי שהמשתמש יראה את המסך שנפתח לפני המעבר להוראה הבאה
-          setTimeout(() => {
-            if (isTourOpen) advanceStep();
-          }, 340);
+          clearHighlight();
+          // לא סוגרים ולא עוברים אוטומטית — המשתמש בוחן את החלון/מסך ומאשר ידנית "הבנתי, המשך ←"
+          if (actionPill) {
+            actionPill.textContent = "✓ מעולה! בדקו את המסך ולחצו המשך כשמוכנים";
+            actionPill.style.display = "inline-flex";
+          }
+          if (skipStepBtn) skipStepBtn.style.display = "none";
+          if (nextBtn) {
+            nextBtn.style.display = "block";
+            nextBtn.textContent = "הבנתי, המשך ←";
+          }
         };
         target.addEventListener("click", onTargetTap, { once: true });
         activeActionCleanup = () => target.removeEventListener("click", onTargetTap);

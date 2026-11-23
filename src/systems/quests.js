@@ -1,9 +1,9 @@
-import { state } from "../state.js?v=20261122u";
-import { saveUserStats } from "../services/storage.js?v=20261122u";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122u";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261122u";
-import { playCrystalSfx } from "./sfx.js?v=20261122u";
-import { showGameToast } from "../utils/toast.js?v=20261122u";
+import { state } from "../state.js?v=20261123a";
+import { saveUserStats } from "../services/storage.js?v=20261123a";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123a";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261123a";
+import { playCrystalSfx } from "./sfx.js?v=20261123a";
+import { showGameToast } from "../utils/toast.js?v=20261123a";
 
 function getTodayKey() {
   const d = new Date();
@@ -18,6 +18,91 @@ export const DAILY_QUESTS = [
   { id: "fast_win", title: "זהה שיר בפחות מ-2 שניות", target: 1, reward: 35, icon: "⚡" },
   { id: "streak_4", title: "הגע לרצף של 4 ניצחונות", target: 4, reward: 40, icon: "🔥" }
 ];
+
+export const STARTER_QUESTS = [
+  {
+    id: "starter_account",
+    icon: "👤",
+    title: "צור חשבון או התחבר",
+    target: 1,
+    reward: 100,
+    getProgress: () => (state.currentUser ? 1 : 0)
+  },
+  {
+    id: "starter_modes_3",
+    icon: "🎮",
+    title: "שחק ב-3 מצבי משחק שונים",
+    target: 3,
+    reward: 120,
+    getProgress: (s) => Math.min(3, (s?.starterQuests?.modesPlayed || []).length)
+  },
+  {
+    id: "starter_shop",
+    icon: "🛍️",
+    title: "רכוש פריט כלשהו בחנות",
+    target: 1,
+    reward: 80,
+    getProgress: (s) => ((s?.ownedItems?.length || 0) > 0 || s?.starterQuests?.boughtItem ? 1 : 0)
+  },
+  {
+    id: "starter_streak_5",
+    icon: "🔥",
+    title: "השג רצף של 5 ניחושים נכונים",
+    target: 5,
+    reward: 150,
+    getProgress: (s) => Math.min(5, s?.bestStreak || 0)
+  },
+  {
+    id: "starter_marathon",
+    icon: "♾️",
+    title: "השלם סיבוב במצב מרתון",
+    target: 1,
+    reward: 120,
+    getProgress: (s) => (s?.starterQuests?.completedMarathon || (s?.bestMarathonScore || 0) > 0 ? 1 : 0)
+  }
+];
+
+function ensureStarterQuestBucket() {
+  if (!state.userStats) return null;
+  if (!state.userStats.starterQuests || typeof state.userStats.starterQuests !== "object") {
+    state.userStats.starterQuests = { modesPlayed: [], boughtItem: false, completedMarathon: false, claimed: [] };
+  }
+  if (!Array.isArray(state.userStats.starterQuests.modesPlayed)) state.userStats.starterQuests.modesPlayed = [];
+  if (!Array.isArray(state.userStats.starterQuests.claimed)) state.userStats.starterQuests.claimed = [];
+  return state.userStats.starterQuests;
+}
+
+export function recordStarterModePlayed(modeKey) {
+  if (!modeKey || !state.userStats) return;
+  const sq = ensureStarterQuestBucket();
+  if (!sq || sq.modesPlayed.includes(modeKey)) return;
+  sq.modesPlayed.push(modeKey);
+  saveUserStats();
+  if (sq.modesPlayed.length === 3) {
+    showGameToast("🌟 משימת היכרות הושלמה: שחק ב-3 מצבי משחק שונים!", "quest");
+  }
+  updateHomeQuestsDot();
+}
+
+export function recordStarterShopPurchase() {
+  if (!state.userStats) return;
+  const sq = ensureStarterQuestBucket();
+  if (!sq || sq.boughtItem) return;
+  sq.boughtItem = true;
+  saveUserStats();
+  showGameToast("🌟 משימת היכרות הושלמה: רכוש פריט בחנות!", "quest");
+  updateHomeQuestsDot();
+}
+
+export function recordStarterMarathonComplete() {
+  if (!state.userStats) return;
+  const sq = ensureStarterQuestBucket();
+  if (!sq || sq.completedMarathon) return;
+  sq.completedMarathon = true;
+  saveUserStats();
+  showGameToast("🌟 משימת היכרות הושלמה: השלם סיבוב במרתון!", "quest");
+  updateHomeQuestsDot();
+}
 
 // 16 הישגים מדורגים (מרגיל ועד אגדי / קשה במיוחד) — לכל הישג מוסבר איך משיגים אותו
 export const ACHIEVEMENT_BADGES = [
@@ -56,9 +141,12 @@ function ensureDailyQuestBucket() {
 }
 
 export function hasUnclaimedQuestReward() {
+  if (!state.currentUser || !state.userStats) return false;
   const bucket = ensureDailyQuestBucket();
-  if (!bucket || !state.currentUser) return false;
-  return DAILY_QUESTS.some(q => (bucket.progress?.[q.id] || 0) >= q.target && !bucket.claimed.includes(q.id));
+  const hasDaily = bucket && DAILY_QUESTS.some(q => (bucket.progress?.[q.id] || 0) >= q.target && !bucket.claimed.includes(q.id));
+  const sq = ensureStarterQuestBucket();
+  const hasStarter = sq && STARTER_QUESTS.some(q => q.getProgress(state.userStats) >= q.target && !sq.claimed.includes(q.id));
+  return Boolean(hasDaily || hasStarter);
 }
 
 export function updateHomeQuestsDot() {
@@ -112,10 +200,30 @@ export function claimQuestReward(questId) {
   return true;
 }
 
+export function claimStarterQuestReward(questId) {
+  if (!state.currentUser || !state.userStats) return false;
+  const quest = STARTER_QUESTS.find(q => q.id === questId);
+  const sq = ensureStarterQuestBucket();
+  if (!quest || !sq) return false;
+  if (quest.getProgress(state.userStats) < quest.target || sq.claimed.includes(questId)) return false;
+
+  sq.claimed.push(questId);
+  awardPoints(quest.reward, { persist: false });
+  saveUserStats();
+  syncAccountToCloud(state.currentUser, state.userStats);
+  updatePointsDisplay(true);
+  playCrystalSfx();
+  launchCrystalRewardAnimation(quest.reward);
+  renderQuestsModal();
+  updateHomeQuestsDot();
+  return true;
+}
+
 export function renderQuestsModal() {
   const questsEl = document.getElementById("quests-modal-list");
   const guestHint = document.getElementById("quests-guest-hint");
   const bucket = ensureDailyQuestBucket();
+  const sq = ensureStarterQuestBucket();
 
   if (guestHint) {
     guestHint.style.display = state.currentUser ? "none" : "block";
@@ -123,12 +231,10 @@ export function renderQuestsModal() {
 
   if (questsEl && bucket) {
     questsEl.innerHTML = "";
-    DAILY_QUESTS.forEach(q => {
-      const prog = Math.min(q.target, bucket.progress?.[q.id] || 0);
-      const isDone = prog >= q.target;
-      const isClaimed = bucket.claimed.includes(q.id);
-      const pct = Math.round((prog / q.target) * 100);
 
+    const renderQuestRow = (q, prog, isClaimed, onClaim) => {
+      const isDone = prog >= q.target;
+      const pct = Math.round((Math.min(q.target, prog) / q.target) * 100);
       const row = document.createElement("div");
       row.className = `quest-row ${isClaimed ? "is-claimed" : (isDone ? "is-ready" : "")}`;
 
@@ -150,12 +256,12 @@ export function renderQuestsModal() {
         claimBtn.type = "button";
         claimBtn.className = "quest-claim-btn";
         claimBtn.textContent = `🎁 אסוף +${q.reward} 💎`;
-        claimBtn.addEventListener("click", () => claimQuestReward(q.id));
+        claimBtn.addEventListener("click", onClaim);
         right.appendChild(claimBtn);
       } else {
         const progPill = document.createElement("span");
         progPill.className = "quest-status-pill";
-        progPill.textContent = `${prog}/${q.target} · +${q.reward} 💎`;
+        progPill.textContent = `${Math.min(q.target, prog)}/${q.target} · +${q.reward} 💎`;
         right.appendChild(progPill);
       }
 
@@ -170,6 +276,32 @@ export function renderQuestsModal() {
 
       row.append(top, track);
       questsEl.appendChild(row);
+    };
+
+    // 5 משימות היכרות עם פרסים נדיבים (מוצגות כל עוד לא נאספו כולן)
+    const allStarterClaimed = sq && STARTER_QUESTS.every(q => sq.claimed.includes(q.id));
+    if (sq && !allStarterClaimed) {
+      const stHeader = document.createElement("div");
+      stHeader.className = "quests-group-title is-starter";
+      stHeader.textContent = "🌟 משימות היכרות (פרסים נדיבים!)";
+      questsEl.appendChild(stHeader);
+
+      STARTER_QUESTS.forEach(q => {
+        const prog = q.getProgress(state.userStats);
+        const isClaimed = sq.claimed.includes(q.id);
+        renderQuestRow(q, prog, isClaimed, () => claimStarterQuestReward(q.id));
+      });
+    }
+
+    const dailyHeader = document.createElement("div");
+    dailyHeader.className = "quests-group-title";
+    dailyHeader.textContent = "📅 משימות יומיות";
+    questsEl.appendChild(dailyHeader);
+
+    DAILY_QUESTS.forEach(q => {
+      const prog = Math.min(q.target, bucket.progress?.[q.id] || 0);
+      const isClaimed = bucket.claimed.includes(q.id);
+      renderQuestRow(q, prog, isClaimed, () => claimQuestReward(q.id));
     });
   }
   updateHomeQuestsDot();

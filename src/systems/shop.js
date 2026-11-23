@@ -8,11 +8,12 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261122u";
-import { state } from "../state.js?v=20261122u";
-import { saveUserStats } from "../services/storage.js?v=20261122u";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261122u";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261122u";
+} from "../data/shop.js?v=20261123a";
+import { state } from "../state.js?v=20261123a";
+import { saveUserStats } from "../services/storage.js?v=20261123a";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123a";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123a";
+import { recordStarterShopPurchase } from "./quests.js?v=20261123a";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -30,6 +31,7 @@ function itemKey(type, id) {
 }
 
 function isOwned(type, item) {
+  if (item.exclusive) return getOwnedItems().includes(itemKey(type, item.id));
   return item.price === 0 || getOwnedItems().includes(itemKey(type, item.id));
 }
 
@@ -367,6 +369,7 @@ function purchaseOrEquip(type, item, skipConfirm = false) {
       return;
     }
     getOwnedItems().push(itemKey(type, item.id));
+    recordStarterShopPurchase();
     setShopMessage(`✓ רכשת והפעלת את "${item.name}"!`, "success");
   } else {
     setShopMessage(`✓ "${item.name}" הופעל`, "success");
@@ -830,7 +833,9 @@ export function renderShop() {
   }
 
   if (activeShopTab === "themes") {
-    SHOP_THEMES.forEach(item => grid.appendChild(buildCard("theme", item)));
+    SHOP_THEMES
+      .filter(item => !item.exclusive || isOwned("theme", item))
+      .forEach(item => grid.appendChild(buildCard("theme", item)));
     return;
   }
 
@@ -838,7 +843,9 @@ export function renderShop() {
   grid.appendChild(buildCustomUploadCard(type));
 
   const items = activeShopTab === "avatars" ? SHOP_AVATARS : SHOP_BACKGROUNDS;
-  items.forEach(item => grid.appendChild(buildCard(type, item)));
+  items
+    .filter(item => !item.exclusive || isOwned(type, item))
+    .forEach(item => grid.appendChild(buildCard(type, item)));
 }
 
 export function initShopListeners() {
@@ -927,6 +934,7 @@ export function initShopListeners() {
           state.userStats.powerups = { streakFreeze: 0, fiftyFifty: 0, extraTime: 0 };
         }
         state.userStats.powerups[item.id] = (state.userStats.powerups[item.id] || 0) + qty;
+        recordStarterShopPurchase();
         saveUserStats();
         syncAccountToCloud(state.currentUser, state.userStats);
         setShopMessage(`✓ רכשת ${qty} × ${item.emoji} ${item.name}! (ברשותך: ${state.userStats.powerups[item.id]})`, "success");

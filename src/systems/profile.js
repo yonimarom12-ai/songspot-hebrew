@@ -1,14 +1,15 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261122u";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261122u";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261122u";
-import { state } from "../state.js?v=20261122u";
-import { saveUserStats } from "../services/storage.js?v=20261122u";
-import { fetchItunesData } from "../services/itunes.js?v=20261122u";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261122u";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261122u";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261122u";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261122u";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261122u";
+import { ARTISTS_DB } from "../data/artists.js?v=20261123a";
+import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261123a";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123a";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261123a";
+import { state } from "../state.js?v=20261123a";
+import { saveUserStats } from "../services/storage.js?v=20261123a";
+import { fetchItunesData } from "../services/itunes.js?v=20261123a";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261123a";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261123a";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261123a";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261123a";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261123a";
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
@@ -57,6 +58,19 @@ export function renderProfileStatsModal() {
   const heard = state.userStats.totalHeard || 0;
   const won = state.userStats.totalWon || 0;
   const rate = heard > 0 ? Math.round((won / heard) * 100) : 0;
+
+  // עדכון כרטיס ה-Hero המחודש + רקע הפרופיל החינמי
+  const heroWon = document.getElementById("hero-stat-won");
+  const heroStreak = document.getElementById("hero-stat-streak");
+  const heroPts = document.getElementById("hero-stat-points");
+  if (heroWon) heroWon.textContent = String(won);
+  if (heroStreak) heroStreak.textContent = String(state.userStats.bestStreak || 0);
+  if (heroPts) heroPts.textContent = formatPoints(getPointsBalance());
+  const bannerObj = findProfileBanner(state.userStats?.profileBanner || "default");
+  if (dom.loggedUserBar) {
+    dom.loggedUserBar.style.background = bannerObj.css;
+  }
+  renderProfileBannerPicker();
 
   document.getElementById("stat-heard").textContent = heard;
   document.getElementById("stat-won").textContent = won;
@@ -526,6 +540,29 @@ function triggerFavoriteSearch(field) {
         commitResults();
       });
   }, 180);
+}
+
+function renderProfileBannerPicker() {
+  const container = document.getElementById("profile-banner-picker");
+  if (!container) return;
+  const currentId = state.userStats?.profileBanner || "default";
+  container.innerHTML = "";
+  FREE_PROFILE_BANNERS.forEach(b => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `profile-banner-swatch${b.id === currentId ? " active" : ""}`;
+    btn.style.background = b.css;
+    btn.title = b.name;
+    btn.textContent = b.name;
+    btn.addEventListener("click", () => {
+      if (!state.userStats) return;
+      state.userStats.profileBanner = b.id;
+      if (dom.loggedUserBar) dom.loggedUserBar.style.background = b.css;
+      saveUserStats();
+      renderProfileBannerPicker();
+    });
+    container.appendChild(btn);
+  });
 }
 
 function renderProfileFavorites() {

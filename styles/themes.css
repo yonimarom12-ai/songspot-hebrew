@@ -245,3 +245,67 @@ body[data-theme="royal_gold"] .bottom-nav {
   background: rgba(14, 11, 6, 0.95);
   border-top-color: rgba(250, 204, 21, 0.3);
 }
+
+/* 6. בלעדי לקוד: גלקסיה קוסמית (galaxy_nebula) */
+body[data-theme="galaxy_nebula"] {
+  --bg-pure: #070417;
+  --bg-stage: radial-gradient(circle at 25% 0%, rgba(99, 102, 241, 0.32), transparent 52%), radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.24), transparent 50%), #070417;
+  --surface: rgba(14, 10, 38, 0.92);
+  --surface-elevated: rgba(22, 16, 56, 0.94);
+  --border: rgba(129, 140, 248, 0.35);
+  --accent-purple: #6366f1;
+  --accent-purple-bright: #818cf8;
+  --accent-pink: #38bdf8;
+}
+body[data-theme="galaxy_nebula"] .home-stage-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.34), rgba(56, 189, 248, 0.14) 40%, #070417 78%);
+}
+body[data-theme="galaxy_nebula"] .home-quickplay-btn,
+body[data-theme="galaxy_nebula"] .setup-confirm-btn,
+body[data-theme="galaxy_nebula"] .btn-next {
+  background: linear-gradient(135deg, #4f46e5 0%, #38bdf8 100%);
+  border-color: rgba(165, 180, 252, 0.7);
+}
+
+/* 7. בלעדי לקוד: אדום VIP (crimson_vip) */
+body[data-theme="crimson_vip"] {
+  --bg-pure: #100305;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(220, 38, 38, 0.32), rgba(153, 27, 27, 0.18) 45%, #100305 80%);
+  --surface: rgba(30, 8, 12, 0.92);
+  --surface-elevated: rgba(44, 12, 18, 0.94);
+  --border: rgba(248, 113, 113, 0.35);
+  --accent-purple: #ef4444;
+  --accent-purple-bright: #f87171;
+  --accent-pink: #f97316;
+}
+body[data-theme="crimson_vip"] .home-stage-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(220, 38, 38, 0.32), #100305 76%);
+}
+body[data-theme="crimson_vip"] .home-quickplay-btn,
+body[data-theme="crimson_vip"] .setup-confirm-btn,
+body[data-theme="crimson_vip"] .btn-next {
+  background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+  border-color: rgba(254, 202, 202, 0.65);
+}
+
+/* 8. בלעדי לקוד: קרח ארקטי (arctic_ice) */
+body[data-theme="arctic_ice"] {
+  --bg-pure: #030d16;
+  --bg-stage: radial-gradient(circle at 50% -10%, rgba(56, 189, 248, 0.3), rgba(2, 132, 199, 0.16) 45%, #030d16 80%);
+  --surface: rgba(8, 22, 36, 0.92);
+  --surface-elevated: rgba(12, 34, 54, 0.94);
+  --border: rgba(125, 211, 252, 0.36);
+  --accent-purple: #0ea5e9;
+  --accent-purple-bright: #7dd3fc;
+  --accent-pink: #38bdf8;
+}
+body[data-theme="arctic_ice"] .home-stage-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.3), #030d16 76%);
+}
+body[data-theme="arctic_ice"] .home-quickplay-btn,
+body[data-theme="arctic_ice"] .setup-confirm-btn,
+body[data-theme="arctic_ice"] .btn-next {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  border-color: rgba(186, 230, 253, 0.72);
+  color: #03131f;
+}

@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122u">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122u">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123a">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123a">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261122u">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261122u">
-  <link rel="stylesheet" href="styles/home.css?v=20261122u">
-  <link rel="stylesheet" href="styles/header.css?v=20261122u">
-  <link rel="stylesheet" href="styles/player.css?v=20261122u">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261122u">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261122u">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261122u">
-  <link rel="stylesheet" href="styles/animations.css?v=20261122u">
-  <link rel="stylesheet" href="styles/themes.css?v=20261122u">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261123a">
+  <link rel="stylesheet" href="styles/home.css?v=20261123a">
+  <link rel="stylesheet" href="styles/header.css?v=20261123a">
+  <link rel="stylesheet" href="styles/player.css?v=20261123a">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261123a">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261123a">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261123a">
+  <link rel="stylesheet" href="styles/animations.css?v=20261123a">
+  <link rel="stylesheet" href="styles/themes.css?v=20261123a">
 </head>
 
 <body data-theme="spotify">
@@ -181,6 +181,7 @@
             <span class="mode-card-title">מרתון</span>
             <span class="mode-card-sub">10 שאלות · זיהוי שיר, זמר ושנים</span>
           </span>
+          <span class="mode-card-lb-btn" role="button" tabindex="0" data-mode-lb="marathon" title="טופ מרתון">🏆 טופ</span>
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
@@ -193,6 +194,7 @@
             <span class="mode-card-title">הפוך על הפוך</span>
             <span class="mode-card-sub">זהו להיטים שמתנגנים בהילוך אחורי!</span>
           </span>
+          <span class="mode-card-lb-btn" role="button" tabindex="0" data-mode-lb="reverse" title="טופ הפוך על הפוך">🏆 טופ</span>
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
@@ -205,6 +207,7 @@
             <span class="mode-card-title">ציר זמן</span>
             <span class="mode-card-sub">מקמו שירים לפי סדר שנות היציאה!</span>
           </span>
+          <span class="mode-card-lb-btn" role="button" tabindex="0" data-mode-lb="timeline" title="טופ ציר זמן">🏆 טופ</span>
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
@@ -217,6 +220,7 @@
             <span class="mode-card-title">משחק בזמן</span>
             <span class="mode-card-sub">60 שניות · נחשו כמה שיותר שירים</span>
           </span>
+          <span class="mode-card-lb-btn" role="button" tabindex="0" data-mode-lb="timed" title="טופ 60 שניות">🏆 טופ</span>
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
@@ -301,9 +305,6 @@
         </button>
         <button type="button" class="lb-sort-tab" data-lb-sort="points" role="tab">
           <img class="icon-3d-mini icon-3d-crystal" src="assets/icon-crystal.png" alt="" /> קריסטלים
-        </button>
-        <button type="button" class="lb-sort-tab" data-lb-sort="bestMarathon" role="tab">
-          <img class="icon-3d-mini" src="assets/icon-marathon.png" alt="" /> מרתון
         </button>
       </div>
       <div class="lb-fair-note" id="lb-fair-note">💎 דירוג הקריסטלים מחשב רק קריסטלים שהורווחו במשחקים, משימות ומתנות יומיות (קריסטלים מקודים לא נספרים).</div>
@@ -523,6 +524,7 @@
         </div>
 
         <div class="marathon-sum-actions">
+          <button type="button" class="share-result-btn" id="marathon-lb-btn" data-mode-lb="marathon">🏆 טופ מרתון</button>
           <button type="button" class="share-result-btn" id="marathon-share-btn">📤 שתף תוצאה (בלי ספוילרים)</button>
           <button type="button" class="setup-confirm-btn" id="marathon-replay-btn">שחק מרתון חדש ▶</button>
           <button type="button" class="setup-back-btn marathon-home-btn" id="marathon-home-btn">חזרה ללובי</button>
@@ -922,14 +924,23 @@
         <button class="drawer-close-btn" id="profile-close-btn" aria-label="סגור פרופיל">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- סרגל משתמש מחובר -->
-        <div class="logged-user-bar" id="logged-user-bar">
-          <div class="logged-user-info">
-            <span class="profile-modal-avatar" id="profile-modal-avatar">🎧</span>
-            <span>מחובר בתור: <strong id="logged-username-display" style="color: var(--spotify-green);"></strong></span>
+        <!-- כרטיס פרופיל ראשי מחודש (אווטאר גדול + רקע פרופיל חינמי לבחירה) -->
+        <div class="logged-user-bar profile-hero-card" id="logged-user-bar">
+          <div class="profile-hero-top">
+            <span class="profile-modal-avatar profile-hero-avatar" id="profile-modal-avatar">🎧</span>
+            <div class="profile-hero-identity">
+              <strong class="profile-hero-name" id="logged-username-display"></strong>
+              <div class="profile-hero-mini-stats">
+                <span>🎵 <strong id="hero-stat-won">0</strong></span>
+                <span>·</span>
+                <span>🔥 <strong id="hero-stat-streak">0</strong></span>
+                <span>·</span>
+                <span>💎 <strong id="hero-stat-points">0</strong></span>
+              </div>
+            </div>
           </div>
-          <div class="logged-user-actions">
-            <button type="button" class="share-profile-btn" id="share-my-profile-btn" title="שתף פרופיל בוואטסאפ">📤 שתף</button>
+          <div class="logged-user-actions profile-hero-actions">
+            <button type="button" class="share-profile-btn" id="share-my-profile-btn" title="שתף פרופיל בוואטסאפ">📤 שתף פרופיל</button>
             <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
           </div>
         </div>
@@ -1043,6 +1054,10 @@
                 </div>
 
                 <form class="favorites-edit-form" id="profile-favorites-form" style="display: none;" autocomplete="off">
+                  <div class="fav-field">
+                    <label>🎨 רקע פרופיל (בחינם!)</label>
+                    <div class="profile-banner-picker" id="profile-banner-picker"></div>
+                  </div>
                   <div class="fav-field">
                     <label for="fav-song-input">🎵 שיר מועדף (חפש ובחר מהרשימה)</label>
                     <div class="fav-search-box">
@@ -1269,6 +1284,20 @@
     </div>
   </div>
 
+  <!-- חלון דירוג ייעודי לכל מצב משחק (מרתון / 60 שניות / הפוך על הפוך / ציר זמן) -->
+  <div class="modal-backdrop" id="mode-lb-modal-backdrop" style="z-index: 405;">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-modal="true" aria-label="דירוג מצב משחק">
+      <div class="modal-header">
+        <h2 class="modal-title" id="mode-lb-modal-title">🏆 דירוג</h2>
+        <button class="drawer-close-btn" id="mode-lb-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body mode-lb-body">
+        <div class="lb-my-rank-card" id="mode-lb-my-rank" style="display: none;"></div>
+        <div class="lb-table-list" id="mode-lb-list"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- חלון קוד QR אישי לשיתוף פרופיל וחברות -->
   <div class="modal-backdrop" id="qr-modal-backdrop" style="z-index: 410;">
     <div class="profile-modal streak-modal-card qr-modal-card" role="dialog" aria-modal="true" aria-label="קוד ה-QR שלי">
@@ -1437,7 +1466,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261122u"></script>
+  <script type="module" src="src/main.js?v=20261123a"></script>
 </body>
 
 </html>

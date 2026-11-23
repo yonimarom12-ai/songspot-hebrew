@@ -1,8 +1,8 @@
-import { dom } from "../dom.js?v=20261122u";
-import { state } from "../state.js?v=20261122u";
-import { cleanTrackTitle, normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261122u";
-import { fetchItunesData } from "../services/itunes.js?v=20261122u";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261122u";
+import { dom } from "../dom.js?v=20261123a";
+import { state } from "../state.js?v=20261123a";
+import { cleanTrackTitle, normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261123a";
+import { fetchItunesData } from "../services/itunes.js?v=20261123a";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261123a";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;
@@ -51,11 +51,75 @@ export function closeSuggestionsDropdown() {
   state.highlightedSuggestionIndex = -1;
 }
 
+function splitArtistParts(artistStr) {
+  return String(artistStr || "")
+    .split(/\s*(?:,|&|\+|feat\.?|ft\.?|×|\bעם\b)\s*/i)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function artistsOverlap(aStr, bStr) {
+  const aParts = splitArtistParts(aStr).map(normalizeHebrew).filter(Boolean);
+  const bParts = splitArtistParts(bStr).map(normalizeHebrew).filter(Boolean);
+  if (!aParts.length || !bParts.length) return false;
+  return aParts.some(a => bParts.some(b => a === b || (a.length >= 3 && b.includes(a)) || (b.length >= 3 && a.includes(b))));
+}
+
+function mergeArtistNames(aStr, bStr) {
+  const seen = new Set();
+  const out = [];
+  for (const part of [...splitArtistParts(aStr), ...splitArtistParts(bStr)]) {
+    const key = normalizeHebrew(part);
+    if (key && !seen.has(key)) {
+      seen.add(key);
+      out.push(part);
+    }
+  }
+  return out.join(", ");
+}
+
+function dedupeAndMergeSongs(items) {
+  const merged = [];
+  for (const raw of items) {
+    if (!raw || !raw.title) continue;
+    const normTitle = normalizeHebrew(raw.title);
+    const existing = merged.find(m => {
+      if (raw.trackId && m.trackId && String(raw.trackId) === String(m.trackId)) return true;
+      if (raw.previewUrl && m.previewUrl && raw.previewUrl === m.previewUrl) return true;
+      if (normalizeHebrew(m.title) !== normTitle) return false;
+      // מאחדים כשיש חפיפת אמנים (דואט/שיתוף פעולה) — אבל משאירים בנפרד שירים שונים בעלי אותו שם של זמרים שונים!
+      return artistsOverlap(m.artist, raw.artist);
+    });
+    if (existing) {
+      existing.artist = mergeArtistNames(existing.artist, raw.artist);
+      if (!existing.trackId && raw.trackId) existing.trackId = raw.trackId;
+      if (!existing.previewUrl && raw.previewUrl) existing.previewUrl = raw.previewUrl;
+    } else {
+      merged.push({ ...raw });
+    }
+  }
+  return merged;
+}
+
+export function isSongAlreadyGuessed(item) {
+  if (!item || !state.guessedWrongKeys || state.guessedWrongKeys.size === 0) return false;
+  if (item.trackId && state.guessedWrongKeys.has(`id:${item.trackId}`)) return true;
+  const fullKey = getSongKey(item.title, item.artist || "");
+  if (state.guessedWrongKeys.has(fullKey)) return true;
+  // בדיקה גם מול חלקי אמנים (במקרה של שיר עם כמה זמרים מאוחדים)
+  for (const part of splitArtistParts(item.artist || "")) {
+    if (state.guessedWrongKeys.has(getSongKey(item.title, part))) return true;
+  }
+  return false;
+}
+
 export function selectSuggestionItem(item) {
-  if (!item) return;
+  if (!item || isSongAlreadyGuessed(item)) return;
   dom.guessInput.value = `${item.title} - ${item.artist}`;
   dom.guessInput.dataset.selectedTitle = item.title;
-  dom.guessInput.dataset.selectedArtist = item.artist;
+  dom.guessInput.dataset.selectedArtist = item.artist || "";
+  if (item.trackId) dom.guessInput.dataset.selectedTrackId = String(item.trackId);
+  else delete dom.guessInput.dataset.selectedTrackId;
   updateSubmitButtonVisibility();
   updateSearchBarProximityFeedback(item.title);
   closeSuggestionsDropdown();
@@ -75,7 +139,8 @@ export function updateSuggestionHighlight() {
 
 export function renderSuggestions(items) {
   dom.suggestionsList.innerHTML = "";
-  state.currentSuggestionItems = items || [];
+  const cleanItems = dedupeAndMergeSongs(items || []);
+  state.currentSuggestionItems = cleanItems;
   state.highlightedSuggestionIndex = -1;
 
   if (state.currentSuggestionItems.length === 0) {
@@ -84,8 +149,10 @@ export function renderSuggestions(items) {
   }
 
   state.currentSuggestionItems.forEach((item, idx) => {
+    const alreadyGuessed = isSongAlreadyGuessed(item);
     const div = document.createElement("div");
-    div.className = "suggestion-row";
+    div.className = `suggestion-row${alreadyGuessed ? " is-already-guessed" : ""}`;
+    if (alreadyGuessed) div.setAttribute("aria-disabled", "true");
 
     const titleSpan = document.createElement("span");
     titleSpan.className = "suggestion-title";
@@ -97,19 +164,26 @@ export function renderSuggestions(items) {
 
     div.append(titleSpan, artistSpan);
 
-    div.addEventListener("mouseenter", () => {
-      state.highlightedSuggestionIndex = idx;
-      const rows = dom.suggestionsList.querySelectorAll(".suggestion-row");
-      rows.forEach((r, i) => r.classList.toggle("highlighted", i === idx));
-    });
+    if (alreadyGuessed) {
+      const tag = document.createElement("span");
+      tag.className = "suggestion-guessed-tag";
+      tag.textContent = "השיר כבר נוחש";
+      div.appendChild(tag);
+    } else {
+      div.addEventListener("mouseenter", () => {
+        state.highlightedSuggestionIndex = idx;
+        const rows = dom.suggestionsList.querySelectorAll(".suggestion-row");
+        rows.forEach((r, i) => r.classList.toggle("highlighted", i === idx));
+      });
 
-    div.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-    });
+      div.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+      });
 
-    div.addEventListener("click", () => {
-      selectSuggestionItem(item);
-    });
+      div.addEventListener("click", () => {
+        selectSuggestionItem(item);
+      });
+    }
     dom.suggestionsList.appendChild(div);
   });
 
@@ -167,10 +241,18 @@ function ensureCurrentSongInList(list, normVal, fuzzyVal, queryWords, limit) {
   if (scoreMain <= 0 && scoreAlt <= 0) return list;
 
   const curNormTitle = normalizeHebrew(curTitle);
-  const targetIdx = list.findIndex(c => normalizeHebrew(c.title) === curNormTitle);
+  const targetIdx = list.findIndex(c =>
+    (c.trackId && state.currentSong.trackId && String(c.trackId) === String(state.currentSong.trackId)) ||
+    (normalizeHebrew(c.title) === curNormTitle && artistsOverlap(c.artist, curArtist))
+  );
   if (targetIdx === -1) {
     const insertPos = Math.floor(Math.random() * Math.min(5, list.length + 1));
-    list.splice(insertPos, 0, { title: curTitle, artist: curArtist });
+    list.splice(insertPos, 0, {
+      title: curTitle,
+      artist: curArtist,
+      trackId: state.currentSong.trackId,
+      previewUrl: state.currentSong.previewUrl
+    });
   } else if (targetIdx >= limit) {
     const [targetItem] = list.splice(targetIdx, 1);
     const insertPos = Math.floor(Math.random() * Math.min(5, list.length + 1));
@@ -256,6 +338,7 @@ export function initSearchListeners({ onSubmitGuess }) {
   dom.guessInput.addEventListener("input", () => {
     delete dom.guessInput.dataset.selectedTitle;
     delete dom.guessInput.dataset.selectedArtist;
+    delete dom.guessInput.dataset.selectedTrackId;
 
     const val = dom.guessInput.value.trim();
     updateSubmitButtonVisibility();

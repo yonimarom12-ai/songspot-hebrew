@@ -1,12 +1,14 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261122u";
-import { state } from "../state.js?v=20261122u";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261122u";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122u";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261122u";
-import { saveUserStats } from "../services/storage.js?v=20261122u";
-import { launchWinConfetti } from "./confetti.js?v=20261122u";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261122u";
-import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261122u";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261123a";
+import { state } from "../state.js?v=20261123a";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123a";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123a";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123a";
+import { saveUserStats } from "../services/storage.js?v=20261123a";
+import { launchWinConfetti } from "./confetti.js?v=20261123a";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123a";
+import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261123a";
+import { recordStarterMarathonComplete } from "./quests.js?v=20261123a";
+import { recordStarterMarathonComplete } from "./quests.js?v=20261122u";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -661,6 +663,7 @@ function renderMarathonSummary() {
   if (isNewRecord && state.userStats) {
     state.userStats.bestMarathonScore = totalScore;
   }
+  recordStarterMarathonComplete();
 
   let rankTitle = "🎧 חימום טוב!";
   if (totalScore >= 12000) rankTitle = "👑 אגדת מרתון!";

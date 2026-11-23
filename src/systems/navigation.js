@@ -1,18 +1,19 @@
-import { state } from "../state.js?v=20261122u";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261122u";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler } from "./drawer.js?v=20261122u";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261122u";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261122u";
-import { showGameToast } from "../utils/toast.js?v=20261122u";
-import { stopTimedRun } from "./timed.js?v=20261122u";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261122u";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261122u";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261122u";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261122u";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261122u";
-import { playClickSfx } from "./sfx.js?v=20261122u";
-import { vibrateTap } from "../utils/toast.js?v=20261122u";
-import { isOnboardingOpen } from "./onboarding.js?v=20261122u";
+import { state } from "../state.js?v=20261123a";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123a";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261123a";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261123a";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261123a";
+import { showGameToast } from "../utils/toast.js?v=20261123a";
+import { stopTimedRun } from "./timed.js?v=20261123a";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261123a";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261123a";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261123a";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261123a";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261123a";
+import { playClickSfx } from "./sfx.js?v=20261123a";
+import { vibrateTap } from "../utils/toast.js?v=20261123a";
+import { isOnboardingOpen } from "./onboarding.js?v=20261123a";
+import { recordStarterModePlayed } from "./quests.js?v=20261123a";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -178,6 +179,9 @@ function selectHomeMode(modeKey) {
 }
 
 function launchSelectedMode(modeKey) {
+  if (modeKey && modeKey !== "1v1") {
+    recordStarterModePlayed(modeKey);
+  }
   if (modeKey === "marathon") {
     showScreen("marathon");
     startMarathonSession(() => showScreen("home"));
@@ -278,6 +282,7 @@ function toggleSetChoice(targetSet, val) {
     if (targetSet.size === 0) targetSet.add("all");
   }
   syncSetupSelectionUI();
+  saveUserPreferences();
 }
 
 const MODE_ICONS_HTML = {
@@ -514,7 +519,81 @@ function startGameDirectly(difficulty = "easy") {
   fetchRandomSong();
 }
 
+const MODE_LB_CONFIG = {
+  marathon: { title: "♾️ טופ מרתון (10 שאלות)", field: "bestMarathon", format: (v) => `${Number(v || 0).toLocaleString("he-IL")} נק'` },
+  timed: { title: "⏱️ טופ משחק בזמן (60ש')", field: "bestTimed", format: (v) => `${Number(v || 0)} שירים` },
+  reverse: { title: "🔄 טופ הפוך על הפוך", field: "bestReverse", format: (v) => `רצף ${Number(v || 0)}` },
+  timeline: { title: "⏳ טופ ציר זמן", field: "bestTimeline", format: (v) => `${Number(v || 0)} שירים` }
+};
+
+async function openModeLeaderboardModal(modeKey) {
+  const cfg = MODE_LB_CONFIG[modeKey];
+  const backdrop = document.getElementById("mode-lb-modal-backdrop");
+  const titleEl = document.getElementById("mode-lb-modal-title");
+  const listEl = document.getElementById("mode-lb-list");
+  const myRankEl = document.getElementById("mode-lb-my-rank");
+  if (!cfg || !backdrop || !listEl) return;
+
+  if (titleEl) titleEl.textContent = cfg.title;
+  if (myRankEl) myRankEl.style.display = "none";
+  listEl.innerHTML = `<div class="lb-empty">טוען דירוג...</div>`;
+  backdrop.classList.add("open");
+
+  const { rows } = await fetchGlobalLeaderboard(50);
+  const filtered = (rows || [])
+    .filter(r => Number(r[cfg.field] || 0) > 0)
+    .sort((a, b) => Number(b[cfg.field] || 0) - Number(a[cfg.field] || 0));
+
+  listEl.innerHTML = "";
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div class="lb-empty">עדיין אין תוצאות במצב זה — שחקו והיו הראשונים בטבלה!</div>`;
+    return;
+  }
+
+  if (myRankEl && state.currentUser) {
+    const myIdx = filtered.findIndex(r => r.username.toLowerCase() === state.currentUser.toLowerCase());
+    if (myIdx >= 0) {
+      myRankEl.style.display = "flex";
+      myRankEl.textContent = `המיקום שלך: #${myIdx + 1} · ${cfg.format(filtered[myIdx][cfg.field])}`;
+    }
+  }
+
+  filtered.slice(0, 25).forEach((r, idx) => {
+    const row = document.createElement("div");
+    const isMe = state.currentUser && r.username.toLowerCase() === state.currentUser.toLowerCase();
+    row.className = `lb-table-row ${isMe ? "is-me" : ""}${idx < 3 ? ` top-${idx + 1}` : ""}`;
+    const rank = document.createElement("span");
+    rank.className = "lb-rank";
+    rank.textContent = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
+    const nm = document.createElement("span");
+    nm.className = "lb-name";
+    nm.textContent = r.username;
+    const val = document.createElement("span");
+    val.className = "lb-meta";
+    val.textContent = cfg.format(r[cfg.field]);
+    row.append(rank, nm, val);
+    listEl.appendChild(row);
+  });
+}
+
 export function initNavigationListeners() {
+  // כפתורי טופ נפרד לכל מצב משחק (מרתון / 60ש' / הפוך על הפוך / ציר זמן)
+  document.querySelectorAll("[data-mode-lb]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      playClickSfx();
+      openModeLeaderboardModal(btn.dataset.modeLb);
+    });
+  });
+  const modeLbClose = document.getElementById("mode-lb-close-btn");
+  const modeLbBackdrop = document.getElementById("mode-lb-modal-backdrop");
+  if (modeLbClose) modeLbClose.addEventListener("click", () => modeLbBackdrop?.classList.remove("open"));
+  if (modeLbBackdrop) {
+    modeLbBackdrop.addEventListener("click", (e) => {
+      if (e.target === modeLbBackdrop) modeLbBackdrop.classList.remove("open");
+    });
+  }
   // מחבר את פתיחת/סגירת ההגדרות כדף מסך מלא נפרד
   setSettingsScreenHandler((isOpen) => {
     if (isOpen) {
