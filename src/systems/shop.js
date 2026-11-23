@@ -8,12 +8,12 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261123y";
-import { state } from "../state.js?v=20261123y";
-import { saveUserStats } from "../services/storage.js?v=20261123y";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123y";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123y";
-import { recordStarterShopPurchase } from "./quests.js?v=20261123y";
+} from "../data/shop.js?v=20261123z";
+import { state } from "../state.js?v=20261123z";
+import { saveUserStats } from "../services/storage.js?v=20261123z";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123z";
+import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261123z";
+import { recordStarterShopPurchase } from "./quests.js?v=20261123z";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }

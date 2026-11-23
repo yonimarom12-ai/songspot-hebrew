@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261123y";
-import { dom } from "../dom.js?v=20261123y";
-import { state } from "../state.js?v=20261123y";
-import { saveUserStats } from "../services/storage.js?v=20261123y";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261123z";
+import { dom } from "../dom.js?v=20261123z";
+import { state } from "../state.js?v=20261123z";
+import { saveUserStats } from "../services/storage.js?v=20261123z";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
@@ -14,6 +14,10 @@ export function formatPoints(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
   });
+}
+
+export function formatPointsWhole(value) {
+  return Math.round(roundPoints(value)).toLocaleString("en-US");
 }
 
 // בונוס רצף ניצחונות (Streak Multiplier) שמגדיל את הרווח ונותן תמריץ אמיתי לרצף
@@ -105,13 +109,13 @@ export function spendPoints(cost) {
 export function updatePointsDisplay(animate = false) {
   const isLoggedIn = Boolean(state.currentUser);
   const balance = getPointsBalance();
-  const formatted = formatPoints(balance);
+  const formattedWhole = formatPointsWhole(balance);
   if (dom.pointsCountEl) {
-    dom.pointsCountEl.textContent = formatted;
+    dom.pointsCountEl.textContent = formattedWhole;
   }
   const homePointsEl = document.getElementById("home-points-count");
   if (homePointsEl) {
-    homePointsEl.textContent = formatted;
+    homePointsEl.textContent = formattedWhole;
   }
   if (dom.pointsBadge) {
     dom.pointsBadge.classList.toggle("guest-locked", !isLoggedIn);
