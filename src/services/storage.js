@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261123a";
+import { state } from "../state.js?v=20261123b";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
