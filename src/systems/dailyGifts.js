@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261123b";
-import { saveUserStats } from "../services/storage.js?v=20261123b";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123b";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261123b";
-import { launchWinConfetti } from "./confetti.js?v=20261123b";
-import { playWinSfx, playCrystalSfx } from "./sfx.js?v=20261123b";
-import { showGameToast, vibrateWin } from "../utils/toast.js?v=20261123b";
-import { isOnboardingOpen } from "./onboarding.js?v=20261123b";
+import { state } from "../state.js?v=20261123d";
+import { saveUserStats } from "../services/storage.js?v=20261123d";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123d";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261123d";
+import { launchWinConfetti } from "./confetti.js?v=20261123d";
+import { playWinSfx, playCrystalSfx } from "./sfx.js?v=20261123d";
+import { showGameToast, vibrateWin } from "../utils/toast.js?v=20261123d";
+import { isOnboardingOpen } from "./onboarding.js?v=20261123d";
 
 export const DAILY_GIFTS_SCHEDULE = [
   { day: 1, emoji: "💎", title: "20 קריסטלים", crystals: 20 },
