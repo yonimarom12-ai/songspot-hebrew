@@ -1,10 +1,10 @@
-import { state } from "../state.js?v=20261123d";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123d";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123d";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123d";
-import { saveUserStats } from "../services/storage.js?v=20261123d";
-import { launchWinConfetti } from "./confetti.js?v=20261123d";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123d";
+import { state } from "../state.js?v=20261123e";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123e";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123e";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123e";
+import { saveUserStats } from "../services/storage.js?v=20261123e";
+import { launchWinConfetti } from "./confetti.js?v=20261123e";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123e";
 
 const TARGET_CARDS = 8;
 const MAX_LIVES = 3;
