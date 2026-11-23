@@ -1,7 +1,7 @@
-import { dom } from "../dom.js?v=20261123z";
-import { state } from "../state.js?v=20261123z";
-import { normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261123z";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261123z";
+import { dom } from "../dom.js?v=20261123aa";
+import { state } from "../state.js?v=20261123aa";
+import { normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261123aa";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261123aa";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;
@@ -229,30 +229,6 @@ export function renderSuggestions(items) {
   });
 
   dom.suggestionsList.style.display = "block";
-}
-
-function scoreSongMatch(title, artist, normVal, fuzzyVal, queryWords) {
-  const normTitle = normalizeHebrew(title);
-  const normArtist = normalizeHebrew(artist);
-  const combinedNorm = `${normTitle} ${normArtist}`;
-  if (normTitle === normVal) return 100;
-  if (normTitle.startsWith(normVal)) return 85;
-  if (normTitle.includes(normVal)) return 70;
-  if (queryWords.length >= 2 && queryWords.every(w => combinedNorm.includes(w))) return 65;
-  if (normArtist.startsWith(normVal)) return 55;
-  if (normArtist.includes(normVal)) return 45;
-  if (fuzzyVal.length >= 2) {
-    const fuzzyTitle = normalizeHebrewFuzzy(title);
-    const fuzzyArtist = normalizeHebrewFuzzy(artist);
-    const fuzzyCombined = `${fuzzyTitle} ${fuzzyArtist}`;
-    if (fuzzyTitle === fuzzyVal) return 75;
-    if (fuzzyTitle.startsWith(fuzzyVal)) return 60;
-    if (fuzzyTitle.includes(fuzzyVal)) return 40;
-    if (fuzzyArtist.includes(fuzzyVal)) return 32;
-    const fuzzyWords = queryWords.map(w => normalizeHebrewFuzzy(w)).filter(Boolean);
-    if (fuzzyWords.length >= 2 && fuzzyWords.every(w => fuzzyCombined.includes(w))) return 50;
-  }
-  return 0;
 }
 
 function scoreIndexedSong(song, normVal, fuzzyVal, queryWords, fuzzyWords) {

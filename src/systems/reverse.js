@@ -1,10 +1,11 @@
-import { state } from "../state.js?v=20261123z";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123z";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123z";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123z";
-import { saveUserStats } from "../services/storage.js?v=20261123z";
-import { launchWinConfetti } from "./confetti.js?v=20261123z";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123z";
+import { state } from "../state.js?v=20261123aa";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123aa";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123aa";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123aa";
+import { saveUserStats } from "../services/storage.js?v=20261123aa";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123aa";
+import { launchWinConfetti } from "./confetti.js?v=20261123aa";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123aa";
 
 let sessionId = 0;
 let currentSong = null;
@@ -90,8 +91,11 @@ function playReversedClip() {
       if (activeSource === src) activeSource = null;
       if (disc) disc.classList.remove("spinning");
     };
-    src.start(0);
     activeSource = src;
+    Promise.resolve(ctx.state !== "running" ? ctx.resume() : null).catch(() => { }).then(() => {
+      if (activeSource !== src) return;
+      try { src.start(0); } catch (e) { }
+    });
   } catch (e) { }
 }
 
@@ -101,8 +105,12 @@ function playForwardReveal(previewUrl) {
   if (!el || !previewUrl) return;
   try {
     el.src = previewUrl;
-    el.currentTime = 3;
     el.volume = 1;
+    const seekStart = () => {
+      try { el.currentTime = 3; } catch (e) { }
+    };
+    if (el.readyState >= 1) seekStart();
+    else el.addEventListener("loadedmetadata", seekStart, { once: true });
     const p = el.play();
     if (p && typeof p.catch === "function") p.catch(() => { });
   } catch (e) { }
@@ -236,6 +244,9 @@ function handleReverseChoice(btn, opt, mySession) {
       updatePointsDisplay();
     }
     saveUserStats();
+    if (state.currentUser) {
+      syncAccountToCloud(state.currentUser, state.userStats);
+    }
     updateReverseHUD();
     playWinSfx();
     playCrystalSfx();

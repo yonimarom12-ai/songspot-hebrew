@@ -1,6 +1,6 @@
-import { state } from "../state.js?v=20261123z";
-import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261123z";
-import { initAudioContext } from "./audio.js?v=20261123z";
+import { state } from "../state.js?v=20261123aa";
+import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261123aa";
+import { initAudioContext } from "./audio.js?v=20261123aa";
 
 const SFX_STORAGE_KEY = "songspot_sfx_enabled_v1";
 
@@ -36,6 +36,10 @@ function playTone(ctx, { freq, endFreq = null, type = "sine", startOffset = 0, d
     amp.gain.exponentialRampToValueAtTime(0.0001, now + duration);
     osc.connect(amp);
     amp.connect(ctx.destination);
+    osc.onended = () => {
+      try { osc.disconnect(); } catch (e) { }
+      try { amp.disconnect(); } catch (e) { }
+    };
     osc.start(now);
     osc.stop(now + duration + 0.02);
   } catch (e) { }

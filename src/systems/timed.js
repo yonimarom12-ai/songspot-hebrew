@@ -1,7 +1,7 @@
-import { state } from "../state.js?v=20261123z";
-import { saveUserStats } from "../services/storage.js?v=20261123z";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123z";
-import { playCrystalSfx } from "./sfx.js?v=20261123z";
+import { state } from "../state.js?v=20261123aa";
+import { saveUserStats } from "../services/storage.js?v=20261123aa";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123aa";
+import { playCrystalSfx } from "./sfx.js?v=20261123aa";
 
 const TIMED_START_SEC = 60;
 const TIMED_WIN_BONUS = 5;
@@ -14,6 +14,7 @@ let timedScore = 0;
 let timedCrystals = 0;
 let timedHistory = [];
 let timedInterval = null;
+let flashTimer = null;
 let onTimeUpCallback = null;
 let timedPuBound = false;
 
@@ -62,25 +63,18 @@ function renderTimedHud(flashText = "", flashKind = "") {
   updateTimedExtraTimeButton();
 
   if (flashEl && flashText) {
+    clearTimeout(flashTimer);
     flashEl.textContent = flashText;
     flashEl.className = `timed-delta-flash show ${flashKind}`;
-    setTimeout(() => {
+    flashTimer = setTimeout(() => {
       if (flashEl) flashEl.classList.remove("show");
+      flashTimer = null;
     }, 900);
   }
 }
 
 export function isTimedModeActive() {
   return timedActive;
-}
-
-export function getTimedRunStats() {
-  return {
-    score: timedScore,
-    crystals: timedCrystals,
-    best: state.userStats?.bestTimedScore || 0,
-    history: [...timedHistory]
-  };
 }
 
 export function recordTimedSong(song, status) {
@@ -107,6 +101,8 @@ export function stopTimedRun() {
   timedPaused = false;
   clearInterval(timedInterval);
   timedInterval = null;
+  clearTimeout(flashTimer);
+  flashTimer = null;
   onTimeUpCallback = null;
   renderTimedHud();
 }

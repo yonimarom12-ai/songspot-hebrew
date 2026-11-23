@@ -59,7 +59,6 @@ export const dom = {
   navShopBtn: document.getElementById("nav-shop-btn"),
   shopModalBackdrop: document.getElementById("shop-modal-backdrop"),
   shopCloseBtn: document.getElementById("shop-close-btn"),
-  shopPointsBalance: document.getElementById("shop-points-balance"),
 
   // Auth DOM
   loggedUserBar: document.getElementById("logged-user-bar"),

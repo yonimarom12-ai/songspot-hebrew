@@ -1,10 +1,11 @@
-import { state } from "../state.js?v=20261123z";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123z";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123z";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123z";
-import { saveUserStats } from "../services/storage.js?v=20261123z";
-import { launchWinConfetti } from "./confetti.js?v=20261123z";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123z";
+import { state } from "../state.js?v=20261123aa";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261123aa";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261123aa";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261123aa";
+import { saveUserStats } from "../services/storage.js?v=20261123aa";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261123aa";
+import { launchWinConfetti } from "./confetti.js?v=20261123aa";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261123aa";
 
 const TARGET_CARDS = 8;
 const MAX_LIVES = 3;
@@ -16,6 +17,7 @@ let currentMystery = null;
 let lives = MAX_LIVES;
 let correctPlacements = 0;
 let locked = false;
+let nextCardTimer = null;
 let exitCallback = null;
 let listenersBound = false;
 
@@ -28,6 +30,8 @@ function stopTimelineAudio() {
 
 export function stopTimelineSession() {
   sessionId++;
+  clearTimeout(nextCardTimer);
+  nextCardTimer = null;
   stopTimelineAudio();
   currentMystery = null;
 }
@@ -165,7 +169,9 @@ function handleSlotPick(slotIndex, mySession) {
   saveUserStats();
   renderTimelineBoard(mySession);
 
-  setTimeout(() => {
+  clearTimeout(nextCardTimer);
+  nextCardTimer = setTimeout(() => {
+    nextCardTimer = null;
     if (mySession !== sessionId) return;
     if (timelineCards.length >= TARGET_CARDS || lives <= 0 || deck.length === 0) {
       finishTimelineGame();
@@ -201,6 +207,9 @@ function finishTimelineGame() {
     playCrystalSfx();
   }
   saveUserStats();
+  if (state.currentUser) {
+    syncAccountToCloud(state.currentUser, state.userStats);
+  }
   if (won || isNewRecord) launchWinConfetti();
 
   const titleEl = document.getElementById("tl-sum-title");

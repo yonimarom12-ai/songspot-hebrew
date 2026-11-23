@@ -1,11 +1,14 @@
-import { PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123z";
-import { state } from "../state.js?v=20261123z";
-import { fetchItunesData } from "../services/itunes.js?v=20261123z";
-import { saveUserStats } from "../services/storage.js?v=20261123z";
-import { stopAudioVisuals } from "./audio.js?v=20261123z";
+import { PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123aa";
+import { state } from "../state.js?v=20261123aa";
+import { fetchItunesData } from "../services/itunes.js?v=20261123aa";
+import { saveUserStats } from "../services/storage.js?v=20261123aa";
+import { stopAudioVisuals } from "./audio.js?v=20261123aa";
+
+let galleryPlaySeq = 0;
 
 // ניגון אינטראקטיבי מתוך גלריית השירים בפרופיל + חשיפת קישור ל-Spotify
 export function stopGalleryPreview() {
+  galleryPlaySeq++;
   try {
     state.galleryAudio.pause();
   } catch (e) { }
@@ -40,6 +43,7 @@ export async function toggleGallerySongPreview(item) {
   // עצירת אודיו של המשחק הראשי כדי שלא יתנגשו
   stopAudioVisuals();
   stopGalleryPreview();
+  const mySeq = ++galleryPlaySeq;
   state.selectedGalleryTrackId = itemId;
 
   let previewUrl = item.previewUrl;
@@ -48,6 +52,7 @@ export async function toggleGallerySongPreview(item) {
       const term = `${item.title} ${item.artist}`;
       const url = `https://itunes.apple.com/search?country=IL&media=music&entity=song&limit=5&term=${encodeURIComponent(term)}`;
       const data = await fetchItunesData(url, 4500);
+      if (mySeq !== galleryPlaySeq) return;
       if (data?.results?.length > 0) {
         const match = data.results.find(r => r.trackId === item.trackId) || data.results[0];
         if (match?.previewUrl) {
@@ -59,6 +64,7 @@ export async function toggleGallerySongPreview(item) {
     } catch (e) { }
   }
 
+  if (mySeq !== galleryPlaySeq) return;
   if (!previewUrl) {
     updateGalleryCardsPlayState();
     return;
@@ -70,8 +76,10 @@ export async function toggleGallerySongPreview(item) {
   updateGalleryCardsPlayState();
 
   state.galleryAudio.play().then(() => {
+    if (mySeq !== galleryPlaySeq) return;
     updateGalleryCardsPlayState();
   }).catch(() => {
+    if (mySeq !== galleryPlaySeq) return;
     state.playingGalleryTrackId = null;
     updateGalleryCardsPlayState();
   });
