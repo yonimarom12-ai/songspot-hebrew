@@ -1,9 +1,9 @@
-import { state } from "../state.js?v=20261124b";
-import { saveUserStats } from "../services/storage.js?v=20261124b";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124b";
-import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261124b";
-import { playCrystalSfx } from "./sfx.js?v=20261124b";
-import { showGameToast } from "../utils/toast.js?v=20261124b";
+import { state } from "../state.js?v=20261124c";
+import { saveUserStats } from "../services/storage.js?v=20261124c";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124c";
+import { awardPoints, updatePointsDisplay, launchCrystalRewardAnimation } from "./economy.js?v=20261124c";
+import { playCrystalSfx } from "./sfx.js?v=20261124c";
+import { showGameToast } from "../utils/toast.js?v=20261124c";
 
 function getTodayKey() {
   const d = new Date();
@@ -327,7 +327,7 @@ export function renderQuestsAndBadgesModal() {
 
     const icon = document.createElement("span");
     icon.className = "badge-row-icon";
-    icon.textContent = b.icon;
+    icon.textContent = unlocked ? b.icon : "🔒";
 
     const info = document.createElement("div");
     info.className = "badge-row-info";
@@ -360,6 +360,18 @@ export function renderQuestsAndBadgesModal() {
   });
 
   if (summaryEl) {
-    summaryEl.textContent = `${unlockedCount} / ${ACHIEVEMENT_BADGES.length} הושגו`;
+    summaryEl.textContent = `הישגים שנפתחו: ${unlockedCount}/${ACHIEVEMENT_BADGES.length}`;
+  }
+  const progressFill = document.getElementById("badges-progress-fill");
+  if (progressFill) {
+    const pct = ACHIEVEMENT_BADGES.length > 0 ? Math.round((unlockedCount / ACHIEVEMENT_BADGES.length) * 100) : 0;
+    progressFill.style.width = `${pct}%`;
+  }
+
+  // משכפל את רשימת המשימות הפעילות גם לתוך טאב ההישגים בפרופיל
+  const profileQuestsEl = document.getElementById("profile-quests-list");
+  const modalQuestsEl = document.getElementById("quests-modal-list");
+  if (profileQuestsEl && modalQuestsEl) {
+    profileQuestsEl.innerHTML = modalQuestsEl.innerHTML;
   }
 }

@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124b">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124b">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124c">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124c">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124b">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261124b">
-  <link rel="stylesheet" href="styles/home.css?v=20261124b">
-  <link rel="stylesheet" href="styles/header.css?v=20261124b">
-  <link rel="stylesheet" href="styles/player.css?v=20261124b">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261124b">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261124b">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124b">
-  <link rel="stylesheet" href="styles/animations.css?v=20261124b">
-  <link rel="stylesheet" href="styles/themes.css?v=20261124b">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261124c">
+  <link rel="stylesheet" href="styles/home.css?v=20261124c">
+  <link rel="stylesheet" href="styles/header.css?v=20261124c">
+  <link rel="stylesheet" href="styles/player.css?v=20261124c">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261124c">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261124c">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124c">
+  <link rel="stylesheet" href="styles/animations.css?v=20261124c">
+  <link rel="stylesheet" href="styles/themes.css?v=20261124c">
 </head>
 
 <body data-theme="spotify">
@@ -954,25 +954,17 @@
         <h2 class="modal-title">📊 הפרופיל והסטטיסטיקות שלי</h2>
         <button class="drawer-close-btn" id="profile-close-btn" aria-label="סגור פרופיל">&times;</button>
       </div>
-      <div class="modal-body">
-        <!-- כרטיס פרופיל ראשי מחודש (אווטאר גדול + רקע פרופיל חינמי לבחירה) -->
-        <div class="logged-user-bar profile-hero-card" id="logged-user-bar">
-          <div class="profile-hero-top">
+      <div class="modal-body profile-redesigned-body">
+        <!-- חלק עליון נקי: אווטאר במרכז עם אייקון החלפה, שם משתמש וכפתורי עריכה + שיתוף -->
+        <div class="logged-user-bar profile-hero-card profile-clean-header" id="logged-user-bar">
+          <button type="button" class="profile-avatar-trigger" id="profile-avatar-trigger" title="החלף אווטאר">
             <span class="profile-modal-avatar profile-hero-avatar" id="profile-modal-avatar">🎧</span>
-            <div class="profile-hero-identity">
-              <strong class="profile-hero-name" id="logged-username-display"></strong>
-              <div class="profile-hero-mini-stats">
-                <span><img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> <strong id="hero-stat-won">0</strong></span>
-                <span>·</span>
-                <span><img class="icon-3d-mini" src="assets/ui-final-flame.png" alt="" /> <strong id="hero-stat-streak">0</strong></span>
-                <span>·</span>
-                <span><img class="icon-3d-mini" src="assets/ui-final-crystal.png" alt="" /> <strong id="hero-stat-points">0</strong></span>
-              </div>
-            </div>
-          </div>
-          <div class="logged-user-actions profile-hero-actions">
-            <button type="button" class="share-profile-btn" id="share-my-profile-btn" title="שתף פרופיל בוואטסאפ">📤 שתף פרופיל</button>
-            <button type="button" class="logout-btn" id="logout-btn">התנתק</button>
+            <span class="profile-avatar-edit-badge" aria-hidden="true">✏️</span>
+          </button>
+          <strong class="profile-hero-name" id="logged-username-display"></strong>
+          <div class="profile-header-actions-pair">
+            <button type="button" class="profile-hdr-btn is-edit" id="edit-profile-btn">✏️ ערוך פרופיל</button>
+            <button type="button" class="profile-hdr-btn is-share" id="share-my-profile-btn" title="שתף פרופיל">↗ שתף</button>
           </div>
         </div>
 
@@ -1040,51 +1032,40 @@
           </div>
 
           <div class="stats-lock-content">
-            <!-- תצוגת פרופיל ראשית -->
-            <div class="profile-subview active" id="profile-view-main">
-              <div class="wallet-summary-card">
-                <div class="wallet-summary-main">
-                  <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> יתרת קריסטלים</span>
-                  <span class="wallet-summary-val" id="stat-points">0</span>
-                </div>
-                <div class="wallet-summary-meta">
-                  <span>רצף התחברות יומית</span>
-                  <strong id="profile-login-streak-val">1 יום 📅</strong>
-                </div>
-                <div class="wallet-summary-meta">
-                  <span>סה"כ נצבר</span>
-                  <strong id="stat-total-points">0</strong>
-                </div>
-              </div>
+            <!-- סרגל 3 לשוניות מחודש: הישגים | סטטיסטיקות | מועדפים -->
+            <div class="profile-seg-tabs" role="tablist" aria-label="לשוניות פרופיל">
+              <button type="button" class="profile-seg-tab" data-profile-tab="badges" role="tab">הישגים</button>
+              <button type="button" class="profile-seg-tab active" data-profile-tab="stats" role="tab">סטטיסטיקות</button>
+              <button type="button" class="profile-seg-tab" data-profile-tab="main" role="tab">מועדפים</button>
+            </div>
 
-              <!-- מועדפים אישיים + עריכת פרופיל -->
-              <div class="profile-favorites-card">
-                <div class="profile-favorites-header">
-                  <h3 class="stats-sec-title">⭐ המועדפים שלי</h3>
-                  <button type="button" class="edit-profile-btn" id="edit-profile-btn">✏️ ערוך פרופיל</button>
-                </div>
-
+            <!-- לשונית: מועדפים (Media Rows בסגנון נגן מוזיקה + עריכת פרופיל) -->
+            <div class="profile-subview" id="profile-view-main">
+              <div class="profile-favorites-card profile-media-card">
                 <div class="favorites-view" id="profile-favorites-view">
-                  <div class="fav-row">
+                  <div class="fav-row fav-media-row">
                     <img class="fav-display-thumb" id="fav-song-img" alt="" style="display: none;" />
                     <div class="fav-row-text">
                       <span class="fav-label">🎵 שיר מועדף</span>
                       <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
                     </div>
+                    <button type="button" class="fav-quick-edit-btn" data-quick-edit-fav="song" aria-label="ערוך שיר מועדף">✏️</button>
                   </div>
-                  <div class="fav-row">
+                  <div class="fav-row fav-media-row">
                     <img class="fav-display-thumb" id="fav-album-img" alt="" style="display: none;" />
                     <div class="fav-row-text">
                       <span class="fav-label">💿 אלבום מועדף</span>
                       <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
                     </div>
+                    <button type="button" class="fav-quick-edit-btn" data-quick-edit-fav="album" aria-label="ערוך אלבום מועדף">✏️</button>
                   </div>
-                  <div class="fav-row">
+                  <div class="fav-row fav-media-row">
                     <img class="fav-display-thumb is-round" id="fav-artist-img" alt="" style="display: none;" />
                     <div class="fav-row-text">
                       <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
                       <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
                     </div>
+                    <button type="button" class="fav-quick-edit-btn" data-quick-edit-fav="artist" aria-label="ערוך זמר מועדף">✏️</button>
                   </div>
                 </div>
 
@@ -1128,18 +1109,36 @@
                 </form>
                 <div class="fav-saved-msg" id="fav-saved-msg"></div>
               </div>
-
-              <!-- שלושה כפתורים בתחתית הפרופיל: סטטיסטיקות, גלריה והישגים -->
-              <div class="profile-subnav-row three-cols">
-                <button type="button" class="profile-subnav-btn" id="open-profile-stats-btn">📊 סטטיסטיקות</button>
-                <button type="button" class="profile-subnav-btn" id="open-profile-gallery-btn"><img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> גלריה</button>
-                <button type="button" class="profile-subnav-btn" id="open-profile-badges-btn">🏅 הישגים</button>
-              </div>
             </div>
 
-            <!-- תת-תצוגה: סטטיסטיקות -->
-            <div class="profile-subview" id="profile-view-stats">
-              <button type="button" class="profile-subview-back" data-profile-back="main">→ חזור לפרופיל</button>
+            <!-- לשונית: סטטיסטיקות (כרטיס פיננסי ורצף + דרגה + מדדי משחק + גלריה) -->
+            <div class="profile-subview active" id="profile-view-stats">
+              <div class="profile-hero-stat-card">
+                <div class="phs-col">
+                  <span class="phs-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> יתרת קריסטלים</span>
+                  <strong class="phs-val" id="stat-points">0</strong>
+                </div>
+                <span class="phs-divider"></span>
+                <div class="phs-col">
+                  <span class="phs-label">סה"כ נצבר</span>
+                  <strong class="phs-val is-sub" id="stat-total-points">0</strong>
+                </div>
+                <span class="phs-divider"></span>
+                <div class="phs-col">
+                  <span class="phs-label"><img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> רצף ימי משחק</span>
+                  <strong class="phs-val is-streak" id="profile-login-streak-val">1 יום</strong>
+                </div>
+              </div>
+
+              <div class="profile-rank-card">
+                <div class="profile-rank-top">
+                  <strong class="profile-rank-title" id="profile-rank-title">🎧 מתחיל</strong>
+                  <span class="profile-rank-next" id="profile-rank-next">0 / 10 שירים לדרגה הבאה</span>
+                </div>
+                <div class="profile-rank-track">
+                  <div class="profile-rank-fill" id="profile-rank-fill" style="width: 0%;"></div>
+                </div>
+              </div>
 
               <div class="kpi-grid">
                 <div class="kpi-card">
@@ -1169,11 +1168,13 @@
                   <span class="kpi-record-label"><img class="icon-3d-mini" src="assets/icon-timed.png" alt="" /> שיא משחק בזמן</span>
                   <span class="kpi-record-val" id="stat-best-timed">0 שירים</span>
                 </div>
-                <div class="kpi-record-card" style="grid-column: span 2;">
-                  <span class="kpi-record-label">📅 רצף התחברות יומית</span>
-                  <span class="kpi-record-val" id="stat-daily-login-streak">1 יום</span>
-                </div>
               </div>
+
+              <button type="button" class="profile-gallery-launch-btn" id="open-profile-gallery-btn">
+                <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />
+                <span>פתח את גלריית השירים שזיהית</span>
+                <span class="pg-arrow">‹</span>
+              </button>
 
               <div class="stats-section">
                 <h3 class="stats-sec-title">הצלחות לפי רמת קושי</h3>
@@ -1188,7 +1189,7 @@
 
             <!-- תת-תצוגה: גלריית שירים -->
             <div class="profile-subview" id="profile-view-gallery">
-              <button type="button" class="profile-subview-back" data-profile-back="main">→ חזור לפרופיל</button>
+              <button type="button" class="profile-subview-back" data-profile-back="stats">→ חזור לסטטיסטיקות</button>
 
               <div class="stats-section">
                 <h3 class="stats-sec-title">
@@ -1199,19 +1200,64 @@
               </div>
             </div>
 
-            <!-- תת-תצוגה: הישגים ותגים -->
+            <!-- לשונית: הישגים ותגים + משימות פעילות -->
             <div class="profile-subview" id="profile-view-badges">
-              <button type="button" class="profile-subview-back" data-profile-back="main">→ חזור לפרופיל</button>
+              <div class="badges-overall-card">
+                <div class="badges-overall-top">
+                  <strong>🏅 התקדמות הישגים</strong>
+                  <span class="badges-overall-count" id="badges-summary-count">הישגים שנפתחו: 0/16</span>
+                </div>
+                <div class="profile-rank-track">
+                  <div class="profile-rank-fill is-gold" id="badges-progress-fill" style="width: 0%;"></div>
+                </div>
+              </div>
 
               <div class="stats-section">
-                <h3 class="stats-sec-title">
-                  <span>🏅 הישגים ותגים</span>
-                  <span class="stats-sec-sub" id="badges-summary-count">0 / 16 הושגו</span>
-                </h3>
                 <div class="badges-list" id="profile-badges-grid"></div>
               </div>
+
+              <div class="stats-section">
+                <h3 class="stats-sec-title">🎯 משימות פעילות</h3>
+                <div class="quests-list" id="profile-quests-list"></div>
+              </div>
+            </div>
+
+            <!-- תחתית המסך: כפתור התנתקות באדום עמום הרחק מפעולות יומיומיות -->
+            <div class="profile-footer-danger">
+              <button type="button" class="profile-logout-footer-btn" id="logout-btn">🚪 התנתק</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודאל בחירת אווטאר מתוך האווטארים שבבעלות המשתמש -->
+  <div class="modal-backdrop" id="owned-avatars-modal-backdrop" style="z-index: 435;">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-modal="true" aria-label="בחירת אווטאר">
+      <div class="modal-header">
+        <h2 class="modal-title">🎭 בחר תמונת פרופיל</h2>
+        <button class="drawer-close-btn" id="owned-avatars-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="owned-avatars-sub">בחר מתוך האווטארים שבבעלותך (ניתן לרכוש נוספים בחנות הקריסטלים):</p>
+        <div class="owned-avatars-grid" id="owned-avatars-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- דיאלוג אישור התנתקות -->
+  <div class="modal-backdrop" id="logout-confirm-backdrop" style="z-index: 440;">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-modal="true" aria-label="אישור התנתקות">
+      <div class="modal-header">
+        <h2 class="modal-title">🚪 התנתקות מהחשבון</h2>
+        <button class="drawer-close-btn" id="logout-confirm-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body shop-confirm-body">
+        <p class="shop-confirm-desc">האם אתה בטוח שברצונך להתנתק מהחשבון? הנתונים שלך נשמרים בענן ותוכל להתחבר שוב בכל עת.</p>
+        <div class="shop-confirm-actions">
+          <button type="button" class="profile-logout-confirm-btn" id="logout-confirm-ok-btn">כן, התנתק</button>
+          <button type="button" class="logout-btn" id="logout-confirm-cancel-btn">ביטול</button>
         </div>
       </div>
     </div>
@@ -1293,32 +1339,70 @@
     </div>
   </div>
 
-  <!-- חלון חנות הקריסטלים -->
+  <!-- חלון חנות הקריסטלים (Sticky Top Bar + Segmented Tabs + Grid + Preview Modal) -->
   <div class="modal-backdrop" id="shop-modal-backdrop">
-    <div class="profile-modal" role="dialog" aria-label="חנות הקריסטלים">
-      <div class="modal-header">
-        <h2 class="modal-title"><img class="icon-3d-inline" src="assets/ui-final-shop.png" alt="" /> חנות הקריסטלים</h2>
-        <button class="drawer-close-btn" id="shop-close-btn" aria-label="סגור חנות">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="wallet-summary-card">
-          <div class="wallet-summary-main">
-            <span class="wallet-summary-label"><img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> היתרה שלך לקניות בחנות</span>
-            <span class="wallet-summary-val" id="shop-points-balance">0</span>
+    <div class="profile-modal shop-modal-redesigned" role="dialog" aria-label="חנות הקריסטלים">
+      <div class="shop-sticky-top">
+        <div class="shop-sticky-row">
+          <h2 class="modal-title"><img class="icon-3d-inline" src="assets/ui-final-shop.png" alt="" /> חנות הקריסטלים</h2>
+          <div class="shop-sticky-right">
+            <div class="shop-balance-pill" title="יתרת קריסטלים">
+              <img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />
+              <strong id="shop-points-balance">0</strong>
+            </div>
+            <button class="drawer-close-btn" id="shop-close-btn" aria-label="סגור חנות">&times;</button>
           </div>
         </div>
-
-        <div class="shop-tabs">
-          <button type="button" class="shop-tab active" data-shop-tab="avatars">פרופיל</button>
-          <button type="button" class="shop-tab" data-shop-tab="backgrounds">רקעים</button>
-          <button type="button" class="shop-tab" data-shop-tab="themes">ערכות נושא</button>
-          <button type="button" class="shop-tab" data-shop-tab="powerups">⚡ עזרים</button>
+        <div class="shop-tabs shop-segmented-tabs" role="tablist">
+          <button type="button" class="shop-tab active" data-shop-tab="avatars" role="tab">פרופיל</button>
+          <button type="button" class="shop-tab" data-shop-tab="backgrounds" role="tab">רקעים</button>
+          <button type="button" class="shop-tab" data-shop-tab="themes" role="tab">ערכות נושא</button>
+          <button type="button" class="shop-tab" data-shop-tab="powerups" role="tab">עזרים</button>
         </div>
-
+      </div>
+      <div class="modal-body shop-scroll-body">
         <div class="shop-preview-panel" id="shop-preview-panel" style="display: none;"></div>
         <div class="shop-msg" id="shop-msg"></div>
         <div class="shop-grid avatars" id="shop-grid"></div>
         <input type="file" id="shop-image-upload-input" accept="image/*" style="display: none;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- מודאל תצוגה מקדימה לפני רכישה (Phone Mockup חי + פירוט יתרה) -->
+  <div class="modal-backdrop" id="shop-preview-modal-backdrop" style="z-index: 430;">
+    <div class="profile-modal shop-preview-sheet" role="dialog" aria-modal="true" aria-label="תצוגה מקדימה">
+      <div class="modal-header">
+        <h2 class="modal-title">👁️ תצוגה מקדימה</h2>
+        <button class="drawer-close-btn" id="shop-preview-modal-close" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body shop-preview-sheet-body">
+        <div class="phone-mockup-frame" id="shop-phone-mockup">
+          <div class="phone-mockup-screen" id="shop-phone-screen">
+            <div class="phone-mockup-notch"></div>
+            <div class="phone-mockup-top">
+              <span class="phone-mock-pill">⏱️ 0:45</span>
+              <span class="phone-mock-pill" id="phone-mock-badge">שאלה 4 / 10</span>
+            </div>
+            <div class="phone-mockup-play" id="phone-mock-play">▶</div>
+            <div class="phone-mockup-answers">
+              <span class="phone-mock-ans">א. תל אביב</span>
+              <span class="phone-mock-ans is-accent" id="phone-mock-ans-accent">ב. יוניקורן</span>
+              <span class="phone-mock-ans">ג. כביש החוף</span>
+              <span class="phone-mock-ans">ד. שלום עליכם</span>
+            </div>
+          </div>
+        </div>
+        <div class="shop-preview-meta">
+          <span class="shop-preview-type-pill" id="shop-preview-type-pill">רקע</span>
+          <h3 class="shop-preview-item-name" id="shop-preview-item-name"></h3>
+          <p class="shop-preview-item-desc" id="shop-preview-item-desc"></p>
+        </div>
+        <div class="shop-preview-cta-wrap">
+          <button type="button" class="setup-confirm-btn shop-preview-buy-btn" id="shop-preview-buy-btn"></button>
+          <button type="button" class="logout-btn shop-preview-cancel-btn" id="shop-preview-cancel-btn">ביטול</button>
+          <div class="shop-preview-after-balance" id="shop-preview-after-balance"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1493,7 +1577,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261124b"></script>
+  <script type="module" src="src/main.js?v=20261124c"></script>
 </body>
 
 </html>

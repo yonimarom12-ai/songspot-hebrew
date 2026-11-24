@@ -1,16 +1,16 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124b";
-import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261124b";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124b";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124b";
-import { state } from "../state.js?v=20261124b";
-import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124b";
-import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124b";
-import { fetchItunesData } from "../services/itunes.js?v=20261124b";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124b";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124b";
-import { formatPoints, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124b";
-import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124b";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124b";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124c";
+import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124c";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124c";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124c";
+import { state } from "../state.js?v=20261124c";
+import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124c";
+import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124c";
+import { fetchItunesData } from "../services/itunes.js?v=20261124c";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124c";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124c";
+import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124c";
+import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124c";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124c";
 
 function formatLocalDay(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -221,12 +221,37 @@ export function renderProfileStatsModal() {
   }
   const loginStreak = Math.max(1, state.userStats.dailyLoginStreak || state.userStats.dailyGifts?.streakDay || 1);
   const loginStreakLabel = loginStreak === 1 ? "יום 1" : `${loginStreak} ימים`;
-  const loginStreakEl = document.getElementById("stat-daily-login-streak");
-  if (loginStreakEl) loginStreakEl.textContent = loginStreakLabel;
   const profileLoginStreakEl = document.getElementById("profile-login-streak-val");
-  if (profileLoginStreakEl) profileLoginStreakEl.textContent = `${loginStreakLabel} 📅`;
-  if (dom.statPoints) dom.statPoints.textContent = formatPoints(getPointsBalance());
-  if (dom.statTotalPoints) dom.statTotalPoints.textContent = formatPoints(state.userStats.totalPointsEarned || getPointsBalance());
+  if (profileLoginStreakEl) profileLoginStreakEl.textContent = loginStreakLabel;
+
+  // חישוב דרגה והתקדמות לרמה הבאה לפי כמות זיהויים
+  const RANKS = [
+    { min: 0, next: 10, title: "🎧 מתחיל" },
+    { min: 10, next: 30, title: "🎵 חובב מוזיקה" },
+    { min: 30, next: 75, title: "🔥 מומחה להיטים" },
+    { min: 75, next: 150, title: "⭐ מאסטר ישראלי" },
+    { min: 150, next: 300, title: "👑 אגדת מוזיקה" },
+    { min: 300, next: 300, title: "💎 היכל התהילה" }
+  ];
+  let curRank = RANKS[0];
+  for (const r of RANKS) {
+    if (won >= r.min) curRank = r;
+  }
+  const rankTitleEl = document.getElementById("profile-rank-title");
+  const rankNextEl = document.getElementById("profile-rank-next");
+  const rankFillEl = document.getElementById("profile-rank-fill");
+  if (rankTitleEl) rankTitleEl.textContent = curRank.title;
+  if (curRank.next > curRank.min) {
+    const pct = Math.min(100, Math.round(((won - curRank.min) / (curRank.next - curRank.min)) * 100));
+    if (rankNextEl) rankNextEl.textContent = `${won} / ${curRank.next} זיהויים לדרגה הבאה`;
+    if (rankFillEl) rankFillEl.style.width = `${pct}%`;
+  } else {
+    if (rankNextEl) rankNextEl.textContent = `דרגה מקסימלית! (${won} זיהויים)`;
+    if (rankFillEl) rankFillEl.style.width = "100%";
+  }
+
+  if (dom.statPoints) dom.statPoints.textContent = formatPointsWhole(getPointsBalance());
+  if (dom.statTotalPoints) dom.statTotalPoints.textContent = formatPointsWhole(state.userStats.totalPointsEarned || getPointsBalance());
 
   renderProfileFavorites();
   setFavoritesEditMode(false);
@@ -785,7 +810,7 @@ export function toggleShopModal(isOpen) {
   updateBottomNavActiveTab(isOpen ? "shop" : "game");
 }
 
-export function showProfileSubView(viewName = "main") {
+export function showProfileSubView(viewName = "stats") {
   if (viewName !== "gallery") stopGalleryPreview();
   const views = {
     main: "profile-view-main",
@@ -797,6 +822,55 @@ export function showProfileSubView(viewName = "main") {
     const el = document.getElementById(id);
     if (el) el.classList.toggle("active", key === viewName);
   });
+  const activeTabKey = viewName === "gallery" ? "stats" : viewName;
+  document.querySelectorAll(".profile-seg-tab").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.profileTab === activeTabKey);
+  });
+}
+
+function openOwnedAvatarsModal() {
+  if (!state.currentUser) return;
+  const backdrop = document.getElementById("owned-avatars-modal-backdrop");
+  const grid = document.getElementById("owned-avatars-grid");
+  if (!backdrop || !grid) return;
+
+  const ownedKeys = Array.isArray(state.userStats?.ownedItems) ? state.userStats.ownedItems : [];
+  const equippedId = state.userStats?.equippedAvatar || "default";
+  grid.innerHTML = "";
+
+  const ownedList = SHOP_AVATARS.filter(a => (!a.exclusive && a.price === 0) || ownedKeys.includes(`avatar:${a.id}`));
+  if (ownedKeys.includes("avatar:custom") && state.userStats?.customAvatarData) {
+    ownedList.unshift({
+      id: "custom",
+      name: "תמונה אישית",
+      emoji: "",
+      bg: `url("${state.userStats.customAvatarData}") center / cover no-repeat`
+    });
+  }
+
+  ownedList.forEach(av => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `owned-avatar-tile${equippedId === av.id ? " is-active" : ""}`;
+    const circle = document.createElement("span");
+    circle.className = "owned-avatar-circle";
+    circle.style.background = av.bg;
+    circle.textContent = av.emoji || "";
+    const lbl = document.createElement("span");
+    lbl.className = "owned-avatar-name";
+    lbl.textContent = av.name;
+    btn.append(circle, lbl);
+    btn.addEventListener("click", () => {
+      state.userStats.equippedAvatar = av.id;
+      saveUserStats();
+      syncAccountToCloud(state.currentUser, state.userStats);
+      applyEquippedCosmetics();
+      backdrop.classList.remove("open");
+    });
+    grid.appendChild(btn);
+  });
+
+  backdrop.classList.add("open");
 }
 
 export function toggleQuestsModal(isOpen) {
@@ -843,7 +917,7 @@ export function toggleProfileModal(isOpen) {
     if (dom.shopModalBackdrop?.classList.contains("open")) {
       dom.shopModalBackdrop.classList.remove("open");
     }
-    showProfileSubView("main");
+    showProfileSubView("stats");
     renderProfileStatsModal();
     refreshUserStatsFromCloud();
   } else {
@@ -896,14 +970,45 @@ export function initProfileListeners() {
     });
   }
 
-  const openStatsBtn = document.getElementById("open-profile-stats-btn");
   const openGalleryBtn = document.getElementById("open-profile-gallery-btn");
-  const openBadgesBtn = document.getElementById("open-profile-badges-btn");
-  if (openStatsBtn) openStatsBtn.addEventListener("click", () => showProfileSubView("stats"));
   if (openGalleryBtn) openGalleryBtn.addEventListener("click", () => showProfileSubView("gallery"));
-  if (openBadgesBtn) openBadgesBtn.addEventListener("click", () => showProfileSubView("badges"));
+  document.querySelectorAll(".profile-seg-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      showProfileSubView(tab.dataset.profileTab || "stats");
+    });
+  });
   document.querySelectorAll("[data-profile-back]").forEach(btn => {
-    btn.addEventListener("click", () => showProfileSubView("main"));
+    btn.addEventListener("click", () => showProfileSubView(btn.dataset.profileBack || "stats"));
+  });
+
+  // בחירת אווטאר מתוך האווטארים שבבעלות המשתמש
+  const avatarTrigger = document.getElementById("profile-avatar-trigger");
+  if (avatarTrigger) avatarTrigger.addEventListener("click", openOwnedAvatarsModal);
+  const ownedAvClose = document.getElementById("owned-avatars-close-btn");
+  const ownedAvBackdrop = document.getElementById("owned-avatars-modal-backdrop");
+  if (ownedAvClose && ownedAvBackdrop) ownedAvClose.addEventListener("click", () => ownedAvBackdrop.classList.remove("open"));
+  if (ownedAvBackdrop) {
+    ownedAvBackdrop.addEventListener("click", (e) => {
+      if (e.target === ownedAvBackdrop) ownedAvBackdrop.classList.remove("open");
+    });
+  }
+
+  // עריכה מהירה מתוך כפתור העריכה בראש הפרופיל או מכל שורת מועדף
+  const editProfileBtn = document.getElementById("edit-profile-btn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", () => {
+      showProfileSubView("main");
+      setFavoritesEditMode(true);
+    });
+  }
+  document.querySelectorAll("[data-quick-edit-fav]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      showProfileSubView("main");
+      setFavoritesEditMode(true);
+      const field = btn.dataset.quickEditFav;
+      const input = document.getElementById(`fav-${field}-input`);
+      if (input) setTimeout(() => input.focus(), 80);
+    });
   });
 
   if (dom.pointsBadge) dom.pointsBadge.addEventListener("click", () => toggleShopModal(true));

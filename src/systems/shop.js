@@ -8,12 +8,13 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261124b";
-import { state } from "../state.js?v=20261124b";
-import { saveUserStats } from "../services/storage.js?v=20261124b";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124b";
-import { canAfford, spendPoints, formatPoints, getPointsBalance } from "./economy.js?v=20261124b";
-import { recordStarterShopPurchase } from "./quests.js?v=20261124b";
+} from "../data/shop.js?v=20261124c";
+import { state } from "../state.js?v=20261124c";
+import { saveUserStats } from "../services/storage.js?v=20261124c";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124c";
+import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124c";
+import { recordStarterShopPurchase } from "./quests.js?v=20261124c";
+import { showGameToast } from "../utils/toast.js?v=20261124c";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -98,7 +99,7 @@ function setCrystalLabel(el, prefix, price) {
   img.className = "icon-3d-mini icon-3d-crystal";
   img.src = "assets/ui-final-crystal.png";
   img.alt = "";
-  el.append(img, document.createTextNode(` ${formatPoints(price)}`));
+  el.append(img, document.createTextNode(` ${formatPointsWhole(price)}`));
 }
 
 function setShopMessage(text, kind = "") {
@@ -612,22 +613,88 @@ function renderPreviewPanel() {
   panel.append(header, stage, actions);
 }
 
-function selectForPreview(type, item) {
-  setShopMessage("");
-  if (previewSelection && previewSelection.type === type && previewSelection.item.id === item.id) {
-    if (isOwned(type, item) && getEquipped(type) !== item.id) {
-      purchaseOrEquip(type, item);
-      return;
-    }
-    return;
+let previewModalItem = null;
+
+function closeShopPreviewModal() {
+  const backdrop = document.getElementById("shop-preview-modal-backdrop");
+  if (backdrop) backdrop.classList.remove("open");
+  previewModalItem = null;
+}
+
+function openShopPreviewModal(type, item) {
+  const backdrop = document.getElementById("shop-preview-modal-backdrop");
+  if (!backdrop) return;
+  previewModalItem = { type, item };
+
+  const screenEl = document.getElementById("shop-phone-screen");
+  const playEl = document.getElementById("phone-mock-play");
+  const accentAnsEl = document.getElementById("phone-mock-ans-accent");
+  const typePill = document.getElementById("shop-preview-type-pill");
+  const nameEl = document.getElementById("shop-preview-item-name");
+  const descEl = document.getElementById("shop-preview-item-desc");
+  const buyBtn = document.getElementById("shop-preview-buy-btn");
+  const afterEl = document.getElementById("shop-preview-after-balance");
+
+  const typeLabel = type === "theme" ? "ערכת נושא" : type === "avatar" ? "תמונת פרופיל" : "רקע";
+  if (typePill) typePill.textContent = typeLabel;
+  if (nameEl) nameEl.textContent = item.name || "";
+  if (descEl) {
+    descEl.textContent = item.desc || (type === "theme" ? "ערכת צבעים ואווירה מלאה לכל האפליקציה" : "רקע מעוצב למסכי המשחק והלובי");
   }
 
-  previewSelection = { type, item };
-  applyPreviewVisuals();
-  renderShop();
+  if (screenEl) {
+    screenEl.style.background = type === "theme"
+      ? (item.previewBg || "#121212")
+      : type === "background"
+        ? (item.css || "#0a0a0f")
+        : (item.bg || "linear-gradient(135deg,#1db954,#0f6e31)");
+  }
+  const accentColor = type === "theme" && item.accent ? item.accent : "#1ed760";
+  if (playEl) {
+    playEl.style.background = accentColor;
+    playEl.textContent = type === "avatar" && item.emoji ? item.emoji : "▶";
+  }
+  if (accentAnsEl) {
+    accentAnsEl.style.borderColor = accentColor;
+    accentAnsEl.style.background = "rgba(255,255,255,0.16)";
+  }
 
-  const panel = document.getElementById("shop-preview-panel");
-  if (panel) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  const balance = getPointsBalance();
+  const afterVal = balance - (item.price || 0);
+  const affordable = state.currentUser && canAfford(item.price || 0);
+
+  if (buyBtn) {
+    setCrystalLabel(buyBtn, "רכישה ב-", item.price || 0);
+    buyBtn.disabled = !affordable;
+  }
+  if (afterEl) {
+    if (!state.currentUser) {
+      afterEl.className = "shop-preview-after-balance is-short";
+      afterEl.textContent = "התחבר בפרופיל כדי לבצע רכישות בחנות";
+    } else if (afterVal < 0) {
+      afterEl.className = "shop-preview-after-balance is-short";
+      afterEl.innerHTML = `חסרים לך ${formatPointsWhole(Math.abs(afterVal))} <img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" /> לרכישה זו`;
+    } else {
+      afterEl.className = "shop-preview-after-balance";
+      afterEl.innerHTML = `יתרתך לאחר הרכישה: <strong>${formatPointsWhole(afterVal)}</strong> <img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
+    }
+  }
+
+  backdrop.classList.add("open");
+}
+
+function selectForPreview(type, item) {
+  setShopMessage("");
+  const owned = isOwned(type, item);
+  const equipped = getEquipped(type) === item.id;
+  if (equipped) return;
+  if (owned) {
+    // בבעלות אך לא פעיל -> הפעלה מיידית!
+    purchaseOrEquip(type, item, true);
+    return;
+  }
+  // לא בבעלות -> פותח את מודאל התצוגה המקדימה לפני רכישה!
+  openShopPreviewModal(type, item);
 }
 
 function buildCustomUploadCard(type) {
@@ -636,22 +703,16 @@ function buildCustomUploadCard(type) {
   const savedData = getCustomData(type);
   const owned = getOwnedItems().includes(itemKey(type, "custom"));
   const equipped = getEquipped(type) === "custom" && Boolean(savedData);
-  const isPreviewed = previewSelection?.type === type && previewSelection?.item.id === "custom";
 
-  const card = document.createElement("button");
-  card.type = "button";
-  card.className = `shop-item vip-custom ${equipped ? "equipped" : ""} ${isPreviewed ? "previewing" : ""}`;
-
-  const vipBadge = document.createElement("span");
-  vipBadge.className = "shop-vip-badge";
-  vipBadge.textContent = "👑 VIP · העלאה אישית";
+  const card = document.createElement("div");
+  card.className = `shop-item vip-custom compact-vip ${equipped ? "equipped" : ""}`;
 
   const row = document.createElement("div");
   row.className = "shop-vip-row";
 
   const preview = document.createElement("div");
   if (isAvatar) {
-    preview.className = "shop-avatar-preview";
+    preview.className = "shop-avatar-preview shop-vip-thumb-sm";
     if (savedData) {
       preview.style.background = `url("${savedData}") center / cover no-repeat`;
     } else {
@@ -671,40 +732,66 @@ function buildCustomUploadCard(type) {
   const info = document.createElement("div");
   info.className = "shop-vip-info";
 
+  const badgeRow = document.createElement("div");
+  badgeRow.className = "shop-vip-title-row";
+  const vipBadge = document.createElement("span");
+  vipBadge.className = "shop-vip-badge";
+  vipBadge.textContent = "👑 VIP";
   const title = document.createElement("span");
   title.className = "shop-item-name";
-  title.textContent = isAvatar ? "העלה תמונת פרופיל משלך" : "העלה תמונת רקע משלך";
+  title.textContent = isAvatar ? "תמונת פרופיל אישית" : "תמונת רקע אישית";
+  badgeRow.append(vipBadge, title);
 
   const sub = document.createElement("span");
   sub.className = "shop-vip-sub";
   sub.textContent = owned
-    ? "פתוח בבעלותך · לחץ להפעלה או החלפת תמונה"
-    : "בחר תמונה מהגלריה וצפה בתצוגה מקדימה לפני התשלום";
+    ? (equipped ? "פעיל כעת · ניתן להחליף תמונה בכל עת" : "פתוח בבעלותך · הפעל או החלף תמונה")
+    : "העלה תמונה משלך מהגלריה";
 
-  info.append(title, sub);
+  info.append(badgeRow, sub);
 
-  const action = document.createElement("span");
-  action.className = "shop-item-action";
-  if (equipped) {
-    action.textContent = "בשימוש";
-    action.classList.add("is-equipped");
-  } else if (isPreviewed) {
-    action.textContent = "בתצוגה";
-    action.classList.add("is-previewing");
-  } else if (owned) {
-    action.textContent = savedData ? "הפעל / החלף" : "העלה תמונה";
-    action.classList.add("is-owned");
+  const actionsWrap = document.createElement("div");
+  actionsWrap.className = "shop-vip-actions";
+
+  if (owned) {
+    if (!equipped && savedData) {
+      const equipBtn = document.createElement("button");
+      equipBtn.type = "button";
+      equipBtn.className = "shop-item-action is-owned";
+      equipBtn.textContent = "הפעל";
+      equipBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        purchaseOrEquip(type, buildCustomItem(type, savedData), true);
+      });
+      actionsWrap.appendChild(equipBtn);
+    }
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = `shop-item-action ${equipped ? "is-equipped" : "is-owned"}`;
+    editBtn.textContent = savedData ? "החלף תמונה" : "העלה תמונה";
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      triggerCustomImageUpload(type);
+    });
+    actionsWrap.appendChild(editBtn);
   } else {
-    setCrystalLabel(action, "", price);
+    const buyBtn = document.createElement("button");
+    buyBtn.type = "button";
+    buyBtn.className = "shop-item-action is-locked";
+    setCrystalLabel(buyBtn, "", price);
+    buyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      triggerCustomImageUpload(type);
+    });
+    actionsWrap.appendChild(buyBtn);
   }
 
-  row.append(preview, info, action);
-  card.append(vipBadge, row);
-
+  row.append(preview, info, actionsWrap);
+  card.append(row);
   card.addEventListener("click", () => {
     setShopMessage("");
-    if (owned && savedData) {
-      selectForPreview(type, buildCustomItem(type, savedData));
+    if (owned && savedData && !equipped) {
+      purchaseOrEquip(type, buildCustomItem(type, savedData), true);
     } else {
       triggerCustomImageUpload(type);
     }
@@ -716,11 +803,10 @@ function buildCustomUploadCard(type) {
 function buildCard(type, item) {
   const owned = isOwned(type, item);
   const equipped = getEquipped(type) === item.id;
-  const isPreviewed = previewSelection?.type === type && previewSelection?.item.id === item.id;
 
   const card = document.createElement("button");
   card.type = "button";
-  card.className = `shop-item ${equipped ? "equipped" : ""} ${isPreviewed ? "previewing" : ""}`;
+  card.className = `shop-item ${equipped ? "equipped" : ""}`;
 
   const preview = document.createElement("div");
   if (type === "avatar") {
@@ -730,10 +816,6 @@ function buildCard(type, item) {
   } else if (type === "theme") {
     preview.className = "shop-bg-preview shop-theme-preview";
     preview.style.background = item.previewBg;
-    const dot = document.createElement("span");
-    dot.className = "shop-theme-accent-dot";
-    dot.style.background = item.accent;
-    preview.appendChild(dot);
   } else {
     preview.className = "shop-bg-preview";
     preview.style.background = item.css;
@@ -755,15 +837,13 @@ function buildCard(type, item) {
   const action = document.createElement("span");
   action.className = "shop-item-action";
   if (equipped) {
-    action.textContent = "בשימוש";
+    action.textContent = "✓ פעיל";
     action.classList.add("is-equipped");
-  } else if (isPreviewed) {
-    action.textContent = "בתצוגה";
-    action.classList.add("is-previewing");
   } else if (owned) {
     action.textContent = "הפעל";
     action.classList.add("is-owned");
   } else {
+    action.classList.add("is-locked");
     setCrystalLabel(action, "", item.price);
   }
 
@@ -825,7 +905,7 @@ function buildPowerupCard(item) {
 
 export function renderShop() {
   const balanceEl = document.getElementById("shop-points-balance");
-  if (balanceEl) balanceEl.textContent = formatPoints(getPointsBalance());
+  if (balanceEl) balanceEl.textContent = formatPointsWhole(getPointsBalance());
 
   document.querySelectorAll(".shop-tab").forEach(tab => {
     tab.classList.toggle("active", tab.dataset.shopTab === activeShopTab);
@@ -836,7 +916,7 @@ export function renderShop() {
   const grid = document.getElementById("shop-grid");
   if (!grid) return;
   grid.innerHTML = "";
-  grid.className = `shop-grid ${activeShopTab === "avatars" ? "avatars" : "backgrounds"}`;
+  grid.className = `shop-grid ${activeShopTab === "avatars" ? "avatars" : activeShopTab === "powerups" ? "powerups" : "backgrounds"}`;
 
   if (activeShopTab === "powerups") {
     SHOP_POWERUPS.forEach(item => grid.appendChild(buildPowerupCard(item)));
@@ -864,10 +944,33 @@ export function initShopListeners() {
     tab.addEventListener("click", () => {
       activeShopTab = tab.dataset.shopTab;
       clearShopPreview();
+      closeShopPreviewModal();
       setShopMessage("");
       renderShop();
     });
   });
+
+  // מאזינים למודאל התצוגה המקדימה (Phone Mockup + רכישה)
+  const pvBackdrop = document.getElementById("shop-preview-modal-backdrop");
+  const pvClose = document.getElementById("shop-preview-modal-close");
+  const pvCancel = document.getElementById("shop-preview-cancel-btn");
+  const pvBuy = document.getElementById("shop-preview-buy-btn");
+  if (pvClose) pvClose.addEventListener("click", closeShopPreviewModal);
+  if (pvCancel) pvCancel.addEventListener("click", closeShopPreviewModal);
+  if (pvBackdrop) {
+    pvBackdrop.addEventListener("click", (e) => {
+      if (e.target === pvBackdrop) closeShopPreviewModal();
+    });
+  }
+  if (pvBuy) {
+    pvBuy.addEventListener("click", () => {
+      if (!previewModalItem) return;
+      const { type, item } = previewModalItem;
+      closeShopPreviewModal();
+      purchaseOrEquip(type, item, true);
+      showGameToast(`✓ "${item.name}" נרכש והופעל בהצלחה!`, "quest");
+    });
+  }
 
   // מאזינים לחלון אישור רכישה + בחירת כמות לעזרים
   const confirmBackdrop = document.getElementById("shop-confirm-backdrop");

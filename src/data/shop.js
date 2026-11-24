@@ -47,22 +47,22 @@ export const SHOP_AVATARS = [
 ];
 
 export const SHOP_BACKGROUNDS = [
-  { id: "default", name: "שחור קלאסי", css: "#000000", price: 0 },
-  { id: "midnight", name: "חצות כחול", css: "linear-gradient(180deg,#0b1a33 0%,#000000 70%)", price: 60 },
-  { id: "purple", name: "לילה סגול", css: "linear-gradient(180deg,#2a0b3d 0%,#07010c 75%)", price: 60 },
-  { id: "forest", name: "יער", css: "linear-gradient(180deg,#06301c 0%,#010a05 75%)", price: 80 },
-  { id: "sunset", name: "שקיעה", css: "linear-gradient(180deg,#3d0f1e 0%,#1a0712 45%,#000000 85%)", price: 100 },
-  { id: "ocean", name: "אוקיינוס", css: "linear-gradient(160deg,#003b4d 0%,#001a24 50%,#000000 90%)", price: 100 },
-  { id: "stripes", name: "פסים אלכסוניים", css: "repeating-linear-gradient(135deg,#0c0c0c 0 16px,#151515 16px 32px)", price: 120 },
-  { id: "grid", name: "רשת ירוקה", css: "linear-gradient(rgba(29,185,84,0.09) 1px,transparent 1px) 0 0/26px 26px, linear-gradient(90deg,rgba(29,185,84,0.09) 1px,transparent 1px) 0 0/26px 26px, #040404", price: 150 },
-  { id: "dots", name: "נקודות", css: "radial-gradient(rgba(255,255,255,0.08) 1.5px,transparent 1.6px) 0 0/18px 18px, #070707", price: 150 },
-  { id: "stars", name: "שמי כוכבים", css: "radial-gradient(rgba(255,255,255,0.55) 1px,transparent 1.2px) 0 0/46px 46px, radial-gradient(rgba(255,255,255,0.3) 1px,transparent 1.2px) 23px 23px/46px 46px, linear-gradient(180deg,#0a0f2c 0%,#000000 85%)", price: 220 },
-  { id: "neon", name: "נאון", css: "radial-gradient(circle at 15% 10%,rgba(255,0,153,0.28),transparent 45%), radial-gradient(circle at 85% 90%,rgba(0,229,255,0.24),transparent 45%), #050008", price: 260 },
-  { id: "gold", name: "זהב יוקרתי", css: "radial-gradient(circle at 50% 0%,rgba(255,200,60,0.25),transparent 55%), linear-gradient(180deg,#1a1300 0%,#000000 80%)", price: 350 },
+  { id: "default", name: "שחור קלאסי", desc: "מינימליסטי, נקי ועל-זמני", css: "radial-gradient(circle at 50% 0%, #1b1f2a 0%, #07080c 68%, #020204 100%)", price: 0 },
+  { id: "midnight", name: "חצות כחול", desc: "כחול לילה עמוק ואווירת אולפן", css: "linear-gradient(165deg, #163770 0%, #0b1b3a 52%, #040814 100%)", price: 60 },
+  { id: "purple", name: "לילה סגול", desc: "סגול ולווט עם עומק דרמטי", css: "linear-gradient(165deg, #4a1578 0%, #230938 54%, #080210 100%)", price: 60 },
+  { id: "forest", name: "יער", desc: "ירוק אמרלד עמוק ומרגיע", css: "linear-gradient(165deg, #0c5934 0%, #062b19 54%, #020c07 100%)", price: 80 },
+  { id: "sunset", name: "שקיעה", desc: "ארגמן חם וורוד בין ערביים", css: "linear-gradient(165deg, #6b1936 0%, #340c1f 52%, #0a0308 100%)", price: 100 },
+  { id: "ocean", name: "אוקיינוס", desc: "טורקיז עמוק וגלי לילה", css: "linear-gradient(160deg, #006480 0%, #002f40 52%, #020c12 100%)", price: 100 },
+  { id: "stripes", name: "פסים אלכסוניים", desc: "טקסטורת פסים מודרנית כהה", css: "repeating-linear-gradient(135deg, #14161f 0 16px, #212536 16px 32px)", price: 120 },
+  { id: "grid", name: "רשת ירוקה", desc: "רשת סייבר ירוקה עדינה", css: "linear-gradient(rgba(29,185,84,0.18) 1px,transparent 1px) 0 0/26px 26px, linear-gradient(90deg,rgba(29,185,84,0.18) 1px,transparent 1px) 0 0/26px 26px, #07100a", price: 150 },
+  { id: "dots", name: "נקודות", desc: "מרקם נקודות אלגנטי ומדויק", css: "radial-gradient(rgba(255,255,255,0.18) 1.6px,transparent 1.8px) 0 0/18px 18px, #0e1018", price: 150 },
+  { id: "stars", name: "שמי כוכבים", desc: "שמי לילה זרועי כוכבים", css: "radial-gradient(rgba(255,255,255,0.7) 1.2px,transparent 1.4px) 0 0/46px 46px, radial-gradient(rgba(255,255,255,0.38) 1px,transparent 1.2px) 23px 23px/46px 46px, linear-gradient(180deg, #132152 0%, #050817 85%)", price: 220 },
+  { id: "neon", name: "נאון", desc: "זוהר ורוד וציאן מועדוני", css: "radial-gradient(circle at 18% 12%, rgba(255,0,153,0.42), transparent 50%), radial-gradient(circle at 82% 88%, rgba(0,229,255,0.36), transparent 50%), #090212", price: 260 },
+  { id: "gold", name: "זהב יוקרתי", desc: "אור זהב חם ויוקרתי", css: "radial-gradient(circle at 50% 0%, rgba(255,200,60,0.42), transparent 58%), linear-gradient(180deg, #2e2104 0%, #090600 85%)", price: 350 },
   // רקעים בלעדיים שניתן להשיג רק דרך קודים סודיים!
-  { id: "aurora", name: "זוהר צפוני 🔐", css: "radial-gradient(circle at 20% 0%,rgba(16,185,129,0.34),transparent 48%), radial-gradient(circle at 80% 10%,rgba(56,189,248,0.3),transparent 50%), linear-gradient(180deg,#03111c 0%,#02060a 85%)", price: 0, exclusive: true },
-  { id: "matrix", name: "מטריקס 🔐", css: "repeating-linear-gradient(90deg,rgba(34,197,94,0.08) 0 2px,transparent 2px 18px), linear-gradient(180deg,#021406 0%,#000000 85%)", price: 0, exclusive: true },
-  { id: "velvet", name: "קטיפה מלכותית 🔐", css: "radial-gradient(circle at 50% 0%,rgba(225,29,72,0.32),transparent 55%), linear-gradient(180deg,#1c0510 0%,#060104 85%)", price: 0, exclusive: true }
+  { id: "aurora", name: "זוהר צפוני 🔐", desc: "אורות צפון ירוקים וכחולים", css: "radial-gradient(circle at 20% 0%,rgba(16,185,129,0.42),transparent 52%), radial-gradient(circle at 80% 10%,rgba(56,189,248,0.38),transparent 52%), linear-gradient(180deg,#051e30 0%,#02060a 85%)", price: 0, exclusive: true },
+  { id: "matrix", name: "מטריקס 🔐", desc: "קווי מטריקס ירוקים זוהרים", css: "repeating-linear-gradient(90deg,rgba(34,197,94,0.16) 0 2px,transparent 2px 18px), linear-gradient(180deg,#04240c 0%,#000000 85%)", price: 0, exclusive: true },
+  { id: "velvet", name: "קטיפה מלכותית 🔐", desc: "ארגמן עמוק ואלגנטי", css: "radial-gradient(circle at 50% 0%,rgba(225,29,72,0.44),transparent 58%), linear-gradient(180deg,#2c0818 0%,#060104 85%)", price: 0, exclusive: true }
 ];
 
 export const SHOP_THEMES = [

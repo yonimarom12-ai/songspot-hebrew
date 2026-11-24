@@ -1,12 +1,12 @@
-import { dom } from "../dom.js?v=20261124b";
-import { state } from "../state.js?v=20261124b";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261124b";
-import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261124b";
-import { stopGalleryPreview } from "./gallery.js?v=20261124b";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261124b";
-import { updatePointsDisplay } from "./economy.js?v=20261124b";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261124b";
-import { applyUserPreferencesFromStats } from "./drawer.js?v=20261124b";
+import { dom } from "../dom.js?v=20261124c";
+import { state } from "../state.js?v=20261124c";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261124c";
+import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261124c";
+import { stopGalleryPreview } from "./gallery.js?v=20261124c";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261124c";
+import { updatePointsDisplay } from "./economy.js?v=20261124c";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261124c";
+import { applyUserPreferencesFromStats } from "./drawer.js?v=20261124c";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -315,12 +315,37 @@ export function initAuthListeners() {
     syncAuthUI();
   });
 
+  const logoutBackdrop = document.getElementById("logout-confirm-backdrop");
+  const logoutClose = document.getElementById("logout-confirm-close-btn");
+  const logoutCancel = document.getElementById("logout-confirm-cancel-btn");
+  const logoutOk = document.getElementById("logout-confirm-ok-btn");
+
+  const closeLogoutConfirm = () => {
+    if (logoutBackdrop) logoutBackdrop.classList.remove("open");
+  };
+
+  if (logoutClose) logoutClose.addEventListener("click", closeLogoutConfirm);
+  if (logoutCancel) logoutCancel.addEventListener("click", closeLogoutConfirm);
+  if (logoutBackdrop) {
+    logoutBackdrop.addEventListener("click", (e) => {
+      if (e.target === logoutBackdrop) closeLogoutConfirm();
+    });
+  }
+  if (logoutOk) {
+    logoutOk.addEventListener("click", () => {
+      closeLogoutConfirm();
+      stopGalleryPreview();
+      state.currentUser = null;
+      safeStorageRemove("songspot_current_user_v1");
+      setSessionToken("");
+      state.userStats = loadUserStats();
+      syncAuthUI();
+    });
+  }
+
   dom.logoutBtn.addEventListener("click", () => {
-    stopGalleryPreview();
-    state.currentUser = null;
-    safeStorageRemove("songspot_current_user_v1");
-    setSessionToken("");
-    state.userStats = loadUserStats();
-    syncAuthUI();
+    if (logoutBackdrop) {
+      logoutBackdrop.classList.add("open");
+    }
   });
 }

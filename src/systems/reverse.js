@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261124b";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124b";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124b";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124b";
-import { saveUserStats } from "../services/storage.js?v=20261124b";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124b";
-import { launchWinConfetti } from "./confetti.js?v=20261124b";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124b";
+import { state } from "../state.js?v=20261124c";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124c";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124c";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124c";
+import { saveUserStats } from "../services/storage.js?v=20261124c";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124c";
+import { launchWinConfetti } from "./confetti.js?v=20261124c";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124c";
 
 let sessionId = 0;
 let currentSong = null;
