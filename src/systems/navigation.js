@@ -1,20 +1,20 @@
-import { state } from "../state.js?v=20261124h";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124h";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124h";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124h";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey, stopPlaylistGameSession } from "./game.js?v=20261124h";
-import { renderPlaylistsScreen } from "./playlists.js?v=20261124h";
-import { showGameToast } from "../utils/toast.js?v=20261124h";
-import { stopTimedRun } from "./timed.js?v=20261124h";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124h";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124h";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124h";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124h";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124h";
-import { playClickSfx } from "./sfx.js?v=20261124h";
-import { vibrateTap } from "../utils/toast.js?v=20261124h";
-import { isOnboardingOpen } from "./onboarding.js?v=20261124h";
-import { recordStarterModePlayed } from "./quests.js?v=20261124h";
+import { state } from "../state.js?v=20261124i";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124i";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124i";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124i";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey, stopPlaylistGameSession } from "./game.js?v=20261124i";
+import { renderPlaylistsScreen } from "./playlists.js?v=20261124i";
+import { showGameToast } from "../utils/toast.js?v=20261124i";
+import { stopTimedRun } from "./timed.js?v=20261124i";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124i";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124i";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124i";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124i";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124i";
+import { playClickSfx } from "./sfx.js?v=20261124i";
+import { vibrateTap } from "../utils/toast.js?v=20261124i";
+import { isOnboardingOpen } from "./onboarding.js?v=20261124i";
+import { recordStarterModePlayed } from "./quests.js?v=20261124i";
 
 const SCREEN_IDS = {
   home: "screen-home",

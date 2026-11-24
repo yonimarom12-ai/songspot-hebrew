@@ -1,4 +1,6 @@
 :root {
+  --font-display: 'Secular One', 'Heebo', sans-serif;
+  --font-ui: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
   --bg-pure: #090616;
   --bg-stage: radial-gradient(circle at 50% -10%, rgba(146, 62, 255, 0.34) 0%, rgba(45, 16, 92, 0.42) 32%, #090616 74%);
   --surface: rgba(20, 14, 42, 0.86);
@@ -48,7 +50,8 @@ textarea:focus-visible,
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-ui);
+  font-weight: 400;
   background-color: var(--bg-pure);
   background-image: var(--bg-stage);
   background-attachment: fixed;

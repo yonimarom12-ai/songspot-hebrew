@@ -1,8 +1,8 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124h";
-import { DIFFICULTIES } from "../data/config.js?v=20261124h";
-import { state, isIOS } from "../state.js?v=20261124h";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124h";
-import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261124h";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124i";
+import { DIFFICULTIES } from "../data/config.js?v=20261124i";
+import { state, isIOS } from "../state.js?v=20261124i";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124i";
+import { safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261124i";
 
 const BANNED_TRACK_WORDS = [
   "karaoke", "קריוקי", "instrumental", "אינסטרומנטלי", "אינסטרומנטל",
@@ -220,7 +220,7 @@ let seedCatalogLoaded = false;
 export function ensureSeedCatalogLoaded() {
   if (seedCatalogLoaded) return Promise.resolve(true);
   if (seedCatalogPromise) return seedCatalogPromise;
-  seedCatalogPromise = fetch("assets/catalog-seed.json?v=20261124h")
+  seedCatalogPromise = fetch("assets/catalog-seed.json?v=20261124i")
     .then(res => (res.ok ? res.json() : null))
     .then(data => {
       if (data && typeof data === "object") {

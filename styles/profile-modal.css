@@ -204,8 +204,10 @@
 }
 
 .modal-title {
+  font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 400;
+  letter-spacing: 0;
   margin: 0;
   display: flex;
   align-items: center;
@@ -3012,7 +3014,48 @@
   border: 1px solid rgba(30, 215, 96, 0.45);
   color: #86efac;
   font-size: 13.5px;
-  font-weight: 800;
+  font-weight: 600;
   text-decoration: none;
   text-align: center;
+}
+
+/* ===== מערכת היררכיית טיפוגרפיה ומשקלים (Secular One + Heebo) ===== */
+.catalog-song-title,
+.phone-mock-title,
+.guest-lock-title,
+.profile-hero-name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.auth-submit-btn,
+.profile-logout-confirm-btn,
+.shop-preview-buy-btn {
+  font-weight: 700;
+}
+
+.profile-seg-tab,
+.profile-hdr-btn,
+.shop-tab,
+.shop-item-action,
+.shop-preview-badge,
+.shop-preview-title,
+.shop-preview-type-pill,
+.shop-peek-label,
+.fav-value,
+.quest-status-pill,
+.badge-row-title,
+.badge-tier-pill,
+.badge-row-status,
+.catalog-song-level-pill,
+.phone-mock-pill,
+.phone-mock-chip,
+.profile-logout-footer-btn,
+.profile-delete-footer-btn {
+  font-weight: 600;
+}
+
+.auth-input {
+  font-weight: 400;
 }

@@ -1,16 +1,16 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124h";
-import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124h";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124h";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124h";
-import { state } from "../state.js?v=20261124h";
-import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124h";
-import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124h";
-import { fetchItunesData } from "../services/itunes.js?v=20261124h";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124h";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124h";
-import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124h";
-import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124h";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124h";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124i";
+import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124i";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124i";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124i";
+import { state } from "../state.js?v=20261124i";
+import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124i";
+import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124i";
+import { fetchItunesData } from "../services/itunes.js?v=20261124i";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124i";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124i";
+import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124i";
+import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124i";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124i";
 
 function formatLocalDay(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

@@ -300,10 +300,11 @@ body.has-custom-bg .home-stage-glow {
 
 .home-title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 44px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.08;
   background: linear-gradient(180deg, #ffffff 10%, #f3d5ff 55%, #e879f9 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -426,7 +427,7 @@ body.has-custom-bg .home-stage-glow {
 
 .quickplay-title {
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.1;
 }
 
@@ -827,8 +828,10 @@ body.has-custom-bg .home-stage-glow {
 
 .setup-title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 400;
+  letter-spacing: 0;
   color: #ffffff;
 }
 
@@ -937,8 +940,10 @@ body.has-custom-bg .home-stage-glow {
 
 .mode-detail-title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .mode-detail-desc {
@@ -1778,8 +1783,10 @@ body.hide-bottom-nav .bottom-nav {
 
 .marathon-q-prompt {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 400;
+  letter-spacing: 0;
   color: #fff;
 }
 
@@ -3011,8 +3018,10 @@ body.hide-bottom-nav .bottom-nav {
 
 .ob-title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 400;
+  letter-spacing: 0;
   color: #fff;
 }
 
@@ -4629,4 +4638,85 @@ body {
 .lb-empty-cta {
   margin-top: 4px;
   min-width: 200px;
+}
+
+/* ===== מערכת היררכיית טיפוגרפיה ומשקלים (Secular One + Heebo) ===== */
+.pl-empty-title,
+.pl-challenge-title,
+.pl-share-title,
+.lb-empty-title,
+.tl-mystery-title,
+.marathon-sum-rank {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.setup-confirm-btn,
+.pl-new-btn,
+.pl-save-btn,
+.pl-play-btn.is-run,
+.pl-whatsapp-btn,
+.add-friend-submit-btn,
+.friends-tool-btn.primary {
+  font-weight: 700;
+}
+
+.home-stat-btn,
+.home-friends-pill-btn,
+.home-change-mode-btn,
+.setup-back-btn,
+.setup-step-badge,
+.mode-card-title,
+.weekly-title,
+.setup-choice-title,
+.mode-detail-badge,
+.bottom-nav-label,
+.lb-scope-tab,
+.lb-sort-tab,
+.lb-refresh-btn,
+.lb-rank,
+.lb-name,
+.lb-podium-name,
+.lb-my-rank-label,
+.marathon-q-pill,
+.marathon-score-pill,
+.marathon-q-type-badge,
+.marathon-choice-title,
+.marathon-sum-list-title,
+.marathon-sum-song,
+.friend-row-name,
+.friends-section-title,
+.friends-tool-btn,
+.copy-id-btn,
+.fp-favs-title,
+.fp-fav-val,
+.tl-card-title,
+.ob-step-counter,
+.timed-sum-title,
+.timed-sum-badge,
+.gift-day-num,
+.gift-day-reward,
+.quests-group-title,
+.playlists-count-pill,
+.pl-card-title,
+.pl-editor-heading,
+.pl-editor-counter,
+.pl-play-btn.is-shuffle,
+.pl-quick-btn,
+.pl-secondary-btn,
+.pl-row-title,
+.pl-add-pill,
+.pl-selected-title,
+.pl-hud-pill,
+.pl-summary-compare,
+.pl-summary-badge {
+  font-weight: 600;
+}
+
+.pl-editor-name-input,
+.pl-editor-search-input,
+.add-friend-input,
+.pl-share-url-input {
+  font-weight: 500;
 }

@@ -1,7 +1,7 @@
-import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261124h";
-import { dom } from "../dom.js?v=20261124h";
-import { state } from "../state.js?v=20261124h";
-import { saveUserStats } from "../services/storage.js?v=20261124h";
+import { BASE_POINTS_BY_DURATION, DIFFICULTIES } from "../data/config.js?v=20261124i";
+import { dom } from "../dom.js?v=20261124i";
+import { state } from "../state.js?v=20261124i";
+import { saveUserStats } from "../services/storage.js?v=20261124i";
 
 // מערכת קריסטלים וכלכלת משחק (זמינה למשתמשים רשומים בלבד, מוכנה לחנות העתידית)
 export function roundPoints(value) {
