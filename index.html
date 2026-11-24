@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124a">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124a">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124b">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124b">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124a">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124b">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261124a">
-  <link rel="stylesheet" href="styles/home.css?v=20261124a">
-  <link rel="stylesheet" href="styles/header.css?v=20261124a">
-  <link rel="stylesheet" href="styles/player.css?v=20261124a">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261124a">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261124a">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124a">
-  <link rel="stylesheet" href="styles/animations.css?v=20261124a">
-  <link rel="stylesheet" href="styles/themes.css?v=20261124a">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261124b">
+  <link rel="stylesheet" href="styles/home.css?v=20261124b">
+  <link rel="stylesheet" href="styles/header.css?v=20261124b">
+  <link rel="stylesheet" href="styles/player.css?v=20261124b">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261124b">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261124b">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124b">
+  <link rel="stylesheet" href="styles/animations.css?v=20261124b">
+  <link rel="stylesheet" href="styles/themes.css?v=20261124b">
 </head>
 
 <body data-theme="spotify">
@@ -314,7 +314,7 @@
         <div class="lb-table-header">
           <span class="lb-th-rank">#</span>
           <span class="lb-th-name">שחקן</span>
-          <span class="lb-th-stats">זיהויים · רצף · קריסטלים</span>
+          <span class="lb-th-stats" id="lb-th-stats">זיהויים</span>
         </div>
         <div class="lb-table-list" id="lb-table-list"></div>
       </div>
@@ -652,7 +652,7 @@
       </div>
       <div class="setup-header">
         <h2 class="setup-title">מאיזה עשורים?</h2>
-        <p class="setup-subtitle">בחר עשור אחד או יותר — ואז מתחילים!</p>
+        <p class="setup-subtitle">בחר עשור אחד או יותר ושמור את ההעדפות שלך</p>
       </div>
       <div class="setup-grid" id="setup-decades-grid">
         <button type="button" class="setup-choice-card full-span selected" data-setup-decade="all">
@@ -680,7 +680,7 @@
           <span class="setup-choice-desc">השירים הכי חמים של השנים האחרונות</span>
         </button>
       </div>
-      <button type="button" class="setup-confirm-btn" id="setup-decades-confirm-btn">אישור · התחל לשחק ▶</button>
+      <button type="button" class="setup-confirm-btn" id="setup-decades-confirm-btn">שמור העדפות ✓</button>
     </div>
   </section>
 
@@ -753,20 +753,25 @@
               <svg class="streak-shield-svg" viewBox="0 0 64 72">
                 <defs>
                   <linearGradient id="streakShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="rgba(125, 211, 252, 0.68)" />
-                    <stop offset="50%" stop-color="rgba(14, 165, 233, 0.44)" />
-                    <stop offset="100%" stop-color="rgba(37, 99, 235, 0.62)" />
+                    <stop offset="0%" stop-color="rgba(125, 211, 252, 0.24)" />
+                    <stop offset="50%" stop-color="rgba(56, 189, 248, 0.12)" />
+                    <stop offset="100%" stop-color="rgba(37, 99, 235, 0.22)" />
                   </linearGradient>
                 </defs>
+                <!-- מגן שלם ונקי (ללא שבר) במצב פעיל רגיל -->
+                <g class="shield-whole">
+                  <path d="M32 3 L58 12.5 V33.5 C58 50.8 47 62.6 32 69 C17 62.6 6 50.8 6 33.5 V12.5 Z" fill="url(#streakShieldGrad)" stroke="rgba(125, 211, 252, 0.85)" stroke-width="2.4" stroke-linejoin="round" />
+                  <path d="M13 17.5 L29 11.8" stroke="rgba(255, 255, 255, 0.52)" stroke-width="2" stroke-linecap="round" />
+                  <path d="M51 18.5 V32.5 C51 44.5 44 53.8 36 59.5" fill="none" stroke="rgba(224, 242, 254, 0.35)" stroke-width="1.8" stroke-linecap="round" />
+                </g>
+                <!-- שני חצאים שמופיעים ומתנפצים אך ורק בעת שבירת המגן בכישלון שלב -->
                 <g class="shield-half-left">
-                  <path d="M32 4 L8 13 V33 C8 49.5 18.2 61 32 67 L32 46 L29 36 L33 24 L32 4 Z" fill="url(#streakShieldGrad)" stroke="#7dd3fc" stroke-width="2.6" stroke-linejoin="round" />
-                  <path d="M14 17.5 L28 12.5" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linecap="round" />
+                  <path d="M32 3 L6 12.5 V33.5 C6 50.8 17 62.6 32 69 L32 47 L28.5 36.5 L33.5 23.5 L32 3 Z" fill="url(#streakShieldGrad)" stroke="#7dd3fc" stroke-width="2.4" stroke-linejoin="round" />
                 </g>
                 <g class="shield-half-right">
-                  <path d="M32 4 L56 13 V33 C56 49.5 45.8 61 32 67 L32 46 L29 36 L33 24 L32 4 Z" fill="url(#streakShieldGrad)" stroke="#7dd3fc" stroke-width="2.6" stroke-linejoin="round" />
-                  <path d="M50 18 V32 C50 44 43 53 35 58.5" fill="none" stroke="rgba(224, 242, 254, 0.55)" stroke-width="2" stroke-linecap="round" />
+                  <path d="M32 3 L58 12.5 V33.5 C58 50.8 47 62.6 32 69 L32 47 L28.5 36.5 L33.5 23.5 L32 3 Z" fill="url(#streakShieldGrad)" stroke="#7dd3fc" stroke-width="2.4" stroke-linejoin="round" />
                 </g>
-                <path class="shield-crack-line" d="M32 4 L33 24 L29 36 L32 46 L32 67" fill="none" stroke="#e0f2fe" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                <path class="shield-crack-line" d="M32 3 L33.5 23.5 L28.5 36.5 L32 47 L32 69" fill="none" stroke="#e0f2fe" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               <span class="streak-shield-burst" aria-hidden="true"></span>
             </div>
@@ -1043,6 +1048,10 @@
                   <span class="wallet-summary-val" id="stat-points">0</span>
                 </div>
                 <div class="wallet-summary-meta">
+                  <span>רצף התחברות יומית</span>
+                  <strong id="profile-login-streak-val">1 יום 📅</strong>
+                </div>
+                <div class="wallet-summary-meta">
                   <span>סה"כ נצבר</span>
                   <strong id="stat-total-points">0</strong>
                 </div>
@@ -1159,6 +1168,10 @@
                 <div class="kpi-record-card is-timed">
                   <span class="kpi-record-label"><img class="icon-3d-mini" src="assets/icon-timed.png" alt="" /> שיא משחק בזמן</span>
                   <span class="kpi-record-val" id="stat-best-timed">0 שירים</span>
+                </div>
+                <div class="kpi-record-card" style="grid-column: span 2;">
+                  <span class="kpi-record-label">📅 רצף התחברות יומית</span>
+                  <span class="kpi-record-val" id="stat-daily-login-streak">1 יום</span>
                 </div>
               </div>
 
@@ -1480,7 +1493,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261124a"></script>
+  <script type="module" src="src/main.js?v=20261124b"></script>
 </body>
 
 </html>

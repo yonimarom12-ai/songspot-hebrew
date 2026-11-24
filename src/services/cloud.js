@@ -1,4 +1,4 @@
-import { loadAccountsMap, safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261124a";
+import { loadAccountsMap, safeStorageGet, safeStorageSet, safeStorageRemove } from "./storage.js?v=20261124b";
 
 // לקוח ענן אחיד: עובד אוטומטית מול Cloudflare D1 (/api/auth, /api/sync, /api/leaderboard)
 // עם אימות Session Token חתום ב-HMAC-SHA256 וגיבוי מקומי אוטומטי
@@ -40,6 +40,25 @@ export async function cloudAuthRequest(action, { username, password, email = "",
     return { ok: true, username: data.username, stats: data.stats || null, token: data.token || "" };
   } catch (e) {
     return { fallback: true };
+  }
+}
+
+export async function pullAccountFromCloud(username) {
+  if (!isHttp || !username) return null;
+  try {
+    const res = await fetch(`/api/sync?username=${encodeURIComponent(username)}&_t=${Date.now()}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+      cache: "no-store"
+    });
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => null);
+    if (data?.ok && data.stats && typeof data.stats === "object") {
+      return data.stats;
+    }
+    return null;
+  } catch (e) {
+    return null;
   }
 }
 

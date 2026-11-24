@@ -130,35 +130,41 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
-/* מגן רצף כחול על גבי אש הרצף + תג כמות + אנימציית שבירה */
+/* מגן רצף כחול שקוף וגדול יותר על גבי אש הרצף + תג כמות + אנימציית שבירה רק בכישלון */
 .streak-shield-overlay {
   position: absolute;
-  inset: -4px -5px;
+  inset: -11px -12px;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   z-index: 3;
   opacity: 0;
-  transform: scale(0.72);
+  transform: scale(0.76);
   transition: opacity 0.25s ease, transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .streak-shield-svg {
-  width: 62px;
-  height: 68px;
+  width: 76px;
+  height: 84px;
   overflow: visible;
-  filter: drop-shadow(0 3px 10px rgba(14, 165, 233, 0.72));
+  filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.45));
 }
 
+.shield-whole {
+  opacity: 1;
+}
+
+.shield-half-left,
+.shield-half-right,
 .shield-crack-line {
   opacity: 0;
 }
 
 .streak-shield-burst {
   position: absolute;
-  width: 58px;
-  height: 58px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   border: 2.5px solid rgba(125, 211, 252, 0.95);
   box-shadow: 0 0 18px rgba(56, 189, 248, 0.9);
@@ -169,10 +175,10 @@
 
 .streak-shield-count {
   position: absolute;
-  top: -2px;
-  right: -8px;
-  min-width: 21px;
-  height: 21px;
+  top: -6px;
+  right: -12px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 5px;
   border-radius: 999px;
   background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
@@ -184,7 +190,7 @@
   display: none;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(14, 165, 233, 0.75);
+  box-shadow: 0 3px 10px rgba(14, 165, 233, 0.7);
   z-index: 4;
   pointer-events: none;
 }
@@ -205,6 +211,10 @@
 .streak-fire-badge.streak-shield-breaking .streak-shield-overlay {
   opacity: 1;
   transform: scale(1);
+}
+
+.streak-fire-badge.streak-shield-breaking .shield-whole {
+  opacity: 0;
 }
 
 .streak-fire-badge.streak-shield-breaking .shield-crack-line {

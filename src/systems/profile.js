@@ -1,15 +1,101 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124a";
-import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261124a";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124a";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124a";
-import { state } from "../state.js?v=20261124a";
-import { saveUserStats } from "../services/storage.js?v=20261124a";
-import { fetchItunesData } from "../services/itunes.js?v=20261124a";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124a";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124a";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261124a";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261124a";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124a";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124b";
+import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261124b";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124b";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124b";
+import { state } from "../state.js?v=20261124b";
+import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124b";
+import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124b";
+import { fetchItunesData } from "../services/itunes.js?v=20261124b";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124b";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124b";
+import { formatPoints, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124b";
+import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124b";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124b";
+
+function formatLocalDay(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function recordDailyLoginStreak() {
+  if (!state.currentUser || !state.userStats) return;
+  const now = new Date();
+  const today = formatLocalDay(now);
+  const yest = new Date(now);
+  yest.setDate(yest.getDate() - 1);
+  const yesterday = formatLocalDay(yest);
+
+  const last = state.userStats.lastLoginDate || "";
+  if (last === today) {
+    if ((state.userStats.dailyLoginStreak || 0) < 1) {
+      state.userStats.dailyLoginStreak = 1;
+      saveUserStats();
+    }
+    return;
+  }
+
+  if (last === yesterday) {
+    state.userStats.dailyLoginStreak = Math.max(1, (state.userStats.dailyLoginStreak || 0) + 1);
+  } else {
+    state.userStats.dailyLoginStreak = Math.max(1, state.userStats.dailyGifts?.lastClaimDate === today ? (state.userStats.dailyGifts.streakDay || 1) : 1);
+  }
+  state.userStats.lastLoginDate = today;
+  saveUserStats();
+  syncAccountToCloud(state.currentUser, state.userStats);
+}
+
+let cloudPullInFlight = false;
+export async function refreshUserStatsFromCloud() {
+  if (!state.currentUser || cloudPullInFlight) return false;
+  cloudPullInFlight = true;
+  try {
+    const cloudRaw = await pullAccountFromCloud(state.currentUser);
+    if (!cloudRaw) return false;
+    const cloud = normalizeStatsObj(cloudRaw);
+    const local = state.userStats || normalizeStatsObj(null);
+    const cloudIsAhead = (cloud.totalWon || 0) >= (local.totalWon || 0);
+    const base = cloudIsAhead ? { ...local, ...cloud } : { ...cloud, ...local };
+
+    const unionArr = (a, b) => Array.from(new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])]));
+    const mergeSongs = (primary, secondary) => {
+      const map = new Map();
+      for (const s of [...(Array.isArray(primary) ? primary : []), ...(Array.isArray(secondary) ? secondary : [])]) {
+        if (s && s.trackId && !map.has(String(s.trackId))) map.set(String(s.trackId), s);
+      }
+      return Array.from(map.values()).slice(0, 60);
+    };
+
+    state.userStats = normalizeStatsObj({
+      ...base,
+      totalWon: Math.max(cloud.totalWon || 0, local.totalWon || 0),
+      totalHeard: Math.max(cloud.totalHeard || 0, local.totalHeard || 0),
+      bestStreak: Math.max(cloud.bestStreak || 0, local.bestStreak || 0),
+      bestTimedScore: Math.max(cloud.bestTimedScore || 0, local.bestTimedScore || 0),
+      bestMarathonScore: Math.max(cloud.bestMarathonScore || 0, local.bestMarathonScore || 0),
+      bestReverseStreak: Math.max(cloud.bestReverseStreak || 0, local.bestReverseStreak || 0),
+      bestTimelineScore: Math.max(cloud.bestTimelineScore || 0, local.bestTimelineScore || 0),
+      totalPointsEarned: Math.max(cloud.totalPointsEarned || 0, local.totalPointsEarned || 0),
+      earnedPoints: Math.max(cloud.earnedPoints || 0, local.earnedPoints || 0),
+      promoPointsReceived: Math.max(cloud.promoPointsReceived || 0, local.promoPointsReceived || 0),
+      dailyLoginStreak: Math.max(cloud.dailyLoginStreak || 0, local.dailyLoginStreak || 0),
+      ownedItems: unionArr(cloud.ownedItems, local.ownedItems),
+      redeemedCodes: unionArr(cloud.redeemedCodes, local.redeemedCodes),
+      wonSongs: cloudIsAhead ? mergeSongs(cloud.wonSongs, local.wonSongs) : mergeSongs(local.wonSongs, cloud.wonSongs)
+    });
+
+    saveUserStats();
+    updateStreakDisplay();
+    updatePointsDisplay();
+    applyEquippedCosmetics();
+    if (dom.profileModalBackdrop?.classList.contains("open")) {
+      renderProfileStatsModal();
+    }
+    return true;
+  } catch (e) {
+    return false;
+  } finally {
+    cloudPullInFlight = false;
+  }
+}
 
 let shieldAnimTimer = null;
 let shieldRestoreTimer = null;
@@ -133,6 +219,12 @@ export function renderProfileStatsModal() {
     const bt = state.userStats.bestTimedScore || 0;
     bestTimedEl.textContent = `${bt} ${bt === 1 ? "שיר" : "שירים"}`;
   }
+  const loginStreak = Math.max(1, state.userStats.dailyLoginStreak || state.userStats.dailyGifts?.streakDay || 1);
+  const loginStreakLabel = loginStreak === 1 ? "יום 1" : `${loginStreak} ימים`;
+  const loginStreakEl = document.getElementById("stat-daily-login-streak");
+  if (loginStreakEl) loginStreakEl.textContent = loginStreakLabel;
+  const profileLoginStreakEl = document.getElementById("profile-login-streak-val");
+  if (profileLoginStreakEl) profileLoginStreakEl.textContent = `${loginStreakLabel} 📅`;
   if (dom.statPoints) dom.statPoints.textContent = formatPoints(getPointsBalance());
   if (dom.statTotalPoints) dom.statTotalPoints.textContent = formatPoints(state.userStats.totalPointsEarned || getPointsBalance());
 
@@ -753,6 +845,7 @@ export function toggleProfileModal(isOpen) {
     }
     showProfileSubView("main");
     renderProfileStatsModal();
+    refreshUserStatsFromCloud();
   } else {
     stopGalleryPreview();
   }

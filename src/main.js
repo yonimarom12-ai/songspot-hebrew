@@ -1,29 +1,29 @@
-import { dom } from "./dom.js?v=20261124a";
-import { initStorageState } from "./services/storage.js?v=20261124a";
-import { hydratePersistedCatalogs, ensureSeedCatalogLoaded } from "./services/itunes.js?v=20261124a";
-import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261124a";
-import { initHintListeners } from "./systems/feedback.js?v=20261124a";
-import { initSearchListeners } from "./systems/search.js?v=20261124a";
-import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261124a";
-import { updateStreakDisplay, initProfileListeners } from "./systems/profile.js?v=20261124a";
-import { updatePointsDisplay } from "./systems/economy.js?v=20261124a";
-import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261124a";
-import { initAuthListeners } from "./systems/auth.js?v=20261124a";
-import { initDrawerListeners, applyUserPreferencesFromStats } from "./systems/drawer.js?v=20261124a";
-import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261124a";
-import { initSfxState } from "./systems/sfx.js?v=20261124a";
-import { updateHomeQuestsDot } from "./systems/quests.js?v=20261124a";
-import { initPromoListeners } from "./systems/promo.js?v=20261124a";
-import { initDailyGiftsListeners, updateHomeGiftsDot, maybeAutoOpenDailyGifts } from "./systems/dailyGifts.js?v=20261124a";
-import { checkSharedProfileDeepLink, initProfileShareButton } from "./systems/friends.js?v=20261124a";
-import { startOnboardingTour } from "./systems/onboarding.js?v=20261124a";
+import { dom } from "./dom.js?v=20261124b";
+import { initStorageState } from "./services/storage.js?v=20261124b";
+import { hydratePersistedCatalogs, ensureSeedCatalogLoaded } from "./services/itunes.js?v=20261124b";
+import { playSnippet, setBeforePlaySnippetHook, unlockAudioOnFirstGesture, installMediaSessionGuards } from "./systems/audio.js?v=20261124b";
+import { initHintListeners } from "./systems/feedback.js?v=20261124b";
+import { initSearchListeners } from "./systems/search.js?v=20261124b";
+import { stopGalleryPreview, initGalleryAudioListeners } from "./systems/gallery.js?v=20261124b";
+import { updateStreakDisplay, initProfileListeners, refreshUserStatsFromCloud, recordDailyLoginStreak } from "./systems/profile.js?v=20261124b";
+import { updatePointsDisplay } from "./systems/economy.js?v=20261124b";
+import { initShopListeners, applyEquippedCosmetics } from "./systems/shop.js?v=20261124b";
+import { initAuthListeners } from "./systems/auth.js?v=20261124b";
+import { initDrawerListeners, applyUserPreferencesFromStats } from "./systems/drawer.js?v=20261124b";
+import { initNavigationListeners, showScreen } from "./systems/navigation.js?v=20261124b";
+import { initSfxState } from "./systems/sfx.js?v=20261124b";
+import { updateHomeQuestsDot } from "./systems/quests.js?v=20261124b";
+import { initPromoListeners } from "./systems/promo.js?v=20261124b";
+import { initDailyGiftsListeners, updateHomeGiftsDot, maybeAutoOpenDailyGifts } from "./systems/dailyGifts.js?v=20261124b";
+import { checkSharedProfileDeepLink, initProfileShareButton } from "./systems/friends.js?v=20261124b";
+import { startOnboardingTour } from "./systems/onboarding.js?v=20261124b";
 import {
   fetchRandomSong,
   goToNextSong,
   handleGuess,
   advanceAttempt,
   initDifficultyListeners
-} from "./systems/game.js?v=20261124a";
+} from "./systems/game.js?v=20261124b";
 
 function bootApp() {
   // Hydrate persisted user, stats, played track IDs, and cached catalogs safely
@@ -61,6 +61,7 @@ function bootApp() {
   dom.nextBtn.addEventListener("click", goToNextSong);
 
   // Boot application -> תפריט הבית הוא המסך הראשון שהשחקן רואה
+  recordDailyLoginStreak();
   updateStreakDisplay();
   updatePointsDisplay();
   applyEquippedCosmetics();
@@ -68,6 +69,14 @@ function bootApp() {
   updateHomeQuestsDot();
   updateHomeGiftsDot();
   showScreen("home");
+  // סנכרון אוטומטי מהענן בעלייה ובחזרה ללשונית — מונע פערים בין דפדפן Safari לאפליקציית מסך הבית!
+  refreshUserStatsFromCloud();
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      recordDailyLoginStreak();
+      refreshUserStatsFromCloud();
+    }
+  });
   // אם נכנסו דרך קישור פרופיל (?profile=...), פותח מיד את פרופיל השחקן עם כפתור הוספת חבר
   checkSharedProfileDeepLink((screen) => showScreen(screen));
   // מציג מדריך היכרות קצר בפעם הראשונה בלבד (ניתן לדילוג), ואם כבר הושלם — מציע מתנה יומית פעם ביום

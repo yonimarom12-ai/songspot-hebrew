@@ -1,19 +1,19 @@
-import { state } from "../state.js?v=20261124a";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124a";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124a";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124a";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261124a";
-import { showGameToast } from "../utils/toast.js?v=20261124a";
-import { stopTimedRun } from "./timed.js?v=20261124a";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124a";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124a";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124a";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124a";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124a";
-import { playClickSfx } from "./sfx.js?v=20261124a";
-import { vibrateTap } from "../utils/toast.js?v=20261124a";
-import { isOnboardingOpen } from "./onboarding.js?v=20261124a";
-import { recordStarterModePlayed } from "./quests.js?v=20261124a";
+import { state } from "../state.js?v=20261124b";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124b";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124b";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124b";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261124b";
+import { showGameToast } from "../utils/toast.js?v=20261124b";
+import { stopTimedRun } from "./timed.js?v=20261124b";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124b";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124b";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124b";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124b";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124b";
+import { playClickSfx } from "./sfx.js?v=20261124b";
+import { vibrateTap } from "../utils/toast.js?v=20261124b";
+import { isOnboardingOpen } from "./onboarding.js?v=20261124b";
+import { recordStarterModePlayed } from "./quests.js?v=20261124b";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -409,6 +409,30 @@ function renderLeaderboardView() {
     }
   }
 
+  const renderCategoryMetricHtml = (row) => {
+    if (activeLeaderboardSort === "bestStreak") {
+      return `${row.bestStreak || 0} <img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" />`;
+    }
+    if (activeLeaderboardSort === "points") {
+      return `${formatMetricValue(row.points)} <img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
+    }
+    if (activeLeaderboardSort === "bestMarathon") {
+      return `♾️ ${(row.bestMarathon || 0).toLocaleString("he-IL")} נק'`;
+    }
+    return `${row.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />`;
+  };
+
+  const thStatsEl = document.getElementById("lb-th-stats");
+  if (thStatsEl) {
+    thStatsEl.textContent = activeLeaderboardSort === "bestStreak"
+      ? "שיא רצף"
+      : activeLeaderboardSort === "points"
+        ? "קריסטלים"
+        : activeLeaderboardSort === "bestMarathon"
+          ? "שיא מרתון"
+          : "זיהויים";
+  }
+
   // כרטיס מיקום אישי
   if (myRankEl) {
     if (state.currentUser) {
@@ -422,9 +446,7 @@ function renderLeaderboardView() {
         label.textContent = `המיקום שלך: #${myIdx + 1} (${me.username})`;
         const stats = document.createElement("span");
         stats.className = "lb-meta";
-        stats.innerHTML = activeLeaderboardSort === "bestMarathon"
-          ? `♾️ ${(me.bestMarathon || 0).toLocaleString("he-IL")} נק' · ${me.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />`
-          : `${me.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> · ${me.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> · ${formatMetricValue(me.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
+        stats.innerHTML = renderCategoryMetricHtml(me);
         myRankEl.append(label, stats);
       } else {
         myRankEl.style.display = "none";
@@ -464,9 +486,7 @@ function renderLeaderboardView() {
 
     const metaSpan = document.createElement("span");
     metaSpan.className = "lb-meta";
-    metaSpan.innerHTML = activeLeaderboardSort === "bestMarathon"
-      ? `♾️ ${(r.bestMarathon || 0).toLocaleString("he-IL")} נק' · ${r.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />`
-      : `${r.totalWon || 0} <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> · ${r.bestStreak || 0}<img class="icon-3d-mini icon-3d-flame" src="assets/ui-final-flame.png" alt="" /> · ${formatMetricValue(r.points)}<img class="icon-3d-mini icon-3d-crystal" src="assets/ui-final-crystal.png" alt="" />`;
+    metaSpan.innerHTML = renderCategoryMetricHtml(r);
 
     row.append(rankSpan, nameSpan, metaSpan);
     listEl.appendChild(row);
@@ -679,7 +699,12 @@ export function initNavigationListeners() {
   }
   if (decadesBack) decadesBack.addEventListener("click", () => showScreen("setup-genres"));
   if (decadesConfirm) {
-    decadesConfirm.addEventListener("click", () => startGameDirectly(state.currentDifficulty || "easy"));
+    decadesConfirm.addEventListener("click", () => {
+      updateFilterPillsUI();
+      saveUserPreferences();
+      showGameToast("✓ העדפות ז'אנר ועשור נשמרו!", "quest");
+      showScreen("home");
+    });
   }
 
   // בחירת מוד מתפריט המשחקים -> מחליף את המוד במסך הבית ומחזיר אוטומטית לבית

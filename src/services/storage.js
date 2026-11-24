@@ -1,4 +1,4 @@
-import { state } from "../state.js?v=20261124a";
+import { state } from "../state.js?v=20261124b";
 
 // גישה בטוחה ל-localStorage (מונעת קריסה במצב גלישה פרטית או WebViews במובייל)
 export function safeStorageGet(key) {
@@ -67,6 +67,8 @@ export function getDefaultStats() {
     dailyQuests: null,
     starterQuests: { modesPlayed: [], boughtItem: false, completedMarathon: false, claimed: [] },
     dailyGifts: { lastClaimDate: "", streakDay: 0 },
+    dailyLoginStreak: 0,
+    lastLoginDate: "",
     preferences: {
       selectedGenres: ["all"],
       selectedDecades: ["all"],
@@ -129,6 +131,11 @@ export function normalizeStatsObj(parsed) {
       lastClaimDate: typeof parsed.dailyGifts?.lastClaimDate === "string" ? parsed.dailyGifts.lastClaimDate : "",
       streakDay: Number.isFinite(Number(parsed.dailyGifts?.streakDay)) ? Math.max(0, Math.min(7, Math.round(Number(parsed.dailyGifts.streakDay)))) : 0
     },
+    dailyLoginStreak: Math.max(
+      Number.isFinite(Number(parsed.dailyLoginStreak)) ? Math.max(0, Math.round(Number(parsed.dailyLoginStreak))) : 0,
+      Number.isFinite(Number(parsed.dailyGifts?.streakDay)) ? Math.max(0, Math.round(Number(parsed.dailyGifts.streakDay))) : 0
+    ),
+    lastLoginDate: typeof parsed.lastLoginDate === "string" ? parsed.lastLoginDate : "",
     preferences: {
       selectedGenres: Array.isArray(parsed.preferences?.selectedGenres) && parsed.preferences.selectedGenres.length > 0 ? parsed.preferences.selectedGenres : ["all"],
       selectedDecades: Array.isArray(parsed.preferences?.selectedDecades) && parsed.preferences.selectedDecades.length > 0 ? parsed.preferences.selectedDecades : ["all"],
