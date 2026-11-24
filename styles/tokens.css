@@ -121,6 +121,17 @@ body {
     background-attachment: scroll;
   }
 
+  /* מניעת זום אוטומטי מיותר של iOS Safari בפתיחת מקלדת (בלי לחסום צביטה-לזום) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
   .app-screen.active {
     animation-duration: 0.14s;
   }

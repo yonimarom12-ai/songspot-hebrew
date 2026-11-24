@@ -317,7 +317,7 @@
 }
 
 .play-fab-wrap.is-playing .play-progress-ring {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .play-ring-outer {
