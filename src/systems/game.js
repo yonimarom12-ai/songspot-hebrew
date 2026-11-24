@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124i";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124i";
-import { dom } from "../dom.js?v=20261124i";
-import { state } from "../state.js?v=20261124i";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124i";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124i";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124i";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124j";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124j";
+import { dom } from "../dom.js?v=20261124j";
+import { state } from "../state.js?v=20261124j";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124j";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124j";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124j";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261124i";
+} from "../services/itunes.js?v=20261124j";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261124i";
-import { launchWinConfetti } from "./confetti.js?v=20261124i";
+} from "./audio.js?v=20261124j";
+import { launchWinConfetti } from "./confetti.js?v=20261124j";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261124i";
+} from "./feedback.js?v=20261124j";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261124i";
-import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124i";
+} from "./search.js?v=20261124j";
+import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124j";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,19 +43,20 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261124i";
-import { recordQuestProgress } from "./quests.js?v=20261124i";
+} from "./economy.js?v=20261124j";
+import { recordQuestProgress } from "./quests.js?v=20261124j";
 import {
   isTimedModeActive,
   startTimedRun,
+  stopTimedRun,
   pauseTimedClock,
   resumeTimedClock,
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261124i";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124i";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124i";
+} from "./timed.js?v=20261124j";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124j";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124j";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -773,9 +774,18 @@ export function endRound(won) {
   if (isSpecialWin) dom.resultBanner.classList.add("is-challenge-win");
   dom.resultBanner.style.display = "flex";
 
-  // טוען מראש ברקע את השיר הבא רק במשחק הקלאסי
+  // טוען מראש ברקע את השיר הבא במשחק הקלאסי או בפלייליסט (מעבר מיידי של 0ms!)
   if (isClassic) {
     preloadNextSongInBackground(state.pendingNextDifficulty || playedDifficulty);
+  } else if (isPlaylistMode && state.activePlaylistRun?.mode === "run") {
+    const nextPlSong = state.activePlaylistRun.queue[state.activePlaylistRun.index];
+    if (nextPlSong?.previewUrl) {
+      prefetchAudioRaw(nextPlSong.previewUrl);
+      if (nextPlSong.artwork) {
+        const img = new Image();
+        img.src = nextPlSong.artwork;
+      }
+    }
   }
 
   clearSearchBarFeedback();

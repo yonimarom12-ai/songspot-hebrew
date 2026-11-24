@@ -1,10 +1,10 @@
-import { state } from "../state.js?v=20261124i";
-import { saveUserStats } from "../services/storage.js?v=20261124i";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124i";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124i";
-import { normalizeHebrew } from "../utils/text.js?v=20261124i";
-import { showGameToast } from "../utils/toast.js?v=20261124i";
-import { startPlaylistGameSession } from "./game.js?v=20261124i";
+import { state } from "../state.js?v=20261124j";
+import { saveUserStats } from "../services/storage.js?v=20261124j";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124j";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124j";
+import { normalizeHebrew } from "../utils/text.js?v=20261124j";
+import { showGameToast } from "../utils/toast.js?v=20261124j";
+import { startPlaylistGameSession } from "./game.js?v=20261124j";
 
 export const MIN_PLAYLIST_SONGS = 5;
 export const MAX_PLAYLIST_SONGS = 50;
