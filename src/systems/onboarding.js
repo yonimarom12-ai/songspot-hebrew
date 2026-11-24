@@ -1,6 +1,6 @@
-import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261124e";
-import { isIOS } from "../state.js?v=20261124e";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261124e";
+import { safeStorageGet, safeStorageSet } from "../services/storage.js?v=20261124f";
+import { isIOS } from "../state.js?v=20261124f";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261124f";
 
 // מפתח v2 — מפעיל את המדריך האינטראקטיבי החדש פעם אחת גם למשתמשים ותיקים!
 const ONBOARDING_KEY = "songspot_onboarding_done_v2";

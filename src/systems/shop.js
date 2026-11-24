@@ -8,13 +8,13 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261124e";
-import { state } from "../state.js?v=20261124e";
-import { saveUserStats } from "../services/storage.js?v=20261124e";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124e";
-import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124e";
-import { recordStarterShopPurchase } from "./quests.js?v=20261124e";
-import { showGameToast } from "../utils/toast.js?v=20261124e";
+} from "../data/shop.js?v=20261124f";
+import { state } from "../state.js?v=20261124f";
+import { saveUserStats } from "../services/storage.js?v=20261124f";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124f";
+import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124f";
+import { recordStarterShopPurchase } from "./quests.js?v=20261124f";
+import { showGameToast } from "../utils/toast.js?v=20261124f";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }

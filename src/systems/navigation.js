@@ -1,19 +1,20 @@
-import { state } from "../state.js?v=20261124e";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124e";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124e";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124e";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey } from "./game.js?v=20261124e";
-import { showGameToast } from "../utils/toast.js?v=20261124e";
-import { stopTimedRun } from "./timed.js?v=20261124e";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124e";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124e";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124e";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124e";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124e";
-import { playClickSfx } from "./sfx.js?v=20261124e";
-import { vibrateTap } from "../utils/toast.js?v=20261124e";
-import { isOnboardingOpen } from "./onboarding.js?v=20261124e";
-import { recordStarterModePlayed } from "./quests.js?v=20261124e";
+import { state } from "../state.js?v=20261124f";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124f";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124f";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124f";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey, stopPlaylistGameSession } from "./game.js?v=20261124f";
+import { renderPlaylistsScreen } from "./playlists.js?v=20261124f";
+import { showGameToast } from "../utils/toast.js?v=20261124f";
+import { stopTimedRun } from "./timed.js?v=20261124f";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124f";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124f";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124f";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124f";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124f";
+import { playClickSfx } from "./sfx.js?v=20261124f";
+import { vibrateTap } from "../utils/toast.js?v=20261124f";
+import { isOnboardingOpen } from "./onboarding.js?v=20261124f";
+import { recordStarterModePlayed } from "./quests.js?v=20261124f";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -23,6 +24,7 @@ const SCREEN_IDS = {
   marathon: "screen-marathon",
   reverse: "screen-reverse",
   timeline: "screen-timeline",
+  playlists: "screen-playlists",
   "setup-genres": "screen-setup-genres",
   "setup-decades": "screen-setup-decades",
   mode: "screen-mode",
@@ -91,6 +93,7 @@ const HOME_MODE_CONFIG = {
   timed: { title: "משחק בזמן", sub: "", themeClass: "mode-theme-timed" },
   daily: { title: "אתגר יומי", sub: "", themeClass: "mode-theme-daily" },
   weekly: { title: "השיר השבועי", sub: "", themeClass: "mode-theme-weekly" },
+  playlists: { title: "פלייליסט אישי", sub: "", themeClass: "mode-theme-playlists" },
   "1v1": { title: "1 נגד 1", sub: "", themeClass: "mode-theme-1v1" }
 };
 
@@ -123,6 +126,11 @@ function renderHomeModeStatsStrip() {
     strip.innerHTML = doneWeek
       ? `<span>👑 <strong>✅ השיר השבועי הושלם!</strong> חזור בשבוע הבא</span>`
       : `<span>👑 בונוס ×4 · שיר שבועי זהה לכולם · <strong>ניסיון אחד!</strong></span>`;
+  } else if (selectedHomeMode === "playlists") {
+    const plCount = Array.isArray(s.customPlaylists) ? s.customPlaylists.length : 0;
+    strip.innerHTML = plCount > 0
+      ? `<span>🎧 פלייליסטים שמורים: <strong>${plCount}</strong> · אתגר חברים!</span>`
+      : `<span>🎧 בנה פלייליסט משלך ושחק בו · <strong>5–50 שירים</strong></span>`;
   } else if (selectedHomeMode === "1v1") {
     strip.innerHTML = `<span>🚧 מצב אונליין מול חברים · <strong>בקרוב</strong></span>`;
   } else {
@@ -144,7 +152,7 @@ function updateHomeSelectedModeUI() {
     subEl.style.display = cfg.sub ? "" : "none";
   }
   if (btn) {
-    btn.classList.remove("mode-theme-marathon", "mode-theme-reverse", "mode-theme-timeline", "mode-theme-timed", "mode-theme-daily", "mode-theme-weekly", "mode-theme-1v1");
+    btn.classList.remove("mode-theme-marathon", "mode-theme-reverse", "mode-theme-timeline", "mode-theme-timed", "mode-theme-daily", "mode-theme-weekly", "mode-theme-playlists", "mode-theme-1v1");
     if (cfg.themeClass) btn.classList.add(cfg.themeClass);
   }
 
@@ -216,6 +224,8 @@ function launchSelectedMode(modeKey) {
     }
     showScreen("game");
     startDeterministicChallenge("weekly");
+  } else if (modeKey === "playlists") {
+    showScreen("playlists");
   } else if (modeKey === "1v1") {
     openModeScreen("1v1");
   } else {
@@ -241,6 +251,7 @@ export function showScreen(screenName) {
 
   if (screenName !== "game" && screenName !== "settings" && screenName !== "marathon" && screenName !== "reverse" && screenName !== "timeline") {
     stopTimedRun();
+    stopPlaylistGameSession();
     state.activeSpecialChallenge = null;
     stopAudioVisuals();
     releaseMediaElement();
@@ -249,6 +260,10 @@ export function showScreen(screenName) {
       reveal.classList.remove("open", "is-win", "is-loss");
       reveal.style.display = "none";
     }
+  }
+
+  if (screenName === "playlists") {
+    renderPlaylistsScreen();
   }
 
   if (screenName === "home") {

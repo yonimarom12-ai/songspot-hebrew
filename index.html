@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124e">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124e">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124f">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124f">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124e">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261124e">
-  <link rel="stylesheet" href="styles/home.css?v=20261124e">
-  <link rel="stylesheet" href="styles/header.css?v=20261124e">
-  <link rel="stylesheet" href="styles/player.css?v=20261124e">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261124e">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261124e">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124e">
-  <link rel="stylesheet" href="styles/animations.css?v=20261124e">
-  <link rel="stylesheet" href="styles/themes.css?v=20261124e">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261124f">
+  <link rel="stylesheet" href="styles/home.css?v=20261124f">
+  <link rel="stylesheet" href="styles/header.css?v=20261124f">
+  <link rel="stylesheet" href="styles/player.css?v=20261124f">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261124f">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261124f">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124f">
+  <link rel="stylesheet" href="styles/animations.css?v=20261124f">
+  <link rel="stylesheet" href="styles/themes.css?v=20261124f">
 </head>
 
 <body data-theme="spotify">
@@ -247,6 +247,18 @@
           <span class="mode-card-selected-tag">✓ נבחר</span>
           <span class="mode-card-arrow">‹</span>
         </button>
+
+        <button type="button" class="mode-card theme-playlists" data-open-mode="playlists">
+          <span class="mode-card-svg" aria-hidden="true">
+            <span class="pl-mode-card-icon">🎧</span>
+          </span>
+          <span class="mode-card-meta">
+            <span class="mode-card-title">פלייליסט אישי</span>
+            <span class="mode-card-sub">בנה רשימת שירים משלך ואתגר חברים</span>
+          </span>
+          <span class="mode-card-selected-tag">✓ נבחר</span>
+          <span class="mode-card-arrow">‹</span>
+        </button>
       </div>
 
       <button type="button" class="home-weekly-banner" data-open-mode="weekly">
@@ -430,6 +442,59 @@
         <button type="button" class="setup-confirm-btn fp-add-btn" id="fp-add-friend-btn" style="display: none;">➕ שלח בקשת חברות</button>
         <div class="friends-action-msg" id="fp-action-msg"></div>
         <button type="button" class="fp-remove-btn" id="fp-remove-friend-btn">הסר מרשימת החברים</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== מסך 1ג.5: הפלייליסטים שלי (רשימה + עורך) ===== -->
+  <section class="app-screen" id="screen-playlists" aria-label="הפלייליסטים שלי">
+    <div class="home-stage-glow"></div>
+    <div class="app-shell playlists-shell">
+      <!-- תצוגת רשימת פלייליסטים -->
+      <div class="playlists-view" id="playlists-list-view">
+        <div class="playlists-top-bar">
+          <button type="button" class="setup-back-btn" id="playlists-back-btn">→ בית</button>
+          <span class="playlists-count-pill" id="playlists-count-pill">0 / 15 פלייליסטים</span>
+          <button type="button" class="pl-new-btn" id="playlists-new-btn">➕ חדש</button>
+        </div>
+
+        <div class="setup-header" style="padding-top: 2px;">
+          <h2 class="setup-title">🎧 הפלייליסטים שלי</h2>
+          <p class="setup-subtitle">בנה רשימות שירים משלך, שחק בהן ואתגר חברים</p>
+        </div>
+
+        <div class="playlists-cards-list" id="playlists-cards-list"></div>
+      </div>
+
+      <!-- תצוגת עורך פלייליסט -->
+      <div class="playlists-view pl-editor-view" id="playlists-editor-view" style="display: none;">
+        <div class="playlists-top-bar">
+          <button type="button" class="setup-back-btn" id="pl-editor-cancel-btn">→ חזרה</button>
+          <strong class="pl-editor-heading" id="pl-editor-heading">פלייליסט חדש</strong>
+          <button type="button" class="pl-save-btn" id="pl-editor-save-btn" disabled>שמור ✓</button>
+        </div>
+
+        <div class="pl-editor-card">
+          <input type="text" class="pl-editor-name-input" id="pl-editor-name-input" maxlength="48" placeholder="שם הפלייליסט (למשל: מסיבת שישי, להיטי אייל גולן...)" />
+          <div class="pl-editor-counter" id="pl-editor-counter">0 / 50 שירים (מינימום 5)</div>
+
+          <div class="pl-editor-search-wrap">
+            <input type="text" class="pl-editor-search-input" id="pl-editor-search-input" autocomplete="off" placeholder="🔍 חפש שיר או זמר להוספה (6,270+ שירים)..." />
+          </div>
+
+          <div class="pl-editor-quick-row">
+            <button type="button" class="pl-quick-btn" id="pl-editor-artist-btn">🎤 הוסף לפי אמן</button>
+            <button type="button" class="pl-quick-btn" id="pl-editor-import-catalog-btn">✨ ייבא מהקטלוג שלי</button>
+          </div>
+
+          <div class="pl-editor-artist-panel" id="pl-editor-artist-panel" style="display: none;"></div>
+          <div class="pl-editor-search-results" id="pl-editor-search-results" style="display: none;"></div>
+        </div>
+
+        <div class="pl-selected-section">
+          <div class="pl-selected-title">שירים בפלייליסט</div>
+          <div class="pl-selected-list" id="pl-editor-selected-list"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -742,6 +807,12 @@
           <div class="timed-hud-pill best"><img class="icon-3d-mini" src="assets/ui-final-trophy.png" alt="" /> שיא: <strong id="timed-best-val">0</strong></div>
           <button type="button" class="timed-pu-btn" id="timed-pu-time" disabled>⏸️ +5ש' (0)</button>
           <span class="timed-delta-flash" id="timed-delta-flash"></span>
+        </div>
+
+        <div class="playlist-hud-bar" id="playlist-hud-bar" style="display: none;" aria-live="polite">
+          <span class="pl-hud-title">🎧 <strong id="pl-hud-title">פלייליסט</strong></span>
+          <span class="pl-hud-pill" id="pl-hud-progress">שיר 1 / 10</span>
+          <span class="pl-hud-pill is-score" id="pl-hud-score">✓ 0</span>
         </div>
 
         <!-- אש הרצף (צבע קלאסי + מגן כחול עם ספירה ואנימציית שבירה) -->
@@ -1598,6 +1669,78 @@
     </div>
   </div>
 
+  <!-- מודאל שיתוף פלייליסט (קישור קצר + QR + וואטסאפ) -->
+  <div class="modal-backdrop" id="playlist-share-modal-backdrop" style="z-index: 446;">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-modal="true" aria-label="שיתוף פלייליסט">
+      <div class="modal-header">
+        <h2 class="modal-title">📤 שתף פלייליסט</h2>
+        <button class="drawer-close-btn" id="pl-share-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body pl-share-body">
+        <div class="pl-share-title" id="pl-share-title"></div>
+        <p class="pl-share-status" id="pl-share-status">יוצר קישור שיתוף...</p>
+        <div class="pl-share-qr-wrap">
+          <img class="pl-share-qr-img" id="pl-share-qr-img" alt="QR קוד לפלייליסט" style="display: none;" />
+        </div>
+        <input type="text" class="pl-share-url-input" id="pl-share-url-input" readonly />
+        <div class="pl-share-actions">
+          <button type="button" class="setup-confirm-btn" id="pl-share-copy-btn">📋 העתק קישור</button>
+          <button type="button" class="pl-whatsapp-btn" id="pl-share-whatsapp-btn">💬 שתף בוואטסאפ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודאל קבלת אתגר פלייליסט מחבר (?playlist=...) -->
+  <div class="modal-backdrop" id="playlist-challenge-modal-backdrop" style="z-index: 448;">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-modal="true" aria-label="אתגר פלייליסט מחבר">
+      <div class="modal-header">
+        <h2 class="modal-title">🎯 אתגר פלייליסט!</h2>
+        <button class="drawer-close-btn" id="pl-challenge-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body pl-challenge-body">
+        <div class="pl-challenge-collage" id="pl-challenge-collage"></div>
+        <div class="pl-challenge-owner" id="pl-challenge-owner"></div>
+        <h3 class="pl-challenge-title" id="pl-challenge-title"></h3>
+        <div class="pl-challenge-meta" id="pl-challenge-meta"></div>
+        <div class="pl-challenge-actions">
+          <button type="button" class="setup-confirm-btn" id="pl-challenge-play-btn">▶ קבל אתגר (ריצת פלייליסט)</button>
+          <button type="button" class="pl-secondary-btn" id="pl-challenge-save-btn">💾 שמור עותק אצלי</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודאל סיכום ריצת פלייליסט -->
+  <div class="modal-backdrop" id="playlist-summary-modal-backdrop" style="z-index: 447;">
+    <div class="profile-modal pl-summary-modal" role="dialog" aria-modal="true" aria-label="סיכום ריצת פלייליסט">
+      <div class="modal-header">
+        <h2 class="modal-title">🏆 <span id="pl-summary-title">סיכום פלייליסט</span></h2>
+        <button class="drawer-close-btn" id="pl-summary-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body pl-summary-body">
+        <div class="pl-summary-kpis">
+          <div class="pl-summary-kpi">
+            <span class="pl-kpi-label">זיהויים</span>
+            <strong class="pl-kpi-val" id="pl-summary-score">0 / 0</strong>
+          </div>
+          <div class="pl-summary-kpi">
+            <span class="pl-kpi-label">זמן ממוצע</span>
+            <strong class="pl-kpi-val" id="pl-summary-avg">—</strong>
+          </div>
+        </div>
+        <div class="pl-summary-compare" id="pl-summary-compare" style="display: none;"></div>
+        <div class="pl-summary-list" id="pl-summary-list"></div>
+        <div class="pl-summary-actions">
+          <button type="button" class="setup-confirm-btn" id="pl-summary-replay-btn">▶ שחק שוב</button>
+          <button type="button" class="pl-secondary-btn" id="pl-summary-share-btn">📤 שתף תוצאה</button>
+          <button type="button" class="pl-secondary-btn" id="pl-summary-save-copy-btn" style="display: none;">💾 שמור עותק אצלי</button>
+          <button type="button" class="pl-ghost-btn" id="pl-summary-back-btn">חזור לפלייליסטים</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- סרגל ניווט תחתון (בסגנון אפליקציות / אינסטגרם) -->
   <nav class="bottom-nav" aria-label="ניווט ראשי">
     <div class="bottom-nav-inner">
@@ -1634,7 +1777,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261124e"></script>
+  <script type="module" src="src/main.js?v=20261124f"></script>
 </body>
 
 </html>

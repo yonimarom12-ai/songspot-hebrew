@@ -76,7 +76,8 @@ export const state = {
   playingGalleryTrackId: null,
   selectedGalleryTrackId: null,
 
-  // שחזור סיסמא
+  // שחזור סיסמא + ריצת פלייליסט אישי פעילה
   pendingResetAccountKey: null,
-  pendingResetCode: null
+  pendingResetCode: null,
+  activePlaylistRun: null
 };

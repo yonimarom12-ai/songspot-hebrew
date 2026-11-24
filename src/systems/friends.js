@@ -1,9 +1,9 @@
-import { state } from "../state.js?v=20261124e";
-import { SHOP_AVATARS } from "../data/shop.js?v=20261124e";
-import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261124e";
-import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261124e";
-import { playClickSfx, playWinSfx } from "./sfx.js?v=20261124e";
-import { showGameToast } from "../utils/toast.js?v=20261124e";
+import { state } from "../state.js?v=20261124f";
+import { SHOP_AVATARS } from "../data/shop.js?v=20261124f";
+import { safeStorageGet, safeStorageSet, loadAccountsMap } from "../services/storage.js?v=20261124f";
+import { syncAccountToCloud, getAuthHeaders } from "../services/cloud.js?v=20261124f";
+import { playClickSfx, playWinSfx } from "./sfx.js?v=20261124f";
+import { showGameToast } from "../utils/toast.js?v=20261124f";
 
 const PUBLIC_BASE_URL = "https://guessthesonghebrew.pages.dev";
 let activeViewedRelation = "friend";

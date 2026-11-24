@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124e";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124e";
-import { dom } from "../dom.js?v=20261124e";
-import { state } from "../state.js?v=20261124e";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124e";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124e";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124e";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124f";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124f";
+import { dom } from "../dom.js?v=20261124f";
+import { state } from "../state.js?v=20261124f";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124f";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124f";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124f";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261124e";
+} from "../services/itunes.js?v=20261124f";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261124e";
-import { launchWinConfetti } from "./confetti.js?v=20261124e";
+} from "./audio.js?v=20261124f";
+import { launchWinConfetti } from "./confetti.js?v=20261124f";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261124e";
+} from "./feedback.js?v=20261124f";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261124e";
-import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124e";
+} from "./search.js?v=20261124f";
+import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124f";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261124e";
-import { recordQuestProgress } from "./quests.js?v=20261124e";
+} from "./economy.js?v=20261124f";
+import { recordQuestProgress } from "./quests.js?v=20261124f";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261124e";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124e";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124e";
+} from "./timed.js?v=20261124f";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124f";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124f";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -206,6 +206,91 @@ export function resetUI() {
 }
 
 let warmTimerId = null;
+let onPlaylistRunCompleteHook = null;
+
+export function setOnPlaylistRunCompleteHook(fn) {
+  onPlaylistRunCompleteHook = typeof fn === "function" ? fn : null;
+}
+
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function updatePlaylistHudUI() {
+  const hud = document.getElementById("playlist-hud-bar");
+  const diffBar = document.getElementById("difficulty-bar");
+  const filterRow = document.querySelector("#screen-game .filter-summary-row");
+  const streakSlot = document.querySelector("#screen-game .streak-top-slot");
+  const run = state.activePlaylistRun;
+
+  if (!run) {
+    if (hud) hud.style.display = "none";
+    if (diffBar && !isTimedModeActive()) diffBar.style.display = "";
+    if (filterRow && !isTimedModeActive()) filterRow.style.display = "";
+    if (streakSlot && !isTimedModeActive()) streakSlot.style.display = "";
+    return;
+  }
+
+  if (diffBar) diffBar.style.display = "none";
+  if (filterRow) filterRow.style.display = "none";
+  if (streakSlot) streakSlot.style.display = "none";
+  if (hud) {
+    hud.style.display = "flex";
+    const titleEl = document.getElementById("pl-hud-title");
+    const progEl = document.getElementById("pl-hud-progress");
+    const scoreEl = document.getElementById("pl-hud-score");
+    if (titleEl) titleEl.textContent = run.title || "פלייליסט";
+    if (progEl) {
+      progEl.textContent = run.mode === "run"
+        ? `שיר ${Math.min(run.index, run.queue.length)} / ${run.queue.length}`
+        : "🔀 ערבוב אינסופי";
+    }
+    if (scoreEl) {
+      const hits = (run.results || []).filter(r => r.won).length;
+      scoreEl.textContent = `✓ ${hits}`;
+    }
+  }
+}
+
+export function startPlaylistGameSession(playlist, mode = "run", meta = {}) {
+  stopTimedRun();
+  state.activeSpecialChallenge = null;
+  state.pendingNextDifficulty = null;
+  state.preloadedNextSong = null;
+
+  const songs = Array.isArray(playlist?.songs) ? playlist.songs.filter(s => s && s.previewUrl && s.title) : [];
+  if (songs.length === 0) return;
+
+  state.activePlaylistRun = {
+    playlistId: playlist.id || null,
+    title: playlist.title || "פלייליסט אישי",
+    mode: mode === "shuffle" ? "shuffle" : "run",
+    queue: shuffleArray(songs),
+    originalSongs: songs,
+    index: 0,
+    lastTrackId: null,
+    results: [],
+    isSharedChallenge: Boolean(meta.isSharedChallenge),
+    ownerName: meta.ownerName || "",
+    ownerBestHits: Number(meta.ownerBestHits) || 0,
+    ownerBestAvgSec: Number(meta.ownerBestAvgSec) || 0,
+    sharedPayload: meta.sharedPayload || null
+  };
+
+  updatePlaylistHudUI();
+  fetchRandomSong();
+}
+
+export function stopPlaylistGameSession() {
+  state.activePlaylistRun = null;
+  if (dom.nextBtn) delete dom.nextBtn.dataset.finishPlaylistRun;
+  updatePlaylistHudUI();
+}
 
 // טעינה מוקדמת של השיר הבא ברקע בזמן מסך החשיפה -> מעבר מיידי של 0ms בלחיצה על "לשיר הבא"
 function preloadNextSongInBackground(nextDifficulty) {
@@ -238,7 +323,32 @@ export async function fetchRandomSong() {
   dom.retryBtn.style.display = "none";
 
   let selectedSong = null;
-  if (isTimedModeActive()) {
+  if (state.activePlaylistRun) {
+    const run = state.activePlaylistRun;
+    if (run.mode === "run") {
+      if (run.index >= run.queue.length) {
+        const finished = { ...run };
+        stopPlaylistGameSession();
+        if (onPlaylistRunCompleteHook) onPlaylistRunCompleteHook(finished);
+        return;
+      }
+      selectedSong = run.queue[run.index];
+      run.index += 1;
+    } else {
+      const pool = run.queue.length > 1
+        ? run.queue.filter(s => String(s.trackId) !== String(run.lastTrackId))
+        : run.queue;
+      selectedSong = pool[Math.floor(Math.random() * pool.length)] || run.queue[0];
+    }
+    if (selectedSong) {
+      run.lastTrackId = String(selectedSong.trackId);
+      // מוודא שכל שירי הפלייליסט קיימים במאגר החיפוש כדי שהשחקן תמיד יוכל למצוא אותם
+      if (!state.discoveredSongsMap.has(String(selectedSong.trackId))) {
+        state.discoveredSongsMap.set(String(selectedSong.trackId), selectedSong);
+      }
+    }
+    updatePlaylistHudUI();
+  } else if (isTimedModeActive()) {
     // במוד 60 שניות: שירים אקראיים לחלוטין מכל הקטלוג ללא סינון רמות קושי, ז'אנרים או עשורים
     await ensureSeedCatalogLoaded();
     if (roundId !== state.activeFetchRoundId) return;
@@ -378,7 +488,11 @@ export async function fetchRandomSong() {
 }
 
 export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoints = 0, exactTimeSec = null) {
-  const isClassic = !isTimedModeActive() && !state.activeSpecialChallenge;
+  const isPlaylist = Boolean(state.activePlaylistRun);
+  const isClassic = !isTimedModeActive() && !state.activeSpecialChallenge && !isPlaylist;
+  if (isPlaylist) {
+    return;
+  }
   state.userStats.totalHeard = (state.userStats.totalHeard || 0) + 1;
   if (won) {
     state.userStats.totalWon = (state.userStats.totalWon || 0) + 1;
@@ -466,7 +580,8 @@ export function endRound(won) {
   if (dom.timelineMarker) dom.timelineMarker.style.display = "none";
 
   const specialChallenge = state.activeSpecialChallenge ? { ...state.activeSpecialChallenge } : null;
-  const isClassic = !isTimedModeActive() && !specialChallenge;
+  const isPlaylistMode = Boolean(state.activePlaylistRun);
+  const isClassic = !isTimedModeActive() && !specialChallenge && !isPlaylistMode;
   const solvedAtSec = DURATIONS[Math.min(state.currentAttempt, DURATIONS.length - 1)] || 15;
   // הנקודה הרחוקה ביותר שאליה השחקן האזין בשיר בסיבוב הזה (גם אם ניגן מחדש אח"כ!)
   const rawHeard = Number(state.maxAudioHeardSec) || 0;
@@ -480,7 +595,7 @@ export function endRound(won) {
   const usedEasySearch = state.usedEasySearchInRound || state.easySearchFiftyActive;
   const usedRedFeedback = (state.usedRedFeedbackInRound || state.redFeedbackEnabled) && solvedAtSec >= 8;
   const nextStreakIfWon = isClassic && won ? (state.userStats.currentStreak || 0) + 1 : 0;
-  const earnedPoints = won
+  const earnedPoints = (won && !isPlaylistMode)
     ? calculateRoundReward(solvedAtSec, playedDifficulty, {
         usedHint,
         usedEasySearch,
@@ -491,6 +606,18 @@ export function endRound(won) {
   try {
     recordRoundStats(won, solvedAtSec, playedDifficulty, earnedPoints, exactSolveSec);
   } catch (e) { }
+
+  if (isPlaylistMode && state.activePlaylistRun && state.currentSong) {
+    state.activePlaylistRun.results.push({
+      trackId: state.currentSong.trackId,
+      title: state.currentSong.title,
+      artist: state.currentSong.artist,
+      artwork: state.currentSong.artwork || "",
+      won: Boolean(won),
+      solveSec: won ? exactSolveSec : 0
+    });
+    updatePlaylistHudUI();
+  }
 
   // מסמן השלמת אתגר יומי / שיר שבועי (ניסיון אחד בלבד ליום/שבוע!)
   if (specialChallenge) {
@@ -533,7 +660,10 @@ export function endRound(won) {
 
     if (dom.pointsEarnedNotice) {
       dom.pointsEarnedNotice.classList.remove("is-muted");
-      if (!state.currentUser) {
+      if (isPlaylistMode) {
+        dom.pointsEarnedNotice.textContent = "🎧 מצב פלייליסט אישי (ללא השפעה על דירוג ורצף)";
+        dom.pointsEarnedNotice.classList.add("is-muted");
+      } else if (!state.currentUser) {
         dom.pointsEarnedNotice.textContent = "🔒 התחבר או הירשם כדי לצבור קריסטלים";
         dom.pointsEarnedNotice.classList.add("is-muted");
       } else if (usedHint && playedDifficulty !== "impossible") {
@@ -623,8 +753,14 @@ export function endRound(won) {
   if (specialChallenge) {
     dom.nextBtn.textContent = "חזרה ללובי 🏠";
     dom.nextBtn.dataset.exitToLobby = "1";
+    delete dom.nextBtn.dataset.finishPlaylistRun;
+  } else if (isPlaylistMode && state.activePlaylistRun?.mode === "run" && state.activePlaylistRun.index >= state.activePlaylistRun.queue.length) {
+    delete dom.nextBtn.dataset.exitToLobby;
+    dom.nextBtn.dataset.finishPlaylistRun = "1";
+    dom.nextBtn.textContent = "לסיכום הפלייליסט 🏆";
   } else {
     delete dom.nextBtn.dataset.exitToLobby;
+    delete dom.nextBtn.dataset.finishPlaylistRun;
     dom.nextBtn.textContent = "לשיר הבא";
   }
 
@@ -914,6 +1050,15 @@ export async function startDeterministicChallenge(kind) {
 }
 
 export function goToNextSong() {
+  if (dom.nextBtn?.dataset.finishPlaylistRun === "1") {
+    delete dom.nextBtn.dataset.finishPlaylistRun;
+    const finished = state.activePlaylistRun ? { ...state.activePlaylistRun } : null;
+    stopPlaylistGameSession();
+    if (finished && onPlaylistRunCompleteHook) {
+      onPlaylistRunCompleteHook(finished);
+    }
+    return;
+  }
   if (dom.nextBtn?.dataset.exitToLobby === "1") {
     delete dom.nextBtn.dataset.exitToLobby;
     const exitBtn = document.getElementById("exit-to-lobby-btn");
@@ -935,7 +1080,7 @@ export function goToNextSong() {
 export function initDifficultyListeners() {
   dom.diffButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      if (isTimedModeActive() || state.activeSpecialChallenge) return;
+      if (isTimedModeActive() || state.activeSpecialChallenge || state.activePlaylistRun) return;
       state.pendingNextDifficulty = null;
       state.preloadedNextSong = null;
       setActiveDifficultyUI(btn.dataset.level);

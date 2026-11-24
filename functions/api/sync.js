@@ -80,6 +80,14 @@ function mergeMonotonicStats(cloud, incoming) {
     return Array.from(map.values()).slice(0, 60);
   };
 
+  const mergePlaylists = (primary, secondary) => {
+    const map = new Map();
+    for (const pl of [...(Array.isArray(primary) ? primary : []), ...(Array.isArray(secondary) ? secondary : [])]) {
+      if (pl && pl.id && !map.has(String(pl.id))) map.set(String(pl.id), pl);
+    }
+    return Array.from(map.values()).slice(0, 15);
+  };
+
   return {
     ...base,
     totalWon: Math.max(cloudWon, incWon),
@@ -98,6 +106,9 @@ function mergeMonotonicStats(cloud, incoming) {
     wonSongs: isIncomingStale
       ? mergeWonSongs(cloud.wonSongs, incoming.wonSongs)
       : mergeWonSongs(incoming.wonSongs, cloud.wonSongs),
+    customPlaylists: isIncomingStale
+      ? mergePlaylists(cloud.customPlaylists, incoming.customPlaylists)
+      : mergePlaylists(incoming.customPlaylists, cloud.customPlaylists),
     customAvatarData: incoming.customAvatarData || cloud.customAvatarData || "",
     customBackgroundData: incoming.customBackgroundData || cloud.customBackgroundData || ""
   };
