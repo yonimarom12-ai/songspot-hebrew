@@ -1,12 +1,13 @@
-import { dom } from "../dom.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
-import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261124f";
-import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261124f";
-import { stopGalleryPreview } from "./gallery.js?v=20261124f";
-import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261124f";
-import { updatePointsDisplay } from "./economy.js?v=20261124f";
-import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261124f";
-import { applyUserPreferencesFromStats } from "./drawer.js?v=20261124f";
+import { dom } from "../dom.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
+import { loadAccountsMap, saveAccountsMap, loadUserStats, normalizeStatsObj, safeStorageSet, safeStorageRemove } from "../services/storage.js?v=20261124h";
+import { cloudAuthRequest, setSessionToken } from "../services/cloud.js?v=20261124h";
+import { stopGalleryPreview } from "./gallery.js?v=20261124h";
+import { updateStreakDisplay, renderProfileStatsModal } from "./profile.js?v=20261124h";
+import { updatePointsDisplay } from "./economy.js?v=20261124h";
+import { applyEquippedCosmetics, clearShopPreview } from "./shop.js?v=20261124h";
+import { applyUserPreferencesFromStats } from "./drawer.js?v=20261124h";
+import { showGameToast } from "../utils/toast.js?v=20261124h";
 
 // מערכת הרשמה, התחברות ושחזור סיסמא במודאל הפרופיל
 const USERNAME_ALLOWED_REGEX = /^[a-zA-Z\u0590-\u05FF0-9_?!]+$/;
@@ -348,4 +349,114 @@ export function initAuthListeners() {
       logoutBackdrop.classList.add("open");
     }
   });
+
+  // מחיקת חשבון לצמיתות (עם אישור סיסמה + ניקוי בענן ובמכשיר)
+  const deleteBtn = document.getElementById("delete-account-btn");
+  const deleteBackdrop = document.getElementById("delete-account-confirm-backdrop");
+  const deleteClose = document.getElementById("delete-account-close-btn");
+  const deleteCancel = document.getElementById("delete-account-cancel-btn");
+  const deleteForm = document.getElementById("delete-account-form");
+  const deletePassInput = document.getElementById("delete-account-password");
+  const deleteMsgEl = document.getElementById("delete-account-msg");
+  const deleteOkBtn = document.getElementById("delete-account-ok-btn");
+
+  const closeDeleteConfirm = () => {
+    if (deleteBackdrop) deleteBackdrop.classList.remove("open");
+    if (deleteForm) deleteForm.reset();
+    if (deleteMsgEl) {
+      deleteMsgEl.textContent = "";
+      deleteMsgEl.className = "auth-msg";
+    }
+    if (deleteOkBtn) {
+      deleteOkBtn.disabled = false;
+      deleteOkBtn.textContent = "מחק חשבון לצמיתות";
+    }
+  };
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", () => {
+      if (!state.currentUser || !deleteBackdrop) return;
+      closeDeleteConfirm();
+      deleteBackdrop.classList.add("open");
+      setTimeout(() => deletePassInput?.focus(), 60);
+    });
+  }
+  if (deleteClose) deleteClose.addEventListener("click", closeDeleteConfirm);
+  if (deleteCancel) deleteCancel.addEventListener("click", closeDeleteConfirm);
+  if (deleteBackdrop) {
+    deleteBackdrop.addEventListener("click", (e) => {
+      if (e.target === deleteBackdrop) closeDeleteConfirm();
+    });
+  }
+
+  if (deleteForm) {
+    deleteForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!state.currentUser) return;
+      const username = state.currentUser;
+      const password = deletePassInput ? deletePassInput.value : "";
+      if (password.length < 4) {
+        if (deleteMsgEl) {
+          deleteMsgEl.textContent = "יש להזין את הסיסמה שלך כדי לאשר מחיקה.";
+          deleteMsgEl.className = "auth-msg error";
+        }
+        return;
+      }
+
+      if (deleteOkBtn) {
+        deleteOkBtn.disabled = true;
+        deleteOkBtn.textContent = "מוחק חשבון...";
+      }
+      if (deleteMsgEl) {
+        deleteMsgEl.textContent = "";
+        deleteMsgEl.className = "auth-msg";
+      }
+
+      const cloudRes = await cloudAuthRequest("delete_account", { username, password });
+      if (!cloudRes.fallback) {
+        if (!cloudRes.ok) {
+          if (deleteMsgEl) {
+            deleteMsgEl.textContent = cloudRes.error || "הסיסמה שגויה או שאירעה שגיאה במחיקה.";
+            deleteMsgEl.className = "auth-msg error";
+          }
+          if (deleteOkBtn) {
+            deleteOkBtn.disabled = false;
+            deleteOkBtn.textContent = "מחק חשבון לצמיתות";
+          }
+          return;
+        }
+      } else {
+        const accounts = loadAccountsMap();
+        const matchedKey = findExistingAccountKey(accounts, username);
+        const acc = matchedKey ? accounts[matchedKey] : null;
+        if (acc && acc.password && acc.password !== password) {
+          if (deleteMsgEl) {
+            deleteMsgEl.textContent = "הסיסמה שהוזנה שגויה.";
+            deleteMsgEl.className = "auth-msg error";
+          }
+          if (deleteOkBtn) {
+            deleteOkBtn.disabled = false;
+            deleteOkBtn.textContent = "מחק חשבון לצמיתות";
+          }
+          return;
+        }
+      }
+
+      // מחיקה מקומית מלאה + ניתוק
+      const accounts = loadAccountsMap();
+      const matchedKey = findExistingAccountKey(accounts, username);
+      if (matchedKey) {
+        delete accounts[matchedKey];
+        saveAccountsMap(accounts);
+      }
+      closeDeleteConfirm();
+      stopGalleryPreview();
+      state.currentUser = null;
+      safeStorageRemove("songspot_current_user_v1");
+      setSessionToken("");
+      state.userStats = loadUserStats();
+      syncAuthUI();
+      showGameToast("🗑️ החשבון נמחק לצמיתות", "info");
+    });
+  }
 }

@@ -1,16 +1,16 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124f";
-import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124f";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124f";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
-import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124f";
-import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124f";
-import { fetchItunesData } from "../services/itunes.js?v=20261124f";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124f";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124f";
-import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124f";
-import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124f";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124f";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124h";
+import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124h";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124h";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
+import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124h";
+import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124h";
+import { fetchItunesData } from "../services/itunes.js?v=20261124h";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124h";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124h";
+import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124h";
+import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124h";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124h";
 
 function formatLocalDay(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -287,7 +287,7 @@ export function renderProfileStatsModal() {
       const img = document.createElement("img");
       img.className = "gallery-thumb";
       img.src = item.artwork || "";
-      img.alt = item.title;
+      img.alt = item.title ? `עטיפת השיר: ${item.title}` : "עטיפת השיר";
 
       const overlay = document.createElement("div");
       overlay.className = "gallery-play-overlay";
@@ -820,7 +820,9 @@ export function showProfileSubView(viewName = "stats") {
   });
   const activeTabKey = viewName === "gallery" ? "stats" : viewName;
   document.querySelectorAll(".profile-seg-tab").forEach(tab => {
-    tab.classList.toggle("active", tab.dataset.profileTab === activeTabKey);
+    const isSel = tab.dataset.profileTab === activeTabKey;
+    tab.classList.toggle("active", isSel);
+    tab.setAttribute("aria-selected", String(isSel));
   });
 }
 
@@ -853,7 +855,7 @@ function openCatalogSongModal(item) {
   if (bgBlur) bgBlur.style.backgroundImage = hiResArt ? `url("${hiResArt}")` : "none";
   if (cover) {
     cover.src = hiResArt || "";
-    cover.alt = item.title || "";
+    cover.alt = item.title ? `עטיפת השיר: ${item.title}` : "עטיפת השיר";
   }
   const lvlDiff = DIFFICULTIES[item.level];
   if (lvlPill) {

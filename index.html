@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>נחש את השיר — משחק הלהיטים הישראלי</title>
   <meta name="description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון 10 שאלות, הפוך על הפוך, ציר זמן ודירוג עולמי חי עם חברים.">
+  <link rel="canonical" href="https://guessthesonghebrew.pages.dev/">
   <meta name="theme-color" content="#090616">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,8 +22,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124f">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124f">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124h">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124h">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +32,37 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124f">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124h">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "נחש את השיר",
+    "alternateName": "נחש את השיר — משחק הלהיטים הישראלי",
+    "description": "זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון 10 שאלות, הפוך על הפוך, ציר זמן, פלייליסטים אישיים ודירוג עולמי חי עם חברים.",
+    "inLanguage": "he",
+    "url": "https://guessthesonghebrew.pages.dev/",
+    "image": "https://guessthesonghebrew.pages.dev/assets/og-preview.jpg",
+    "applicationCategory": "Game",
+    "genre": ["Music", "Trivia"],
+    "operatingSystem": "Any",
+    "isAccessibleForFree": true
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261124f">
-  <link rel="stylesheet" href="styles/home.css?v=20261124f">
-  <link rel="stylesheet" href="styles/header.css?v=20261124f">
-  <link rel="stylesheet" href="styles/player.css?v=20261124f">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261124f">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261124f">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124f">
-  <link rel="stylesheet" href="styles/animations.css?v=20261124f">
-  <link rel="stylesheet" href="styles/themes.css?v=20261124f">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261124h">
+  <link rel="stylesheet" href="styles/home.css?v=20261124h">
+  <link rel="stylesheet" href="styles/header.css?v=20261124h">
+  <link rel="stylesheet" href="styles/player.css?v=20261124h">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261124h">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261124h">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124h">
+  <link rel="stylesheet" href="styles/animations.css?v=20261124h">
+  <link rel="stylesheet" href="styles/themes.css?v=20261124h">
 </head>
 
 <body data-theme="spotify">
@@ -58,7 +76,7 @@
       <header class="home-top-bar">
         <div class="home-top-right">
           <div class="home-status-pill">
-            <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
+            <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות" aria-label="צפייה ברצף הניצחונות">
               <span class="home-flame-wrap">
                 <img class="icon-3d-inline ui-theme-icon" data-ui-icon="flame" src="assets/ui-final-flame.png" alt="" aria-hidden="true" />
                 <svg class="home-shield-svg" viewBox="0 0 40 44" aria-hidden="true">
@@ -69,11 +87,11 @@
               </span><span id="home-streak-count">0</span>
             </button>
             <span class="home-stat-divider"></span>
-            <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים">
+            <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים" aria-label="יתרת קריסטלים ופתיחת החנות">
               <img class="icon-3d-inline ui-theme-icon" data-ui-icon="crystal" src="assets/ui-final-crystal.png" alt="" aria-hidden="true" /><span id="home-points-count">0</span>
             </button>
           </div>
-          <button type="button" class="home-friends-pill-btn" id="home-friends-btn" title="חברים">
+          <button type="button" class="home-friends-pill-btn" id="home-friends-btn" title="חברים" aria-label="חברים ובקשות חברות">
             <img class="ui-theme-icon ui-btn-icon" data-ui-icon="friends" src="assets/ui-final-friends.png" alt="" aria-hidden="true" />
             <span>חברים</span>
             <span class="home-friends-dot" id="home-friends-dot"></span>
@@ -366,6 +384,7 @@
 
         <form class="add-friend-form" id="add-friend-form" autocomplete="off">
           <input type="text" class="add-friend-input" id="add-friend-input"
+            aria-label="חיפוש או הוספת חבר לפי Player ID או שם משתמש"
             placeholder="הזן Player ID (למשל #A7F392) או שם משתמש..." autocomplete="off" autocorrect="off"
             autocapitalize="characters" spellcheck="false" />
           <button type="submit" class="add-friend-submit-btn">שלח בקשה</button>
@@ -475,11 +494,11 @@
         </div>
 
         <div class="pl-editor-card">
-          <input type="text" class="pl-editor-name-input" id="pl-editor-name-input" maxlength="48" placeholder="שם הפלייליסט (למשל: מסיבת שישי, להיטי אייל גולן...)" />
+          <input type="text" class="pl-editor-name-input" id="pl-editor-name-input" maxlength="48" aria-label="שם הפלייליסט" placeholder="שם הפלייליסט (למשל: מסיבת שישי, להיטי אייל גולן...)" />
           <div class="pl-editor-counter" id="pl-editor-counter">0 / 50 שירים (מינימום 5)</div>
 
           <div class="pl-editor-search-wrap">
-            <input type="text" class="pl-editor-search-input" id="pl-editor-search-input" autocomplete="off" placeholder="🔍 חפש שיר או זמר להוספה (6,270+ שירים)..." />
+            <input type="text" class="pl-editor-search-input" id="pl-editor-search-input" autocomplete="off" aria-label="חיפוש שיר או זמר להוספה לפלייליסט" placeholder="🔍 חפש שיר או זמר להוספה (6,270+ שירים)..." />
           </div>
 
           <div class="pl-editor-quick-row">
@@ -553,7 +572,7 @@
             <span class="marathon-year-val" id="marathon-year-val">2010</span>
             <button type="button" class="marathon-year-step" data-year-step="1" aria-label="שנה קדימה">+</button>
           </div>
-          <input type="range" class="marathon-year-slider" id="marathon-year-slider" min="1970" max="2026" value="2010" />
+          <input type="range" class="marathon-year-slider" id="marathon-year-slider" min="1970" max="2026" value="2010" aria-label="בחירת שנת יציאת השיר" />
           <div class="marathon-year-scale"><span>1970</span><span>1990</span><span>2010</span><span>2026</span></div>
           <button type="button" class="setup-confirm-btn marathon-year-confirm-btn" id="marathon-year-confirm-btn">נעל תשובה ✓</button>
         </div>
@@ -863,7 +882,7 @@
         <main class="player-card" id="player-card">
           <div class="disc-wrapper" id="disc-wrapper">
             <div class="disc-center-hole"></div>
-            <img class="cover-img" id="song-cover" src="" alt="Cover" />
+            <img class="cover-img" id="song-cover" src="" alt="" />
           </div>
 
           <div class="equalizer" id="equalizer">
@@ -942,7 +961,7 @@
                 <path
                   d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z" />
               </svg>
-              <input type="text" class="search-input" id="guess-input" placeholder="חפש שיר או זמר..." disabled
+              <input type="text" class="search-input" id="guess-input" aria-label="ניחוש שם שיר או זמר" placeholder="חפש שיר או זמר..." disabled
                 autocomplete="off" />
               <div class="suggestions-dropdown" id="suggestions-list"></div>
             </div>
@@ -977,7 +996,7 @@
             <span class="setting-desc">מציג בחיפוש רק 50% מהשירים של כל אמן (מזכה ב-×0.5 קריסטלים)</span>
           </div>
           <button type="button" class="switch-toggle" id="easy-search-setting-toggle"
-            aria-label="הפעל חיפוש קל"></button>
+            role="switch" aria-checked="false" aria-label="הפעל חיפוש קל"></button>
         </div>
 
         <div class="setting-row">
@@ -987,7 +1006,7 @@
               ו-15ש')</span>
           </div>
           <button type="button" class="switch-toggle" id="red-feedback-setting-toggle"
-            aria-label="הפעל חיווי אדום ב-8 שניות"></button>
+            role="switch" aria-checked="false" aria-label="הפעל חיווי אדום ב-8 שניות"></button>
         </div>
 
         <div class="setting-row">
@@ -996,7 +1015,7 @@
             <span class="setting-desc">הצג כפתורי רמז (זמר, שנה, אות ראשונה) כשמגיעים ל-15ש'</span>
           </div>
           <button type="button" class="switch-toggle" id="hints-setting-toggle"
-            aria-label="הפעל רמזים ב-15 שניות"></button>
+            role="switch" aria-checked="false" aria-label="הפעל רמזים ב-15 שניות"></button>
         </div>
 
         <div class="setting-row">
@@ -1005,7 +1024,7 @@
             <span class="setting-desc">צלילים עדינים ללחיצות, ניצחון וקבלת קריסטלים</span>
           </div>
           <button type="button" class="switch-toggle on" id="sfx-setting-toggle"
-            aria-label="הפעל אפקטים קוליים"></button>
+            role="switch" aria-checked="true" aria-label="הפעל אפקטים קוליים"></button>
         </div>
 
         <div class="promo-trigger-row">
@@ -1028,14 +1047,14 @@
       <div class="modal-body profile-redesigned-body">
         <!-- חלק עליון נקי: אווטאר במרכז עם אייקון החלפה, שם משתמש וכפתורי עריכה + שיתוף -->
         <div class="logged-user-bar profile-hero-card profile-clean-header" id="logged-user-bar">
-          <button type="button" class="profile-avatar-trigger" id="profile-avatar-trigger" title="החלף אווטאר">
+          <button type="button" class="profile-avatar-trigger" id="profile-avatar-trigger" title="החלף אווטאר" aria-label="החלפת תמונת פרופיל">
             <span class="profile-modal-avatar profile-hero-avatar" id="profile-modal-avatar">🎧</span>
             <span class="profile-avatar-edit-badge" aria-hidden="true">✏️</span>
           </button>
           <strong class="profile-hero-name" id="logged-username-display"></strong>
           <div class="profile-header-actions-pair">
             <button type="button" class="profile-hdr-btn is-edit" id="edit-profile-btn">✏️ ערוך פרופיל</button>
-            <button type="button" class="profile-hdr-btn is-share" id="share-my-profile-btn" title="שתף פרופיל">↗ שתף</button>
+            <button type="button" class="profile-hdr-btn is-share" id="share-my-profile-btn" title="שתף פרופיל" aria-label="שיתוף פרופיל">↗ שתף</button>
           </div>
         </div>
 
@@ -1048,42 +1067,42 @@
           </div>
 
           <!-- טופס התחברות -->
-          <form class="auth-form active" id="login-form" autocomplete="off">
-            <input type="text" class="auth-input" id="login-username" placeholder="שם משתמש" required autocomplete="off"
+          <form class="auth-form active" id="login-form">
+            <input type="text" class="auth-input" id="login-username" aria-label="שם משתמש להתחברות" placeholder="שם משתמש" required autocomplete="username"
               autocorrect="off" autocapitalize="none" spellcheck="false" />
-            <input type="password" class="auth-input" id="login-password" placeholder="סיסמא" required
-              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
+            <input type="password" class="auth-input" id="login-password" aria-label="סיסמה להתחברות" placeholder="סיסמא" required
+              autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <button type="submit" class="auth-submit-btn">התחבר לחשבון</button>
           </form>
 
           <!-- טופס הרשמה -->
-          <form class="auth-form" id="register-form" autocomplete="off">
-            <input type="text" class="auth-input" id="reg-username"
-              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required autocomplete="off" autocorrect="off"
+          <form class="auth-form" id="register-form">
+            <input type="text" class="auth-input" id="reg-username" aria-label="בחירת שם משתמש"
+              placeholder="בחר שם משתמש (עברית, אנגלית, מספרים, _ ? !)" required autocomplete="username" autocorrect="off"
               autocapitalize="none" spellcheck="false" />
             <div class="username-live-hint" id="reg-username-hint"></div>
-            <input type="email" class="auth-input" id="reg-email" placeholder="כתובת אימייל (לשחזור סיסמא)" required
-              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
-            <input type="password" class="auth-input" id="reg-password" placeholder="בחר סיסמא (לפחות 4 תווים)" required
-              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
+            <input type="email" class="auth-input" id="reg-email" aria-label="כתובת אימייל לשחזור סיסמה" placeholder="כתובת אימייל (לשחזור סיסמא)" required
+              autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" />
+            <input type="password" class="auth-input" id="reg-password" aria-label="בחירת סיסמה חדשה" placeholder="בחר סיסמא (לפחות 4 תווים)" required
+              autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" />
             <button type="submit" class="auth-submit-btn">צור חשבון ושמור נתונים</button>
           </form>
 
           <!-- טופס שכחתי סיסמא -->
-          <form class="auth-form" id="forgot-form" autocomplete="off">
+          <form class="auth-form" id="forgot-form">
             <div id="forgot-step-1" style="display: flex; flex-direction: column; gap: 8px;">
-              <input type="text" class="auth-input" id="forgot-identifier"
-                placeholder="הזן שם משתמש או אימייל שנרשמת איתו" autocomplete="off" />
+              <input type="text" class="auth-input" id="forgot-identifier" aria-label="שם משתמש או כתובת אימייל לשחזור סיסמה"
+                placeholder="הזן שם משתמש או אימייל שנרשמת איתו" autocomplete="username" />
               <button type="button" class="auth-submit-btn" id="send-reset-code-btn">שלח קוד אימות למייל</button>
             </div>
 
             <div class="simulated-email-box" id="simulated-email-box"></div>
 
             <div id="forgot-step-2" style="display: none; flex-direction: column; gap: 8px;">
-              <input type="text" class="auth-input" id="reset-code-input" placeholder="הזן קוד בן 6 ספרות מהמייל"
-                maxlength="6" autocomplete="off" />
-              <input type="password" class="auth-input" id="reset-new-password" placeholder="בחר סיסמא חדשה"
-                autocomplete="off" />
+              <input type="text" class="auth-input" id="reset-code-input" aria-label="קוד אימות בן 6 ספרות מהמייל" placeholder="הזן קוד בן 6 ספרות מהמייל"
+                maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+              <input type="password" class="auth-input" id="reset-new-password" aria-label="סיסמה חדשה לאיפוס" placeholder="בחר סיסמא חדשה"
+                autocomplete="new-password" />
               <button type="submit" class="auth-submit-btn">אפס סיסמא והתחבר</button>
             </div>
           </form>
@@ -1105,9 +1124,9 @@
           <div class="stats-lock-content">
             <!-- סרגל 3 לשוניות מחודש: הישגים | סטטיסטיקות | מועדפים -->
             <div class="profile-seg-tabs" role="tablist" aria-label="לשוניות פרופיל">
-              <button type="button" class="profile-seg-tab" data-profile-tab="badges" role="tab">הישגים</button>
-              <button type="button" class="profile-seg-tab active" data-profile-tab="stats" role="tab">סטטיסטיקות</button>
-              <button type="button" class="profile-seg-tab" data-profile-tab="main" role="tab">מועדפים</button>
+              <button type="button" class="profile-seg-tab" data-profile-tab="badges" role="tab" aria-selected="false">הישגים</button>
+              <button type="button" class="profile-seg-tab active" data-profile-tab="stats" role="tab" aria-selected="true">סטטיסטיקות</button>
+              <button type="button" class="profile-seg-tab" data-profile-tab="main" role="tab" aria-selected="false">מועדפים</button>
             </div>
 
             <!-- לשונית: מועדפים (Media Rows בסגנון נגן מוזיקה + עריכת פרופיל) -->
@@ -1290,9 +1309,10 @@
               </div>
             </div>
 
-            <!-- תחתית המסך: כפתור התנתקות באדום עמום הרחק מפעולות יומיומיות -->
+            <!-- תחתית המסך: התנתקות ומחיקת חשבון הרחק מפעולות יומיומיות -->
             <div class="profile-footer-danger">
               <button type="button" class="profile-logout-footer-btn" id="logout-btn">🚪 התנתק</button>
+              <button type="button" class="profile-delete-footer-btn" id="delete-account-btn">🗑️ מחק חשבון</button>
             </div>
           </div>
         </div>
@@ -1361,6 +1381,29 @@
     </div>
   </div>
 
+  <!-- דיאלוג אישור מחיקת חשבון לצמיתות -->
+  <div class="modal-backdrop" id="delete-account-confirm-backdrop" style="z-index: 442;">
+    <div class="profile-modal streak-modal-card" role="dialog" aria-modal="true" aria-label="מחיקת חשבון לצמיתות">
+      <div class="modal-header">
+        <h2 class="modal-title">🗑️ מחיקת חשבון לצמיתות</h2>
+        <button class="drawer-close-btn" id="delete-account-close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="modal-body shop-confirm-body">
+        <p class="shop-confirm-desc">פעולה זו בלתי הפיכה ותמחק לצמיתות את החשבון שלך, כולל סטטיסטיקות, קריסטלים, רשימת חברים ופלייליסטים.</p>
+        <form class="delete-account-form" id="delete-account-form">
+          <input type="password" class="auth-input" id="delete-account-password" aria-label="הזן סיסמה לאישור מחיקת החשבון"
+            placeholder="הזן את הסיסמה שלך לאישור..." required autocomplete="current-password" autocorrect="off"
+            autocapitalize="none" spellcheck="false" />
+          <div class="auth-msg" id="delete-account-msg"></div>
+          <div class="shop-confirm-actions">
+            <button type="submit" class="profile-logout-confirm-btn" id="delete-account-ok-btn">מחק חשבון לצמיתות</button>
+            <button type="button" class="logout-btn" id="delete-account-cancel-btn">ביטול</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- חלון נתוני אש הרצף -->
   <div class="modal-backdrop" id="streak-modal-backdrop">
     <div class="profile-modal streak-modal-card" role="dialog" aria-label="נתוני רצף ניצחונות">
@@ -1398,7 +1441,7 @@
       <div class="modal-body">
         <p class="promo-modal-desc">קיבלת קוד סודי? הזן אותו כאן לקבלת מתנה (קריסטלים או פריטים בלעדיים)!</p>
         <form class="promo-code-form" id="promo-code-form" autocomplete="off">
-          <input type="text" class="auth-input promo-code-input" id="promo-code-input"
+          <input type="text" class="auth-input promo-code-input" id="promo-code-input" aria-label="הזנת קוד קידום או מתנה"
             placeholder="הזן קוד כאן..." maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" />
           <button type="submit" class="auth-submit-btn">מימוש קוד</button>
         </form>
@@ -1451,18 +1494,18 @@
             <button class="drawer-close-btn" id="shop-close-btn" aria-label="סגור חנות">&times;</button>
           </div>
         </div>
-        <div class="shop-tabs shop-segmented-tabs" role="tablist">
-          <button type="button" class="shop-tab active" data-shop-tab="avatars" role="tab">פרופיל</button>
-          <button type="button" class="shop-tab" data-shop-tab="backgrounds" role="tab">רקעים</button>
-          <button type="button" class="shop-tab" data-shop-tab="themes" role="tab">ערכות נושא</button>
-          <button type="button" class="shop-tab" data-shop-tab="powerups" role="tab">עזרים</button>
+        <div class="shop-tabs shop-segmented-tabs" role="tablist" aria-label="קטגוריות החנות">
+          <button type="button" class="shop-tab active" data-shop-tab="avatars" role="tab" aria-selected="true">פרופיל</button>
+          <button type="button" class="shop-tab" data-shop-tab="backgrounds" role="tab" aria-selected="false">רקעים</button>
+          <button type="button" class="shop-tab" data-shop-tab="themes" role="tab" aria-selected="false">ערכות נושא</button>
+          <button type="button" class="shop-tab" data-shop-tab="powerups" role="tab" aria-selected="false">עזרים</button>
         </div>
       </div>
       <div class="modal-body shop-scroll-body">
         <div class="shop-preview-panel" id="shop-preview-panel" style="display: none;"></div>
         <div class="shop-msg" id="shop-msg"></div>
         <div class="shop-grid avatars" id="shop-grid"></div>
-        <input type="file" id="shop-image-upload-input" accept="image/*" style="display: none;" />
+        <input type="file" id="shop-image-upload-input" accept="image/*" aria-label="העלאת תמונת רקע או פרופיל מהמכשיר" style="display: none;" />
       </div>
     </div>
   </div>
@@ -1682,7 +1725,7 @@
         <div class="pl-share-qr-wrap">
           <img class="pl-share-qr-img" id="pl-share-qr-img" alt="QR קוד לפלייליסט" style="display: none;" />
         </div>
-        <input type="text" class="pl-share-url-input" id="pl-share-url-input" readonly />
+        <input type="text" class="pl-share-url-input" id="pl-share-url-input" aria-label="קישור לשיתוף הפלייליסט" readonly />
         <div class="pl-share-actions">
           <button type="button" class="setup-confirm-btn" id="pl-share-copy-btn">📋 העתק קישור</button>
           <button type="button" class="pl-whatsapp-btn" id="pl-share-whatsapp-btn">💬 שתף בוואטסאפ</button>
@@ -1777,7 +1820,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261124f"></script>
+  <script type="module" src="src/main.js?v=20261124h"></script>
 </body>
 
 </html>

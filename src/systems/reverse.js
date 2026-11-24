@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261124f";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124f";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124f";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124f";
-import { saveUserStats } from "../services/storage.js?v=20261124f";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124f";
-import { launchWinConfetti } from "./confetti.js?v=20261124f";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124f";
+import { state } from "../state.js?v=20261124h";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124h";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124h";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124h";
+import { saveUserStats } from "../services/storage.js?v=20261124h";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124h";
+import { launchWinConfetti } from "./confetti.js?v=20261124h";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124h";
 
 let sessionId = 0;
 let currentSong = null;
@@ -137,7 +137,10 @@ async function loadNextReverseRound(mySession) {
   const fbEl = document.getElementById("reverse-feedback-box");
 
   if (fbEl) fbEl.classList.remove("visible", "is-win", "is-loss");
-  if (coverEl) coverEl.classList.remove("revealed");
+  if (coverEl) {
+    coverEl.classList.remove("revealed");
+    coverEl.alt = "";
+  }
   if (playBtn) playBtn.disabled = true;
   if (choicesEl) choicesEl.innerHTML = "";
   if (statusEl) statusEl.textContent = "הופך את השיר להילוך אחורי... 🔄";
@@ -228,7 +231,10 @@ function handleReverseChoice(btn, opt, mySession) {
   });
 
   const coverEl = document.getElementById("reverse-cover-img");
-  if (coverEl) coverEl.classList.add("revealed");
+  if (coverEl) {
+    coverEl.classList.add("revealed");
+    coverEl.alt = currentSong?.title ? `עטיפת השיר: ${currentSong.title}` : "עטיפת השיר";
+  }
 
   const fbEl = document.getElementById("reverse-feedback-box");
   const fbTitle = document.getElementById("reverse-fb-title");

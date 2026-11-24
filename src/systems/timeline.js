@@ -1,11 +1,11 @@
-import { state } from "../state.js?v=20261124f";
-import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124f";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124f";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124f";
-import { saveUserStats } from "../services/storage.js?v=20261124f";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124f";
-import { launchWinConfetti } from "./confetti.js?v=20261124f";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124f";
+import { state } from "../state.js?v=20261124h";
+import { ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124h";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124h";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124h";
+import { saveUserStats } from "../services/storage.js?v=20261124h";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124h";
+import { launchWinConfetti } from "./confetti.js?v=20261124h";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124h";
 
 const TARGET_CARDS = 8;
 const MAX_LIVES = 3;

@@ -1,8 +1,8 @@
-import { PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
-import { fetchItunesData } from "../services/itunes.js?v=20261124f";
-import { saveUserStats } from "../services/storage.js?v=20261124f";
-import { stopAudioVisuals } from "./audio.js?v=20261124f";
+import { PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
+import { fetchItunesData } from "../services/itunes.js?v=20261124h";
+import { saveUserStats } from "../services/storage.js?v=20261124h";
+import { stopAudioVisuals } from "./audio.js?v=20261124h";
 
 let galleryPlaySeq = 0;
 

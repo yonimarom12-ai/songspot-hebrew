@@ -1,20 +1,20 @@
-import { state } from "../state.js?v=20261124f";
-import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124f";
-import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124f";
-import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124f";
-import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey, stopPlaylistGameSession } from "./game.js?v=20261124f";
-import { renderPlaylistsScreen } from "./playlists.js?v=20261124f";
-import { showGameToast } from "../utils/toast.js?v=20261124f";
-import { stopTimedRun } from "./timed.js?v=20261124f";
-import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124f";
-import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124f";
-import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124f";
-import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124f";
-import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124f";
-import { playClickSfx } from "./sfx.js?v=20261124f";
-import { vibrateTap } from "../utils/toast.js?v=20261124f";
-import { isOnboardingOpen } from "./onboarding.js?v=20261124f";
-import { recordStarterModePlayed } from "./quests.js?v=20261124f";
+import { state } from "../state.js?v=20261124h";
+import { stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124h";
+import { updateFilterPillsUI, toggleDrawer, setSettingsScreenHandler, saveUserPreferences } from "./drawer.js?v=20261124h";
+import { toggleProfileModal, toggleShopModal, toggleStreakModal, toggleQuestsModal, updateBottomNavActiveTab } from "./profile.js?v=20261124h";
+import { fetchRandomSong, setActiveDifficultyUI, startTimedGameSession, startDeterministicChallenge, getTodayDateKey, getCurrentWeekKey, stopPlaylistGameSession } from "./game.js?v=20261124h";
+import { renderPlaylistsScreen } from "./playlists.js?v=20261124h";
+import { showGameToast } from "../utils/toast.js?v=20261124h";
+import { stopTimedRun } from "./timed.js?v=20261124h";
+import { startMarathonSession, stopMarathonSession } from "./marathon.js?v=20261124h";
+import { startReverseSession, stopReverseSession } from "./reverse.js?v=20261124h";
+import { startTimelineSession, stopTimelineSession } from "./timeline.js?v=20261124h";
+import { loadFriendsScreen, refreshIncomingFriendsBadge } from "./friends.js?v=20261124h";
+import { fetchGlobalLeaderboard, syncAccountToCloud } from "../services/cloud.js?v=20261124h";
+import { playClickSfx } from "./sfx.js?v=20261124h";
+import { vibrateTap } from "../utils/toast.js?v=20261124h";
+import { isOnboardingOpen } from "./onboarding.js?v=20261124h";
+import { recordStarterModePlayed } from "./quests.js?v=20261124h";
 
 const SCREEN_IDS = {
   home: "screen-home",
@@ -136,8 +136,12 @@ function renderHomeModeStatsStrip() {
   } else {
     const won = s.totalWon || 0;
     const heard = s.totalHeard || 0;
-    const rate = heard > 0 ? Math.round((won / heard) * 100) : 0;
-    strip.innerHTML = `<span><img class="icon-3d-mini ui-theme-icon" data-ui-icon="notes" src="assets/ui-final-notes.png" alt="" /> זיהויים: <strong>${won}</strong></span><span class="hm-stat-sep">·</span><span><img class="icon-3d-mini ui-theme-icon" data-ui-icon="accuracy" src="assets/ui-final-accuracy.png" alt="" /> דיוק: <strong>${rate}%</strong></span>`;
+    if (heard === 0) {
+      strip.innerHTML = `<span class="hm-new-player-hint">🎧 האזינו לקטע קצר ונחשו את השיר — <strong>מתחילים מיד, בלי הרשמה!</strong></span>`;
+    } else {
+      const rate = Math.round((won / heard) * 100);
+      strip.innerHTML = `<span><img class="icon-3d-mini ui-theme-icon" data-ui-icon="notes" src="assets/ui-final-notes.png" alt="" /> זיהויים: <strong>${won}</strong></span><span class="hm-stat-sep">·</span><span><img class="icon-3d-mini ui-theme-icon" data-ui-icon="accuracy" src="assets/ui-final-accuracy.png" alt="" /> דיוק: <strong>${rate}%</strong></span>`;
+    }
   }
 }
 
@@ -475,14 +479,33 @@ function renderLeaderboardView() {
   // טבלה מלאה
   listEl.innerHTML = "";
   if (sorted.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "lb-empty";
-    empty.textContent = activeLeaderboardScope === "friends"
-      ? (state.currentUser
-        ? "עדיין אין לך חברים מאושרים — הוסף חברים מכפתור 👥 חברים במסך הבית!"
-        : "התחבר לחשבון כדי לראות טבלת חברים!")
-      : "עדיין אין שחקנים רשומים בדירוג — הירשם בפרופיל כדי להיות הראשון בטבלה!";
-    listEl.appendChild(empty);
+    if (activeLeaderboardScope === "friends") {
+      const card = document.createElement("div");
+      card.className = "lb-empty-card";
+      if (state.currentUser) {
+        card.innerHTML = `
+          <div class="lb-empty-icon" aria-hidden="true">👥</div>
+          <h3 class="lb-empty-title">עדיין אין חברים בדירוג</h3>
+          <p class="lb-empty-desc">הוסיפו חברים באמצעות Player ID, קישור הזמנה או קוד QR — והשוו מולם זיהויים, רצפים ושיאים!</p>
+          <button type="button" class="setup-confirm-btn lb-empty-cta">👥 הוסף או הזמן חבר</button>
+        `;
+        card.querySelector(".lb-empty-cta")?.addEventListener("click", () => showScreen("friends"));
+      } else {
+        card.innerHTML = `
+          <div class="lb-empty-icon" aria-hidden="true">🔒</div>
+          <h3 class="lb-empty-title">דירוג חברים זמין למשתמשים רשומים</h3>
+          <p class="lb-empty-desc">התחברו או צרו חשבון בחינם כדי להוסיף חברים ולהתחרות מולם בטבלה פרטית.</p>
+          <button type="button" class="setup-confirm-btn lb-empty-cta">🔑 התחבר או הירשם</button>
+        `;
+        card.querySelector(".lb-empty-cta")?.addEventListener("click", () => toggleProfileModal(true));
+      }
+      listEl.appendChild(card);
+    } else {
+      const empty = document.createElement("div");
+      empty.className = "lb-empty";
+      empty.textContent = "עדיין אין שחקנים רשומים בדירוג — הירשם בפרופיל כדי להיות הראשון בטבלה!";
+      listEl.appendChild(empty);
+    }
     return;
   }
 
@@ -755,14 +778,20 @@ export function initNavigationListeners() {
   document.querySelectorAll("[data-lb-scope]").forEach(tab => {
     tab.addEventListener("click", () => {
       activeLeaderboardScope = tab.dataset.lbScope || "global";
-      document.querySelectorAll("[data-lb-scope]").forEach(t => t.classList.toggle("active", t === tab));
+      document.querySelectorAll("[data-lb-scope]").forEach(t => {
+        t.classList.toggle("active", t === tab);
+        t.setAttribute("aria-selected", String(t === tab));
+      });
       renderLeaderboardView();
     });
   });
   document.querySelectorAll("[data-lb-sort]").forEach(tab => {
     tab.addEventListener("click", () => {
       activeLeaderboardSort = tab.dataset.lbSort || "totalWon";
-      document.querySelectorAll("[data-lb-sort]").forEach(t => t.classList.toggle("active", t === tab));
+      document.querySelectorAll("[data-lb-sort]").forEach(t => {
+        t.classList.toggle("active", t === tab);
+        t.setAttribute("aria-selected", String(t === tab));
+      });
       renderLeaderboardView();
     });
   });

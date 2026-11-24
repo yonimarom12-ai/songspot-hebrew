@@ -1,5 +1,5 @@
-// Cloudflare Pages Function: הרשמה והתחברות מאובטחת מול Cloudflare D1 + חתימת Session Token
-import { createSessionToken } from "./_session.js";
+// Cloudflare Pages Function: הרשמה, התחברות ומחיקת חשבון מאובטחת מול Cloudflare D1 + חתימת Session Token
+import { createSessionToken, extractBearerToken, verifySessionToken } from "./_session.js";
 
 const TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS players (
@@ -107,6 +107,52 @@ export async function onRequestPost(context) {
       try { parsedStats = JSON.parse(row.stats_json || "{}"); } catch (e) { }
       const token = await createSessionToken(usernameLower, env);
       return Response.json({ ok: true, username: row.username, stats: parsedStats, token });
+    }
+
+    if (action === "delete_account") {
+      const bearer = extractBearerToken(request);
+      if (bearer) {
+        const verifiedUser = await verifySessionToken(bearer, env);
+        if (verifiedUser && verifiedUser !== usernameLower) {
+          return Response.json({ error: "אין הרשאה למחוק חשבון אחר." }, { status: 403 });
+        }
+      }
+
+      const row = await env.DB
+        .prepare("SELECT username, password_hash FROM players WHERE username_lower = ?")
+        .bind(usernameLower)
+        .first();
+
+      if (!row || row.password_hash !== passHash) {
+        return Response.json({ error: "הסיסמה שהוזנה שגויה." }, { status: 401 });
+      }
+
+      await env.DB
+        .prepare("DELETE FROM players WHERE username_lower = ?")
+        .bind(usernameLower)
+        .run();
+
+      // ניקוי נתונים נלווים בטבלאות חברים ופלייליסטים (אם הטבלאות קיימות)
+      try {
+        await env.DB
+          .prepare("DELETE FROM friendships WHERE user_lower = ? OR friend_lower = ?")
+          .bind(usernameLower, usernameLower)
+          .run();
+      } catch (e) { }
+      try {
+        await env.DB
+          .prepare("DELETE FROM friend_requests WHERE from_lower = ? OR to_lower = ?")
+          .bind(usernameLower, usernameLower)
+          .run();
+      } catch (e) { }
+      try {
+        await env.DB
+          .prepare("DELETE FROM shared_playlists WHERE lower(owner) = ?")
+          .bind(usernameLower)
+          .run();
+      } catch (e) { }
+
+      return Response.json({ ok: true, deleted: true });
     }
 
     return Response.json({ error: "Unknown action" }, { status: 400 });

@@ -1,13 +1,13 @@
-import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
-import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124f";
-import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124f";
-import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124f";
-import { saveUserStats } from "../services/storage.js?v=20261124f";
-import { launchWinConfetti } from "./confetti.js?v=20261124f";
-import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124f";
-import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261124f";
-import { recordStarterMarathonComplete } from "./quests.js?v=20261124f";
+import { ARTISTS_DB, ARTIST_BY_NAME } from "../data/artists.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
+import { getArtistCatalog, ensureSeedCatalogLoaded } from "../services/itunes.js?v=20261124h";
+import { initAudioContext, stopAudioVisuals, releaseMediaElement } from "./audio.js?v=20261124h";
+import { awardPoints, updatePointsDisplay } from "./economy.js?v=20261124h";
+import { saveUserStats } from "../services/storage.js?v=20261124h";
+import { launchWinConfetti } from "./confetti.js?v=20261124h";
+import { playClickSfx, playWinSfx, playWrongSfx, playCrystalSfx } from "./sfx.js?v=20261124h";
+import { vibrateTap, vibrateWin, vibrateError, animateCountUp } from "../utils/toast.js?v=20261124h";
+import { recordStarterMarathonComplete } from "./quests.js?v=20261124h";
 
 const TOTAL_QUESTIONS = 10;
 const QUESTION_DURATION_MS = 15000;
@@ -374,6 +374,7 @@ function showFeedbackAndScheduleNext(sessionId, { isGood, titleText, subText, po
   const q = questions[currentIndex];
   if (coverImg && q?.song?.artwork) {
     coverImg.src = q.song.artwork;
+    coverImg.alt = q.song.title ? `עטיפת השיר: ${q.song.title}` : "עטיפת השיר";
     coverImg.classList.add("revealed");
   }
 
@@ -570,6 +571,7 @@ function renderCurrentQuestion(sessionId) {
   if (coverImg) {
     coverImg.classList.remove("revealed");
     coverImg.src = q.song.artwork || "";
+    coverImg.alt = "";
   }
 
   if (q.type === "song" || q.type === "artist" || q.type === "older") {

@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124f";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124f";
-import { dom } from "../dom.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124f";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124f";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124f";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124h";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124h";
+import { dom } from "../dom.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124h";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124h";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124h";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261124f";
+} from "../services/itunes.js?v=20261124h";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261124f";
-import { launchWinConfetti } from "./confetti.js?v=20261124f";
+} from "./audio.js?v=20261124h";
+import { launchWinConfetti } from "./confetti.js?v=20261124h";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261124f";
+} from "./feedback.js?v=20261124h";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261124f";
-import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124f";
+} from "./search.js?v=20261124h";
+import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124h";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261124f";
-import { recordQuestProgress } from "./quests.js?v=20261124f";
+} from "./economy.js?v=20261124h";
+import { recordQuestProgress } from "./quests.js?v=20261124h";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261124f";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124f";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124f";
+} from "./timed.js?v=20261124h";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124h";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124h";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -170,6 +170,7 @@ export function resetUI() {
   syncGameModeVisibility();
 
   dom.discWrapper.classList.remove("revealed");
+  if (dom.songCover) dom.songCover.alt = "";
   dom.statusLabel.style.color = "var(--text-sub)";
   dom.durationBadge.style.display = "flex";
   if (dom.timelineMarker) dom.timelineMarker.style.display = isTimed ? "none" : "flex";
@@ -720,7 +721,10 @@ export function endRound(won) {
   const revealOutcome = document.getElementById("reveal-outcome-badge");
   if (revealCover) {
     revealCover.src = hiResArt;
-    revealCover.alt = state.currentSong.title;
+    revealCover.alt = state.currentSong.title ? `עטיפת השיר: ${state.currentSong.title}` : "עטיפת השיר";
+  }
+  if (dom.songCover) {
+    dom.songCover.alt = state.currentSong.title ? `עטיפת השיר: ${state.currentSong.title}` : "עטיפת השיר";
   }
   if (revealBg) {
     revealBg.style.backgroundImage = hiResArt ? `url("${hiResArt}")` : "";

@@ -8,13 +8,13 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
-import { saveUserStats } from "../services/storage.js?v=20261124f";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124f";
-import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124f";
-import { recordStarterShopPurchase } from "./quests.js?v=20261124f";
-import { showGameToast } from "../utils/toast.js?v=20261124f";
+} from "../data/shop.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
+import { saveUserStats } from "../services/storage.js?v=20261124h";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124h";
+import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124h";
+import { recordStarterShopPurchase } from "./quests.js?v=20261124h";
+import { showGameToast } from "../utils/toast.js?v=20261124h";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -929,7 +929,9 @@ export function renderShop() {
   if (balanceEl) balanceEl.textContent = formatPointsWhole(getPointsBalance());
 
   document.querySelectorAll(".shop-tab").forEach(tab => {
-    tab.classList.toggle("active", tab.dataset.shopTab === activeShopTab);
+    const isSel = tab.dataset.shopTab === activeShopTab;
+    tab.classList.toggle("active", isSel);
+    tab.setAttribute("aria-selected", String(isSel));
   });
 
   renderPreviewPanel();

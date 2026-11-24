@@ -1,14 +1,14 @@
-import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261124f";
-import { dom } from "../dom.js?v=20261124f";
-import { state } from "../state.js?v=20261124f";
+import { GENRE_LABELS, DECADE_LABELS } from "../data/config.js?v=20261124h";
+import { dom } from "../dom.js?v=20261124h";
+import { state } from "../state.js?v=20261124h";
 import {
   updateSettingsStatusPills,
   updateSearchBarProximityFeedback,
   updateHintsPanelVisibility
-} from "./feedback.js?v=20261124f";
-import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261124f";
-import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261124f";
-import { saveUserStats } from "../services/storage.js?v=20261124f";
+} from "./feedback.js?v=20261124h";
+import { triggerSearchForCurrentInput, closeSuggestionsDropdown } from "./search.js?v=20261124h";
+import { setSfxEnabled, playClickSfx } from "./sfx.js?v=20261124h";
+import { saveUserStats } from "../services/storage.js?v=20261124h";
 
 let settingsScreenHandler = null;
 
@@ -42,11 +42,23 @@ export function applyUserPreferencesFromStats() {
   state.hintsEnabled = Boolean(prefs.hintsEnabled);
   setSfxEnabled(prefs.sfxEnabled !== undefined ? Boolean(prefs.sfxEnabled) : true);
 
-  if (dom.easySearchSettingToggle) dom.easySearchSettingToggle.classList.toggle("on", state.easySearchFiftyActive);
-  if (dom.redFeedbackSettingToggle) dom.redFeedbackSettingToggle.classList.toggle("on", state.redFeedbackEnabled);
-  if (dom.hintsSettingToggle) dom.hintsSettingToggle.classList.toggle("on", state.hintsEnabled);
+  if (dom.easySearchSettingToggle) {
+    dom.easySearchSettingToggle.classList.toggle("on", state.easySearchFiftyActive);
+    dom.easySearchSettingToggle.setAttribute("aria-checked", String(Boolean(state.easySearchFiftyActive)));
+  }
+  if (dom.redFeedbackSettingToggle) {
+    dom.redFeedbackSettingToggle.classList.toggle("on", state.redFeedbackEnabled);
+    dom.redFeedbackSettingToggle.setAttribute("aria-checked", String(Boolean(state.redFeedbackEnabled)));
+  }
+  if (dom.hintsSettingToggle) {
+    dom.hintsSettingToggle.classList.toggle("on", state.hintsEnabled);
+    dom.hintsSettingToggle.setAttribute("aria-checked", String(Boolean(state.hintsEnabled)));
+  }
   const sfxToggle = document.getElementById("sfx-setting-toggle");
-  if (sfxToggle) sfxToggle.classList.toggle("on", state.sfxEnabled);
+  if (sfxToggle) {
+    sfxToggle.classList.toggle("on", state.sfxEnabled);
+    sfxToggle.setAttribute("aria-checked", String(Boolean(state.sfxEnabled)));
+  }
 
   updateFilterPillsUI();
   updateSettingsStatusPills();
@@ -74,8 +86,16 @@ export function formatFilterPillLabel(selectedSet, labelsMap, allText, pluralUni
 }
 
 export function updateFilterPillsUI() {
-  dom.genreOptionBtns.forEach(btn => btn.classList.toggle("selected", state.selectedGenres.has(btn.dataset.genre)));
-  dom.decadeOptionBtns.forEach(btn => btn.classList.toggle("selected", state.selectedDecades.has(btn.dataset.decade)));
+  dom.genreOptionBtns.forEach(btn => {
+    const sel = state.selectedGenres.has(btn.dataset.genre);
+    btn.classList.toggle("selected", sel);
+    btn.setAttribute("aria-pressed", String(sel));
+  });
+  dom.decadeOptionBtns.forEach(btn => {
+    const sel = state.selectedDecades.has(btn.dataset.decade);
+    btn.classList.toggle("selected", sel);
+    btn.setAttribute("aria-pressed", String(sel));
+  });
 
   dom.activeGenrePill.textContent = formatFilterPillLabel(state.selectedGenres, GENRE_LABELS, "כל הז'אנרים", "ז'אנרים");
   dom.activeDecadePill.textContent = formatFilterPillLabel(state.selectedDecades, DECADE_LABELS, "כל העשורים", "עשורים");
@@ -110,6 +130,7 @@ export function initDrawerListeners() {
       state.usedEasySearchInRound = true;
     }
     dom.easySearchSettingToggle.classList.toggle("on", state.easySearchFiftyActive);
+    dom.easySearchSettingToggle.setAttribute("aria-checked", String(Boolean(state.easySearchFiftyActive)));
     updateSettingsStatusPills();
     saveUserPreferences();
     if (dom.guessInput.value.trim().length > 0 && !dom.guessInput.disabled) {
@@ -125,6 +146,7 @@ export function initDrawerListeners() {
       state.usedRedFeedbackInRound = true;
     }
     dom.redFeedbackSettingToggle.classList.toggle("on", state.redFeedbackEnabled);
+    dom.redFeedbackSettingToggle.setAttribute("aria-checked", String(Boolean(state.redFeedbackEnabled)));
     updateSettingsStatusPills();
     updateSearchBarProximityFeedback(dom.guessInput.value);
     saveUserPreferences();
@@ -133,6 +155,7 @@ export function initDrawerListeners() {
   dom.hintsSettingToggle.addEventListener("click", () => {
     state.hintsEnabled = !state.hintsEnabled;
     dom.hintsSettingToggle.classList.toggle("on", state.hintsEnabled);
+    dom.hintsSettingToggle.setAttribute("aria-checked", String(Boolean(state.hintsEnabled)));
     updateHintsPanelVisibility();
     saveUserPreferences();
     playClickSfx();
@@ -141,9 +164,11 @@ export function initDrawerListeners() {
   const sfxToggle = document.getElementById("sfx-setting-toggle");
   if (sfxToggle) {
     sfxToggle.classList.toggle("on", state.sfxEnabled);
+    sfxToggle.setAttribute("aria-checked", String(Boolean(state.sfxEnabled)));
     sfxToggle.addEventListener("click", () => {
       setSfxEnabled(!state.sfxEnabled);
       sfxToggle.classList.toggle("on", state.sfxEnabled);
+      sfxToggle.setAttribute("aria-checked", String(Boolean(state.sfxEnabled)));
       saveUserPreferences();
       if (state.sfxEnabled) playClickSfx();
     });

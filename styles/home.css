@@ -4585,3 +4585,48 @@ body {
 .pl-summary-row.is-miss .pl-summary-badge {
   color: #f87171;
 }
+
+/* ===== שיפור UX לשחקן חדש + מצב ריק בדירוג חברים ===== */
+.hm-new-player-hint {
+  color: #e9d5ff;
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.lb-empty-card {
+  background: rgba(20, 14, 42, 0.86);
+  border: 1px dashed rgba(192, 132, 252, 0.36);
+  border-radius: 20px;
+  padding: 26px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.lb-empty-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.lb-empty-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.lb-empty-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-sub);
+  max-width: 310px;
+  line-height: 1.5;
+}
+
+.lb-empty-cta {
+  margin-top: 4px;
+  min-width: 200px;
+}
