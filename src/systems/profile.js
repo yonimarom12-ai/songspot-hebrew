@@ -1,30 +1,74 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261123aa";
-import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261123aa";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123aa";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261123aa";
-import { state } from "../state.js?v=20261123aa";
-import { saveUserStats } from "../services/storage.js?v=20261123aa";
-import { fetchItunesData } from "../services/itunes.js?v=20261123aa";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261123aa";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261123aa";
-import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261123aa";
-import { renderShop, clearShopPreview } from "./shop.js?v=20261123aa";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261123aa";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124a";
+import { FREE_PROFILE_BANNERS, findProfileBanner } from "../data/shop.js?v=20261124a";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124a";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124a";
+import { state } from "../state.js?v=20261124a";
+import { saveUserStats } from "../services/storage.js?v=20261124a";
+import { fetchItunesData } from "../services/itunes.js?v=20261124a";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124a";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124a";
+import { formatPoints, getPointsBalance, getStreakMultiplier } from "./economy.js?v=20261124a";
+import { renderShop, clearShopPreview } from "./shop.js?v=20261124a";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124a";
+
+let shieldAnimTimer = null;
+let shieldRestoreTimer = null;
 
 export function updateStreakDisplay() {
   const s = state.userStats.currentStreak || 0;
-  const hasShield = (state.userStats?.powerups?.streakFreeze || 0) > 0;
+  const shieldCount = Math.max(0, Number(state.userStats?.powerups?.streakFreeze) || 0);
+  const hasShield = shieldCount > 0;
   dom.streakCountEl.textContent = s;
   dom.streakBadge.classList.toggle("active-streak", s > 0);
   dom.streakBadge.classList.toggle("zero-streak", s === 0);
-  dom.streakBadge.classList.toggle("has-streak-shield", hasShield);
+
+  const shieldCountEl = document.getElementById("streak-shield-count");
+  if (!dom.streakBadge.classList.contains("streak-shield-breaking")) {
+    dom.streakBadge.classList.toggle("has-streak-shield", hasShield);
+    if (shieldCountEl) shieldCountEl.textContent = hasShield ? String(shieldCount) : "";
+  }
+
   const homeStreakEl = document.getElementById("home-streak-count");
   if (homeStreakEl) homeStreakEl.textContent = s;
   const homeStreakBtn = document.getElementById("home-streak-btn");
   if (homeStreakBtn) homeStreakBtn.classList.toggle("has-streak-shield", hasShield);
+  const homeShieldCountEl = document.getElementById("home-shield-count");
+  if (homeShieldCountEl) homeShieldCountEl.textContent = hasShield ? String(shieldCount) : "";
+
   if (dom.profileBtnLabel) {
     dom.profileBtnLabel.textContent = state.currentUser ? state.currentUser : "אורח";
   }
+}
+
+export function triggerStreakShieldBreakAnimation(remainingShields = 0) {
+  const badge = dom.streakBadge;
+  if (!badge) return;
+  const shieldCountEl = document.getElementById("streak-shield-count");
+  const countAfter = Math.max(0, Number(remainingShields) || 0);
+
+  clearTimeout(shieldAnimTimer);
+  clearTimeout(shieldRestoreTimer);
+  badge.classList.remove("streak-shield-breaking", "streak-shield-restore");
+  void badge.offsetWidth;
+
+  // מפעיל את אנימציית השבירה/התנפצות של המגן הכחול מעל אש הרצף (האש עצמה נשארת במקומה)
+  badge.classList.remove("has-streak-shield");
+  badge.classList.add("streak-shield-breaking");
+
+  shieldAnimTimer = setTimeout(() => {
+    badge.classList.remove("streak-shield-breaking");
+    if (countAfter > 0) {
+      if (shieldCountEl) shieldCountEl.textContent = String(countAfter);
+      badge.classList.add("has-streak-shield", "streak-shield-restore");
+      shieldRestoreTimer = setTimeout(() => {
+        badge.classList.remove("streak-shield-restore");
+      }, 460);
+    } else {
+      badge.classList.remove("has-streak-shield");
+      if (shieldCountEl) shieldCountEl.textContent = "";
+    }
+    updateStreakDisplay();
+  }, 740);
 }
 
 // Profile & Stats Modal Rendering

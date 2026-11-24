@@ -1,6 +1,6 @@
-import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261123aa";
-import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261123aa";
-import { state } from "../state.js?v=20261123aa";
+import { DURATIONS, STAGE_STOPS_PCT, START_OFFSET } from "../data/config.js?v=20261124a";
+import { dom, PLAY_SVG, PAUSE_SVG } from "../dom.js?v=20261124a";
+import { state } from "../state.js?v=20261124a";
 
 let beforePlaySnippetHook = null;
 let pendingRawFetch = null; // { roundId, promise }
@@ -368,12 +368,22 @@ export function updateTimelineMarkerForStage(stageIdx) {
   }
 }
 
+const PLAY_RING_CIRCUMFERENCE = 2 * Math.PI * 49; // 307.88
+
+function setPlayRingProgress(ratio) {
+  const ringFill = document.getElementById("play-ring-fill");
+  if (!ringFill) return;
+  const clamped = Math.max(0, Math.min(1, Number(ratio) || 0));
+  ringFill.style.strokeDashoffset = (PLAY_RING_CIRCUMFERENCE * (1 - clamped)).toFixed(2);
+}
+
 export function startProgressLoop(durationSec, resetStart = true) {
   cancelAnimationFrame(state.rafProgressId);
   activeDurationSec = durationSec;
   if (resetStart || snippetStartPerf === null) {
     snippetStartPerf = performance.now();
     if (dom.playbackFill) dom.playbackFill.style.width = "0%";
+    setPlayRingProgress(0);
   }
 
   function tick(now) {
@@ -386,6 +396,7 @@ export function startProgressLoop(durationSec, resetStart = true) {
     if (dom.playbackFill) {
       dom.playbackFill.style.width = `${elapsedSecondsToBarPercent(clampedSec)}%`;
     }
+    setPlayRingProgress(clampedSec / Math.max(0.05, activeDurationSec));
     if (elapsedSec < activeDurationSec) {
       state.rafProgressId = requestAnimationFrame(tick);
     }
@@ -447,6 +458,9 @@ export function stopAudioVisuals(finalPct = null) {
 
   dom.playIcon.innerHTML = PLAY_SVG;
   if (dom.playBtn) dom.playBtn.classList.remove("is-playing");
+  const fabWrap = document.getElementById("play-fab-wrap");
+  if (fabWrap) fabWrap.classList.remove("is-playing");
+  setPlayRingProgress(0);
   if (dom.durationBadge) dom.durationBadge.classList.remove("is-playing");
   dom.equalizer.classList.remove("playing");
   dom.discWrapper.classList.remove("spinning");
@@ -456,6 +470,8 @@ function setPlayingVisuals() {
   state.isPlayingSnippet = true;
   dom.playIcon.innerHTML = PAUSE_SVG;
   if (dom.playBtn) dom.playBtn.classList.add("is-playing");
+  const fabWrap = document.getElementById("play-fab-wrap");
+  if (fabWrap) fabWrap.classList.add("is-playing");
   if (dom.durationBadge) dom.durationBadge.classList.add("is-playing");
   dom.equalizer.classList.add("playing");
   dom.discWrapper.classList.add("spinning");

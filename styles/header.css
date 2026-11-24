@@ -130,6 +130,131 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
+/* מגן רצף כחול על גבי אש הרצף + תג כמות + אנימציית שבירה */
+.streak-shield-overlay {
+  position: absolute;
+  inset: -4px -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transform: scale(0.72);
+  transition: opacity 0.25s ease, transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.streak-shield-svg {
+  width: 62px;
+  height: 68px;
+  overflow: visible;
+  filter: drop-shadow(0 3px 10px rgba(14, 165, 233, 0.72));
+}
+
+.shield-crack-line {
+  opacity: 0;
+}
+
+.streak-shield-burst {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(125, 211, 252, 0.95);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.9);
+  opacity: 0;
+  transform: scale(0.5);
+  pointer-events: none;
+}
+
+.streak-shield-count {
+  position: absolute;
+  top: -2px;
+  right: -8px;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  border: 2px solid #e0f2fe;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(14, 165, 233, 0.75);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.streak-fire-badge.has-streak-shield .streak-shield-overlay {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.streak-fire-badge.has-streak-shield .streak-shield-count {
+  display: inline-flex;
+}
+
+.streak-fire-badge.streak-shield-restore .streak-shield-overlay {
+  animation: shieldRestorePop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.streak-fire-badge.streak-shield-breaking .streak-shield-overlay {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.streak-fire-badge.streak-shield-breaking .shield-crack-line {
+  animation: shieldCrackFlash 0.72s ease-out forwards;
+}
+
+.streak-fire-badge.streak-shield-breaking .shield-half-left {
+  transform-origin: 32px 36px;
+  animation: shieldSplitLeft 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.streak-fire-badge.streak-shield-breaking .shield-half-right {
+  transform-origin: 32px 36px;
+  animation: shieldSplitRight 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.streak-fire-badge.streak-shield-breaking .streak-shield-burst {
+  animation: shieldBurstRing 0.62s ease-out forwards;
+}
+
+@keyframes shieldCrackFlash {
+  0% { opacity: 0; }
+  18% { opacity: 1; stroke-width: 3.2; }
+  45% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes shieldSplitLeft {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  22% { transform: translate(-2px, 0) rotate(-3deg) scale(1.06); opacity: 1; }
+  100% { transform: translate(-26px, -12px) rotate(-34deg) scale(0.65); opacity: 0; }
+}
+
+@keyframes shieldSplitRight {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  22% { transform: translate(2px, 0) rotate(3deg) scale(1.06); opacity: 1; }
+  100% { transform: translate(26px, -10px) rotate(34deg) scale(0.65); opacity: 0; }
+}
+
+@keyframes shieldBurstRing {
+  0% { opacity: 0.95; transform: scale(0.55); }
+  100% { opacity: 0; transform: scale(1.65); }
+}
+
+@keyframes shieldRestorePop {
+  0% { opacity: 0; transform: scale(0.45); }
+  65% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 /* Crystal Currency Counter (No Background Pill) */
 .points-badge {
   height: 36px;

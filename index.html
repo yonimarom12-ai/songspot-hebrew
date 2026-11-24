@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123aa">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123aa">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124a">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124a">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261123aa">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/home.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/header.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/player.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/animations.css?v=20261123aa">
-  <link rel="stylesheet" href="styles/themes.css?v=20261123aa">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261124a">
+  <link rel="stylesheet" href="styles/home.css?v=20261124a">
+  <link rel="stylesheet" href="styles/header.css?v=20261124a">
+  <link rel="stylesheet" href="styles/player.css?v=20261124a">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261124a">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261124a">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124a">
+  <link rel="stylesheet" href="styles/animations.css?v=20261124a">
+  <link rel="stylesheet" href="styles/themes.css?v=20261124a">
 </head>
 
 <body data-theme="spotify">
@@ -59,7 +59,14 @@
         <div class="home-top-right">
           <div class="home-status-pill">
             <button type="button" class="home-stat-btn" id="home-streak-btn" title="רצף ניצחונות">
-              <img class="icon-3d-inline ui-theme-icon" data-ui-icon="flame" src="assets/ui-final-flame.png" alt="" aria-hidden="true" /><span id="home-streak-count">0</span>
+              <span class="home-flame-wrap">
+                <img class="icon-3d-inline ui-theme-icon" data-ui-icon="flame" src="assets/ui-final-flame.png" alt="" aria-hidden="true" />
+                <svg class="home-shield-svg" viewBox="0 0 40 44" aria-hidden="true">
+                  <path d="M20 2 L36 8 V21 C36 31.5 29 38.5 20 42 C11 38.5 4 31.5 4 21 V8 Z" fill="rgba(56, 189, 248, 0.42)" stroke="#7dd3fc" stroke-width="2.6" stroke-linejoin="round" />
+                  <path d="M20 6 L32 10.5 V20.5 C32 28.5 26.8 34.2 20 37.2" fill="none" stroke="rgba(224, 242, 254, 0.65)" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+                <span class="home-shield-count" id="home-shield-count"></span>
+              </span><span id="home-streak-count">0</span>
             </button>
             <span class="home-stat-divider"></span>
             <button type="button" class="home-stat-btn" id="home-points-btn" title="יתרת קריסטלים">
@@ -737,11 +744,33 @@
           <span class="timed-delta-flash" id="timed-delta-flash"></span>
         </div>
 
-        <!-- אש הרצף החדשה (PNG שקוף 3D) -->
+        <!-- אש הרצף (צבע קלאסי + מגן כחול עם ספירה ואנימציית שבירה) -->
         <div class="streak-top-slot">
           <div class="streak-fire-badge zero-streak" id="streak-badge" title="רצף ניצחונות נוכחי">
             <img class="streak-fire-img icon-3d-flame" src="assets/ui-final-flame.png" alt="" aria-hidden="true" />
             <span class="streak-count-text" id="streak-count">0</span>
+            <div class="streak-shield-overlay" id="streak-shield-overlay" aria-hidden="true">
+              <svg class="streak-shield-svg" viewBox="0 0 64 72">
+                <defs>
+                  <linearGradient id="streakShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(125, 211, 252, 0.68)" />
+                    <stop offset="50%" stop-color="rgba(14, 165, 233, 0.44)" />
+                    <stop offset="100%" stop-color="rgba(37, 99, 235, 0.62)" />
+                  </linearGradient>
+                </defs>
+                <g class="shield-half-left">
+                  <path d="M32 4 L8 13 V33 C8 49.5 18.2 61 32 67 L32 46 L29 36 L33 24 L32 4 Z" fill="url(#streakShieldGrad)" stroke="#7dd3fc" stroke-width="2.6" stroke-linejoin="round" />
+                  <path d="M14 17.5 L28 12.5" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linecap="round" />
+                </g>
+                <g class="shield-half-right">
+                  <path d="M32 4 L56 13 V33 C56 49.5 45.8 61 32 67 L32 46 L29 36 L33 24 L32 4 Z" fill="url(#streakShieldGrad)" stroke="#7dd3fc" stroke-width="2.6" stroke-linejoin="round" />
+                  <path d="M50 18 V32 C50 44 43 53 35 58.5" fill="none" stroke="rgba(224, 242, 254, 0.55)" stroke-width="2" stroke-linecap="round" />
+                </g>
+                <path class="shield-crack-line" d="M32 4 L33 24 L29 36 L32 46 L32 67" fill="none" stroke="#e0f2fe" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span class="streak-shield-burst" aria-hidden="true"></span>
+            </div>
+            <span class="streak-shield-count" id="streak-shield-count" aria-hidden="true"></span>
           </div>
         </div>
       </div>
@@ -797,11 +826,18 @@
             <div class="game-wave-wing" aria-hidden="true">
               <span></span><span></span><span></span><span></span>
             </div>
-            <button class="play-fab" id="play-btn" disabled aria-label="השמע">
-              <svg viewBox="0 0 24 24" id="play-icon">
-                <path d="M8 5v14l11-7z" />
+            <div class="play-fab-wrap" id="play-fab-wrap">
+              <svg class="play-progress-ring" viewBox="0 0 112 112" aria-hidden="true">
+                <circle class="play-ring-outer" cx="56" cy="56" r="53.5" />
+                <circle class="play-ring-track" cx="56" cy="56" r="49" />
+                <circle class="play-ring-fill" id="play-ring-fill" cx="56" cy="56" r="49" />
               </svg>
-            </button>
+              <button class="play-fab" id="play-btn" disabled aria-label="השמע">
+                <svg viewBox="0 0 24 24" id="play-icon">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
+            </div>
             <div class="side-duration-readout"><span id="play-time-label">0.1</span>s</div>
           </div>
 
@@ -1444,7 +1480,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261123aa"></script>
+  <script type="module" src="src/main.js?v=20261124a"></script>
 </body>
 
 </html>

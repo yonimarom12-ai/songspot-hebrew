@@ -1,7 +1,7 @@
-import { dom } from "../dom.js?v=20261123aa";
-import { state } from "../state.js?v=20261123aa";
-import { normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261123aa";
-import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261123aa";
+import { dom } from "../dom.js?v=20261124a";
+import { state } from "../state.js?v=20261124a";
+import { normalizeHebrew, normalizeHebrewFuzzy, getSongKey } from "../utils/text.js?v=20261124a";
+import { updateSearchBarProximityFeedback } from "./feedback.js?v=20261124a";
 
 export function updateSubmitButtonVisibility() {
   const hasTyped = dom.guessInput && !dom.guessInput.disabled && dom.guessInput.value.trim().length > 0;

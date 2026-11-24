@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261123aa";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261123aa";
-import { dom } from "../dom.js?v=20261123aa";
-import { state } from "../state.js?v=20261123aa";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261123aa";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261123aa";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261123aa";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124a";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124a";
+import { dom } from "../dom.js?v=20261124a";
+import { state } from "../state.js?v=20261124a";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124a";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124a";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124a";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261123aa";
+} from "../services/itunes.js?v=20261124a";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261123aa";
-import { launchWinConfetti } from "./confetti.js?v=20261123aa";
+} from "./audio.js?v=20261124a";
+import { launchWinConfetti } from "./confetti.js?v=20261124a";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261123aa";
+} from "./feedback.js?v=20261124a";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261123aa";
-import { updateStreakDisplay } from "./profile.js?v=20261123aa";
+} from "./search.js?v=20261124a";
+import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124a";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261123aa";
-import { recordQuestProgress } from "./quests.js?v=20261123aa";
+} from "./economy.js?v=20261124a";
+import { recordQuestProgress } from "./quests.js?v=20261124a";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261123aa";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261123aa";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261123aa";
+} from "./timed.js?v=20261124a";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124a";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124a";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -417,10 +417,12 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
       }
     }
   } else if (isClassic) {
-    // מגן רצף מהחנות: פועל אך ורק במשחק הקלאסי!
+    // חוק איפוס הרצף: מתאפס אך ורק בכישלון בשלב שלם (ולא על טעויות ביניים בתוך השלב).
+    // אם יש מגן רצף פעיל — הוא נשבר ומציל את הרצף!
     if ((state.userStats.currentStreak || 0) > 0 && (state.userStats.powerups?.streakFreeze || 0) > 0) {
       state.userStats.powerups.streakFreeze--;
       state.lastRoundStreakSaved = true;
+      triggerStreakShieldBreakAnimation(state.userStats.powerups.streakFreeze);
     } else {
       state.userStats.currentStreak = 0;
       state.lastRoundStreakSaved = false;
@@ -543,7 +545,17 @@ export function endRound(won) {
     }
   } else {
     dom.statusLabel.textContent = "";
-    if (dom.pointsEarnedNotice) dom.pointsEarnedNotice.style.display = "none";
+    if (state.lastRoundStreakSaved) {
+      state.lastRoundStreakSaved = false;
+      try { showGameToast("🛡️ מגן הרצף נשבר והציל את אש הרצף שלך!", "shield"); } catch (e) { }
+      if (dom.pointsEarnedNotice) {
+        dom.pointsEarnedNotice.classList.remove("is-muted");
+        dom.pointsEarnedNotice.textContent = "🛡️ מגן הרצף הציל את הרצף שלך!";
+        dom.pointsEarnedNotice.style.display = "inline-flex";
+      }
+    } else if (dom.pointsEarnedNotice) {
+      dom.pointsEarnedNotice.style.display = "none";
+    }
   }
 
   // משמיע אוטומטית את השיר המלא גם בניצחון וגם בהפסד (ונכבה אוטומטית כשממשיכים לשיר הבא)
@@ -749,18 +761,10 @@ export function handleGuess() {
   if (isMatched) {
     endRound(true);
   } else {
+    // טעות בתוך השלב לא מאפסת את הרצף — רק כישלון בשלב שלם (אחרי כל הניסיונות)
     recordWrongGuessKey(rawValue, selectedArtist, selectedTrackId);
     playWrongSfx();
     vibrateError();
-    if (state.lastRoundStreakSaved) {
-      state.lastRoundStreakSaved = false;
-      showGameToast("🛡️ מגן הרצף הציל את אש הרצף שלך!", "shield");
-      if (dom.pointsEarnedNotice) {
-        dom.pointsEarnedNotice.classList.remove("is-muted");
-        dom.pointsEarnedNotice.textContent = "🛡️ מגן הרצף הציל את הרצף שלך!";
-        dom.pointsEarnedNotice.style.display = "inline-flex";
-      }
-    }
     dom.playerCard.classList.remove("shake");
     void dom.playerCard.offsetWidth;
     dom.playerCard.classList.add("shake");

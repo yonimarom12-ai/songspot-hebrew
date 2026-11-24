@@ -293,6 +293,60 @@
   100% { transform: scaleY(1.22); }
 }
 
+/* Circular Progress Ring Wrapping the Play Button */
+.play-fab-wrap {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.play-progress-ring {
+  position: absolute;
+  inset: 0;
+  width: 112px;
+  height: 112px;
+  transform: rotate(-90deg);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.play-fab-wrap.is-playing .play-progress-ring {
+  opacity: 1;
+}
+
+.play-ring-outer {
+  fill: none;
+  stroke: var(--level-color);
+  stroke-width: 1.5;
+  opacity: 0.24;
+  transition: stroke 0.25s ease;
+}
+
+.play-ring-track {
+  fill: none;
+  stroke: var(--level-color);
+  stroke-width: 3.5;
+  opacity: 0.2;
+  transition: stroke 0.25s ease;
+}
+
+.play-ring-fill {
+  fill: none;
+  stroke: var(--level-color);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 307.88;
+  stroke-dashoffset: 307.88;
+  filter: drop-shadow(0 0 6px var(--level-glow));
+  transition: stroke 0.25s ease;
+}
+
 .play-fab {
   position: relative;
   width: 88px;
