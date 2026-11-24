@@ -1,16 +1,16 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124c";
-import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124c";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124c";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124c";
-import { state } from "../state.js?v=20261124c";
-import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124c";
-import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124c";
-import { fetchItunesData } from "../services/itunes.js?v=20261124c";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124c";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124c";
-import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124c";
-import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124c";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124c";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124d";
+import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124d";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124d";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124d";
+import { state } from "../state.js?v=20261124d";
+import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124d";
+import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124d";
+import { fetchItunesData } from "../services/itunes.js?v=20261124d";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124d";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124d";
+import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124d";
+import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124d";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124d";
 
 function formatLocalDay(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -993,14 +993,7 @@ export function initProfileListeners() {
     });
   }
 
-  // עריכה מהירה מתוך כפתור העריכה בראש הפרופיל או מכל שורת מועדף
-  const editProfileBtn = document.getElementById("edit-profile-btn");
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener("click", () => {
-      showProfileSubView("main");
-      setFavoritesEditMode(true);
-    });
-  }
+  // עריכה מהירה מתוך כל שורת מועדף
   document.querySelectorAll("[data-quick-edit-fav]").forEach(btn => {
     btn.addEventListener("click", () => {
       showProfileSubView("main");
@@ -1024,6 +1017,7 @@ export function initProfileListeners() {
   if (editProfileBtn) {
     editProfileBtn.addEventListener("click", () => {
       if (!state.currentUser) return;
+      showProfileSubView("main");
       setFavoritesEditMode(true);
     });
   }
