@@ -21,8 +21,8 @@
   <meta property="og:url" content="https://guessthesonghebrew.pages.dev/">
   <meta property="og:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta property="og:description" content="זהו להיטים ישראליים משבריר שנייה! שחקו משחק מהיר, מרתון, הפוך על הפוך, ציר זמן והתחרו בדירוג העולמי עם חברים 🔥">
-  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124d">
-  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124d">
+  <meta property="og:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124e">
+  <meta property="og:image:secure_url" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124e">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -31,20 +31,20 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎵 נחש את השיר — משחק הלהיטים הישראלי">
   <meta name="twitter:description" content="זהו להיטים ישראליים משבריר שנייה! משחק מהיר, מרתון, הפוך על הפוך, ציר זמן ודירוג עולמי 🔥">
-  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124d">
+  <meta name="twitter:image" content="https://guessthesonghebrew.pages.dev/assets/og-preview.jpg?v=20261124e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="assets/stage-bg.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/tokens.css?v=20261124d">
-  <link rel="stylesheet" href="styles/home.css?v=20261124d">
-  <link rel="stylesheet" href="styles/header.css?v=20261124d">
-  <link rel="stylesheet" href="styles/player.css?v=20261124d">
-  <link rel="stylesheet" href="styles/interaction.css?v=20261124d">
-  <link rel="stylesheet" href="styles/drawer.css?v=20261124d">
-  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124d">
-  <link rel="stylesheet" href="styles/animations.css?v=20261124d">
-  <link rel="stylesheet" href="styles/themes.css?v=20261124d">
+  <link rel="stylesheet" href="styles/tokens.css?v=20261124e">
+  <link rel="stylesheet" href="styles/home.css?v=20261124e">
+  <link rel="stylesheet" href="styles/header.css?v=20261124e">
+  <link rel="stylesheet" href="styles/player.css?v=20261124e">
+  <link rel="stylesheet" href="styles/interaction.css?v=20261124e">
+  <link rel="stylesheet" href="styles/drawer.css?v=20261124e">
+  <link rel="stylesheet" href="styles/profile-modal.css?v=20261124e">
+  <link rel="stylesheet" href="styles/animations.css?v=20261124e">
+  <link rel="stylesheet" href="styles/themes.css?v=20261124e">
 </head>
 
 <body data-theme="spotify">
@@ -1049,7 +1049,6 @@
                       <span class="fav-label">🎵 שיר מועדף</span>
                       <span class="fav-value" id="fav-song-display">לא נבחר עדיין</span>
                     </div>
-                    <button type="button" class="fav-quick-edit-btn" data-quick-edit-fav="song" aria-label="ערוך שיר מועדף">✏️</button>
                   </div>
                   <div class="fav-row fav-media-row">
                     <img class="fav-display-thumb" id="fav-album-img" alt="" style="display: none;" />
@@ -1057,7 +1056,6 @@
                       <span class="fav-label">💿 אלבום מועדף</span>
                       <span class="fav-value" id="fav-album-display">לא נבחר עדיין</span>
                     </div>
-                    <button type="button" class="fav-quick-edit-btn" data-quick-edit-fav="album" aria-label="ערוך אלבום מועדף">✏️</button>
                   </div>
                   <div class="fav-row fav-media-row">
                     <img class="fav-display-thumb is-round" id="fav-artist-img" alt="" style="display: none;" />
@@ -1065,7 +1063,6 @@
                       <span class="fav-label">🎤 זמר/ת מועדף/ת</span>
                       <span class="fav-value" id="fav-artist-display">לא נבחר עדיין</span>
                     </div>
-                    <button type="button" class="fav-quick-edit-btn" data-quick-edit-fav="artist" aria-label="ערוך זמר מועדף">✏️</button>
                   </div>
                 </div>
 
@@ -1172,7 +1169,7 @@
 
               <button type="button" class="profile-gallery-launch-btn" id="open-profile-gallery-btn">
                 <img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" />
-                <span>פתח את גלריית השירים שזיהית</span>
+                <span>פתח את קטלוג השירים שזיהית</span>
                 <span class="pg-arrow">‹</span>
               </button>
 
@@ -1187,14 +1184,14 @@
               </div>
             </div>
 
-            <!-- תת-תצוגה: גלריית שירים -->
+            <!-- תת-תצוגה: קטלוג שירים -->
             <div class="profile-subview" id="profile-view-gallery">
               <button type="button" class="profile-subview-back" data-profile-back="stats">→ חזור לסטטיסטיקות</button>
 
               <div class="stats-section">
                 <h3 class="stats-sec-title">
-                  <span><img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> גלריית השירים שזיהית</span>
-                  <span class="stats-sec-sub">לחץ להשמעה וקישור ל-Spotify ▶</span>
+                  <span><img class="icon-3d-mini" src="assets/ui-final-notes.png" alt="" /> קטלוג השירים שזיהית</span>
+                  <span class="stats-sec-sub">לחץ על שיר לפרטים והשמעה ▶</span>
                 </h3>
                 <div class="gallery-grid" id="won-gallery-grid"></div>
               </div>
@@ -1242,6 +1239,36 @@
       <div class="modal-body">
         <p class="owned-avatars-sub">בחר מתוך האווטארים שבבעלותך (ניתן לרכוש נוספים בחנות הקריסטלים):</p>
         <div class="owned-avatars-grid" id="owned-avatars-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- חלון פרטי שיר מהקטלוג (כמו מסך חשיפה גדול + סטטיסטיקות השיר) -->
+  <div class="modal-backdrop" id="catalog-song-modal-backdrop" style="z-index: 445;">
+    <div class="catalog-song-modal" role="dialog" aria-modal="true" aria-label="פרטי שיר מהקטלוג">
+      <div class="catalog-song-bg-blur" id="catalog-song-bg-blur"></div>
+      <button class="drawer-close-btn catalog-song-close-btn" id="catalog-song-close-btn" aria-label="סגור">&times;</button>
+      <div class="catalog-song-content">
+        <div class="catalog-song-cover-wrap">
+          <img class="catalog-song-cover" id="catalog-song-cover" src="" alt="" />
+        </div>
+        <span class="catalog-song-level-pill" id="catalog-song-level-pill">קל</span>
+        <h3 class="catalog-song-title" id="catalog-song-title"></h3>
+        <p class="catalog-song-artist" id="catalog-song-artist"></p>
+        <div class="catalog-song-stats-grid">
+          <div class="catalog-song-stat-box">
+            <span class="cssb-label">פעמים שזיהית</span>
+            <strong class="cssb-val" id="catalog-song-times">1</strong>
+          </div>
+          <div class="catalog-song-stat-box is-fast">
+            <span class="cssb-label">הזיהוי הכי מהיר</span>
+            <strong class="cssb-val" id="catalog-song-fastest">0.1 שניות</strong>
+          </div>
+        </div>
+        <div class="catalog-song-actions">
+          <button type="button" class="setup-confirm-btn catalog-song-play-btn" id="catalog-song-play-btn">▶ השמע קטע</button>
+          <a class="catalog-song-spotify-btn" id="catalog-song-spotify-link" href="#" target="_blank" rel="noopener noreferrer">נגן ב-Spotify</a>
+        </div>
       </div>
     </div>
   </div>
@@ -1380,16 +1407,46 @@
         <div class="phone-mockup-frame" id="shop-phone-mockup">
           <div class="phone-mockup-screen" id="shop-phone-screen">
             <div class="phone-mockup-notch"></div>
-            <div class="phone-mockup-top">
-              <span class="phone-mock-pill">⏱️ 0:45</span>
-              <span class="phone-mock-pill" id="phone-mock-badge">שאלה 4 / 10</span>
+            <!-- תצוגת מסך בית אמיתית (לרקעים וערכות נושא) -->
+            <div class="phone-mock-home" id="phone-mock-home">
+              <div class="phone-mock-topbar">
+                <span class="phone-mock-pill">💎 1,240 · 🔥 5</span>
+                <span class="phone-mock-icons">🎁 🎯 ⚙️</span>
+              </div>
+              <div class="phone-mock-hero">
+                <div class="phone-mock-eq" id="phone-mock-eq">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <strong class="phone-mock-title">נחש את השיר</strong>
+                <span class="phone-mock-sub">זהו להיטים ישראליים משבריר שנייה</span>
+              </div>
+              <div class="phone-mock-cta" id="phone-mock-play">▶ משחק מהיר</div>
+              <div class="phone-mock-stats-pill">🎵 זיהויים: 38 · ✅ דיוק: 64%</div>
+              <div class="phone-mock-actions-row">
+                <span class="phone-mock-chip">החלף מצב</span>
+                <span class="phone-mock-chip">ז'אנר ועשור</span>
+              </div>
+              <div class="phone-mock-nav">
+                <span>🏆</span><span>🎮</span><span class="is-home">🏠</span><span>🛍️</span><span>👤</span>
+              </div>
             </div>
-            <div class="phone-mockup-play" id="phone-mock-play">▶</div>
-            <div class="phone-mockup-answers">
-              <span class="phone-mock-ans">א. תל אביב</span>
-              <span class="phone-mock-ans is-accent" id="phone-mock-ans-accent">ב. יוניקורן</span>
-              <span class="phone-mock-ans">ג. כביש החוף</span>
-              <span class="phone-mock-ans">ד. שלום עליכם</span>
+            <!-- תצוגת מסך פרופיל אמיתית (לתמונות פרופיל/אווטארים) -->
+            <div class="phone-mock-profile" id="phone-mock-profile" style="display: none;">
+              <div class="phone-mock-prof-card" id="phone-mock-prof-card">
+                <div class="phone-mock-prof-avatar" id="phone-mock-prof-avatar">🎧</div>
+                <strong class="phone-mock-prof-name" id="phone-mock-prof-name">הפרופיל שלך</strong>
+                <div class="phone-mock-prof-btns">
+                  <span class="phone-mock-chip">✏️ ערוך פרופיל</span>
+                  <span class="phone-mock-chip">↗ שתף</span>
+                </div>
+              </div>
+              <div class="phone-mock-prof-tabs">
+                <span>הישגים</span><span class="is-on">סטטיסטיקות</span><span>מועדפים</span>
+              </div>
+              <div class="phone-mock-prof-stats">
+                <span>💎 קריסטלים</span>
+                <span>🔥 רצף יומי</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1577,7 +1634,7 @@
 
   <audio id="game-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
   <audio id="gallery-audio" preload="auto" playsinline webkit-playsinline style="display: none;"></audio>
-  <script type="module" src="src/main.js?v=20261124d"></script>
+  <script type="module" src="src/main.js?v=20261124e"></script>
 </body>
 
 </html>

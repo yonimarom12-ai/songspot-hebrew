@@ -8,13 +8,13 @@ import {
   findAvatar,
   findBackground,
   findTheme
-} from "../data/shop.js?v=20261124d";
-import { state } from "../state.js?v=20261124d";
-import { saveUserStats } from "../services/storage.js?v=20261124d";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124d";
-import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124d";
-import { recordStarterShopPurchase } from "./quests.js?v=20261124d";
-import { showGameToast } from "../utils/toast.js?v=20261124d";
+} from "../data/shop.js?v=20261124e";
+import { state } from "../state.js?v=20261124e";
+import { saveUserStats } from "../services/storage.js?v=20261124e";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124e";
+import { canAfford, spendPoints, formatPoints, formatPointsWhole, getPointsBalance } from "./economy.js?v=20261124e";
+import { recordStarterShopPurchase } from "./quests.js?v=20261124e";
+import { showGameToast } from "../utils/toast.js?v=20261124e";
 
 let activeShopTab = "avatars";
 let previewSelection = null; // { type: "avatar" | "background", item }
@@ -627,8 +627,12 @@ function openShopPreviewModal(type, item) {
   previewModalItem = { type, item };
 
   const screenEl = document.getElementById("shop-phone-screen");
+  const homeMock = document.getElementById("phone-mock-home");
+  const profMock = document.getElementById("phone-mock-profile");
   const playEl = document.getElementById("phone-mock-play");
-  const accentAnsEl = document.getElementById("phone-mock-ans-accent");
+  const eqEl = document.getElementById("phone-mock-eq");
+  const profAvatarEl = document.getElementById("phone-mock-prof-avatar");
+  const profNameEl = document.getElementById("phone-mock-prof-name");
   const typePill = document.getElementById("shop-preview-type-pill");
   const nameEl = document.getElementById("shop-preview-item-name");
   const descEl = document.getElementById("shop-preview-item-desc");
@@ -639,24 +643,41 @@ function openShopPreviewModal(type, item) {
   if (typePill) typePill.textContent = typeLabel;
   if (nameEl) nameEl.textContent = item.name || "";
   if (descEl) {
-    descEl.textContent = item.desc || (type === "theme" ? "ערכת צבעים ואווירה מלאה לכל האפליקציה" : "רקע מעוצב למסכי המשחק והלובי");
+    descEl.textContent = item.desc || (
+      type === "theme"
+        ? "ערכת צבעים ואווירה מלאה למסך הבית ולמשחק"
+        : type === "avatar"
+          ? "תמונת פרופיל מעוצבת שתופיע בפרופיל ובדירוג"
+          : "רקע מעוצב למסך הבית ולמשחק"
+    );
   }
 
-  if (screenEl) {
-    screenEl.style.background = type === "theme"
-      ? (item.previewBg || "#121212")
-      : type === "background"
-        ? (item.css || "#0a0a0f")
-        : (item.bg || "linear-gradient(135deg,#1db954,#0f6e31)");
-  }
-  const accentColor = type === "theme" && item.accent ? item.accent : "#1ed760";
-  if (playEl) {
-    playEl.style.background = accentColor;
-    playEl.textContent = type === "avatar" && item.emoji ? item.emoji : "▶";
-  }
-  if (accentAnsEl) {
-    accentAnsEl.style.borderColor = accentColor;
-    accentAnsEl.style.background = "rgba(255,255,255,0.16)";
+  if (type === "avatar") {
+    if (homeMock) homeMock.style.display = "none";
+    if (profMock) profMock.style.display = "flex";
+    if (screenEl) screenEl.style.background = "linear-gradient(180deg, #130b29 0%, #090616 100%)";
+    if (profAvatarEl) {
+      profAvatarEl.style.background = item.bg || "linear-gradient(135deg,#1db954,#0f6e31)";
+      profAvatarEl.textContent = item.emoji || "🎧";
+    }
+    if (profNameEl) profNameEl.textContent = state.currentUser || "הפרופיל שלך";
+  } else {
+    if (homeMock) homeMock.style.display = "flex";
+    if (profMock) profMock.style.display = "none";
+    if (screenEl) {
+      screenEl.style.background = type === "theme"
+        ? (item.previewBg || "#121212")
+        : (item.css || "#0a0a0f");
+    }
+    const accentColor = type === "theme" && item.accent ? item.accent : "#1ed760";
+    if (playEl) {
+      playEl.style.background = accentColor;
+      playEl.style.color = "#05140a";
+      playEl.textContent = "▶ משחק מהיר";
+    }
+    if (eqEl) {
+      eqEl.querySelectorAll("span").forEach(bar => { bar.style.background = accentColor; });
+    }
   }
 
   const balance = getPointsBalance();

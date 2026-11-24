@@ -1,16 +1,16 @@
-import { ARTISTS_DB } from "../data/artists.js?v=20261124d";
-import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124d";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124d";
-import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124d";
-import { state } from "../state.js?v=20261124d";
-import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124d";
-import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124d";
-import { fetchItunesData } from "../services/itunes.js?v=20261124d";
-import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124d";
-import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124d";
-import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124d";
-import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124d";
-import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124d";
+import { ARTISTS_DB } from "../data/artists.js?v=20261124e";
+import { FREE_PROFILE_BANNERS, findProfileBanner, SHOP_AVATARS } from "../data/shop.js?v=20261124e";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124e";
+import { dom, PLAY_SVG, SPOTIFY_SVG } from "../dom.js?v=20261124e";
+import { state } from "../state.js?v=20261124e";
+import { saveUserStats, normalizeStatsObj } from "../services/storage.js?v=20261124e";
+import { pullAccountFromCloud, syncAccountToCloud } from "../services/cloud.js?v=20261124e";
+import { fetchItunesData } from "../services/itunes.js?v=20261124e";
+import { cleanTrackTitle, normalizeHebrew } from "../utils/text.js?v=20261124e";
+import { stopGalleryPreview, updateGalleryCardsPlayState, toggleGallerySongPreview } from "./gallery.js?v=20261124e";
+import { formatPointsWhole, getPointsBalance, getStreakMultiplier, updatePointsDisplay } from "./economy.js?v=20261124e";
+import { renderShop, clearShopPreview, applyEquippedCosmetics } from "./shop.js?v=20261124e";
+import { renderQuestsAndBadgesModal, renderQuestsModal } from "./quests.js?v=20261124e";
 
 function formatLocalDay(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -189,13 +189,6 @@ export function renderProfileStatsModal() {
   const won = state.userStats.totalWon || 0;
   const rate = heard > 0 ? Math.round((won / heard) * 100) : 0;
 
-  // עדכון כרטיס ה-Hero המחודש + רקע הפרופיל החינמי
-  const heroWon = document.getElementById("hero-stat-won");
-  const heroStreak = document.getElementById("hero-stat-streak");
-  const heroPts = document.getElementById("hero-stat-points");
-  if (heroWon) heroWon.textContent = String(won);
-  if (heroStreak) heroStreak.textContent = String(state.userStats.bestStreak || 0);
-  if (heroPts) heroPts.textContent = formatPoints(getPointsBalance());
   const bannerObj = findProfileBanner(state.userStats?.profileBanner || "default");
   if (dom.loggedUserBar) {
     dom.loggedUserBar.style.background = bannerObj.css;
@@ -275,7 +268,7 @@ export function renderProfileStatsModal() {
   if (wonList.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-gallery-msg";
-    empty.textContent = "עדיין לא זיהית שירים. נחש שיר נכון והוא יופיע כאן בגלריה להאזנה!";
+    empty.textContent = "עדיין לא זיהית שירים. נחש שיר נכון והוא יופיע כאן בקטלוג להאזנה!";
     galleryGrid.appendChild(empty);
   } else {
     wonList.forEach(item => {
@@ -283,7 +276,7 @@ export function renderProfileStatsModal() {
       const card = document.createElement("div");
       card.className = "gallery-item";
       card.dataset.trackId = itemId;
-      card.title = `לחץ להשמעת "${item.title}" ולהצגת קישור ל-Spotify`;
+      card.title = `לחץ לפרטים והשמעה של "${item.title}"`;
 
       const mainRow = document.createElement("div");
       mainRow.className = "gallery-item-main";
@@ -318,7 +311,7 @@ export function renderProfileStatsModal() {
 
       const timePill = document.createElement("span");
       timePill.className = "gallery-time-pill";
-      const shownSec = item.exactTimeSec ?? item.timeSec;
+      const shownSec = item.fastestTimeSec ?? item.exactTimeSec ?? item.timeSec;
       timePill.textContent = `${shownSec}`;
 
       const lvlDiff = DIFFICULTIES[item.level];
@@ -341,7 +334,7 @@ export function renderProfileStatsModal() {
       spotifyLink.addEventListener("click", (e) => e.stopPropagation());
 
       card.append(mainRow, spotifyLink);
-      card.addEventListener("click", () => toggleGallerySongPreview(item));
+      card.addEventListener("click", () => openCatalogSongModal(item));
       galleryGrid.appendChild(card);
     });
     updateGalleryCardsPlayState();
@@ -780,6 +773,9 @@ function setFavoritesEditMode(isEditing) {
   view.style.display = isEditing ? "none" : "flex";
   form.style.display = isEditing ? "flex" : "none";
   if (editBtn) editBtn.style.display = isEditing ? "none" : "inline-flex";
+  if (dom.profileModalBackdrop) {
+    dom.profileModalBackdrop.classList.toggle("is-editing-profile", Boolean(isEditing));
+  }
 }
 
 export function updateBottomNavActiveTab(activeTab = "game") {
@@ -826,6 +822,56 @@ export function showProfileSubView(viewName = "stats") {
   document.querySelectorAll(".profile-seg-tab").forEach(tab => {
     tab.classList.toggle("active", tab.dataset.profileTab === activeTabKey);
   });
+}
+
+let activeCatalogSongItem = null;
+
+function closeCatalogSongModal() {
+  const backdrop = document.getElementById("catalog-song-modal-backdrop");
+  if (backdrop) backdrop.classList.remove("open");
+  stopGalleryPreview();
+  activeCatalogSongItem = null;
+}
+
+function openCatalogSongModal(item) {
+  if (!item) return;
+  const backdrop = document.getElementById("catalog-song-modal-backdrop");
+  if (!backdrop) return;
+  activeCatalogSongItem = item;
+
+  const bgBlur = document.getElementById("catalog-song-bg-blur");
+  const cover = document.getElementById("catalog-song-cover");
+  const lvlPill = document.getElementById("catalog-song-level-pill");
+  const titleEl = document.getElementById("catalog-song-title");
+  const artistEl = document.getElementById("catalog-song-artist");
+  const timesEl = document.getElementById("catalog-song-times");
+  const fastestEl = document.getElementById("catalog-song-fastest");
+  const playBtn = document.getElementById("catalog-song-play-btn");
+  const spLink = document.getElementById("catalog-song-spotify-link");
+
+  const hiResArt = (item.artwork || "").replace("400x400bb", "600x600bb");
+  if (bgBlur) bgBlur.style.backgroundImage = hiResArt ? `url("${hiResArt}")` : "none";
+  if (cover) {
+    cover.src = hiResArt || "";
+    cover.alt = item.title || "";
+  }
+  const lvlDiff = DIFFICULTIES[item.level];
+  if (lvlPill) {
+    lvlPill.textContent = lvlDiff ? lvlDiff.label : "";
+    lvlPill.style.color = lvlDiff ? lvlDiff.color : "#1ed760";
+    lvlPill.style.borderColor = lvlDiff ? lvlDiff.color : "#1ed760";
+    lvlPill.style.display = lvlDiff ? "inline-flex" : "none";
+  }
+  if (titleEl) titleEl.textContent = item.title || "";
+  if (artistEl) artistEl.textContent = item.artist || "";
+  const times = Math.max(1, Number(item.timesWon) || 1);
+  if (timesEl) timesEl.textContent = times === 1 ? "פעם אחת" : `${times} פעמים`;
+  const fastest = item.fastestTimeSec ?? item.exactTimeSec ?? item.timeSec ?? 0;
+  if (fastestEl) fastestEl.textContent = `${fastest} שניות`;
+  if (playBtn) playBtn.textContent = "▶ השמע קטע";
+  if (spLink) spLink.href = `https://open.spotify.com/search/${encodeURIComponent(`${item.title || ""} ${item.artist || ""}`)}`;
+
+  backdrop.classList.add("open");
 }
 
 function openOwnedAvatarsModal() {
@@ -993,16 +1039,24 @@ export function initProfileListeners() {
     });
   }
 
-  // עריכה מהירה מתוך כל שורת מועדף
-  document.querySelectorAll("[data-quick-edit-fav]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      showProfileSubView("main");
-      setFavoritesEditMode(true);
-      const field = btn.dataset.quickEditFav;
-      const input = document.getElementById(`fav-${field}-input`);
-      if (input) setTimeout(() => input.focus(), 80);
+  // חלון פרטי שיר גדול מהקטלוג
+  const catClose = document.getElementById("catalog-song-close-btn");
+  const catBackdrop = document.getElementById("catalog-song-modal-backdrop");
+  const catPlayBtn = document.getElementById("catalog-song-play-btn");
+  if (catClose) catClose.addEventListener("click", closeCatalogSongModal);
+  if (catBackdrop) {
+    catBackdrop.addEventListener("click", (e) => {
+      if (e.target === catBackdrop) closeCatalogSongModal();
     });
-  });
+  }
+  if (catPlayBtn) {
+    catPlayBtn.addEventListener("click", async () => {
+      if (!activeCatalogSongItem) return;
+      await toggleGallerySongPreview(activeCatalogSongItem);
+      const isPlaying = !state.galleryAudio.paused;
+      catPlayBtn.textContent = isPlaying ? "⏸ עצור השמעה" : "▶ השמע קטע";
+    });
+  }
 
   if (dom.pointsBadge) dom.pointsBadge.addEventListener("click", () => toggleShopModal(true));
   dom.profileCloseBtn.addEventListener("click", () => toggleProfileModal(false));

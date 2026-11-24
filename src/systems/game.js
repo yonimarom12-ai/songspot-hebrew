@@ -1,10 +1,10 @@
-import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124d";
-import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124d";
-import { dom } from "../dom.js?v=20261124d";
-import { state } from "../state.js?v=20261124d";
-import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124d";
-import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124d";
-import { syncAccountToCloud } from "../services/cloud.js?v=20261124d";
+import { ARTIST_BY_NAME } from "../data/artists.js?v=20261124e";
+import { DIFFICULTIES, DIFFICULTY_ORDER, DURATIONS } from "../data/config.js?v=20261124e";
+import { dom } from "../dom.js?v=20261124e";
+import { state } from "../state.js?v=20261124e";
+import { cleanTrackTitle, normalizeHebrew, isFuzzySongMatch, getSongKey } from "../utils/text.js?v=20261124e";
+import { saveUserStats, markSongAsPlayed } from "../services/storage.js?v=20261124e";
+import { syncAccountToCloud } from "../services/cloud.js?v=20261124e";
 import {
   doesYearMatchSelectedDecades,
   getArtistCatalog,
@@ -14,7 +14,7 @@ import {
   getCandidatePool,
   warmCatalogCache,
   ensureSeedCatalogLoaded
-} from "../services/itunes.js?v=20261124d";
+} from "../services/itunes.js?v=20261124e";
 import {
   prefetchAudioRaw,
   preloadAudioBufferInBackground,
@@ -23,19 +23,19 @@ import {
   extendActivePlaybackToStage,
   releaseMediaElement,
   playRevealPreview
-} from "./audio.js?v=20261124d";
-import { launchWinConfetti } from "./confetti.js?v=20261124d";
+} from "./audio.js?v=20261124e";
+import { launchWinConfetti } from "./confetti.js?v=20261124e";
 import {
   clearSearchBarFeedback,
   updateHintsPanelVisibility,
   resetHintButtons
-} from "./feedback.js?v=20261124d";
+} from "./feedback.js?v=20261124e";
 import {
   prepareEasySearchMaskForRound,
   closeSuggestionsDropdown,
   updateSubmitButtonVisibility
-} from "./search.js?v=20261124d";
-import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124d";
+} from "./search.js?v=20261124e";
+import { updateStreakDisplay, triggerStreakShieldBreakAnimation } from "./profile.js?v=20261124e";
 import {
   calculateRoundReward,
   getStreakMultiplier,
@@ -43,8 +43,8 @@ import {
   formatPoints,
   updatePointsDisplay,
   launchCrystalRewardAnimation
-} from "./economy.js?v=20261124d";
-import { recordQuestProgress } from "./quests.js?v=20261124d";
+} from "./economy.js?v=20261124e";
+import { recordQuestProgress } from "./quests.js?v=20261124e";
 import {
   isTimedModeActive,
   startTimedRun,
@@ -53,9 +53,9 @@ import {
   handleTimedWin,
   handleTimedWrong,
   recordTimedSong
-} from "./timed.js?v=20261124d";
-import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124d";
-import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124d";
+} from "./timed.js?v=20261124e";
+import { playWinSfx, playCrystalSfx, playWrongSfx, playSkipSfx } from "./sfx.js?v=20261124e";
+import { showGameToast, vibrateWin, vibrateError } from "../utils/toast.js?v=20261124e";
 
 let loadingDelayTimer = null;
 let loadingTickTimer = null;
@@ -400,7 +400,15 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
     }
 
     if (state.currentSong) {
-      state.userStats.wonSongs = state.userStats.wonSongs.filter(s => s.trackId !== state.currentSong.trackId);
+      const prevEntry = state.userStats.wonSongs.find(s => String(s.trackId) === String(state.currentSong.trackId));
+      const thisTime = exactTimeSec ?? solvedDuration;
+      const prevFastest = prevEntry
+        ? (prevEntry.fastestTimeSec ?? prevEntry.exactTimeSec ?? prevEntry.timeSec ?? thisTime)
+        : thisTime;
+      const fastestTimeSec = Math.min(Number(prevFastest) || thisTime, Number(thisTime) || solvedDuration);
+      const timesWon = (prevEntry ? (Number(prevEntry.timesWon) || 1) : 0) + 1;
+
+      state.userStats.wonSongs = state.userStats.wonSongs.filter(s => String(s.trackId) !== String(state.currentSong.trackId));
       state.userStats.wonSongs.unshift({
         trackId: state.currentSong.trackId,
         title: state.currentSong.title,
@@ -408,7 +416,9 @@ export function recordRoundStats(won, solvedDuration, difficultyLevel, earnedPoi
         artwork: state.currentSong.artwork,
         previewUrl: state.currentSong.previewUrl,
         timeSec: solvedDuration,
-        exactTimeSec: exactTimeSec ?? solvedDuration,
+        exactTimeSec: thisTime,
+        fastestTimeSec,
+        timesWon,
         level: difficultyLevel,
         pointsEarned: earnedPoints
       });
